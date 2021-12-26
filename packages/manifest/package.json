@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/manifest",
   "description": "Manifest Type Definitions",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.Manifest.git"
@@ -10,7 +10,5 @@
   "files": [ "src" ],
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
-  "exports": {
-    ".": { "default": "./src/index.ts" }
-  }
+  "main": "./src/index.ts"
 }
