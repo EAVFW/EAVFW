@@ -3,6 +3,9 @@
   "scripts": {
 
   },
+  "devDependencies": {
+    "@types/node": "16.7.10"
+  },
   "private": true,
   "workspaces": {
     "packages": [
