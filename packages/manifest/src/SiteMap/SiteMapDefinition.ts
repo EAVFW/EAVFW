@@ -10,3 +10,5 @@ export type SiteMapDefinition = {
     locale?: { [locale: string]: LocaleDefinition };
 
 };
+
+
