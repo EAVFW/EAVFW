@@ -9,8 +9,8 @@
   "dependencies": {
     "react": "17.0.2"
   },
-  "devDependencies": {
-    "@types/react": "17.0.38"
+  "scripts": {
+    "publish": "npm publish --access public"
   },
   "license": "MIT",
   "files": [ "src" ],

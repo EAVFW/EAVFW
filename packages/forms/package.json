@@ -10,6 +10,9 @@
     "react": "17.0.2",
     "react-fast-compare": "3.2.0"
   },
+  "scripts": {
+    "publish": "npm publish --access public"
+  },
   "devDependencies": {
     "@types/react": "17.0.38"
   },
