@@ -1,14 +1,15 @@
 
 import { EAVFWErrorDefinition, isEAVFWError, ManifestDefinition, } from "@eavfw/manifest";
 import { useExpressionParserContext } from "@eavfw/expressions";
-import { PropsWithChildren, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
 import { EAVFormContext } from "./EAVFormContext";
 import { EAVFormContextState } from "./EAVFormContextProps";
 
 export type EAVFormProps<T extends any> = {
-    formDefinition: ManifestDefinition,
+    formDefinition?: ManifestDefinition,
     defaultData: T
+    onChange?: (data:T) => void;
 }
 
 export type JsonSchemaErrorObject = {
@@ -64,7 +65,7 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
     return data;
 }
 
-export const EAVForm = <T extends any>({ formDefinition, defaultData, children }: PropsWithChildren<EAVFormProps<T>>) => {
+export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, children }: PropsWithChildren<EAVFormProps<T>>) => {
 
     const { current: data } = useRef<EAVFormContextState<T>>({
         formValues: defaultData,
@@ -79,7 +80,7 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, children }
     const [etag, setEtag] = useState(new Date().toISOString());
     
    // const { setFormValues } = useExpressionParserContext();
-
+     
     const actions = useRef({
 
         onChange: (cb: (props: any) => void) => {
@@ -117,7 +118,7 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, children }
 
                             if (local === global_etag.current) {
                                 // mergeDeep(data, updatedFields);
-                                mergeAndUpdate(data, updatedFields);
+                                mergeAndUpdate(data.formValues, updatedFields);
 
 
                                 setLocalErrors(wrapErrors(results));
@@ -128,6 +129,9 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, children }
 
                             if (local === global_etag.current) {
                               //  setFormValues({ ...data });
+                                if (onChange)
+                                    onChange(data.formValues);
+
                                 setEtag(global_etag.current);
 
                                 console.log("Updated Props Changed", [changed, data]);
@@ -140,6 +144,9 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, children }
 
                    // setFormValues({ ...data });
                     setEtag(global_etag.current = new Date().toISOString());
+
+                    if (onChange)
+                        onChange(data.formValues);
 
                     console.log("Updated Props Changed", [changed, data]);
                 }

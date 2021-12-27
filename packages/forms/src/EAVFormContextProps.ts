@@ -3,7 +3,7 @@ import { EAVFormContextActions } from "./EAVFormContextActions";
 
 export type EAVFormContextState<T> = {
     formValues: T;
-    formDefinition: ManifestDefinition;
+    formDefinition?: ManifestDefinition;
     visited: string[];
     errors: EAVFWErrorDefinition
 }
