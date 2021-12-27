@@ -1,6 +1,6 @@
 
 export * from "./ManifestDefinition";
-export * from "ManifestWithExpressions";
+export * from "./ManifestWithExpressions";
 export * from "./Entities";
 export * from "./Validation";
 export * from "./Views";
