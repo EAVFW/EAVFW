@@ -1,15 +1,13 @@
 {
   "name": "@eavfw/manifest",
   "description": "Manifest Type Definitions",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.Manifest.git"
   },
-  "scripts": {
-    "publish": "npm publish --access public"
-  },
-  "dependencies": {
+  "peerDependencies": {
+    "swr": "1.1.2",
     "react": "17.0.2"
   },
   "license": "MIT",
