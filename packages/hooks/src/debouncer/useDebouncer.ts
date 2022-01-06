@@ -47,15 +47,15 @@ function debounce<T1,T>(func: Function, wait: number, immediate: boolean) {
         }
     };
 
-    var debounced = function (...args) {
+    var debounced = function () {
         context = this;
-       // args = arguments;
+        args = arguments;
         timestamp = Date.now();
         var callNow = immediate && !timeout;
         if (!timeout) timeout = window.setTimeout(later, wait);
         if (callNow) {
             result = func.apply(context, args);
-            context = null;
+            context = args= null;
             return new Promise(r => r(result));
         }
 
