@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useExpressionParserAttributeContext } from "./ExpressionParserAttributeContext";
-import { useExpressionParserContext } from "./ExpressionParserContext";
+import { useExpressionParserContext } from "./useExpressionParserContext";
 
 
 const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
