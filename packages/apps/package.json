@@ -1,16 +1,16 @@
 {
   "name": "@eavfw/apps",
   "description": "Model Driven Apps",
-  "version": "0.0.6",
+  "version": "0.0.10",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EAVFW/EAVFW.Manifest.git"
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
   "dependencies": {
-    "@eavfw/manifest": "0.0.5",
-    "@eavfw/hooks": "0.0.5",
-    "@eavfw/expressions": "0.0.5",
-    "@eavfw/forms": "0.0.5"
+    "@eavfw/manifest": "0.0.10",
+    "@eavfw/hooks": "0.0.10",
+    "@eavfw/expressions": "0.0.10",
+    "@eavfw/forms": "0.0.10"
   },
   "peerDependencies": {
     "react": "17.0.2",

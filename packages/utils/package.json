@@ -1,10 +1,10 @@
 {
   "name": "@eavfw/utils",
   "description": "Model Driven Apps",
-  "version": "0.0.6",
+  "version": "0.0.10",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EAVFW/EAVFW.Manifest.git"
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
   "peerDependencies": {
   },

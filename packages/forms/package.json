@@ -1,10 +1,10 @@
 {
   "name": "@eavfw/forms",
   "description": "EAVFW Forms",
-  "version": "0.0.5",
+  "version": "0.0.10",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/EAVFW/EAVFW.Manifest.git"
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
   "peerDependencies": {
     "react": "17.0.2"
