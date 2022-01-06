@@ -6,11 +6,20 @@
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.Manifest.git"
   },
-  "scripts": {
-    "publish": "npm publish --access public"
-  },
   "dependencies": {
-    "react": "17.0.2"
+    "@eavfw/manifest": "0.0.5",
+    "@eavfw/hooks": "0.0.5",
+    "@eavfw/expressions": "0.0.5",
+    "@eavfw/forms": "0.0.5"
+  },
+  "peerDependencies": {
+    "react": "17.0.2",
+    "json-schema": "0.4.0",
+    "@fluentui/react": "8.48.1",
+    "@rjsf/fluent-ui": "3.2.1"
+  },
+  "devDependencies": {
+    "@types/json-schema": "7.0.9"
   },
   "license": "MIT",
   "files": [ "src" ],

@@ -1,0 +1,271 @@
+.fxs-portal {
+    position: fixed;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    overflow: hidden;
+    z-index: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    line-height: normal;
+}
+
+.fxs-mode-dark {
+    fill: #fff;
+}
+
+.fxs-theme-dark {
+    background-color: #333;
+
+    a {
+        color: #4894fe;
+    }
+}
+
+.fxs-display-none {
+    display: none !important;
+}
+
+.fxs-blade-progress-translucent {
+    height: 8px;
+    position: absolute;
+    z-index: 202;
+    overflow: hidden;
+    left: 0;
+    top: 4px;
+}
+
+.fxs-portal-content {
+    flex: 1 1 auto;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.fxs-show-home .fxs-home-target,
+.fxs-show-allservices .fxs-sidebar-flyout,
+.fxs-show-settings .fxs-settings-flyout {
+    display: block;
+}
+
+.fxs-panorama .fxs-startboard-target,
+.fxs-panorama .fxs-home-target,
+.fxs-panorama .fxs-journey-target,
+.fxs-panorama .fxs-sidebar-flyout {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+}
+
+.fxs-mode-dark .fxs-home-target {
+    background-color: #333;
+}
+
+.fxs-home-target {
+    flex-direction: column;
+}
+
+.fxs-mode-dark .fxs-home-container {
+    fill: #fff;
+}
+
+.fxs-mode-dark .fxs-portal-text {
+    color: #fff;
+}
+
+.fxs-home-container {
+    padding: 24px 24.66666667px;
+    font-size: 13px;
+    max-width: 1063px;
+    margin: 0 auto;
+}
+
+@media (min-width: 480px) {
+    .fxs-home-container {
+        padding-left: 37px;
+        padding-right: 37px;
+    }
+}
+
+@media (min-width: 920px) {
+    .fxs-home-container {
+        padding-left: 74px;
+        padding-right: 74px;
+    }
+}
+
+.fxs-home-section {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+@media (min-width: 480px) {
+    .fxs-home-section {
+        min-width: 300px;
+    }
+}
+
+.fxs-home-info .fxs-home-title {
+    min-width: 170px;
+}
+
+.fxs-home-info {
+    // flex-direction: column;
+}
+
+@media (min-width: 920px) {
+    .fxs-home-info {
+        // flex-direction: row;
+    }
+}
+
+[role="button"],
+[role="link"],
+.fxs-fxclick {
+    cursor: pointer;
+}
+
+svg {
+    overflow: hidden;
+}
+
+.fxs-home-title {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 18px;
+    margin-bottom: 16px;
+    min-width: 300px;
+}
+
+.fxs-home-info .fxs-home-info-content {
+    display: flex;
+    flex-wrap: wrap;
+    margin-bottom: 17px;
+    margin-left: -12px;
+    margin-right: 12px;
+}
+
+.fxs-home-learn-section {
+    flex-basis: 100%;
+    flex: 0 0 251px;
+    margin-left: 12px;
+}
+
+.fxs-home-linkicon {
+    vertical-align: middle;
+    margin-left: 4px;
+}
+
+.fxs-mode-dark .fxs-home-linkicon {
+    fill: #4894fe;
+}
+
+.fxs-portal-main {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
+    position: relative;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: 100%;
+}
+
+.fxs-panorama .fxs-startboard-target,
+.fxs-panorama .fxs-home-target,
+.fxs-panorama .fxs-journey-target,
+.fxs-panorama .fxs-sidebar-flyout {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 0;
+}
+
+.fxs-show-home .fxs-home-target,
+.fxs-show-allservices .fxs-sidebar-flyout,
+.fxs-show-settings .fxs-settings-flyout {
+    display: block;
+}
+
+.fxs-home-mobilelinks {
+    flex: 0 0 auto;
+}
+
+@media (min-width: 920px) {
+    .fxs-home-mobilelinks {
+        flex: 1 1 241px;
+    }
+}
+
+.fxs-home-mobile {
+    display: flex;
+}
+
+.fxs-home-mobile .fxs-home-mobile-img:first-of-type {
+    margin-right: 8px;
+}
+
+.fxs-home-mobile .fxs-home-mobile-img {
+    height: 34px;
+    width: 116px;
+}
+
+.fxs-home-learnmore {
+    flex: 0 0 auto;
+    max-width: 789px;
+    margin-bottom: 40px;
+}
+
+@media (min-width: 920px) {
+    .fxs-home-learnmore {
+        flex: 3 3 789px;
+    }
+}
+
+.fxs-home-info svg {
+    height: 12px;
+    width: 12px;
+}
+
+.fxs-home-section:not(:last-child) {
+    margin-bottom: 40px;
+}
+
+.fxs-home-target {
+    overflow-y: auto;
+}
+
+a[href]:hover,
+[role="link"].fxs-fxclick:hover {
+    text-decoration: underline;
+}
+
+.ms-DetailsHeader-cellSizer {
+    cursor: e-resize;
+}
+
+.fxs-mode-light :focus {
+    outline-color: #605e5c;
+}
+
+.fxs-mode-light {
+    a {
+        color: #0078d4;
+    }
+}
+
+
+
+/* NAV */
+:global(.pa-ag) {
+    border-right: 1px solid rgb(216, 216, 216);
+}

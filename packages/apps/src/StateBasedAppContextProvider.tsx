@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { AppInfoProvider } from "./AppInfoProvider";
+import { AppNavigationContext } from "./AppNavigationContext";
 import { EAVApp } from "./EAVApp";
 import { ModelDrivenApp } from "./ModelDrivenApp";
 
@@ -24,8 +26,8 @@ export const StateBasedAppContextProvider: React.FC<{ model: ModelDrivenApp }> =
     }>
         <AppInfoProvider>
         { children }
-        < /AppInfoProvider>
-        < /AppNavigationContext.Provider>
-        < /EAVApp>
+        </AppInfoProvider>
+        </AppNavigationContext.Provider>
+        </EAVApp>
     )
 }
