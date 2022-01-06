@@ -1,0 +1,16 @@
+{
+  "name": "@eavfw/utils",
+  "description": "Model Driven Apps",
+  "version": "0.0.6",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EAVFW/EAVFW.Manifest.git"
+  },
+  "peerDependencies": {
+  },
+  "license": "MIT",
+  "files": [ "src" ],
+  "author": "Poul Kjeldager <poul@kjeldager.com>",
+  "type": "module",
+  "main": "./src/index.ts"
+}
