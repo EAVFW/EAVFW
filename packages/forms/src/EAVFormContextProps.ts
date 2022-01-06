@@ -5,7 +5,8 @@ export type EAVFormContextState<T> = {
     formValues: T;
     formDefinition?: ManifestDefinition;
     visited: string[];
-    errors: EAVFWErrorDefinition
+    errors: EAVFWErrorDefinition;
+    editedFields:any
 }
 export type EAVFormContextProps<T> = {
     actions: EAVFormContextActions<T>;

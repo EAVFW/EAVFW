@@ -9,35 +9,15 @@ import { EAVFormContextState } from "./EAVFormContextProps";
 export type EAVFormProps<T extends any> = {
     formDefinition?: ManifestDefinition,
     defaultData: T
-    onChange?: (data:T) => void;
+    onChange?: (data: T) => void;
+    state?: any;
 }
 
-export type JsonSchemaErrorObject = {
-    __errors: Array<string>;
-}
-export type JsonSchemaErrorObjectWrap = {
-    [key: string]: JsonSchemaError
-}
-export type JsonSchemaError = JsonSchemaErrorObjectWrap | JsonSchemaErrorObject | Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
 
 const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
 const validationFunction = process.env['NEXT_PUBLIC_BLAZOR_EVAL_VALIDATION'];
 
 
-const wrapErrors: (arg: EAVFWErrorDefinition) => JsonSchemaError =
-    (errors) => {
-
-        if (Array.isArray(errors)) {
-            return errors.map((e, i) => wrapErrors(e)) as Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
-        }
-
-        if (isEAVFWError(errors)) {
-            return { __errors: [errors.error] } as JsonSchemaErrorObject;
-        }
-
-        return Object.fromEntries(Object.entries(errors).map(([k, v]) => [k, wrapErrors(v)])) as JsonSchemaErrorObjectWrap;
-
-    }
 
 
 
@@ -65,24 +45,33 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
     return data;
 }
 
-export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, children }: PropsWithChildren<EAVFormProps<T>>) => {
+export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, children, ...props }: PropsWithChildren<EAVFormProps<T>>) => {
 
-    const { current: data } = useRef<EAVFormContextState<T>>({
+    const { current: state } = useRef<EAVFormContextState<T>>({
         formValues: defaultData,
         formDefinition,
         visited: [],
-        errors: {}
+        errors: {},
+        editedFields: {},
+        ...props.state ?? {}
     });
 
     const global_etag = useRef<string>(new Date().toISOString());
 
-    const [_errors, setLocalErrors] = useState<JsonSchemaError>();
+   // const [_errors, setLocalErrors] = useState<JsonSchemaError>();
     const [etag, setEtag] = useState(new Date().toISOString());
     
    // const { setFormValues } = useExpressionParserContext();
      
     const actions = useRef({
+        addVisited: (id: string) => {
+            if (state.visited.indexOf(id) === -1) {
+                state.visited = state.visited.filter(c => c !== id).concat([id]);
 
+                setEtag(global_etag.current = new Date().toISOString());
+            }
+
+        },
         onChange: (cb: (props: any) => void) => {
 
             const updatedProps = {};
@@ -93,7 +82,7 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, 
 
             let changed = false;
 
-            let formValues = data.formValues as any;
+            let formValues = state.formValues as any;
 
             for (let [entry, value] of Object.entries(updatedProps)) {
                 if (!isEqual(formValues[entry], value)) {
@@ -106,22 +95,22 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, 
                  
                 if (namespace && validationFunction) {
 
-                    setLocalErrors(undefined);
+                   // setLocalErrors(undefined);
                     const local = global_etag.current = new Date().toISOString();
 
-                    DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(namespace, validationFunction, formDefinition, data, true)
+                    DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(namespace, validationFunction, formDefinition, state.formValues, true)
                         .then(({ errors: results, updatedFields }) => {
 
-                            console.log("RESULT", [results, wrapErrors(results), updatedFields]);
+                            console.log("RESULT", [results, updatedFields]);
 
 
 
                             if (local === global_etag.current) {
                                 // mergeDeep(data, updatedFields);
-                                mergeAndUpdate(data.formValues, updatedFields);
+                                mergeAndUpdate(state.formValues, updatedFields);
 
-
-                                setLocalErrors(wrapErrors(results));
+                                state.errors = results; // wrapErrors(results);
+                               // setLocalErrors(wrapErrors(results));
                             }
                         }).catch(err => {
                             console.error(err);
@@ -130,11 +119,11 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, 
                             if (local === global_etag.current) {
                               //  setFormValues({ ...data });
                                 if (onChange)
-                                    onChange(data.formValues);
+                                    onChange(state.formValues);
 
                                 setEtag(global_etag.current);
 
-                                console.log("Updated Props Changed", [changed, data]);
+                                console.log("Updated Props Changed", [changed, state.formValues]);
 
                             }
                         });
@@ -146,16 +135,16 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, 
                     setEtag(global_etag.current = new Date().toISOString());
 
                     if (onChange)
-                        onChange(data.formValues);
+                        onChange(state.formValues);
 
-                    console.log("Updated Props Changed", [changed, data]);
+                    console.log("Updated Props Changed", [changed, state.formValues]);
                 }
 
 
             }
 
 
-            return data;
+            return state;
 
         },
         //setErrors: (err: ErrorObjectWrap) => {
@@ -174,7 +163,7 @@ export const EAVForm = <T extends any>({ formDefinition, defaultData, onChange, 
     return <EAVFormContext.Provider
         value={{         
             actions: actions.current,
-            state: data,           
+            state: state,           
             etag,           
         }}>{children}</EAVFormContext.Provider>
 }
