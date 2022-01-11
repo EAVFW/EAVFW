@@ -1,5 +1,5 @@
 
-import { EAVFWErrorDefinition, isEAVFWError, ManifestDefinition, } from "@eavfw/manifest";
+import { EAVFWError, EAVFWErrorDefinition, isEAVFWError, ManifestDefinition, } from "@eavfw/manifest";
 
 export type JsonSchemaErrorObject = {
     __errors: Array<string>;
@@ -10,17 +10,27 @@ export type JsonSchemaErrorObjectWrap = {
 export type JsonSchemaError = JsonSchemaErrorObjectWrap | JsonSchemaErrorObject | Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
 
 
-export const rjsfErrors: (arg: EAVFWErrorDefinition) => JsonSchemaError =
-    (errors) => {
+export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFWError, state:any) => JsonSchemaErrorObject) => JsonSchemaError =
+    (errors, state = {}, fx) => {
+
+        if (typeof errors === "undefined")
+            return {} as JsonSchemaErrorObjectWrap;
 
         if (Array.isArray(errors)) {
-            return errors.map((e, i) => rjsfErrors(e)) as Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
+            console.debug("rjsfErrors array", [errors, state])
+            return errors.map((e, i) => rjsfErrors(e,state?.[i],fx)) as Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
         }
 
         if (isEAVFWError(errors)) {
+            console.debug("rjsfErrors error", [errors, state, fx])
+            if (fx)
+                return fx(errors,state) as JsonSchemaErrorObject;
             return { __errors: [errors.error] } as JsonSchemaErrorObject;
         }
 
-        return Object.fromEntries(Object.entries(errors).map(([k, v]) => [k, rjsfErrors(v)])) as JsonSchemaErrorObjectWrap;
+        console.debug("rjsfErrors object", [errors, state])
+        const entries = Object.entries(errors).map(([k, v]) => [k, rjsfErrors(v, state[k], fx)]);
+        
+        return Object.fromEntries(entries) as JsonSchemaErrorObjectWrap;
 
     }

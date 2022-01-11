@@ -200,26 +200,32 @@ export function ModelDrivenEntityViewer({
 
             while (attributes.length > 0) {
                 let attributeKey = attributes.shift()!;
-                console.log("partOfGroup", attributeKey);
+                console.debug("partOfGroup", attributeKey);
                 let attribute = entity.attributes[attributeKey] ?? app.getEntity(entity.TPT!).attributes[attributeKey];
 
-                if (attribute.logicalName in formdata) {
+                if (attribute.logicalName in formdata || (isLookup(attribute.type) && attribute.logicalName.slice(0, -2) in formdata)) {
                     console.log(`Found ${attribute.logicalName} in formdata`);
 
-                    if (isLookup(attribute.type) && typeof formdata[attribute.logicalName] === "object") {
+                    const lookupValue = formdata[attribute.logicalName.slice(0, -2)]??formdata[attribute.logicalName];
+                    if (isLookup(attribute.type) && typeof (lookupValue ) === "object") {
                         const oldvalue = oldFormData[attribute.logicalName.slice(0, -2)];
                         console.log(`Found ${attribute.logicalName} in formdata as lookup object`,
-                            oldFormData[attribute.logicalName.slice(0, -2)], formdata[attribute.logicalName]);
+                            oldFormData[attribute.logicalName.slice(0, -2)], lookupValue);
 
-                        if (formdata[attribute.logicalName].id) {
-                            oldFormData[attribute.logicalName] = formdata[attribute.logicalName].id;
+                        if (lookupValue.id) {
+                            oldFormData[attribute.logicalName] = lookupValue.id;
                         } else {
                             // Remove ID from old object
                             delete oldFormData[attribute.logicalName]
                         }
-                        const keys = Object.keys(formdata[attribute.logicalName]);
-                        changed = !isEqual(Object.fromEntries(keys.map(k => [k, oldvalue?.[k]])), formdata[attribute.logicalName]);
-                        oldFormData[attribute.logicalName.slice(0, -2)] = formdata[attribute.logicalName];
+                      //  const keys = Object.keys(formdata[attribute.logicalName]);
+                        if (!isEqual(oldvalue, lookupValue)) {
+                            changed = true;
+                            console.log(`Found ${attribute.logicalName.slice(0, -2)} in formdata as lookup object that was changed`);
+                         
+                        }
+                        oldFormData[attribute.logicalName.slice(0, -2)] = lookupValue;
+                       
 
                         // changed = true;
 
@@ -258,7 +264,7 @@ export function ModelDrivenEntityViewer({
                                 attributes.push(...dependants.filter(d => attributes.indexOf(d) === -1));
                                 console.log("updated attributes ", attributes);
                             }
-                        }
+                        }  
                     }
                 }
             }
@@ -292,8 +298,13 @@ export function ModelDrivenEntityViewer({
     }, 50, [record, entity]);
 
     const onFormDataChange = useCallback((formdata: any) => {
-        console.log("FormData Change", formdata);
+
+        console.log("FormData Changing", { changes: formdata, old: formdatamerger.current });
+
         formdatamerger.current = { ...formdatamerger.current, ...formdata };
+
+        console.log("FormData Changed", { changes: formdata, new: formdatamerger.current });
+
         return onFormDataChange2(formdatamerger.current);
     }, [onFormDataChange2]);
 

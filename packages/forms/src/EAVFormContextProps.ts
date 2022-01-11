@@ -1,13 +1,8 @@
 import { EAVFWErrorDefinition, ManifestDefinition } from "@eavfw/manifest";
 import { EAVFormContextActions } from "./EAVFormContextActions";
+import { EAVFormContextState } from "./EAVFormContextState";
 
-export type EAVFormContextState<T> = {
-    formValues: T;
-    formDefinition?: ManifestDefinition;
-    visited: string[];
-    errors: EAVFWErrorDefinition;
-    editedFields:any
-}
+
 export type EAVFormContextProps<T> = {
     actions: EAVFormContextActions<T>;
     state: EAVFormContextState<T>;

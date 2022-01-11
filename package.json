@@ -2,7 +2,36 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "devDependencies": {
     "@types/node": "16.7.10",
-    "@types/react": "17.0.38"
+    "@types/react": "17.0.38",
+    "concurrently": "7.0.0"
+  },
+  "scripts": {
+    "link": "concurrently  \"npm:link-*\"",
+    "link-manifest": "npm --workspace packages/manifest link",
+    "link-apps": "npm --workspace packages/apps link",
+    "link-expressions": "npm --workspace packages/expressions link",
+    "link-forms": "npm --workspace packages/forms link",
+    "link-utils": "npm --workspace packages/utils link",
+    "link-hooks": "npm --workspace packages/hooks link",
+    "link-nextjs": "npm --workspace packages/nextjs link",
+
+    "publish-apps": "npm --workspace packages/apps publish --access public",
+    "publish-manifest": "npm --workspace packages/manifest publish --access public",
+    "publish-expressions": "npm --workspace packages/expressions publish --access public",
+    "publish-forms": "npm --workspace packages/forms publish --access public",
+    "publish-utils": "npm --workspace packages/utils publish --access public",
+    "publish-hooks": "npm --workspace packages/hooks publish --access public",
+    "publish-nextjs": "npm --workspace packages/nextjs publish --access public",
+
+
+    "bumb-version": "concurrently  \"npm:bumb-version-*\"",
+    "bumb-version-manifest": "npm --workspace packages/manifest version patch -m \"Upgrade to %s\"",
+    "bumb-version-apps": "npm --workspace packages/apps version patch -m \"Upgrade to %s\"",
+    "bumb-version-expressions": "npm --workspace packages/expressions version patch -m \"Upgrade to %s\"",
+    "bumb-version-forms": "npm --workspace packages/forms version patch -m \"Upgrade to %s\"",
+    "bumb-version-utils": "npm --workspace packages/utils version patch -m \"Upgrade to %s\"",
+    "bumb-version-hooks": "npm --workspace packages/hooks version patch -m \"Upgrade to %s\"",
+    "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\""
   },
   
   "private": true,

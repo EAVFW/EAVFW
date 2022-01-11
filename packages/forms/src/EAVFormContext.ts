@@ -4,15 +4,16 @@ import { EAVFormContextProps } from "./EAVFormContextProps";
 
 export const EAVFormContext = createContext<EAVFormContextProps<any>>({
     actions: {
+        runValidation: () => false,
         addVisited: (id) => { },
-        onChange: () => { }
+        onChange: () => { },
+        updateState: () => { }
     },
     state: {
         formDefinition: {} as any,
         errors: {},
         formValues: {},
-        visited: [],
-        editedFields: {},
+        fieldMetadata: {}
     },
     etag: new Date().toISOString()
 });

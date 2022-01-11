@@ -2,8 +2,9 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import isEqual from "react-fast-compare";
 import { EAVFormContext } from "./EAVFormContext";
 import { EAVFormContextActions } from "./EAVFormContextActions";
-import { EAVFormContextState } from "./EAVFormContextProps";
-
+import { EAVFormContextProps } from "./EAVFormContextProps";
+import cloneDeep from "clone-deep";
+import { EAVFormContextState } from "./EAVFormContextState";
 
 
 
@@ -85,23 +86,23 @@ import { EAVFormContextState } from "./EAVFormContextProps";
 //    }
 //}
 
-export function useEAVForm<TCollected>(collector: (state: EAVFormContextState<any>) => TCollected, logid?: string): [TCollected, EAVFormContextActions<any>]
+export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
 export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TState extends EAVFormContextState<TFormValues>, TCollected>(collector: (state: TState) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TState extends EAVFormContextState<TFormValues>,TCollected>(collector: (state: TState) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>] {
+export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
+export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>] {
 
     const {
         actions,
         state,        
         etag
-    } = useContext(EAVFormContext);
+    } = useContext<EAVFormContextProps<TFormValues>>(EAVFormContext);
 
-    const oldValues = useRef(Object.values(collector(state as TState)));
+    const oldValues = useRef(collector(state as TState));
     const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
   
     useEffect(() => {
-        console.debug("useEAVForm Trigger: " + logid + " " + etag);
-        const newValues = Object.values(collector(state as TState));
+        console.log("useEAVForm Trigger: " + logid + " " + etag);
+        const newValues =  collector(state as TState);
         console.debug("useEAVForm oldValues: " + logid, oldValues.current);
         console.debug("useEAVForm newValues: " + logid, newValues);
 
@@ -116,14 +117,12 @@ export function useEAVForm<TFormValues, TState extends EAVFormContextState<TForm
 
   
     const collected = useMemo(() => {
-        console.debug("useEAVForm collected: " + logid, collector(state as TState));
+        console.log("useEAVForm collected: " + logid, collector(state as TState));
 
         let collected = collector(state as TState);
 
         return [
-            Array.isArray(collected) ?
-                collected.slice() :
-                { ...collected }, actions] as [TCollected, EAVFormContextActions<TFormValues>];
+            cloneDeep(collected), actions] as [TCollected, EAVFormContextActions<TFormValues>];
     }, [subscriptionid]);
      
     

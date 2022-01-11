@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "react-fast-compare": "3.2.0",
-    "pako": "2.0.4"
+    "pako": "2.0.4",
+    "clone-deep": "4.0.1"
   },
   "devDependencies": {
-    "@types/pako": "1.0.3"
+    "@types/pako": "1.0.3",
+    "@types/clone-deep": "4.0.1"
   },
   "license": "MIT",
   "files": [ "src" ],
