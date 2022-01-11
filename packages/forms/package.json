@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/forms",
   "description": "EAVFW Forms",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
@@ -19,7 +19,9 @@
     "@types/clone-deep": "4.0.1"
   },
   "license": "MIT",
-  "files": [ "src" ],
+  "files": [
+    "src"
+  ],
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts"

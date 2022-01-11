@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/hooks",
   "description": "EAVFW React Hooks",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
@@ -9,10 +9,11 @@
   "peerDependencies": {
     "react": "17.0.2"
   },
-  "scripts": {
-  },
+  "scripts": {},
   "license": "MIT",
-  "files": [ "src" ],
+  "files": [
+    "src"
+  ],
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts"

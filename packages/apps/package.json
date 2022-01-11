@@ -1,13 +1,12 @@
 {
   "name": "@eavfw/apps",
   "description": "Model Driven Apps",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "peerDependencies": {
     "react": "17.0.2",
     "json-schema": "0.4.0",
@@ -18,7 +17,9 @@
     "@types/json-schema": "7.0.9"
   },
   "license": "MIT",
-  "files": [ "src" ],
+  "files": [
+    "src"
+  ],
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts"
