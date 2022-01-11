@@ -49,7 +49,7 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
                 let a = data[k] ?? [];
               
                 v.forEach((value) => {
-                    let found = a.filter((n: any) => value.id && n.id === value.id)[0];
+                    let found = a.filter((n: any) => (value.id && n.id === value.id|| n["__id"] === value["__id"]))[0];
                     if (found) {
                         mergeAndUpdate(found, value)
                     } else {

@@ -20,15 +20,15 @@ export const deepDiffMapper = function () {
 
             if (isArray && doArrayIdDiff) {
                 console.log("Array Diff" ,[ oldValue, newValue])
-                let newhash = Object.fromEntries(newValue.filter((n: any) => n.id).map((n: any) => [n.id, n]));
-                let oldhash = Object.fromEntries(oldValue.filter((n: any) => n.id).map((n: any) => [n.id, n]));
+                let newhash = Object.fromEntries(newValue.filter((n: any) => n.id ?? n["__id"]).map((n: any) => [n.id ?? n["__id"], n]));
+                let oldhash = Object.fromEntries(oldValue.filter((n: any) => n.id ?? n["__id"]).map((n: any) => [n.id ?? n["__id"], n]));
                 let ids = Object.keys(newhash).filter((n: string) => n in oldhash);
                 let diff = {
                     __type: "list_changes",
                     data: newValue,
                     changed: ids.map(id => ({ prev_idx: oldValue.map((n: any) => n.id).indexOf(id), new_idx: newValue.map((n: any) => n.id).indexOf(id), data: this.map(oldhash[id], newhash[id]) })),
-                    added: newValue.filter((n: any) => !("id" in n)),
-                    removed: oldValue.map((n: any) => n.id).filter((id: any) => !(id in newhash))
+                    added: newValue.filter((n: any) => !("id" in n || "__id" in n)),
+                    removed: oldValue.map((n: any) => n.id ?? n["__id"]).filter((id: any) => !(id in newhash))
                 } as any;
 
                 return diff;
