@@ -3,7 +3,8 @@
   "devDependencies": {
     "@types/node": "16.7.10",
     "@types/react": "17.0.38",
-    "concurrently": "7.0.0"
+    "concurrently": "7.0.0",
+    "npm-run-all": "^4.1.5"
   },
   "scripts": {
     "link": "concurrently  \"npm:link-*\"",
@@ -15,6 +16,7 @@
     "link-hooks": "npm --workspace packages/hooks link",
     "link-nextjs": "npm --workspace packages/nextjs link",
 
+    "publish": "npm-run-all --continue-on-error publish-*",
     "publish-apps": "npm --workspace packages/apps publish --access public",
     "publish-manifest": "npm --workspace packages/manifest publish --access public",
     "publish-expressions": "npm --workspace packages/expressions publish --access public",
@@ -22,7 +24,6 @@
     "publish-utils": "npm --workspace packages/utils publish --access public",
     "publish-hooks": "npm --workspace packages/hooks publish --access public",
     "publish-nextjs": "npm --workspace packages/nextjs publish --access public",
-
 
     "bumb-version": "concurrently  \"npm:bumb-version-*\"",
     "bumb-version-manifest": "npm --workspace packages/manifest version patch -m \"Upgrade to %s\"",
@@ -33,7 +34,6 @@
     "bumb-version-hooks": "npm --workspace packages/hooks version patch -m \"Upgrade to %s\"",
     "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\""
   },
-  
   "private": true,
   "workspaces": {
     "packages": [
