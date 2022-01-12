@@ -12,7 +12,7 @@ export function cleanDiff(updatedValues: object): [boolean, any] {
                     changed = true;
                 } else if (value.__type === "list_changes") {
 
-                    let l = value.added.slice();
+                    let l = [];
 
                     for (let change of value.changed) {
 
@@ -24,7 +24,7 @@ export function cleanDiff(updatedValues: object): [boolean, any] {
 
                         l.push(_value);
                     }
-
+                    l.push(...value.added);
                     if (l.length) {
                         a[key] = l;
                         changed = true;

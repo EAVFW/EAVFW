@@ -40,7 +40,7 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
          
         for (let [k, v] of Object.entries(updatedFields)) {
 
-            console.log("mergeAndUpdate", [k, data[k], v]);
+            console.log("mergeAndUpdate", [k, JSON.stringify(data[k]), JSON.stringify( v)]);
 
             if (k.endsWith("@deleted")) {
                 data[k] = (data[k] ?? []).concat(v);
@@ -49,7 +49,8 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
                 let a = data[k] ?? [];
               
                 v.forEach((value) => {
-                    let found = a.filter((n: any) => (value.id && n.id === value.id|| n["__id"] === value["__id"]))[0];
+                    let found = a.filter((n: any) => ((value.id && n.id === value.id) || (value["__id"] && n["__id"] === value["__id"])))[0];
+                    console.log("mergeAndUpdate array", [k, JSON.stringify(found), JSON.stringify( value)]);
                     if (found) {
                         mergeAndUpdate(found, value)
                     } else {
