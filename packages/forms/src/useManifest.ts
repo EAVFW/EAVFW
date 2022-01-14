@@ -568,7 +568,7 @@ export const useManifest: (props: useManifestProps) => [ManifestDefinition, (man
             [data[column.logicalName.slice(0, -2)], content, data[column.logicalName.slice(0, -2)] === content,
             data[column.logicalName.slice(0, -2)]?.data === content.data, _manifestmerger.current]);
 
-        onFormDataChange((props)=> { props[column.logicalName] = isLookup(column.type) ? content : content.data });
+        onFormDataChange((props) => { props[isLookup(column.type) ? column.logicalName.slice(0, -2):column.logicalName] = isLookup(column.type) ? content : content.data });
     }
 
     return [_manifest,

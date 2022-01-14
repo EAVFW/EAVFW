@@ -18,6 +18,7 @@ export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = 
     onChange?: (data: T) => void;
     state?: Omit<TState, keyof EAVFormContextState<T>>;
     onValidationResult?: (result: { errors: EAVFWErrorDefinition, calculatedFields: T, actions: EAVFormContextActions<T>, state: TState }) => void;
+    stripForValidation?:(data:T)=>T
 }
 
 
@@ -82,7 +83,8 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
     return data;
 }
 
-export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ formDefinition, defaultData, onChange, children, onValidationResult, state: initialState  }: PropsWithChildren<EAVFormProps<T, TState>>) => {
+
+export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ stripForValidation=(a)=>a,formDefinition, defaultData, onChange, children, onValidationResult, state: initialState  }: PropsWithChildren<EAVFormProps<T, TState>>) => {
 
     const { current: state } = useRef({
         formValues: cloneDeep(defaultData) ?? {},
@@ -104,21 +106,22 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ f
            
             // setLocalErrors(undefined);
             const local = global_etag.current = new Date().toISOString();
+            const formValuesForValidation = stripForValidation(state.formValues);
 
-            console.log("Running Validation", [local, global_etag.current, state, JSON.stringify(state.formValues)]);
+            console.log("Running Validation", [local, global_etag.current, state, formValuesForValidation]);
 
-            DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(namespace, validationFunction, formDefinition, state.formValues, true)
+            DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(namespace, validationFunction, formDefinition, formValuesForValidation, true)
                 .then(({ errors: results, updatedFields }) => {
 
-                    console.log("RESULT", [results, updatedFields, local, global_etag.current, JSON.stringify(state.formValues)]);
+                    console.log("RESULT", [results, updatedFields, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
 
 
 
                     if (local === global_etag.current) {
                         // mergeDeep(data, updatedFields);
-                        console.log("Update State", JSON.stringify(state.formValues), JSON.stringify(updatedFields));
+                        console.log("Update State", JSON.stringify(formValuesForValidation), JSON.stringify(updatedFields));
                         mergeAndUpdate(state.formValues, updatedFields);
-                        console.log("Update State Complete", JSON.stringify(state.formValues), JSON.stringify(updatedFields))
+                        console.log("Update State Complete", JSON.stringify(formValuesForValidation), JSON.stringify(updatedFields))
                         state.errors = results;
 
                        
