@@ -1,4 +1,4 @@
-import { isLookup, RibbonViewInfo } from "@eavfw/manifest";
+ï»¿import { isLookup, RibbonViewInfo } from "@eavfw/manifest";
 import { ContextualMenu, DefaultButton, Dialog, DialogFooter, DialogType, ICommandBarItemProps, PrimaryButton } from "@fluentui/react";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { useRouter } from "next/router";
@@ -21,7 +21,7 @@ const dialogContentProps = {
     type: DialogType.normal,
     title: 'Data er ikke gemt',
     closeButtonAriaLabel: 'Close',
-    subText: 'Vil du gemme dine ændringer før du forlader siden?',
+    subText: 'Vil du gemme dine Ã¦ndringer fÃ¸r du forlader siden?',
 };
 
 
@@ -122,7 +122,7 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
         //  router.
         const unsavedChanges = ribbonState.canSave;
         const warningText =
-            'Du har data der ikke er gemt, er du sikker på du vil forlade siden?';
+            'Du har data der ikke er gemt, er du sikker pÃ¥ du vil forlade siden?';
         const handleWindowClose = (e: BeforeUnloadEvent) => {
             if (!unsavedChanges) return;
             e.preventDefault();
@@ -205,7 +205,7 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
                         });
                         ribbonEvents.emit("onSave", e);
                     }
-                } text="Gem og forsæt" />
+                } text="Gem og forsÃ¦t" />
                 <DefaultButton onClick={() => { confirmedRef.current = true; updateRibbonState({ canSave: false }); toggleHideDialog(); router.push(pastUrl!); setPastUrl(undefined); }} text="Forlad side" />
             </DialogFooter>
             </Dialog>

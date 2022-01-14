@@ -193,7 +193,7 @@ export function ModelDrivenEntityViewer({
         try {
             formdatamerger.current = {};
             console.groupCollapsed("onFormDataChange", [formDataRef.current, formdata]);
-            let oldFormData = Object.assign({}, formDataRef.current);
+            let oldFormData =  Object.assign({}, formDataRef.current);
             let changed = false;
 
             let attributes = [...Object.keys(entity.attributes), ...(Object.keys((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}))];
@@ -206,27 +206,28 @@ export function ModelDrivenEntityViewer({
                 if (attribute.logicalName in formdata || (isLookup(attribute.type) && attribute.logicalName.slice(0, -2) in formdata)) {
                     console.log(`Found ${attribute.logicalName} in formdata`);
 
-                    const lookupValue = formdata[attribute.logicalName.slice(0, -2)]??formdata[attribute.logicalName];
-                    if (isLookup(attribute.type) && typeof (lookupValue ) === "object") {
-                        const oldvalue = oldFormData[attribute.logicalName.slice(0, -2)];
-                        console.log(`Found ${attribute.logicalName} in formdata as lookup object`,
-                            oldFormData[attribute.logicalName.slice(0, -2)], lookupValue);
+                    const lookupValue = typeof formdata[attribute.logicalName] == "object" ? formdata[attribute.logicalName] : formdata[attribute.logicalName.slice(0, -2)];
+                    if (isLookup(attribute.type)) {
+                        if (lookupValue) {
+                            const oldvalue = oldFormData[attribute.logicalName.slice(0, -2)];
+                            console.log(`Found ${attribute.logicalName} in formdata as lookup object`,
+                                oldFormData[attribute.logicalName.slice(0, -2)], lookupValue);
 
-                        if (lookupValue.id) {
-                            oldFormData[attribute.logicalName] = lookupValue.id;
-                        } else {
-                            // Remove ID from old object
-                            delete oldFormData[attribute.logicalName]
-                        }
-                      //  const keys = Object.keys(formdata[attribute.logicalName]);
-                        if (!isEqual(oldvalue, lookupValue)) {
-                            changed = true;
-                            console.log(`Found ${attribute.logicalName.slice(0, -2)} in formdata as lookup object that was changed`);
-                         
-                        }
-                        oldFormData[attribute.logicalName.slice(0, -2)] = lookupValue;
-                       
+                            if (lookupValue.id) {
+                                oldFormData[attribute.logicalName] = lookupValue.id;
+                            } else {
+                                // Remove ID from old object
+                                delete oldFormData[attribute.logicalName]
+                            }
+                            //  const keys = Object.keys(formdata[attribute.logicalName]);
+                            if (!isEqual(oldvalue, lookupValue)) {
+                                changed = true;
+                                console.log(`Found ${attribute.logicalName.slice(0, -2)} in formdata as lookup object that was changed`);
 
+                            }
+                            oldFormData[attribute.logicalName.slice(0, -2)] = lookupValue;
+
+                        }
                         // changed = true;
 
                     } else {
