@@ -3,6 +3,7 @@ import { NotAuthorizedProfile, UserProfile } from "./UserProfile";
 import useSWR from "swr";
 import { getRecordSWR, jsonFetcher } from "@eavfw/manifest";
 import { UserContext } from "./UserContext";
+import { useEffect } from "react";
 
 const DefaultLoader = () => <div>loading...</div>;
 const notAuthorizedUser: NotAuthorizedProfile = { isAuthenticated: false };
@@ -39,17 +40,24 @@ function getProfile(entityKey?: string) {
     }
 }
 
-export const UserProvider: React.FC<{ authorize?: boolean, onRenderLoading?: React.FC, loadUserInfoEntityKey?: string }> = ({ loadUserInfoEntityKey, children, authorize, onRenderLoading: Loader = DefaultLoader }) => {
+export const UserProvider: React.FC<{ authorize?: boolean, onLoaded?: (profile: UserProfile) => void, onRenderLoading?: React.FC, loadUserInfoEntityKey?: string }> = ({ onLoaded, loadUserInfoEntityKey, children, authorize, onRenderLoading: Loader = DefaultLoader }) => {
 
     const { record, isLoading, isError } = getProfile(loadUserInfoEntityKey);
 
     console.log("UserProvider PreAuthorize", [authorize, record]);
+
+    useEffect(() => {
+        if (onLoaded && record && record.isAuthenticated !== false) {
+            onLoaded(record);
+        }
+    }, [record, onLoaded])
 
     if (authorize) {
         if (!record || record.isAuthenticated === false)
             return <Loader />
 
     }
+
 
     console.log("UserProvider PostAuthorize", [authorize, record]);
 

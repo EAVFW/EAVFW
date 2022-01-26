@@ -134,6 +134,9 @@ export class ModelDrivenApp {
     getEntityFromKey(key: string) {
         return this.getEntity(this._data.entityMap[key]);
     }
+    getEntityKey(logicalName: string) {
+        return Object.entries(this._data.entityMap).filter(([entityKey, entityLogicalName]) => entityLogicalName === logicalName)[0][0]
+    }
     getEntityFromCollectionSchemaName(key: string) {
         return this.getEntity(this._data.entityCollectionSchemaNameMap[key]);
     }
