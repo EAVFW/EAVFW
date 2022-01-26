@@ -9,7 +9,7 @@ import cloneDeep from "clone-deep";
 
 import { cleanDiff, deepDiffMapper, mergeDeep } from "@eavfw/utils";
 import { EAVFormContextState } from "./EAVFormContextState";
-import { EAVFormContextActions } from "./EAVFormContextActions";
+import { EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVFormContextActions";
 import { debug } from "console";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
@@ -82,6 +82,7 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
     console.log("mergeAndUpdate output", data);
     return data;
 }
+
 
 
 export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ stripForValidation=(a)=>a,formDefinition, defaultData, onChange, children, onValidationResult, state: initialState  }: PropsWithChildren<EAVFormProps<T, TState>>) => {
@@ -204,17 +205,18 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
             //}
 
         },
-        onChange: (cb: (props: any) => void) => {
+        onChange: (cb) => {
 
             const updatedProps = cloneDeep(state.formValues);
+            const ctx: EAVFormOnChangeCallbackContext = { skipValidation:false };
           //  const updatedProps = {};
 
-            cb(updatedProps);
+            cb(updatedProps,ctx);
 
             const a = deepDiffMapper.map(state.formValues, updatedProps,true);
             const [changed, changedValues] = cleanDiff(a);
 
-            console.log("Updated Props", [updatedProps, state,changed, a, changedValues]);
+            console.log("Updated Props", [updatedProps, state, changed, a, changedValues, ctx]);
              
 
             if (changed) {
@@ -222,7 +224,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
                 mergeAndUpdate(state.formValues=cloneDeep(state.formValues), changedValues);
                 console.log("Updated Props", [changed, updatedProps, JSON.stringify(state.formValues, null, 4), state]);
 
-                if (!runValidation()) {
+                if (ctx.skipValidation || !runValidation()) {
                   
                    // setFormValues({ ...data });
                     setEtag(global_etag.current = new Date().toISOString());
