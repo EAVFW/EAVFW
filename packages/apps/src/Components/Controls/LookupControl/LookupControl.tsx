@@ -15,16 +15,20 @@ import {
     IStyleFunction,
     mergeStyleSets,
     Modal,
-    Stack
+    Stack,
+    useTheme
 } from "@fluentui/react";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ThemeContext } from "@fluentui/react";
-import { EntityDefinition, IRecord, isLookup, LookupType, NestedType, queryEntity } from "@eavfw/manifest";
-import { useModelDrivenApp } from "@eavfw/apps";
+
+import { EntityDefinition, IRecord, isLookup, LookupType, NestedType, queryEntity, queryEntitySWR, TypeFormModalDefinition } from "@eavfw/manifest";
 import { capitalize, throwIfNotDefined } from "@eavfw/utils";
 import { LookupControlProps } from "./LookupControlProps";
 import { FormRender } from "../../Forms/FormRender";
+import { FormValidation } from "../../Forms/FormValidation";
+import { useModelDrivenApp } from "../../../useModelDrivenApp";
+import { useEAVForm } from "@eavfw/forms";
+import { EAVFOrmOnChangeHandler } from "../../../../../forms/src/EAVFormContextActions";
 
 
 
@@ -45,68 +49,62 @@ const _styles: IStyleFunction<IDropdownStyleProps, IDropdownStyles> = (
     props
 ) => ({});
 
-
-
-
-export function LookupControl<T>({
-    entityName,
-    attributeName,
-    onChange,
-    disabled,
-    value,
-    formData,
-    formName,
-    readonly,
-    fieldName,
-    formContext,
+export type LookupCoreControlProps = {
+    extraErrors: FormValidation,
+    targetEntityName: string,
+    logicalName: string,
+    disabled?: boolean,
+    label: string,
+    errorMessage?: string,
+    allowCreate?: boolean,
+    filter?: string,
+    forms?: string[],
+    type: NestedType,
+    selectedValue:any,
+    value: any,
+    onChange: EAVFOrmOnChangeHandler<any>
+}
+export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     extraErrors,
-    errorMessage
-}: LookupControlProps<T>) {
+    targetEntityName,
+    logicalName,
+    disabled,
+    label,
+    errorMessage,
+    allowCreate,
+    filter,
+    forms,
+    type,
+    value,
+    selectedValue,
+    onChange
+}) => {
 
-
-    const allFormData = formContext.formData;
-
-    useEffect(() => {
-        console.log("AllFormdata Changed", allFormData);
-    }, [allFormData])
-
+    const ref = useRef<IComboBox>(null);
 
     const app = useModelDrivenApp();
-    //const entity = app.getEntity(entityName);
-    const ref = useRef<IComboBox>(null);
-    const entityAttributes = app.getAttributes(entityName);
+    const theme = useTheme();
 
-    const attribute = entityAttributes[attributeName];
-    const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];
-    console.log("Lookup Control", [attributeName, attribute, attribute?.type]);
+  
 
-    if (!isLookup(attribute.type))
-        return <div>...</div>;
+    const [modalOpen, setmodalOpen] = useState(false);
+    const _hideModal = () => setmodalOpen(false);
+    const _showModal = () => setmodalOpen(true);
 
-    const targetEntityName = isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute");
+    const localization = {
+        new: capitalize(app.getLocalization("new") ?? "New"),
+    };
+
     const targetEntity = app.getEntity(targetEntityName) as EntityDefinition;
     const primaryField = app.getPrimaryField(targetEntityName);
-
-    const selectedValue = allFormData[attribute.logicalName.slice(0, -2)];
-
-    console.log("SelectedValue", [attribute.displayName, selectedValue]);
-
-    const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
-    const [isLoading, setisLoading] = useState(true);
-    const [modalOpen, setmodalOpen] = useState(false);
-    const [modalForms, setModalForms] = useState(Object.keys(forms).filter(k => forms[k].type === "Modal"));
 
     const [options, setOptions] = useState<IDropdownOption[]>((typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? "dummy", text: selectedValue[primaryField] }] : []));
     const [selectedKey, setselectedKey] = useState<string>(value ?? (typeof (selectedValue) === "object" ? selectedValue.id ?? "dummy" : undefined));
 
-    const _hideModal = () => setmodalOpen(false);
-    const _showModal = () => setmodalOpen(true);
+    const [modalForms, setModalForms] = useState(forms ?? []);
 
     const _onModalSubmit = (data: any) => {
-
-
-        if (isLookup(attribute.type)) {
-
+         
             let o = options?.slice() ?? [];
             if (o.filter(o => o.key === "dummy").length === 0)
                 o.unshift({
@@ -120,12 +118,49 @@ export function LookupControl<T>({
             setselectedKey("dummy");
 
 
-        }
-        onChange(data);
+        onChange(props => {
+            props[ logicalName.slice(0, -2)] = data
+        });
+       // onChange(data);
     }
+
+    const _onChange = (
+        event: React.FormEvent<IComboBox>,
+        option?: IDropdownOption | IComboBoxOption,
+        index?: number) => {
+        try {
+            console.log("lookup on change", event);
+
+            // if (option?.data) {
+            console.log(option?.data);
+            onChange(props => {
+                props[logicalName] = option?.data;
+
+                
+            });
+            // }
+        } finally {
+            console.groupEnd();
+        }
+    }
+
     const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
+
+    const [freeformvalue, setfreeformvalue] = useState<string>();
+
+    useEffect(() => {
+
+        let selectedKey = value;
+
+        if (selectedKey && typeof selectedKey !== "object") {
+            setselectedKey(selectedKey);
+            //let text = options.filter(f => f.key === selectedKey)[0]?.text;
+
+            //    setfreeformvalue(text);
+        }
+    }, [value]);
 
     const _updateOptions = (query: any) => {
         setOptions([{ key: 'dummy', text: loadingText, disabled: true }])
@@ -146,57 +181,14 @@ export function LookupControl<T>({
         });
     }
 
-    const _onChange = (
-        event: React.FormEvent<IComboBox>,
-        option?: IDropdownOption | IComboBoxOption,
-        index?: number) => {
-        try {
-            console.log("lookup on change", event);
-
-            // if (option?.data) {
-            console.log(option?.data);
-            onChange(option?.data)
-            // }
-        } finally {
-            console.groupEnd();
-        }
-    }
-
-    const [freeformvalue, setfreeformvalue] = useState<string>();
-
-    useEffect(() => {
-
-        let selectedKey = value;
-
-        if (selectedKey && typeof selectedKey !== "object") {
-            setselectedKey(selectedKey);
-            //let text = options.filter(f => f.key === selectedKey)[0]?.text;
-
-            //    setfreeformvalue(text);
-        }
-    }, [value]);
-
+    const [isLoading, setisLoading] = useState(true);
     useEffect(() => {
 
 
         (async () => {
-            if (isLookup(attribute.type) && isLoading) {
-
-
-                //TODO - get this migrated out generic
-                if (attribute.type.filter && attribute.type.filter.indexOf('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}') !== -1) {
-
-                    if (!allFormData['schoolid'])
-                        return;
-                    let schooltype = await queryEntity(app.getEntity('school'), {
-                        '$expand': 'schooltype',
-                        '$filter': `id eq ${allFormData['schoolid']}`
-                    });
-                    attribute.type.filter = attribute.type.filter?.replace('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}', schooltype.items[0].schooltype.id);
-                }
-
-
-                let data = await queryEntity(targetEntity, attribute.type.filter ? { '$filter': attribute.type.filter } : {});
+            if (isLoading) {
+                 
+                let data = await queryEntity(targetEntity, filter ? { '$filter': filter } : {});
 
                 const _options = data.items
                     .map(m => ({
@@ -212,16 +204,9 @@ export function LookupControl<T>({
             }
         })()
 
-    }, [allFormData])
-    useEffect(() => {
-        console.log("LookupControl changed : " + fieldName, [value, options, selectedKey]);
-    })
+    }, [value])
 
-
-    const localization = {
-        new: capitalize(app.getLocalization("new") ?? "New"),
-    };
-    return (<ThemeContext.Consumer>{theme => <>
+    return (<>
         <Modal isOpen={modalOpen} onDismiss={_hideModal} isBlocking={true} styles={{ scrollableContent: { overflowY: "hidden", maxHeight: "100%" } }}>
             <Stack verticalFill styles={{ root: { minWidth: "60vw", maxWidth: "90vw" } }}>
                 <Stack horizontal>
@@ -241,16 +226,16 @@ export function LookupControl<T>({
                         />
                     </Stack.Item>
                 </Stack>
-                <FormRender forms={modalForms} type={attribute.type as NestedType} dismissPanel={_hideModal}
+                <FormRender forms={modalForms} type={type} dismissPanel={_hideModal}
                     onChange={_onModalSubmit} extraErrors={extraErrors} />
             </Stack>
         </Modal>
 
         <ComboBox
             componentRef={ref}
-            disabled={disabled || isLoading || readonly}
+            disabled={disabled || isLoading}
 
-            ariaLabel={attribute.displayName}
+            ariaLabel={label}
             styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
             onChange={_onChange}
             options={options}
@@ -259,7 +244,7 @@ export function LookupControl<T>({
             text={freeformvalue}
             autofill={{
                 onInputValueChange: (value) => {
-                    console.log(attribute.displayName);
+                   
                     console.log(value); ref.current?.focus(true);
                     setfreeformvalue(value);
                     let query: any = { "$top": 10 };
@@ -286,7 +271,7 @@ export function LookupControl<T>({
                 setfreeformvalue(option?.text);
             }}
             caretDownButtonStyles={{ rootDisabled: { display: "none" } }}
-            onRenderLowerContent={column?.disableCreate !== true ? () =>
+            onRenderLowerContent={allowCreate ? () =>
                 <div style={({
                     position: "fixed",
                     backgroundColor: theme?.palette.white,
@@ -300,60 +285,158 @@ export function LookupControl<T>({
             selectedKey={selectedKey}
         />
     </>
-    }
-    </ThemeContext.Consumer>
     )
 }
 
-const theme = getTheme();
-const contentStyles = mergeStyleSets({
-    container: {
-        display: 'flex',
-        flexFlow: 'column nowrap',
-        alignItems: 'stretch',
-    },
-    header: [
-        // eslint-disable-next-line deprecation/deprecation
-        theme.fonts.xLargePlus,
-        {
-            flex: '1 1 auto',
-            borderTop: `4px solid ${theme.palette.themePrimary}`,
-            color: theme.palette.neutralPrimary,
-            display: 'flex',
-            alignItems: 'center',
-            fontWeight: FontWeights.semibold,
-            padding: '12px 12px 14px 24px',
-        },
-    ],
-    body: {
-        flex: '4 4 auto',
-        padding: '0 24px 24px 24px',
-        overflowY: 'hidden',
-        selectors: {
-            p: { margin: '14px 0' },
-            'p:first-child': { marginTop: 0 },
-            'p:last-child': { marginBottom: 0 },
-        },
-    },
-});
 
-const stackProps: Partial<IStackProps> = {
-    horizontal: true,
-    tokens: { childrenGap: 40 },
-    styles: { root: { marginBottom: 20 } },
-};
+export function LookupControl<T>({
+    entityName,
+    attributeName,
+    onChange,
+    disabled,
+   // value,
+    formData,
+    formName,
+    readonly,
+    fieldName,
+    formContext,
+    extraErrors,
+    errorMessage
+}: LookupControlProps<T>) {
 
-const iconButtonStyles: Partial<IButtonStyles> = {
-    root: {
-        color: theme.palette.neutralPrimary,
-        marginLeft: 'auto',
-        marginTop: '4px',
-        marginRight: '2px',
-    },
-    rootHovered: {
-        color: theme.palette.neutralDark,
-    },
-};
+
+    const allFormData = formContext.formData;
+
+   
+    useEffect(() => {
+        console.log("AllFormdata Changed", allFormData);
+    }, [allFormData])
+
+
+    const app = useModelDrivenApp();
+    //const entity = app.getEntity(entityName);
+  
+    const entityAttributes = app.getAttributes(entityName);
+
+    const attribute = entityAttributes[attributeName];
+    const logicalName = attribute.logicalName;
+    const [{ selectedValue, value }, { onChange:eavOnChange }] = useEAVForm(state => ({
+        selectedValue: state.formValues[logicalName.slice(0, -2)],
+        value: state.formValues[logicalName]
+    }))
+
+
+    const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];
+    console.log("Lookup Control", [attributeName, attribute, attribute?.type]);
+
+    if (!isLookup(attribute.type))
+        return <div>...</div>;
+
+    const targetEntityName = isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute");
+
+
+    const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
+   
+
+   
+  
+
+    const isschool = isLookup(attribute.type) && (attribute.type.filter?.indexOf('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}')??-1) !== -1;
+
+    const { data: schoolFilter, isLoading } = queryEntitySWR(app.getEntity('school'), {
+        '$expand': 'schooltype',
+        '$filter': `id eq ${allFormData['schoolid']}`
+    }, isschool);
+  
+
+    const filter = useMemo(() => {
+       
+        if (isLookup(attribute.type)) {
+
+            //TODO - get this migrated out generic
+
+            if (isschool && attribute.type.filter) {
+                return attribute.type.filter?.replace('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}', schoolFilter.items[0].schooltype.id);
+            }
+
+            return attribute.type.filter;
+
+           
+        } 
+
+    }, [attribute, schoolFilter])
+
+    if (isschool && isLoading)
+        return <div>...</div>;
+   
+
+   
+    
+    return <LookupCoreControl
+        selectedValue={selectedValue}
+        onChange={eavOnChange}
+        value={value}
+        type={attribute.type}
+        forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
+        filter={filter}
+        allowCreate={column?.disableCreate !== true }
+        label={attribute.displayName}
+        extraErrors={extraErrors}
+        targetEntityName={targetEntityName}
+        logicalName={attribute.logicalName}
+        disabled={disabled || readonly}
+    />
+}
+
+//const theme = getTheme();
+//const contentStyles = mergeStyleSets({
+//    container: {
+//        display: 'flex',
+//        flexFlow: 'column nowrap',
+//        alignItems: 'stretch',
+//    },
+//    header: [
+//        // eslint-disable-next-line deprecation/deprecation
+//        theme.fonts.xLargePlus,
+//        {
+//            flex: '1 1 auto',
+//            borderTop: `4px solid ${theme.palette.themePrimary}`,
+//            color: theme.palette.neutralPrimary,
+//            display: 'flex',
+//            alignItems: 'center',
+//            fontWeight: FontWeights.semibold,
+//            padding: '12px 12px 14px 24px',
+//        },
+//    ],
+//    body: {
+//        flex: '4 4 auto',
+//        padding: '0 24px 24px 24px',
+//        overflowY: 'hidden',
+//        selectors: {
+//            p: { margin: '14px 0' },
+//            'p:first-child': { marginTop: 0 },
+//            'p:last-child': { marginBottom: 0 },
+//        },
+//    },
+//});
+
+//const stackProps: Partial<IStackProps> = {
+//    horizontal: true,
+//    tokens: { childrenGap: 40 },
+//    styles: { root: { marginBottom: 20 } },
+//};
+
+//const iconButtonStyles: Partial<IButtonStyles> = {
+//    root: {
+//        color: theme.palette.neutralPrimary,
+//        marginLeft: 'auto',
+//        marginTop: '4px',
+//        marginRight: '2px',
+//    },
+//    rootHovered: {
+//        color: theme.palette.neutralDark,
+//    },
+//};
 
 export default LookupControl;
 //Lookupcontrol
