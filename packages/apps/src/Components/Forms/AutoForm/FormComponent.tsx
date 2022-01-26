@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { IPivotProps, Pivot, PivotItem } from "@fluentui/react";
-import { FormValidation } from "@rjsf/core";
+
 
 import TabComponent from "./TabComponent";
 import { useRouter } from "next/router";
@@ -8,6 +8,7 @@ import { useChangeDetector } from "@eavfw/hooks";
 import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
 import { useTabProvider } from "../Tabs/useTabProvider";
 import { OptionsFactory } from "./OptionsFactory";
+import { FormValidation } from "../FormValidation";
 
 type FormComponentProps<T> = {
     form: FormDefinition;

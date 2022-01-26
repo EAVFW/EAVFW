@@ -5,8 +5,8 @@ import ColumnComponent from "./ColumnComponent";
 
 import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
-import { FormValidation } from "@rjsf/core";
 import { OptionsFactory } from "./OptionsFactory";
+import { FormValidation } from "../FormValidation";
 
 type TabComponentProps<T> = {
     form: FormDefinition;

@@ -1,6 +1,7 @@
 import { EntityDefinition, FormDefinition } from "@eavfw/manifest";
+import { FormValidation } from "../../FormValidation";
 import { OptionsFactory } from "../OptionsFactory";
-import { FormValidation } from "@rjsf/core";
+
 
 export type SectionComponentProps<T> = {
     form: FormDefinition;

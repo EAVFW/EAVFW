@@ -206,9 +206,49 @@ export function ModelDrivenEntityViewer({
                 if (attribute.logicalName in formdata || (isLookup(attribute.type) && attribute.logicalName.slice(0, -2) in formdata)) {
                     console.log(`Found ${attribute.logicalName} in formdata`);
 
-                    const lookupValue = typeof formdata[attribute.logicalName] == "object" ? formdata[attribute.logicalName] : formdata[attribute.logicalName.slice(0, -2)];
-                    if (isLookup(attribute.type)) {
-                        if (lookupValue) {
+
+                    if (oldFormData[attribute.logicalName] !== formdata[attribute.logicalName]) {
+
+                        console.log(`Found ${attribute.logicalName} in formdata that changed from '${oldFormData[attribute.logicalName]}' to '${formdata[attribute.logicalName]}'`);
+
+                        oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
+                        if (formdata[attribute.logicalName] === undefined)
+                            delete oldFormData[attribute.logicalName];
+                        changed = true;
+
+                        let partOfGroup = groups.filter(g => g.filter(gg => gg[2].logicalName === attribute.logicalName).length > 0)[0];
+
+                        if (partOfGroup && oldFormData[attribute.logicalName]) {
+
+                            console.log(`Found ${attribute.logicalName} in formdata that is part of group`);
+
+                            for (let others of partOfGroup.filter(g => g[2].logicalName !== attribute.logicalName)) {
+                                console.log(`Changing ${others[2].logicalName} in formdata to false and removing from attributes`);
+                                oldFormData[others[2].logicalName] = false;
+                                console.log(attributes);
+                                attributes.splice(attributes.indexOf(others[0]), 1);
+                                console.log(attributes);
+                            }
+                        }
+
+                        if (!formdata[attribute.logicalName]) {
+
+                            let dependants = Object.keys(form.columns).filter(k => form.columns[k].dependant === attributeKey);
+                            console.log("found deps: ", dependants);
+                            for (let dependant of dependants) {
+                                formdata[entity.attributes[dependant].logicalName] = undefined;
+                            }
+                            attributes.push(...dependants.filter(d => attributes.indexOf(d) === -1));
+                            console.log("updated attributes ", attributes);
+                        }
+                    } else {
+
+                        const lookupValue = typeof formdata[attribute.logicalName] == "object" ? formdata[attribute.logicalName] : formdata[attribute.logicalName.slice(0, -2)];
+
+                        if (isLookup(attribute.type) && lookupValue) {
+
+
+
                             const oldvalue = oldFormData[attribute.logicalName.slice(0, -2)];
                             console.log(`Found ${attribute.logicalName} in formdata as lookup object`,
                                 oldFormData[attribute.logicalName.slice(0, -2)], lookupValue);
@@ -227,45 +267,9 @@ export function ModelDrivenEntityViewer({
                             }
                             oldFormData[attribute.logicalName.slice(0, -2)] = lookupValue;
 
+
+
                         }
-                        // changed = true;
-
-                    } else {
-                        if (oldFormData[attribute.logicalName] !== formdata[attribute.logicalName]) {
-
-                            console.log(`Found ${attribute.logicalName} in formdata that changed from '${oldFormData[attribute.logicalName]}' to '${formdata[attribute.logicalName]}'`);
-
-                            oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
-                            if (formdata[attribute.logicalName] === undefined)
-                                delete oldFormData[attribute.logicalName];
-                            changed = true;
-
-                            let partOfGroup = groups.filter(g => g.filter(gg => gg[2].logicalName === attribute.logicalName).length > 0)[0];
-
-                            if (partOfGroup && oldFormData[attribute.logicalName]) {
-
-                                console.log(`Found ${attribute.logicalName} in formdata that is part of group`);
-
-                                for (let others of partOfGroup.filter(g => g[2].logicalName !== attribute.logicalName)) {
-                                    console.log(`Changing ${others[2].logicalName} in formdata to false and removing from attributes`);
-                                    oldFormData[others[2].logicalName] = false;
-                                    console.log(attributes);
-                                    attributes.splice(attributes.indexOf(others[0]), 1);
-                                    console.log(attributes);
-                                }
-                            }
-
-                            if (!formdata[attribute.logicalName]) {
-
-                                let dependants = Object.keys(form.columns).filter(k => form.columns[k].dependant === attributeKey);
-                                console.log("found deps: ", dependants);
-                                for (let dependant of dependants) {
-                                    formdata[entity.attributes[dependant].logicalName] = undefined;
-                                }
-                                attributes.push(...dependants.filter(d => attributes.indexOf(d) === -1));
-                                console.log("updated attributes ", attributes);
-                            }
-                        }  
                     }
                 }
             }

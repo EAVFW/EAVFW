@@ -2,7 +2,7 @@
 
 
 import React, { Fragment, PropsWithChildren, useContext, useMemo, useRef } from "react";
-import { FieldTemplateProps, IChangeEvent, UiSchema, FormValidation, FieldValidation, AjvError } from "@rjsf/core";
+import { FieldTemplateProps, IChangeEvent, UiSchema,  FieldValidation, AjvError } from "@rjsf/core";
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import Form from "@rjsf/fluent-ui";
 import { mergeDeep } from "@eavfw/utils";
@@ -32,11 +32,13 @@ import { useBoolean, useId } from "@fluentui/react-hooks";
 
 
 import { useChangeDetector } from "@eavfw/hooks";
-import { useModelDrivenApp } from "@eavfw/apps";
+
 import ControlHostWidget from "../../Controls/ControlHostWidget";
 import SelectWidget from "../../Controls/SelectWidget";
 import { OptionsFactory } from "./OptionsFactory";
 import { ControlJsonSchemaObject } from "./ControlJsonSchema";
+import { FormValidation } from "../FormValidation";
+import { useModelDrivenApp } from "../../../useModelDrivenApp";
 
 declare module '@rjsf/core' {
     interface WidgetProps {

@@ -3,9 +3,9 @@ import { Stack } from "@fluentui/react";
 
 import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
-import { FormValidation } from "@rjsf/core";
 import { OptionsFactory } from "./OptionsFactory";
 import { SectionComponent } from "./SectionComponent/SectionComponent";
+import { FormValidation } from "../FormValidation";
 
 
 export type ColumnComponentProps<T> = {

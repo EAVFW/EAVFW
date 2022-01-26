@@ -1,8 +1,8 @@
 
 import { EntityDefinition } from "@eavfw/manifest";
-import { FormValidation } from "@rjsf/core";
 import { FormsConfig } from "../../FormsConfig";
 import { OptionsFactory } from "./AutoForm/OptionsFactory";
+import { FormValidation } from "./FormValidation";
 
 
 export type ModelDrivenEntityViewerProps = {

@@ -155,7 +155,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                 console.log(views);
                 setViews(views);
             } finally {
-                console.groupCollapsed();
+                console.groupEnd();
             }
         }, [entity.logicalName, formName, tabName, columnName, sectionName]);
 
