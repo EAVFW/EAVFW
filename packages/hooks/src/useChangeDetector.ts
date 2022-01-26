@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-export const useChangeDetector = (name: string, data: any, renderId: React.MutableRefObject<string>) => {
+export const useChangeDetector = (name: string, data: any, renderId?: React.MutableRefObject<string>) => {
     const ref = useRef<Boolean>(true);
 
     useEffect(() => {
@@ -8,6 +8,6 @@ export const useChangeDetector = (name: string, data: any, renderId: React.Mutab
             ref.current = false;
             return
         }
-        console.debug(`${renderId.current}: ${name} changed:`, data)
+        console.debug(`${renderId?.current}: ${name} changed:`, data)
     }, [data])
 };
