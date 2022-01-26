@@ -1,7 +1,7 @@
 import useSWR, { mutate  } from "swr";
 import { jsonFetcher } from "./jsonFetcher";
 
-export function getRecordSWR(entityName: string, recordId: string, query: string, ready = true) {
+export function getRecordSWR(entityName: string, recordId: string, query: string="", ready = true) {
     const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entityName}/records/${recordId}${query}`;
     const { data, error } = useSWR(ready ? key : null,
         {
