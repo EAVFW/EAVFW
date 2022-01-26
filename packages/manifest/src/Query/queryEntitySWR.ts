@@ -8,20 +8,24 @@ import { jsonFetcher } from "./jsonFetcher";
 
 export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, query: any = {}, ready = true) {
 
- 
 
-    let expand = Object.values(entity.attributes)
-        .filter((a) => isLookup(a.type))
-        .map((a) => getNavigationProperty(a))
-        .join(",");
-    if (expand && !('$expand' in query))
-        query['$expand'] = expand;
+    
+    function keyFactory() {
+        let expand = Object.values(entity.attributes)
+            .filter((a) => isLookup(a.type))
+            .map((a) => getNavigationProperty(a))
+            .join(",");
+        if (expand && !('$expand' in query))
+            query['$expand'] = expand;
 
-    let q = Object.keys(query).filter(k => query[k]).map(k => `${k}=${query[k]}`).join('&');
+        let q = Object.keys(query).filter(k => query[k]).map(k => `${k}=${query[k]}`).join('&');
 
-    const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`;
-    console.log("queryEntitySWR: " + (ready ? key : null), [query]);
-    const { data, error } = useSWR(ready ? key : null,
+        const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`;
+        console.log("queryEntitySWR: " + (ready ? key : null), [query]);
+        return key;
+    }
+    const key = ready ? keyFactory() : null;
+    const { data, error } = useSWR(key,
         {
             revalidateOnFocus: false,
             revalidateOnMount: true,
