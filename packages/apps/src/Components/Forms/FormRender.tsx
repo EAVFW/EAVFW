@@ -17,6 +17,7 @@ export function FormRender<T>(props: FormRenderProps) {
     const entityName = props.entityName ?? (props.type as LookupType).foreignKey?.principalTable!;
     const entity = app.getEntity(entityName);
     const forms = entity.forms!;
+    console.log("FormRender", [entityName, entity, forms]);
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
 
     const record = useRef(props.record ?? {});

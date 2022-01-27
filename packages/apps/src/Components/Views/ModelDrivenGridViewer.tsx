@@ -199,8 +199,8 @@ type LookupControlRenderProps = {
     onChange?: any;
 }
 
-const LookupControlRender = (props: LookupControlRenderProps) => {
-    const { item, attribute, type } = props;
+const LookupControlRender: React.FC<LookupControlRenderProps> = ({ item, attribute, type, recordRouteGenerator, onChange }) => {
+     
 
     const [isOpen, { setFalse, setTrue }] = useBoolean(false);
     const save = useRibbon();
@@ -240,7 +240,10 @@ const LookupControlRender = (props: LookupControlRenderProps) => {
                 for (let k of Object.keys(plain)) {
                     item[attribute.logicalName.slice(0, -2)][k] = plain[k];
                 }
-                props?.onChange(item);
+
+                if (onChange)
+                    onChange(item);
+
                 addMessage(entitySaveMessageKey, (props?: any) =>
                     <MessageBar messageBarType={MessageBarType.success} {...props}
                         onDismiss={() => removeMessage(entitySaveMessageKey)}>
@@ -301,7 +304,7 @@ const LookupControlRender = (props: LookupControlRenderProps) => {
                     </Stack.Item>
                 </Stack>
 
-                <LazyFormRender extraErrors={extraErrors} record={recordRef.current} entityName={props.type.foreignKey?.principalTable}
+                <LazyFormRender extraErrors={extraErrors} record={recordRef.current} entityName={type.foreignKey?.principalTable}
                     dismissPanel={_onModalDismiss} onChange={_onDataChange} />
 
             </Stack>
@@ -374,6 +377,13 @@ const ConditionRenderComponent: React.FC<any> = (
         //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
 
     } else if (isLookup(type) && item[attribute.logicalName]) {
+        console.log(item);
+        //TODO - Add Toggle in manifest to use hyperlink vs modal
+        return <Link href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
+            <a>
+                {item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}
+            </a>
+        </Link>
 
         return <LookupControlRender onChange={(data: any) => {
             console.log("Lookup data returned", [data, item]);
