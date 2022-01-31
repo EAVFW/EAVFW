@@ -61,12 +61,12 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             showIndeterminateProgressIndicator();
             updateRibbonState({ canSave: false, skipRedirect: false });
 
+            console.log("Saving: ", [recordId ? record : {}, changedRecord.current, deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current)]);
 
 
             const [changed, changedValues] = cleanDiff(deepDiffMapper.map(recordId ? record : {}, changedRecord.current))
-            console.log("UpdatedValues Clean", [changedRecord.current, record,
-            deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
-                changed, changedValues]);
+
+            console.log("UpdatedValues Clean", [changedRecord.current, record,  changed, changedValues]);
 
 
             let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records${recordId ? `/${recordId}` : ``}`, {

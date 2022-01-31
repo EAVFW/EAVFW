@@ -189,7 +189,7 @@ export function ModelDrivenEntityViewer({
     const formdatamerger = useRef({});
 
 
-    const onFormDataChange2 = useDebouncer((formdata: any) => {
+    const onFormDataChange2 = useCallback((formdata: any) => {
         try {
             formdatamerger.current = {};
             console.groupCollapsed("onFormDataChange", [formDataRef.current, formdata]);
@@ -300,7 +300,7 @@ export function ModelDrivenEntityViewer({
         } finally {
             console.groupEnd();
         }
-    }, 50, [record, entity]);
+    }, [record, entity]);
 
     const onFormDataChange = useCallback((formdata: any) => {
 

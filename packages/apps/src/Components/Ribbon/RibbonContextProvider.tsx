@@ -9,6 +9,7 @@ import mitt, { MittEmitter } from "next/dist/shared/lib/mitt";
 
 import { useId, useBoolean } from '@fluentui/react-hooks';
 import { RibbonContext } from "./RibbonContext";
+import { useEAVForm } from "@eavfw/forms";
 
 const dialogStyles = { main: { maxWidth: 450 } };
 const dragOptions = {
@@ -233,9 +234,55 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
                 events: ribbonEvents,
                 registerButton: (button, deps) => {
 
+                    const [_, { onChange: onFormDataChange }] = useEAVForm(() => ({}));
+                    console.log(button.key, onFormDataChange);
 
+                    button.onClick = button.workflow ? useCallback((ev?: any) => {
+
+                        const runner = (async () => {
+                            const actions = button.workflow.actions;
+                            console.log("Execute Workflow", button.workflow);
+                            const starter = Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "undefined" || Object.values(entry.runAfter).length === 0);
+
+                            const queue = starter.slice(0, 1);
+                            while (queue.length) {
+                                const [action, entry] = queue.pop() ?? [];
+                                console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
+                                const type = entry.type;
+                                switch (type) {
+                                    case "UpdateRecord":
+
+                                        onFormDataChange((props, ctx) => {
+                                            ctx.skipValidation = true;
+                                            Object.assign(props, entry.inputs.data)
+                                        }); //TODO wait until change is applied
+
+
+                                        queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+
+
+                                        break;
+
+                                    case "SaveForm":
+
+                                        ribbonEvents.emit("onSave", ev);
+
+                                        queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+
+                                        break;
+                                }
+
+                                console.log("Executed Workflow action", [action, entry]);
+
+                            }
+                        })();
+
+                    }, [button.workflow]) : button.onClick;
 
                     useEffect(() => {
+
+
+
 
                         if (!button.onClick) {
                             button.onClick = (e) => {

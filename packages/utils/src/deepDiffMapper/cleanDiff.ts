@@ -3,7 +3,7 @@ export function cleanDiff(updatedValues: object): [boolean, any] {
         // console.group("cleanDiff");
         let a = {} as any;
         let changed = false;
-        // console.log("cleanDiff: Start: ", updatedValues);
+         console.log("cleanDiff: Start: ", updatedValues);
         for (let [key, value] of Object.entries(updatedValues)) {
             //     console.log("cleanDiff: entry: ", [changed, "__type" in value, key, value]);
             if ("__type" in value) {

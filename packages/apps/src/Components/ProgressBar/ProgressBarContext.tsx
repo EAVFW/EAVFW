@@ -5,7 +5,7 @@ function ProgressBar(): JSX.Element {
 
     const { progressBarProps } = useProgressBarContext();
 
-    console.log("ProgressBar", progressBarProps);
+    
     return (
         <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 0 }}>
             <ProgressIndicator barHeight={4} {...progressBarProps} styles={{ itemProgress: { paddingTop: 0, paddingBottom: 1 } }} />
