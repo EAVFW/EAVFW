@@ -276,7 +276,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                             });
                                         },
                                     } as ICommandBarItemProps//,
-                                ].filter((commandBarButton) => gridprops?.ribbon?.new?.visible !== false)}
+                                ].filter((commandBarButton) => (commandBarButton.key === "newRelatedItem" && gridprops?.ribbon?.new?.visible !== false) || (commandBarButton.key === "deleteSelection" && gridprops?.ribbon?.delete?.visible !== false))}
                             />
                         </RibbonContextProvider>
                     ))}

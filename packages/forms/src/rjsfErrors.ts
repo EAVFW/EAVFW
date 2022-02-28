@@ -12,6 +12,7 @@ export type JsonSchemaError = JsonSchemaErrorObjectWrap | JsonSchemaErrorObject 
 
 export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFWError, state:any) => JsonSchemaErrorObject) => JsonSchemaError =
     (errors, state = {}, fx) => {
+        console.debug("rjsfErrors start", [errors, state]);
 
         if (typeof errors === "undefined")
             return {} as JsonSchemaErrorObjectWrap;
@@ -28,9 +29,9 @@ export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFW
             return { __errors: [errors.error] } as JsonSchemaErrorObject;
         }
 
-        console.debug("rjsfErrors object", [errors, state])
+        console.debug("rjsfErrors object", [errors, state]);
         const entries = Object.entries(errors).map(([k, v]) => [k, rjsfErrors(v, state[k], fx)]);
-        
+        console.debug("rjsfErrors object entries", [errors, state, entries]);
         return Object.fromEntries(entries) as JsonSchemaErrorObjectWrap;
 
     }

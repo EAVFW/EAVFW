@@ -1,7 +1,7 @@
 
 import { EAVFWErrorDefinition, isEAVFWError, ManifestDefinition, } from "@eavfw/manifest";
 import { useExpressionParserContext } from "@eavfw/expressions";
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
 import { EAVFormContext } from "./EAVFormContext";
 
@@ -44,8 +44,9 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
             console.log("mergeAndUpdate", [k, JSON.stringify(data[k]), JSON.stringify( v)]);
 
             if (k.endsWith("@deleted")) {
-                data[k] = (data[k] ?? []).concat(v);
-                data[k.slice(0, -8)] = data[k.slice(0, -8)].filter((n: any) => data[k].filter((nn:any)=>nn===n.id).length===0);
+                data[k] = v.filter((c:string)=>c).concat( (data[k] ?? []).filter((vvv: string) => v.filter((vv: string) => vv === vvv).length == 0));
+                console.log("deleting", [data[k], data[k.slice(0, -8)]]);
+                data[k.slice(0, -8)] = data[k.slice(0, -8)].filter((n: any) => n && data[k].filter((nn:any)=>nn===n.id).length===0);
             } else if (Array.isArray(v)) {
                 let a = data[k] ?? [];
               
@@ -72,8 +73,13 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
                 data[k] = mergeAndUpdate(data[k] ?? {}, v);
 
             } else if (!isEqual(data[k], v)) {
+                console.log("merge", [data, data[k], k, v]);
+                if (Array.isArray(data)) {
+                    (data as any[]).splice(parseInt(k),1);
+                } else {
+                    data[k] = v;
+                }
 
-                data[k] = v;
 
             }
         }
@@ -83,7 +89,39 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
     return data;
 }
 
+type VisitedFieldElement = {
+    [key: string]: VisitedFieldElementValue
+};
+type VisitedFieldElementValue = VisitedFieldElement | boolean | Array<VisitedFieldElement>;
 
+const VisitedContext = createContext({
+    visitedFields: {} as VisitedFieldElement,
+    setVisitedFields: (visitedField: string, value: VisitedFieldElementValue) => { console.log("visited container updated", [visitedField, value]) }
+});
+
+export const useVisitedContext = () => useContext(VisitedContext);
+
+export const VisitedContainer: React.FC<{ id: string }> = ({ id, children }) => {
+
+    const { setVisitedFields: setParentVisitedFields} = useVisitedContext();
+    const [visitedFields, setVisitedFields] = useState<VisitedFieldElement>({});
+    const updateVisitedFields = useCallback((visitedField: string, value: VisitedFieldElementValue = true) => {
+        if (typeof value === "boolean")
+            visitedFields[visitedField] = value;
+        else {
+            visitedFields[visitedField] = mergeDeep(visitedFields[visitedField] ?? {}, value);
+        }
+        setVisitedFields({ ...visitedFields });
+        setParentVisitedFields(id, visitedFields);
+    }, [visitedFields,id]);
+
+    return (<VisitedContext.Provider value={{
+        visitedFields: visitedFields,
+        setVisitedFields: updateVisitedFields
+    }}>
+        {children}
+    </VisitedContext.Provider>)
+}
 
 export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ stripForValidation=(a)=>a,formDefinition, defaultData, onChange, children, onValidationResult, state: initialState  }: PropsWithChildren<EAVFormProps<T, TState>>) => {
 
@@ -213,7 +251,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
             cb(updatedProps,ctx);
 
-            const a = deepDiffMapper.map(state.formValues, updatedProps,true);
+            const a = deepDiffMapper.map(state.formValues, updatedProps);
             const [changed, changedValues] = cleanDiff(a);
 
             console.log("Updated Props", [updatedProps, state, changed, a, changedValues, ctx]);
@@ -255,11 +293,20 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
     });
 
+    useEffect(() => {
+        runValidation();
+    },[]);
 
-    return <EAVFormContext.Provider
-        value={{         
-            actions: actions.current,
-            state: state,           
-            etag,           
-        }}>{children}</EAVFormContext.Provider>
+    return (
+        <EAVFormContext.Provider
+            value={{         
+                actions: actions.current,
+                state: state,           
+                etag,           
+            }}>
+            <VisitedContainer id="root">
+                {children}
+            </VisitedContainer>
+        </EAVFormContext.Provider>
+    )
 }

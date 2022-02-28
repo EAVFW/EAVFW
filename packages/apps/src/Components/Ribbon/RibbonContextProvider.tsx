@@ -67,8 +67,12 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
     const ribbonButtonsRef = useRef<ICommandBarItemProps[]>([]);
     const [ribbonButtons, setRibbonButtons] = useState<ICommandBarItemProps[]>(ribbonButtonsRef.current)
 
-    const _addButton = (command: ICommandBarItemProps) => setRibbonButtons(ribbonButtonsRef.current = ribbonButtonsRef.current.filter(k => k.key !== command.key).concat([command])
-        .sort((a, b) => (a.data?.order ?? Infinity) - (b.data?.order ?? Infinity)));
+    const _addButton = (command: ICommandBarItemProps) => {
+        console.log("Adding Ribbon Item: ", command);
+
+        setRibbonButtons(ribbonButtonsRef.current = ribbonButtonsRef.current.filter(k => k.key !== command.key).concat([command])
+            .sort((a, b) => (a.data?.order ?? Infinity) - (b.data?.order ?? Infinity)));
+    };
     const _removeButton = (key: string) => {
         console.log("Removing Ribbon Item: ", key);
         setRibbonButtons(ribbonButtonsRef.current = ribbonButtonsRef.current.filter(b => b.key !== key)
@@ -294,8 +298,10 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
                             }
                         }
 
-                        console.log("useEffect: Ribbon Button", button);
-                        _addButton(button);
+                        console.log("useEffect: Ribbon Button", [button, button.visible !== false]);
+
+                        if (button.visible !== false)
+                            _addButton(button);
 
                         return () => {
                             console.log("useEffect: Ribbon Button dispose", button);

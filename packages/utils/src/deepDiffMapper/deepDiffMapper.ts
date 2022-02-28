@@ -5,7 +5,7 @@ export const deepDiffMapper = function () {
         VALUE_UPDATED: 'updated',
         VALUE_DELETED: 'deleted',
         VALUE_UNCHANGED: 'unchanged',
-        map: function (oldValue: any, newValue: any, doArrayIdDiff =false) {
+        map: function (oldValue: any, newValue: any) {
             if (this.isFunction(oldValue) || this.isFunction(newValue)) {
                 throw 'Invalid argument. Function given, object expected.';
             }
@@ -16,25 +16,7 @@ export const deepDiffMapper = function () {
                 };
             }
 
-            const isArray = Array.isArray(oldValue) || Array.isArray(newValue);
-
-            if (isArray && doArrayIdDiff) {
-                console.log("Array Diff" ,[ oldValue, newValue])
-                let newhash = Object.fromEntries(newValue.filter((n: any) => n.id ?? n["__id"]).map((n: any) => [n.id ?? n["__id"], n]));
-                let oldhash = Object.fromEntries(oldValue.filter((n: any) => n.id ?? n["__id"]).map((n: any) => [n.id ?? n["__id"], n]));
-                let ids = Object.keys(newhash).filter((n: string) => n in oldhash);
-                let diff = {
-                    __type: "list_changes",
-                    data: newValue,
-                    changed: ids.map(id => ({ prev_idx: oldValue.map((n: any) => n.id).indexOf(id), new_idx: newValue.map((n: any) => n.id).indexOf(id), data: this.map(oldhash[id], newhash[id]) })),
-                    added: newValue.filter((n: any) => !("id" in n || "__id" in n)),
-                    removed: oldValue.map((n: any) => n.id ?? n["__id"]).filter((id: any) => !(id in newhash))
-                } as any;
-
-                return diff;
-            }
-
-            let diff = {} as any;
+            var diff = {} as any;
             for (var key in oldValue) {
                 if (this.isFunction(oldValue[key])) {
                     continue;
@@ -45,14 +27,14 @@ export const deepDiffMapper = function () {
                     value2 = newValue[key];
                 }
 
-                diff[key] = this.map(oldValue[key], value2, doArrayIdDiff);
+                diff[key] = this.map(oldValue[key], value2);
             }
             for (var key in newValue) {
                 if (this.isFunction(newValue[key]) || diff[key] !== undefined) {
                     continue;
                 }
 
-                diff[key] = this.map(undefined, newValue[key], doArrayIdDiff);
+                diff[key] = this.map(undefined, newValue[key]);
             }
 
             return diff;

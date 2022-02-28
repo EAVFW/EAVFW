@@ -9,6 +9,7 @@ export const RibbonHost: React.FC<{ ribbon: { [key: string]: Partial<RibbonButto
 
    
     console.groupCollapsed("Ribbonhost: " + Object.keys(ribbon).join());
+    console.log(ribbon);
     try {
         let elements = [] as ReactNode[];
         for (let [ribbonKey, props] of Object.entries(ribbon)
@@ -22,7 +23,7 @@ export const RibbonHost: React.FC<{ ribbon: { [key: string]: Partial<RibbonButto
                     elements.push(element);
                 }
             } else {
-
+                
                 registerButton({
                     key: ribbonKey,
                     ...props

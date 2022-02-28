@@ -48,9 +48,11 @@ export const ExpressionParserVisibilityHost: React.FC<{
         return true;
     }, [visible, data, isLoading, error]);
 
+
     useEffect(() => {
         if (onVisibilityCalculated)
             onVisibilityCalculated(showShow);
+
     }, [showShow])
 
     if (showShow)

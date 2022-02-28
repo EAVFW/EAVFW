@@ -1,6 +1,6 @@
 import { LookupType } from "@eavfw/manifest";
 import { DefaultButton, PrimaryButton, Stack, Sticky, StickyPositionType } from "@fluentui/react";
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import { capitalize } from "@eavfw/utils";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { FormRenderProps } from "./FormRenderProps";
@@ -27,6 +27,9 @@ export function FormRender<T>(props: FormRenderProps) {
         onChange(record.current);
         dismissPanel.call(undefined, "save");
     };
+    useEffect(() => {
+        record.current = props.record;
+    }, [props.record]);
 
     const StickyFooter = React.useCallback(({ children }) => (props.stickyFooter ?? true) ? <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky> : <>{children}</>, [props.stickyFooter]);
 

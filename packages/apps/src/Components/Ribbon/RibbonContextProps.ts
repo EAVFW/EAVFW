@@ -1,6 +1,7 @@
 import { RibbonViewInfo } from "@eavfw/manifest";
 import { ICommandBarItemProps } from "@fluentui/react";
 import  { MittEmitter } from "next/dist/shared/lib/mitt";
+import { RibbonButtonProps } from "./RibbonButtonProps";
 import { RibbonState } from "./RibbonState";
 
 export type RibbonContextProps = {
@@ -11,5 +12,5 @@ export type RibbonContextProps = {
     updateState: (state: Partial<RibbonState>) => void;
     addButton: (command: ICommandBarItemProps) => void;
     removeButton: (key: string) => void;
-    registerButton: (command: ICommandBarItemProps, deps?: Array<any>) => void;
+    registerButton: (command: ICommandBarItemProps & Partial<RibbonButtonProps>, deps?: Array<any>) => void;
 }

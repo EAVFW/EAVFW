@@ -90,7 +90,7 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
     }, [canSave]);
 
     useEffect(() => {
-
+        console.log("ribbonInfo", ribbonInfo);
         if (ribbonInfo.delete?.visible !== false) {
             addButton({
                 key: 'deleteItem',
