@@ -68,7 +68,7 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
 
                 data[k] = a;
 
-            } else if (typeof v === "object") {
+            } else if (typeof v === "object" && v !== null) {
                 
                 data[k] = mergeAndUpdate(data[k] ?? {}, v);
 
