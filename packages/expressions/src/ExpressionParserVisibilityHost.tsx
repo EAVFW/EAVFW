@@ -21,8 +21,8 @@ export const ExpressionParserVisibilityHost: React.FC<{
 
         if (isLoading) {
             console.debug("ExpressionParserVisibilityHost " + attributeKey + ": Hiding as visibility is loading")
-            
-            return false;
+
+            return undefined;
         }
 
         if (typeof data === "boolean" && data === false) {
@@ -35,7 +35,7 @@ export const ExpressionParserVisibilityHost: React.FC<{
         if (error) {
             console.debug("ExpressionParserVisibilityHost " + attributeKey + ": Hiding as visibility had error on calculation", error)
 
-            return false;
+            return undefined;
         }
 
         if (typeof data === "undefined")
@@ -50,7 +50,7 @@ export const ExpressionParserVisibilityHost: React.FC<{
 
 
     useEffect(() => {
-        if (onVisibilityCalculated)
+        if (onVisibilityCalculated && typeof showShow === "boolean")
             onVisibilityCalculated(showShow);
 
     }, [showShow])
