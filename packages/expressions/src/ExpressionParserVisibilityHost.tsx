@@ -4,8 +4,9 @@ import { useExpressionParser } from "./useExpressionParser";
 
 export const ExpressionParserVisibilityHost: React.FC<{
     onVisibilityCalculated?: (visiblity: boolean) => void,
-    visible?: string | boolean, attributeKey?: string
-}> = ({ children, visible, attributeKey, onVisibilityCalculated }) => {
+    visible?: string | boolean, attributeKey?: string,
+    onLoading?: React.FC<any>
+}> = ({ children, visible, attributeKey, onVisibilityCalculated, onLoading:Spinner}) => {
 
     const { data, isLoading, error } = useExpressionParser<boolean>(typeof visible === "string" ? visible : undefined);
 
@@ -57,6 +58,9 @@ export const ExpressionParserVisibilityHost: React.FC<{
 
     if (showShow)
         return <>{children}</>
+
+    if (Spinner)
+        <Spinner />
 
     return null;
 }
