@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/next",
   "description": "Model Driven Apps",
-  "version": "0.0.23",
+  "version": "0.0.26",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"

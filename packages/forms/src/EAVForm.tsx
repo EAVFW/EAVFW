@@ -50,23 +50,26 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
             } else if (Array.isArray(v)) {
                 let a = data[k] ?? [];
               
-                v.forEach((value) => {
-                    let found = a.filter((n: any) => ((value.id && n.id === value.id) || (value["__id"] && n["__id"] === value["__id"])))[0];
-                    console.log("mergeAndUpdate array", [k, JSON.stringify(found), JSON.stringify( value)]);
-                    if (found) {
-                        mergeAndUpdate(found, value)
-                    } else {
+                //v.forEach((value) => {
+                //    let found = a.filter((n: any) => ((value.id && n.id === value.id) || (value["__id"] && n["__id"] === value["__id"])))[0];
+                //    console.log("mergeAndUpdate array", [k, JSON.stringify(found), JSON.stringify( value)]);
+                //    if (found) {
+                //        mergeAndUpdate(found, value)
+                //    } else {
                         
-                        a.push(mergeAndUpdate({ "__status": "new", "__id": uuidv4() }, value))
-                    }
+                //        a.push(mergeAndUpdate({ "__status": "new", "__id": uuidv4() }, value))
+                //    }
 
-                    //if (data[k][index]?.id && data[k + "@deleted"] && data[k + "@deleted"].indexOf(data[k][index]?.id) !== -1)
-                    //    return;
+                //    //if (data[k][index]?.id && data[k + "@deleted"] && data[k + "@deleted"].indexOf(data[k][index]?.id) !== -1)
+                //    //    return;
 
-                    //data[k][index] = mergeAndUpdate(data[k][index] ?? {}, value);
-                });
+                //    //data[k][index] = mergeAndUpdate(data[k][index] ?? {}, value);
+                //});
+
+                v.forEach((value, index) => { a[index] = mergeAndUpdate(a[index]??value, value); });
 
                 data[k] = a;
+               
 
             } else if (typeof v === "object" && v !== null) {
                 
@@ -142,7 +145,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
     const runValidation = (complete?:()=>void) => {
         if (namespace && validationFunction) {
-           
+         //   alert("Starting validation");
             // setLocalErrors(undefined);
             const local = global_etag.current = new Date().toISOString();
             const formValuesForValidation = stripForValidation(state.formValues);
@@ -173,7 +176,8 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
                 }).catch(err => {
                     console.error(err);
                 }).finally(() => {
-
+                    console.log("Validation Complated in " + (new Date().getTime() - new Date(local).getTime()));
+                   // alert("Validation Complated in " + (new Date().getTime() - new Date(local).getTime()));
                     if (local === global_etag.current) {
                         
                         if (onChange)
@@ -188,7 +192,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
                     } else {
                         console.log("Running validation again", [global_etag.current, JSON.stringify(state.formValues)]);
-                        runValidation(complete); //Run again, state was changed;
+                       // runValidation(complete); //Run again, state was changed;
                     }
 
                   
