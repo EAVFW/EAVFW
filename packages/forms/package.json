@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/forms",
   "description": "EAVFW Forms",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"

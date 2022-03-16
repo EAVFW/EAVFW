@@ -27,6 +27,8 @@ const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
 const validationFunction = process.env['NEXT_PUBLIC_BLAZOR_EVAL_VALIDATION'];
 
 
+
+
 declare global {
     interface Window { formValuesUpdate: any;  }
 }
@@ -296,7 +298,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
                 state.errors = {}; //TODO, only clear errors on fields that updated;
 
 
-                if (namespace) {
+                if (namespace && validationFunction) {
                     let t = new Date().getTime();
                     setTimeout(() => {
                         
