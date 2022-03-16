@@ -1,16 +1,15 @@
 import { useEffect, useMemo } from "react";
+import { useExpressionParserLoadingContext } from "./ExpressionParserAttributeContext";
 import { useExpressionParser } from "./useExpressionParser";
-
+import { useUuid } from "@eavfw/hooks";
 
 export const ExpressionParserVisibilityHost: React.FC<{
     onVisibilityCalculated?: (visiblity: boolean) => void,
-    visible?: string | boolean, attributeKey?: string,
-    onLoading?: React.FC<any>
-}> = ({ children, visible, attributeKey, onVisibilityCalculated, onLoading:Spinner}) => {
+    visible?: string | boolean, attributeKey?: string
+}> = ({ children, visible, attributeKey, onVisibilityCalculated}) => {
 
     const { data, isLoading, error } = useExpressionParser<boolean>(typeof visible === "string" ? visible : undefined);
-
-
+     
 
     const showShow = useMemo(() => {
         if (typeof visible === "boolean" && visible === false) {
@@ -49,6 +48,7 @@ export const ExpressionParserVisibilityHost: React.FC<{
         return true;
     }, [visible, data, isLoading, error]);
 
+ 
 
     useEffect(() => {
         if (onVisibilityCalculated && typeof showShow === "boolean")
@@ -58,9 +58,6 @@ export const ExpressionParserVisibilityHost: React.FC<{
 
     if (showShow)
         return <>{children}</>
-
-    if (Spinner)
-        <Spinner />
-
+     
     return null;
 }

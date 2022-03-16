@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useExpressionParserAttributeContext } from "./ExpressionParserAttributeContext";
+import { useUuid } from "@eavfw/hooks";
+import { useExpressionParserAttributeContext, useExpressionParserLoadingContext } from "./ExpressionParserAttributeContext";
 import { useExpressionParserContext } from "./useExpressionParserContext";
 
 
@@ -30,12 +31,7 @@ if (typeof global.window !== "undefined") {
 }
 
 
-function uuidv4() {
-    //@ts-ignore
-    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
-        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
-    );
-}
+ 
 
 export type useExpressionParserValue<T> = {
     data: T | string | undefined;
@@ -47,16 +43,17 @@ export function useExpressionParser<T = string>(expression?: string) {
 
     const { variables, formValues, addExpresssion } = useExpressionParserContext();
     const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
-    const id = useMemo(() => uuidv4(),[]);
+    const id = useUuid();
 
     var [evaluated, setEvaluated] = useState<useExpressionParserValue<T>>(expression && expression.indexOf("@") !== -1 ?
         { data: undefined, isLoading: true, error: undefined } :
         { data: expression, isLoading: false, error: undefined });
     var etag = useRef(new Date().getTime());
 
-    useEffect(() => {
-     
-       
+
+    useExpressionParserLoadingContext(evaluated?.isLoading);
+
+    useEffect(() => { 
         const etagLocal = etag.current = new Date().getTime();
 
         console.log("useExpressionParser:Form Values Changed expressions: " + expression, [etagLocal, formValues]);
@@ -104,6 +101,8 @@ export function useExpressionParser<T = string>(expression?: string) {
         }
 
     }, [expression]);
+
+  
 
     return evaluated;
 }
