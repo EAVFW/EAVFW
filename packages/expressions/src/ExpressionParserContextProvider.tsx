@@ -70,7 +70,7 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         setFormValues,
         appendVariables: _appendVariables,
         addExpresssion: _appendExpression,
-        removeExpresssion: _removeExpresssion,
+        removeExpression: _removeExpresssion,
         variables
     }}>{children}</ExpressionParserContext.Provider>;
 }
