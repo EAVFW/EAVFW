@@ -26,7 +26,9 @@ if (typeof global.window !== "undefined") {
     window['expressionError'] = function (id: any, error: any) {
         console.log('expressionError', arguments);
         
-
+        setTimeout(() => {
+            expressionResults[id](undefined,error);
+        });
     }
 }
 
@@ -41,7 +43,7 @@ export type useExpressionParserValue<T> = {
 
 export function useExpressionParser<T = string>(expression?: string) {
 
-    const { variables, formValues, addExpresssion } = useExpressionParserContext();
+    const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
     const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
     const id = useUuid();
 
@@ -49,7 +51,7 @@ export function useExpressionParser<T = string>(expression?: string) {
         { data: undefined, isLoading: true, error: undefined } :
         { data: expression, isLoading: false, error: undefined });
     var etag = useRef(new Date().getTime());
-
+    var oldvalue = useRef(evaluated?.data);
 
     useExpressionParserLoadingContext(evaluated?.isLoading);
 
@@ -76,9 +78,22 @@ export function useExpressionParser<T = string>(expression?: string) {
 
         if (namespace && expressionFunction && expression && expression.indexOf("@") !== -1) {
 
-            expressionResults[id] = (result: any) => { console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}`); setEvaluated({ data: result, isLoading: false }) };
+            expressionResults[id] = (result: any, error: any) => {
+                if (error) {
+                    setEvaluated({ data: undefined, isLoading: false });
+                    return;
+                }
+                console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}`);
+                if (oldvalue.current !== result) {
+                    setEvaluated({ data: result, isLoading: false });
+                    oldvalue.current = result;
+                }
+            };
             addExpresssion(id, expression, context);
-            
+
+            return () => {
+                removeExpression(id);
+            }
           //  setEvaluated({ data: "dummy", isLoading: false });
 
             //setTimeout(() => {

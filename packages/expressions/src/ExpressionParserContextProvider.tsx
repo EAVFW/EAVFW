@@ -18,7 +18,11 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
     //Using a ref to store variables to avoid triggering changes on the appendVariables method
     const _appendVariables = useCallback((obj: any) => setVariables(_variables.current = { ..._variables.current, ...obj }), []);
     const _appendExpression = useCallback((id: string, expresssion: string, context: any) => setExpressions(_expresssions.current = { ..._expresssions.current, [id]: { expression: expresssion, context: context } }), []);
-
+    const _removeExpresssion = useCallback((id) => {
+        let expr = { ..._expresssions.current } as any;
+        delete expr[id];
+        setExpressions(_expresssions.current = expr)
+    }, []);
     useEffect(() => {
         console.log("ExpressionParser FormValues Updated: ", formValues);
     }, [formValues]);
@@ -66,6 +70,7 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         setFormValues,
         appendVariables: _appendVariables,
         addExpresssion: _appendExpression,
+        removeExpresssion: _removeExpresssion,
         variables
     }}>{children}</ExpressionParserContext.Provider>;
 }

@@ -10,7 +10,7 @@ import cloneDeep from "clone-deep";
 import { cleanDiff, deepDiffMapper, mergeDeep } from "@eavfw/utils";
 import { EAVFormContextState } from "./EAVFormContextState";
 import { EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVFormContextActions";
-import { debug } from "console";
+
 import { useUuid } from "@eavfw/hooks";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
@@ -345,14 +345,14 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
             if (etag === global_etag.current) {
 
                 console.log("Validation Result", [errors, calculated]);
-                mergeAndUpdate(state.formValues, calculated);
+               // mergeAndUpdate(state.formValues, calculated);
                 state.errors = errors;
 
                 if (onValidationResult)
                     onValidationResult({ errors: errors, calculatedFields: calculated, actions: actions.current, state: state });
 
-                if (onChange)
-                    onChange(cloneDeep(state.formValues));
+               // if (onChange)
+               //     onChange(cloneDeep(state.formValues));
 
                 setEtag(global_etag.current=new Date().toISOString());
             }
