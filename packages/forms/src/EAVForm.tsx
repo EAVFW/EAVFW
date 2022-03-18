@@ -66,7 +66,8 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
 
             console.log("mergeAndUpdate", [k, JSON.stringify(data[k]), JSON.stringify( v)]);
 
-            if (k.endsWith("@deleted")) {
+            if (k.endsWith("@deleted") && data[k] && v) {
+                console.log("", [data[k] , v])
                 data[k] = v.filter((c:string)=>c).concat( (data[k] ?? []).filter((vvv: string) => v.filter((vv: string) => vv === vvv).length == 0));
                 console.log("deleting", [data[k], data[k.slice(0, -8)]]);
                 data[k.slice(0, -8)] = data[k.slice(0, -8)].filter((n: any) => n && data[k].filter((nn:any)=>nn===n.id).length===0);
@@ -129,20 +130,26 @@ export const useVisitedContext = () => useContext(VisitedContext);
 
 export const VisitedContainer: React.FC<{ id: string }> = ({ id, children }) => {
 
-    const { setVisitedFields: setParentVisitedFields} = useVisitedContext();
-    const [visitedFields, setVisitedFields] = useState<VisitedFieldElement>({});
+    const { setVisitedFields: setParentVisitedFields, visitedFields: rootVisitedFields } = useVisitedContext();
+    const refVisitedFields = useRef<VisitedFieldElement>({});
+    const [visitedFields, setVisitedFields] = useState<VisitedFieldElement>(refVisitedFields.current);
     const updateVisitedFields = useCallback((visitedField: string, value: VisitedFieldElementValue = true) => {
+        console.log("Setting visible field " + visitedField, [value, JSON.stringify(refVisitedFields.current)]);
         if (typeof value === "boolean")
-            visitedFields[visitedField] = value;
+            refVisitedFields.current[visitedField] = value;
         else {
-            visitedFields[visitedField] = mergeDeep(visitedFields[visitedField] ?? {}, value);
+            refVisitedFields.current[visitedField] = mergeDeep(refVisitedFields.current[visitedField] ?? {}, value);
         }
-        setVisitedFields({ ...visitedFields });
-        setParentVisitedFields(id, visitedFields);
-    }, [visitedFields,id]);
+        setVisitedFields({ ...refVisitedFields.current });
+        setParentVisitedFields(id, refVisitedFields.current);
+    }, [id]);
+
+    useEffect(() => {
+        console.log("visitedFields updated: " + id, [visitedFields, rootVisitedFields]);
+    }, [visitedFields, rootVisitedFields]);
 
     return (<VisitedContext.Provider value={{
-        visitedFields: visitedFields,
+        visitedFields: Object.assign({}, rootVisitedFields[id] ?? {}, visitedFields),
         setVisitedFields: updateVisitedFields
     }}>
         {children}
