@@ -56,7 +56,9 @@ function uuidv4() {
         (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
     );
 }
-
+function isDefined(v: any) {
+    return !(v === null || typeof v === "undefined");
+}
 function mergeAndUpdate<T>(data: any, updatedFields: T): T {
     console.log("mergeAndUpdate input", JSON.stringify(data), JSON.stringify( updatedFields));
 
@@ -66,7 +68,7 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
 
             console.log("mergeAndUpdate", [k, JSON.stringify(data[k]), JSON.stringify( v)]);
 
-            if (k.endsWith("@deleted") && data[k] && v) {
+            if (k.endsWith("@deleted") && data[k] && isDefined(v)) {
                 console.log("", [data[k] , v])
                 data[k] = v.filter((c:string)=>c).concat( (data[k] ?? []).filter((vvv: string) => v.filter((vv: string) => vv === vvv).length == 0));
                 console.log("deleting", [data[k], data[k.slice(0, -8)]]);
@@ -90,7 +92,11 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
                 //    //data[k][index] = mergeAndUpdate(data[k][index] ?? {}, value);
                 //});
 
-                v.forEach((value, index) => { a[index] = mergeAndUpdate(a[index]??value, value); });
+                v.forEach((value, index) => {
+                    let va = mergeAndUpdate(a[index] ?? value, value);
+                    if (isDefined(va))
+                        a[index] = va;
+                });
 
                 data[k] = a;
                
@@ -99,12 +105,16 @@ function mergeAndUpdate<T>(data: any, updatedFields: T): T {
                 
                 data[k] = mergeAndUpdate(data[k] ?? {}, v);
 
-            } else if (!isEqual(data[k], v)) {
+            } else if ((isDefined(data[k]) || isDefined(v)) && !isEqual(data[k], v)) { //Dont consider null and undefined a difference
                 console.log("merge", [data, data[k], k, v]);
                 if (Array.isArray(data)) {
                     (data as any[]).splice(parseInt(k),1);
                 } else {
-                    data[k] = v;
+                   
+                    if (isDefined(data[k]) && !isDefined(v))
+                        delete data[k];
+                    else
+                        data[k] = v;
                 }
 
 
@@ -156,6 +166,28 @@ export const VisitedContainer: React.FC<{ id: string }> = ({ id, children }) => 
     </VisitedContext.Provider>)
 }
 
+function clearErrors(errors: any, changes: any) {
+    
+    if (!changes)
+        return;
+    if (!errors)
+        return;
+
+    for (let [k, v] of Object.entries(changes)) {
+        if (Array.isArray(v)) {
+            if (errors[k]) {
+                for (let [idx, av] of Object.entries(v)) {
+                    clearErrors(errors[k][idx], av);
+                }
+            }
+        } else if (typeof v === "object") {
+            clearErrors(errors[k], v);
+        } else {
+            delete errors[k];
+        }
+    }
+}
+
 export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ stripForValidation=(a)=>a,formDefinition, defaultData, onChange, children, onValidationResult, state: initialState  }: PropsWithChildren<EAVFormProps<T, TState>>) => {
 
     const { current: state } = useRef({
@@ -189,14 +221,14 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
                 DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(namespace, validationFunction, formDefinition, formValuesForValidation, true)
                     .then(({ errors: results, updatedFields }) => {
 
-                        console.log("RESULT", [id, results, updatedFields, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
+                        console.log("Validation RESULT", [id, results, updatedFields, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
 
 
 
                         if (local === global_etag.current) {
                             // mergeDeep(data, updatedFields);
                             console.log("Update State", JSON.stringify(formValuesForValidation), JSON.stringify(updatedFields));
-                            mergeAndUpdate(state.formValues, updatedFields);
+                          //  mergeAndUpdate(state.formValues, updatedFields);
                             console.log("Update State Complete", JSON.stringify(formValuesForValidation), JSON.stringify(updatedFields))
                             state.errors = results;
 
@@ -242,12 +274,13 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
     const actions = useRef<EAVFormContextActions<T>>({
         runValidation: runValidation,
-        updateState: (cb: (props: any) => void) => {
+        updateState: (cb: (props: any, ctx:any) => void) => {
             console.groupCollapsed("EAVFW : UpdateState");
             try {
                 console.time("Callings Calback");
                 const updatedProps = cloneDeep(state);
-                cb(updatedProps);
+                const ctx = { replaceState:false};
+                cb(updatedProps,ctx);
                 console.timeEnd("Callings Calback");
                 console.log("Updated State Props", updatedProps);
 
@@ -264,8 +297,13 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
 
                 if (changedProp) {
-
-                    mergeAndUpdate(state, changedValues);
+                    if (ctx.replaceState) {
+                        for (let [k, v] of Object.entries(updatedProps)) {
+                            state[k as keyof typeof state] = v;
+                        }
+                    } else {
+                        mergeAndUpdate(state, changedValues);
+                    }
 
                     console.log("Merged State: ", [state]);
                     setEtag(global_etag.current = new Date().toISOString());
@@ -290,19 +328,24 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
             cb(updatedProps,ctx);
 
-            const a = deepDiffMapper.map(state.formValues, updatedProps);
-            const [changed, changedValues] = cleanDiff(a);
+            const changed = !isEqual(state.formValues, updatedProps);
 
-            console.log("Updated Props", [updatedProps, state, changed, a, changedValues, ctx]);
+            const a = deepDiffMapper.map(state.formValues, updatedProps);
+            const [_, changedValues] = cleanDiff(a);
+
+            console.log("Updated Props", [updatedProps, state, changed, ctx]);
              
 
             if (changed) {
 
                 const local = global_etag.current = new Date().toISOString();
-              
-                mergeAndUpdate(state.formValues=cloneDeep(state.formValues), changedValues);
+                state.formValues = updatedProps;
+               // mergeAndUpdate(state.formValues=cloneDeep(state.formValues), changedValues);
                 console.log("Updated Props", [changed, updatedProps, JSON.stringify(state.formValues, null, 4), state]);
-                state.errors = {}; //TODO, only clear errors on fields that updated;
+              //  state.errors = {}; //TODO, only clear errors on fields that updated;
+              //  console.log("Clearing Errors from changed Values", [changedValues,state.errors]);
+                clearErrors(state.errors, changedValues);
+                console.log("Cleared Errors from changed Values", [state.errors]);
 
 
                 if (namespace && validationFunction) {

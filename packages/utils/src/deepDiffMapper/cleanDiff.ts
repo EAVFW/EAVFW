@@ -13,7 +13,7 @@ export function cleanDiff(updatedValues: object , isArray:boolean=false): [boole
                 } else if (value.__type === "deleted") {
 
                    // if (value.data.id) {
-                        a[key] = undefined;
+                      //  a[key] = undefined;
                     //}
 
                     changed = true;                

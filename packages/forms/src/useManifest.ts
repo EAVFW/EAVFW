@@ -1,5 +1,5 @@
 ﻿
-import React, { useMemo, useContext } from "react";
+import React, { useMemo, useContext, useRef } from "react";
 import { isLookup, ManifestDefinition } from "@eavfw/manifest";
 import { useEAVForm } from "./useEAVForm";
 import { gzip, ungzip } from "pako";
@@ -84,7 +84,7 @@ const addValidation = (manifest: ManifestDefinition, expression: ValidationExpre
 
 
 
-const manifestcontext = React.createContext<any>({ current: {} });
+//const manifestcontext = React.createContext<any>({ current: {} });
 export type useManifestProps = {
     entityName: string;
     attributeKey: string;
@@ -549,7 +549,7 @@ export const useManifest: (props: useManifestProps) => [ManifestDefinition, (man
 
 
     //    const _manifestmerger = useRef(_manifest);
-    const _manifestmerger = useContext(manifestcontext);
+    const _manifestmerger = useRef<ManifestDefinition>({} as any);
 
     const setManifest = (manifest: ManifestDefinition, merge = true) => {
 
