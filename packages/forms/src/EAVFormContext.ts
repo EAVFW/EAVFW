@@ -13,7 +13,8 @@ export const EAVFormContext = createContext<EAVFormContextProps<any>>({
         formDefinition: {} as any,
         errors: {},
         formValues: {},
-        fieldMetadata: {}
+        fieldMetadata: {},
+        isErrorsUpdated: false
     },
     etag: new Date().toISOString()
 });

@@ -5,5 +5,6 @@ export type ExpressionParserContextType = {
     removeExpression: (id: string) => void;
     setFormValues: (values: any) => void;
     variables: any;
+    isVariablesUpToDate: boolean;
     formValues: any;
 };

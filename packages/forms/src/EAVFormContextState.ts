@@ -6,4 +6,5 @@ export type EAVFormContextState<T> = {
     formDefinition?: ManifestDefinition;
     fieldMetadata: any;
     errors: EAVFWErrorDefinition;
+    isErrorsUpdated: boolean;
 }
