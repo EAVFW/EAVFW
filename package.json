@@ -40,6 +40,7 @@
 
     "release": "semantic-release -e semantic-release-monorepo"
   },
+  "release": { "branches": [ "master" ] },
   "private": true,
   "workspaces": {
     "packages": [
