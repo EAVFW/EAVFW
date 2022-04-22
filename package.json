@@ -38,7 +38,7 @@
     "bumb-version-hooks": "npm --workspace packages/hooks version patch -m \"Upgrade to %s\"",
     "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\"",
 
-    "release": "semantic-release -e semantic-release-monorepo"
+    "release": "semantic-release -e semantic-release-monorepo --branches main"
   },
   "private": true,
   "workspaces": {
@@ -48,7 +48,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/EAVFW/EAVFW.git"
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
   "license": "MIT"
 }
