@@ -14,5 +14,8 @@
   ],
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
-  "main": "./src/index.ts"
+  "main": "./src/index.ts",
+  "release": {
+    "branches": [ "main", "dev" ]
+  }
 }
