@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/manifest",
   "description": "Manifest Type Definitions",
-  "version": "0.0.36",
+  "version": "0.0.38",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"

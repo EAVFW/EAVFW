@@ -114,7 +114,7 @@ const ControlsComponent =
                 return <div>"loading"</div>
 
             let formErrors = {} as FormValidation;
-
+            console.log("AutoForm: ControlsComponent: ExtraErrors", extraErrors);
             for (let extraErrorsKey in Object.keys(extraErrors)) {
                 let keys = extraErrorsKey.split('.');
                 if (keys[0] in formErrors) {

@@ -54,8 +54,7 @@ export function ModelDrivenBodyViewer
 
     const BodyViewElement = useMemo(() => {
 
-
-
+       
         if (entityName !== undefined && selectedView !== undefined) {
             const view = app.getEntity(entityName).views?.[selectedView];
 
@@ -85,6 +84,7 @@ export function ModelDrivenBodyViewer
         setselectedView(option?.key as string);
     }
 
+    console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
         <Stack verticalFill>
             {showViewSelector && hasMoreViews &&

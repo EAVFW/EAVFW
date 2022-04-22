@@ -8,7 +8,7 @@ import { AppPickerLayout, EmptyLayout, FormLayout, PageLayout, RootLayout } from
 
 
 const Features: {
-    evaluateFormDefinition: (form: FormDefinition, formdata: any) => Promise<FormDefinition>
+    useEvaluateFormDefinition: (form: FormDefinition, formdata: any) => { evaluatedForm: FormDefinition, isEvaluatedFormLoading: boolean }
     formsConfig: FormsConfig,
     defaultTheme?: Theme,
     topBarTheme?: Theme,
@@ -18,7 +18,7 @@ const Features: {
     "AppPickerLayout": typeof AppPickerLayout,
     "FormLayout": typeof FormLayout
 } = {
-    evaluateFormDefinition: (form, data) => Promise.resolve(form),
+    useEvaluateFormDefinition: (form, data) => ({ evaluatedForm: form, isEvaluatedFormLoading:false }),
     formsConfig: {  
         alwaysShowFormSelector: false
     },

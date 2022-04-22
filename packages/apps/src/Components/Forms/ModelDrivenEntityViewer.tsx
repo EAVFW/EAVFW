@@ -84,29 +84,48 @@ function createRadioGroups(form: FormDefinition, entity: EntityDefinition) {
     return Object.values(radioGroups);
 }
 
-//const FormContext = React.createContext<any>({});
-//export const useFormContext = () => React.useContext(FormContext);
+/**
+  * Load the evaludated form and only forward it when its actually updated.
+  * */
+function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent:any) {
+  
+    const useEvaluateFormDefinition = ResolveFeature("useEvaluateFormDefinition");
+    const { evaluatedForm: evaluatedFormDelayed, isEvaluatedFormLoading } = useEvaluateFormDefinition(form, formDataRefcurrent);
+    const [evaluatedForm, setevaluatedForm] = useState(evaluatedFormDelayed);
 
-export function ModelDrivenEntityViewer({
+    useEffect(() => {
+        if (!isEvaluatedFormLoading && evaluatedFormDelayed !== evaluatedForm)
+            setevaluatedForm(evaluatedFormDelayed);
+    }, [evaluatedForm, isEvaluatedFormLoading])
+
+    return evaluatedForm;
+    //-
+}
+
+type ModelDrivenForm = ModelDrivenEntityViewerProps & {
+    setForm: any,
+    form: FormDefinition,
+    formDataRef: any,
+    onFormDataChange: any
+}
+const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
     entity,
     formName,
     locale,
     entityName,
     record,
     factory,
-    related,
-    onChange,
-    extraErrors
-}: ModelDrivenEntityViewerProps) {
+    extraErrors,
+    setForm,
+    form,
+    formDataRef, onFormDataChange
+}: ModelDrivenForm) => {
+
+
     const app = useModelDrivenApp();
-    const save = useRibbon();
-    const [form, setForm] = useState<FormDefinition>(getForm(app, entity, formName));
 
     const [selectedForm, setselectedForm] = useState(formName ?? Object.keys(entity.forms ?? {})[0]);
-   // const [evaluatedForm, setEvaluatedForm] = useState<FormDefinition>();
-
-    //const evaluatedFromRef = useRef<FormDefinition>();
-    const [groups] = useState(createRadioGroups(form, entity));
+    
 
     const firstFormUpdate = useRef(true);
     useEffect(() => {
@@ -128,45 +147,11 @@ export function ModelDrivenEntityViewer({
     }, [record]);
 
 
-    const formDataRef = useRef(record);
-    const [etag, setEtag] = useState(new Date().toISOString());
+  
 
-    /**
-     * When the outher recrod is updated, trigger a etag changed that dependent parts can monitor
-     **/
-    useEffect(() => {
-        formDataRef.current = record;
-        setEtag(new Date().toISOString());
-    }, [record]);
+    const evaluatedForm = useEvaluateFormDefinition(form, formDataRef.current);
 
-
-  //  const start = useRef(new Date().getTime());
-    /**
-     * When the etag is changed, either from local or external change, reevaluate the form definition. 
-     **/
-     
-    const evaluatedForm = useAsyncMemo(
-        () => ResolveFeature("evaluateFormDefinition")(form, formDataRef.current), [form, etag], form);
-
-    //useEffect(() => {
-
-    //    if (evaluatedFromRef.current == undefined) {
-    //        setEvaluatedForm(form);
-    //    }
-
-    //    const startTime = start.current = new Date().getTime();
-
-    //    evaluateFormDefinition(form, formDataRef.current)
-    //        .then(newForm => {
-
-    //            if (startTime === start.current && !isEqual(evaluatedFromRef.current, newForm)) {
-    //                evaluatedFromRef.current = newForm;
-    //                setEvaluatedForm(newForm);
-    //                console.log("evaluateFormDefinition", newForm);
-    //            }
-    //        });
-
-    //}, [form, etag]);
+    
 
     const getTabName = useCallback((tab: FormTabDefinition) => {
         console.log(tab);
@@ -186,14 +171,118 @@ export function ModelDrivenEntityViewer({
     // const _onChange = useDebouncer(onChange!, 50);
 
     //Issue if multiople onFormDataChange called, then only latest is applied.  Need to merge state of the debouncer and
+   
+
+
+    
+
+   
+
+
+    useEffect(() => {
+        console.log("FormData Updated", record);
+    }, [record])
+
+    const [tabs, setTabs] = useState(Object.keys(evaluatedForm?.layout.tabs ?? {}));
+
+
+
+    const { data: { items: descriptions } = { items: [] }, isLoading } =
+        process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] ?
+            queryEntitySWR(app.getEntity(process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] as string), { '$filter': `entity eq '${entityName}' ` })
+            : (console.log("NO NEXT_PUBLIC_DESCRIPTION_ENTITY: " + process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY']) as any || { data: { items: [] as IRecord[] }, isLoading: false })
+
+
+    console.log(descriptions);
+
+
+    const first = useRef(true);
+    useEffect(() => {
+        if (first.current) {
+            first.current = false;
+            return;
+        }
+        const newTabs = Object.keys(evaluatedForm?.layout.tabs ?? {});
+        if (newTabs.length !== tabs.length || tabs.some((value, index) => newTabs[index] !== value)) {
+            setTabs(newTabs);
+        }
+    }, [evaluatedForm]);
+
+    if (!evaluatedForm || !tabs.length || isLoading) {
+        return <div>loading form...</div>
+    }
+    const forms = entity?.forms ?? {};
+
+    const hasMoreForms = Object.keys(forms).filter(f => forms[f].type === "Main").length > 1;
+
+    const primaryField = Object.values(app.getAttributes(entityName)).find((a) => a.isPrimaryField)!;
+
+ 
+
+    
+    return <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
+              
+           
+         <Stack verticalFill>
+
+        {evaluatedForm?.type !== "QuickCreate" && <Stack.Item styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
+            <h2>{formDataRef.current[primaryField?.logicalName]}</h2>
+            <Stack horizontal style={{ alignItems: "center" }}>
+                <h3 style={{ height: "28px" }}>{entity.locale?.[locale]?.displayName ?? entity.displayName}</h3>
+                {hasMoreForms && (
+                    <FormSelectorComponent
+                        onChangeView={_onChangeForm}
+                        selectedForm={selectedForm}
+                        entity={entity}
+                        styles={{ root: { padding: 0 } }}
+                    />
+                )}
+            </Stack>
+        </Stack.Item>
+        }
+
+        <Stack.Item grow styles={{ root: { padding: 0 } }}>
+            <FormComponent {... { tabs, getTabName, entity, formName, onFormDataChange, locale, factory, extraErrors }}
+                form={evaluatedForm}
+                formData={formDataRef.current}
+                formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: formDataRef.current, onFormDataChange: onFormDataChange }}
+
+            />
+        </Stack.Item>
+         </Stack>
+     </RibbonHost>
+}
+
+export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (props) => {
+
+
+    const app = useModelDrivenApp();
+
+    const { record, entity, formName, onChange, related } = props;
+
+    const [form, setForm] = useState<FormDefinition>(getForm(app, entity, formName));
+
     const formdatamerger = useRef({});
+
+    const formDataRef = useRef(record);
+    const [etag, setEtag] = useState(new Date().toISOString());
+
+    /**
+     * When the outher recrod is updated, trigger a etag changed that dependent parts can monitor
+     **/
+    useEffect(() => {
+        formDataRef.current = record;
+        setEtag(new Date().toISOString());
+    }, [record]);
+
+    const [groups] = useState(createRadioGroups(form, entity));
 
 
     const onFormDataChange2 = useCallback((formdata: any) => {
         try {
             formdatamerger.current = {};
             console.groupCollapsed("onFormDataChange", [formDataRef.current, formdata]);
-            let oldFormData =  Object.assign({}, formDataRef.current);
+            let oldFormData = Object.assign({}, formDataRef.current);
             let changed = false;
 
             let attributes = [...Object.keys(entity.attributes), ...(Object.keys((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}))];
@@ -313,77 +402,12 @@ export function ModelDrivenEntityViewer({
         return onFormDataChange2(formdatamerger.current);
     }, [onFormDataChange2]);
 
-
-    useEffect(() => {
-        console.log("FormData Updated", record);
-    }, [record])
-
-    const [tabs, setTabs] = useState(Object.keys(evaluatedForm?.layout.tabs ?? {}));
-
-
-
-    const { data: { items: descriptions } = { items: [] }, isLoading } =
-        process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] ?
-            queryEntitySWR(app.getEntity(process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] as string), { '$filter': `entity eq '${entityName}' ` })
-            : (console.log("NO NEXT_PUBLIC_DESCRIPTION_ENTITY: " + process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY']) as any || { data: { items: [] as IRecord[] }, isLoading: false })
-
-
-    console.log(descriptions);
-
-
-    const first = useRef(true);
-    useEffect(() => {
-        if (first.current) {
-            first.current = false;
-            return;
-        }
-        const newTabs = Object.keys(evaluatedForm?.layout.tabs ?? {});
-        if (newTabs.length !== tabs.length || tabs.some((value, index) => newTabs[index] !== value)) {
-            setTabs(newTabs);
-        }
-    }, [evaluatedForm]);
-
-    if (!evaluatedForm || !tabs.length || isLoading) {
-        return <div>loading form...</div>
-    }
-    const forms = entity?.forms ?? {};
-
-    const hasMoreForms = Object.keys(forms).filter(f => forms[f].type === "Main").length > 1;
-
-    const primaryField = Object.values(app.getAttributes(entityName)).find((a) => a.isPrimaryField)!;
-    //<FormContext.Provider value={{ data: formDataRef.current, onFormDataChange: onFormDataChange, etag }}>
     return (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
 
-            <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
-                <Stack verticalFill>
 
-                    {evaluatedForm?.type !== "QuickCreate" && <Stack.Item styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
-                        <h2>{formDataRef.current[primaryField?.logicalName]}</h2>
-                        <Stack horizontal style={{ alignItems: "center" }}>
-                            <h3 style={{ height: "28px" }}>{entity.locale?.[locale]?.displayName ?? entity.displayName}</h3>
-                            {hasMoreForms && (
-                                <FormSelectorComponent
-                                    onChangeView={_onChangeForm}
-                                    selectedForm={selectedForm}
-                                    entity={entity}
-                                    styles={{ root: { padding: 0 } }}
-                                />
-                            )}
-                        </Stack>
-                    </Stack.Item>
-                    }
-
-                    <Stack.Item grow styles={{ root: { padding: 0 } }}>
-                        <FormComponent {... { tabs, getTabName, entity, formName, onFormDataChange, locale, factory, extraErrors }}
-                            form={evaluatedForm}
-                            formData={formDataRef.current}
-                            formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: formDataRef.current, onFormDataChange: onFormDataChange }}
-
-                        />
-                    </Stack.Item>
-                </Stack>
-            </RibbonHost>
+            <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange} formDataRef={formDataRef} setForm={setForm} form={form} />
+           
 
         </EAVForm>
     );

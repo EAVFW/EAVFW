@@ -38,7 +38,7 @@ import Link from 'next/link';
 import { useBoolean, useId } from "@fluentui/react-hooks"
 
 
-import { AttributeDefinition, EntityDefinition, getNavigationProperty, IRecord, isLookup, LookupType, queryEntitySWR, ViewColumnDefinition, ViewDefinition } from '@eavfw/manifest';
+import { AttributeDefinition, EntityDefinition, getNavigationProperty, IRecord, isAttributeLookup, isLookup, LookupAttributeDefinition, LookupType, queryEntitySWR, ViewColumnDefinition, ViewDefinition } from '@eavfw/manifest';
 import { FormRenderProps } from '../Forms/FormRenderProps';
 import { useRibbon } from '../Ribbon/useRibbon';
 import { errorMessageFactory, useMessageContext } from '../MessageArea/MessageContext';
@@ -421,7 +421,7 @@ export default function ModelDrivenGridViewer(
     console.log("GridView: " + locale);
 
     const [items, setItems] = useState<IRecord[]>(newRecord ? formData[entity.collectionSchemaName.toLowerCase()] ?? [] : []);
-    const [selectedView, setselectedView] = useState(viewName ?? Object.keys(entity.views ?? {})[0]);
+    const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
     const [announcedMessage, setannouncedMessage] = useState<string>();
     const [isModalSelection, setisModalSelection] = useState(true);
     const [isCompactMode, setisCompactMode] = useState(false);
@@ -448,6 +448,7 @@ export default function ModelDrivenGridViewer(
 
     }, [columns, items]);
 
+  
 
     const { setSelection, selection, selectionDetails } = useSelectionContext();
 
@@ -525,12 +526,23 @@ export default function ModelDrivenGridViewer(
         }
     }, [data, newRecord && defaultValues]);
 
+    const columnAttributes = useMemo(() => {
+        const view = entity.views?.[selectedView];
+
+        const columns = Object.keys(view?.columns ?? {}).filter(c => attributes[c] && (!attributes[c].isPrimaryKey)).map(c => attributes[c].logicalName);
+        if (columns.length === 0)
+            return [];
+
+        const keys = Object.values(attributes).filter(a => a.isPrimaryKey).map(c => c.logicalName);
+         
+        return columns.concat(keys);
+    }, [selectedView, entity]);
 
     //Callback to recalculate the fetchQuery.
     const fetchCallBack = useCallback(() => {
-
-        let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
-
+        console.log("Recalculating fetch qury");
+        let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
+       
 
 
         let q = expand ? `$expand=${expand}` : '';
@@ -564,15 +576,15 @@ export default function ModelDrivenGridViewer(
         if (q)
             q = '?' + q;
 
-        setFetchQuery({ "$expand": expand, "$filter": localFilter?.substr('$filter='.length) });
+        setFetchQuery({ "$expand": expand, "$filter": localFilter?.substr('$filter='.length), "$select": columnAttributes.join(",") });
 
 
-    }, [attributes, columns]);
+    }, [attributes, columns, columnAttributes]);
 
 
     useEffect(() => {
         fetchCallBack();
-    }, [formData?.modifiedon]);
+    }, [formData?.modifiedon, selectedView]);
 
 
 

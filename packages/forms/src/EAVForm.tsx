@@ -347,7 +347,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
             const a = deepDiffMapper.map(state.formValues, updatedProps);
             const [_, changedValues] = cleanDiff(a);
 
-            console.log("Updated Props", [updatedProps, state, changed, ctx]);
+            console.log("Updated Props", [updatedProps, changedValues, state, changed, ctx]);
              
 
             if (changed) {

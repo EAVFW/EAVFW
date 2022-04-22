@@ -162,9 +162,14 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         }
     }, [value]);
 
+    const [isLoading, setisLoading] = useState(true);
+
     const _updateOptions = (query: any) => {
         setOptions([{ key: 'dummy', text: loadingText, disabled: true }])
-        queryEntity(app.getEntity(targetEntity.logicalName), query).then(results => {
+        queryEntity(targetEntity, query).then(results => {
+
+            console.log("LookupControl: Loading additional data", [value, targetEntity.logicalName,results]);
+
             let options = results.items.map((record: IRecord): IComboBoxOption => {
                 return {
                     key: record.id,
@@ -181,15 +186,15 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         });
     }
 
-    const [isLoading, setisLoading] = useState(true);
+    
     useEffect(() => {
 
 
         (async () => {
-            if (isLoading) {
+            if (isLoading && !disabled) {
                  
                 let data = await queryEntity(targetEntity, filter ? { '$filter': filter } : {});
-
+                console.log("LookupControl: Loading initial data", [value, targetEntity.logicalName, data]);
                 const _options = data.items
                     .map(m => ({
                         key: m.id,
@@ -204,8 +209,9 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             }
         })()
 
-    }, [value])
+    }, [value, disabled])
 
+    console.log("Lookup Control:", [label, disabled, isLoading, options, filter]);
     return (<>
         <Modal isOpen={modalOpen} onDismiss={_hideModal} isBlocking={true} styles={{ scrollableContent: { overflowY: "hidden", maxHeight: "100%" } }}>
             <Stack verticalFill styles={{ root: { minWidth: "60vw", maxWidth: "90vw" } }}>
@@ -305,17 +311,9 @@ export function LookupControl<T>({
 }: LookupControlProps<T>) {
 
 
-    const allFormData = formContext.formData;
-
    
-    useEffect(() => {
-        console.log("AllFormdata Changed", allFormData);
-    }, [allFormData])
-
 
     const app = useModelDrivenApp();
-    //const entity = app.getEntity(entityName);
-  
     const entityAttributes = app.getAttributes(entityName);
 
     const attribute = entityAttributes[attributeName];
@@ -327,6 +325,8 @@ export function LookupControl<T>({
 
 
     const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];
+
+
     console.log("Lookup Control", [attributeName, attribute, attribute?.type]);
 
     if (!isLookup(attribute.type))
@@ -334,32 +334,33 @@ export function LookupControl<T>({
 
     const targetEntityName = isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute");
 
-
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
    
-
-   
-  
-
-    const isschool = isLookup(attribute.type) && (attribute.type.filter?.indexOf('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}')??-1) !== -1;
-
+     
+    const [schoolid] = useEAVForm((state) => state.formValues["schoolid"]);
+    const isschool = isLookup(attribute.type) && ((column?.filter ?? attribute.type.filter)?.indexOf('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}')??-1) !== -1;
+    
     const { data: schoolFilter, isLoading } = queryEntitySWR(app.getEntity('school'), {
         '$expand': 'schooltype',
-        '$filter': `id eq ${allFormData['schoolid']}`
-    }, isschool);
-  
+        '$filter': `id eq ${schoolid}`
+    }, isschool && !!schoolid);
+
+ 
 
     const filter = useMemo(() => {
        
         if (isLookup(attribute.type)) {
-
+            let _filter = (column?.filter ?? attribute.type.filter);
             //TODO - get this migrated out generic
+            
+            if (isschool && _filter) {
 
-            if (isschool && attribute.type.filter) {
-                return attribute.type.filter?.replace('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}', schoolFilter.items[0].schooltype.id);
+                if (schoolFilter)
+                    return _filter.replace('@{lookup(\'schools\',formData()?.schoolid,\'$expand=schooltype\').schooltype.id}', schoolFilter.items[0].schooltype.id);
+                return undefined;
             }
 
-            return attribute.type.filter;
+            return _filter;
 
            
         } 
@@ -368,7 +369,8 @@ export function LookupControl<T>({
 
     if (isschool && isLoading)
         return <div>...</div>;
-   
+
+    console.log("filtering :", [column?.filter ?? attribute.type.filter])
 
    
     
@@ -388,55 +390,6 @@ export function LookupControl<T>({
     />
 }
 
-//const theme = getTheme();
-//const contentStyles = mergeStyleSets({
-//    container: {
-//        display: 'flex',
-//        flexFlow: 'column nowrap',
-//        alignItems: 'stretch',
-//    },
-//    header: [
-//        // eslint-disable-next-line deprecation/deprecation
-//        theme.fonts.xLargePlus,
-//        {
-//            flex: '1 1 auto',
-//            borderTop: `4px solid ${theme.palette.themePrimary}`,
-//            color: theme.palette.neutralPrimary,
-//            display: 'flex',
-//            alignItems: 'center',
-//            fontWeight: FontWeights.semibold,
-//            padding: '12px 12px 14px 24px',
-//        },
-//    ],
-//    body: {
-//        flex: '4 4 auto',
-//        padding: '0 24px 24px 24px',
-//        overflowY: 'hidden',
-//        selectors: {
-//            p: { margin: '14px 0' },
-//            'p:first-child': { marginTop: 0 },
-//            'p:last-child': { marginBottom: 0 },
-//        },
-//    },
-//});
-
-//const stackProps: Partial<IStackProps> = {
-//    horizontal: true,
-//    tokens: { childrenGap: 40 },
-//    styles: { root: { marginBottom: 20 } },
-//};
-
-//const iconButtonStyles: Partial<IButtonStyles> = {
-//    root: {
-//        color: theme.palette.neutralPrimary,
-//        marginLeft: 'auto',
-//        marginTop: '4px',
-//        marginRight: '2px',
-//    },
-//    rootHovered: {
-//        color: theme.palette.neutralDark,
-//    },
-//};
 
 export default LookupControl;
-//Lookupcontrol
+

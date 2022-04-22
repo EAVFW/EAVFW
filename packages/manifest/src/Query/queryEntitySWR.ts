@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import useSWR, { mutate } from "swr";
 import { getNavigationProperty } from "../Entities/Attributes/getNavigationProperty";
 import { isLookup } from "../Entities/Attributes/Types/Lookup/isLookup";
@@ -24,7 +25,7 @@ export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, quer
         console.log("queryEntitySWR: " + (ready ? key : null), [query]);
         return key;
     }
-    const key = ready ? keyFactory() : null;
+    const key = useMemo(() => ready ? keyFactory() : null, [query, ready]);
     const { data, error } = useSWR(key,
         {
             revalidateOnFocus: false,
