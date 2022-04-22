@@ -2,10 +2,6 @@
   "name": "@eavfw/utils",
   "description": "Model Driven Apps",
   "version": "0.0.38",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/EAVFW/EAVFW.git"
-  },
   "peerDependencies": {},
   "license": "MIT",
   "files": [

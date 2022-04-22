@@ -2,10 +2,6 @@
   "name": "@eavfw/manifest",
   "description": "Manifest Type Definitions",
   "version": "0.0.38",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/EAVFW/EAVFW.git"
-  },
   "peerDependencies": {
     "swr": "1.1.2",
     "react": "17.0.2"
