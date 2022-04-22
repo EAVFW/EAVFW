@@ -17,5 +17,6 @@
   "main": "./src/index.ts",
   "release": {
     "branches": [ "main", "dev" ]
-  }
+  },
+  "scripts": { "release": "semantic-release -e semantic-release-monorepo" }
 }

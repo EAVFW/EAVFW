@@ -28,5 +28,5 @@
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
-  "scripts": { "release": "semantic-release -e semantic-release-monorepo --debug" }
+  "scripts": { "release": "semantic-release -e semantic-release-monorepo" }
 }
