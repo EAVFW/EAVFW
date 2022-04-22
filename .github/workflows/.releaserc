@@ -13,3 +13,6 @@ plugins:
   - - "@semantic-release/github"
 
   - - "@semantic-release/npm"
+
+#  - - "@semantic-release/exec"
+#    - publishCmd: "npm run publish --prefix path/to/your/app"
