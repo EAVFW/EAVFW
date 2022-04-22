@@ -12,7 +12,9 @@ plugins:
 
   - - "@semantic-release/github"
 
-  - - "@semantic-release/npm"
+  - - "multi-semantic-release"
 
-#  - - "@semantic-release/exec"
-#    - publishCmd: "npm run publish --prefix path/to/your/app"
+#  - - "@semantic-release/npm"
+
+  - - "@semantic-release/exec"
+    - publishCmd: "multi-semantic-release --debug"
