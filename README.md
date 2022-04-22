@@ -6,5 +6,3 @@ With the specification the following are distributed:
  - JSON Schema for the json file
 
 
-
- # Release Tak
