@@ -23,5 +23,9 @@
   "main": "./src/index.ts",
   "release": {
     "branches": [ "main", "dev" ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
   }
 }
