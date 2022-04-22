@@ -12,9 +12,7 @@ plugins:
 
   - - "@semantic-release/github"
 
-  - - "multi-semantic-release"
+  - - "@semantic-release/npm"
 
-#  - - "@semantic-release/npm"
-
-  - - "@semantic-release/exec"
-    - publishCmd: "multi-semantic-release --debug"
+#  - - "@semantic-release/exec"
+#    - publishCmd: "multi-semantic-release --debug"
