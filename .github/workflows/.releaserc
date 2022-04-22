@@ -11,3 +11,6 @@ plugins:
     - preset: conventionalcommits
 
   - - "@semantic-release/npm"
+
+extends:
+  - semantic-release-monorepo
