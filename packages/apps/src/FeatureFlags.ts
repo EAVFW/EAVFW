@@ -30,6 +30,11 @@ const Features: {
 
 };
 
+/**
+ * Resolves a feature from the IOC Container
+ * @param name
+ * @param throwIfNotRegistered
+ */
 
 export function ResolveFeature<T extends keyof typeof Features>(name: T, throwIfNotRegistered = true) {
     console.log(`resolving feature '${name}' from ${Object.keys(Features).join(',')}`);
@@ -39,6 +44,12 @@ export function ResolveFeature<T extends keyof typeof Features>(name: T, throwIf
         return throwIfNotDefined(value, `'${name}' has not been registered`);
     return value;
 }
+
+/**
+ * Registers a feature in the IOC Container
+ * @param name
+ * @param view
+ */
 
 
 export function RegisterFeature<T extends keyof typeof Features>(name: T, view: Required<typeof Features>[T]) {
