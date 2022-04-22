@@ -36,7 +36,9 @@
     "bumb-version-forms": "npm --workspace packages/forms version patch -m \"Upgrade to %s\"",
     "bumb-version-utils": "npm --workspace packages/utils version patch -m \"Upgrade to %s\"",
     "bumb-version-hooks": "npm --workspace packages/hooks version patch -m \"Upgrade to %s\"",
-    "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\""
+    "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\"",
+
+    "release": "semantic-release -e semantic-release-monorepo"
   },
   "private": true,
   "workspaces": {
