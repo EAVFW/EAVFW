@@ -1,22 +1,23 @@
 ---
-title: Validtion specification
-keywords: error, warning, info, validtion
+title: Validation specification
+keywords: error, warning, info, validation
 ---
 
-# Validtion
+# Validation
 
-Used to apply extra validtion to entity attributes besides restrictions defined as [json-schema](https://json-schema.org/understanding-json-schema/reference/), using [expressions](https://github.com/delegateas/expressionengine). 
+Used to apply extra validation to entity attributes besides restrictions defined as [json-schema](https://json-schema.org/understanding-json-schema/reference/), using [expressions](https://github.com/delegateas/expressionengine). 
 
-_Note: json-schema only support restrictions, which is treated as errors. If you want to show info or warnings, validtion rules must be used._
+validations can be placed at either entity or attribute level.
+
+_Note: json-schema only support restrictions, which is treated as errors. If you want to show info or warnings, validation rules must be used._
 
 ```json
-// validtion
+// validation
 "<unique-name>": {
     "isValid": "<expression : true|false>",
     "message": "<string>", // optional
     "messageCode": "<string>", // optional
     "messageArgs": [], // optional
-    "target": "<entity-attribute>",
     "type": "<info|warning|error>"
 ```
 
@@ -53,26 +54,30 @@ Must show error to targeted field and block submitting the form.
             "description": "Entity description",
             "attributes": {
                 "Fiedl1": {
-                    "type": "deciaml"
+                    "type": "deciaml",
+                    "validation": {
+                        // attribute level
+                        "warn-above_threshold": {
+                            "isValid": "@greater(formvalue('field1'), 10)",
+                            "message": "Field1 must be greater than {0}",
+                            "messageArgs": [ 10 ],
+                            "target": "field1",
+                            "type": "warning"
+                        },
+                        "err-some_error": {
+                            "isValid": "@less(formvalue('field1'), 100)",
+                            "messageCode": "err-maximum",
+                            "messageArgs": [ 100 ],
+                            "target": "field1",
+                            "type": "error"
+                        }
+                    }
                 }
             },
             "validation": {
-                "warn-above_threshold": {
-                    "isValid": "@greater(formvalue('field1'), 10)",
-                    "message": "Field1 must be greater than {0}",
-                    "messageArgs": [ 10 ],
-                    "target": "field1",
-                    "type": "warning"
-                },
-                "err-some_error": {
-                    "isValid": "@less(formvalue('field1'), 100)",
-                    "messageCode": "err-maximum",
-                    "messageArgs": [ 100 ],
-                    "target": "field1",
-                    "type": "error"
-                }
+                // entity level
             }
-        },
+        }
     }
 }
 ```
