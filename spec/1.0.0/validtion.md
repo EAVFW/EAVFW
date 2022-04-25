@@ -7,6 +7,8 @@ keywords: error, warning, info, validtion
 
 Used to apply extra validtion to entity attributes besides restrictions defined as [json-schema](https://json-schema.org/understanding-json-schema/reference/), using [expressions](https://github.com/delegateas/expressionengine). 
 
+_Note: json-schema only support restrictions, which is treated as errors. If you want to show info or warnings, validtion rules must be used._
+
 ```json
 // validtion
 "<unique-name>": {
