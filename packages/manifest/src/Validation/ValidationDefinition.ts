@@ -6,6 +6,10 @@ export type ValidationDefinitionV1 = {
     }
 }
 
+/**
+ * New Version For Validation
+ * */
+
 export type ValidationDefinitionV2 = {
     isValid: string,
     message?: string,
