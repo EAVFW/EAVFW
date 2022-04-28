@@ -1,5 +1,8 @@
 ﻿branches:
   - name: main
+  - name: releases/*
+    prerelease: true
+    
 
 
 plugins:
