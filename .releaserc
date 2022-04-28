@@ -1,7 +1,6 @@
 ﻿{
   "branches": [
 	"main", 
-	{name: 'dev', prerelease: true},
-	{name: 'releases/**', prerelease: true}
+	{name: 'dev', prerelease: true}
 	]
 }
