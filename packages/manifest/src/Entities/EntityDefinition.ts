@@ -1,7 +1,7 @@
 import { FormDefinition } from "../Forms";
 import { LocaleDefinition } from "../Localization";
 import { MultipleSiteMapDefinitions, SiteMapDefinition } from "../SiteMap";
-import { ValidationDefinition } from "../Validation";
+import { ValidationDefinitionV1, ValidationDefinitionV2 } from "../Validation";
 import { AttributeDefinition } from "./Attributes";
 import { EntityViewsDefinition } from "./EntityViewsDefinition";
 
@@ -20,6 +20,6 @@ export type EntityDefinition = {
         [formName: string]: FormDefinition;
     };
     views?: EntityViewsDefinition,
-    validation?: { [validationKey: string]: ValidationDefinition }
+    validation?: { [validationKey: string]: ValidationDefinitionV1 | ValidationDefinitionV2 }
     [x: string]: any
 };
