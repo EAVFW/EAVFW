@@ -14,7 +14,7 @@
   "type": "module",
   "main": "./src/index.ts",
   "release": {
-    "branches": [ "main", "dev" ]
+    "branches": [ "main", {"name": "dev", "prerelease": true } ]
   },
   "repository": {
     "type": "git",
