@@ -28,4 +28,24 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        GIT_AUTHOR_NAME: pksorensen
+        GIT_AUTHOR_EMAIL: poul@kjeldager.com
       run: npm run release
+
+    #- name: Release EAVFW/Apps
+    #  working-directory: ./packages/apps
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    #    GIT_AUTHOR_NAME: pksorensen
+    #    GIT_AUTHOR_EMAIL: poul@kjeldager.com
+    #  run: npx semantic-release
+
+    #- name: Release EAVFW/Expressions
+    #  working-directory: ./packages/expressions
+    #  env:
+    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    #    NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+    #    GIT_AUTHOR_NAME: pksorensen
+    #    GIT_AUTHOR_EMAIL: poul@kjeldager.com
+    #  run: npx semantic-release

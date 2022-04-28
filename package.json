@@ -38,7 +38,14 @@
     "bumb-version-hooks": "npm --workspace packages/hooks version patch -m \"Upgrade to %s\"",
     "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\"",
 
-    "release": "semantic-release -e semantic-release-monorepo --branches main --debug"
+    "release": "npm-run-all --continue-on-error release-*",
+    "release-apps": "npm run release --workspace packages/apps",
+    "release-manifest": "npm run release --workspace packages/manifest",
+    "release-expressions": "npm run release --workspace packages/expressions",
+    "release-forms": "npm run release --workspace packages/forms",
+    "release-utils": "npm run release --workspace packages/utils",
+    "release-hooks": "npm run release --workspace packages/hooks",
+    "release-nextjs": "npm run release --workspace packages/nextjs"
   },
   "private": true,
   "workspaces": {
