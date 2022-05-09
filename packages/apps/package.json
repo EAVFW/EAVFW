@@ -19,10 +19,7 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts",
-  "scripts": {    "release": "semantic-release -e semantic-release-monorepo"},
-  "release": {
-    "branches": [ "main", "dev" ]
-  },
+  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"

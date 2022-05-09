@@ -15,8 +15,5 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts",
-  "release": {
-    "branches": [ "main", "dev" ]
-  },
   "scripts": { "release": "semantic-release -e semantic-release-monorepo" }
 }
