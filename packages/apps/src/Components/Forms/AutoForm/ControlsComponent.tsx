@@ -91,8 +91,38 @@ const ControlsComponent =
             useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} factory`, factory, renderId);
 
             // const currentData = React.useRef(formData);
+            let order = Object.keys(schema.properties);
 
-            const uiSChema = React.useMemo(() => getUiSchema(schema, factory, formContext), [schema, factory, formContext]);
+            if (schema.dependencies) {
+                 for (let dependant of Object.keys(schema.dependencies)) {
+                    //dependant = has6thvacationweek
+                    //
+                    let depencies = schema.dependencies[dependant];
+                    if (typeof depencies === "object" && !Array.isArray(depencies)) {
+                        let oneOfs = depencies.oneOf;
+                        if (Array.isArray(oneOfs)) {
+                            for (let oneOf of oneOfs) {
+
+                                if (typeof oneOf === "object") {
+                                    let otherProps = Object.keys(oneOf.properties ?? {}).filter(x => x !== dependant);
+
+                                    for (let otherProp of otherProps) {
+
+                                        if (order.indexOf(otherProp) === -1) {
+                                            order.splice(order.indexOf(dependant) + 1, 0, otherProp);
+                                        }
+                                    }
+                                }
+                            }
+                        } 
+                    } 
+                }
+            }
+
+            const uiSChema = React.useMemo(() => ({ ...getUiSchema(schema, factory, formContext), "ui:order": order }), [schema, factory, formContext]);
+
+            console.log("Generated UISchema:", [order,schema, uiSChema]);
+
             // const timerRef = React.useRef(0);
             const onChange = React.useCallback((e: Partial<IChangeEvent<T>>) => {
                 console.group("OnChange", [e, formData, { ...e.formData }]);
@@ -368,7 +398,9 @@ function getUiSchema(
 ): UiSchema {
     //  console.log("jsonSchema",jsonSchema);
     const props = jsonSchema.properties;
-    const deps = mergeDeep({}, ...Object.values(jsonSchema.dependencies ?? {}).map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext))).flat(), mapUISchema(props, formContext));
+    const deps = mergeDeep({},
+        ...Object.values(jsonSchema.dependencies ?? {})
+            .map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext))).flat(), mapUISchema(props, formContext));
     return deps;
     //   console.log("jsonSchema", [jsonSchema, mapUISchema(props), deps]);
 
