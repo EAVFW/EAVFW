@@ -89,7 +89,7 @@ const FormComponent = <T,>(props: FormComponentProps<T>) => {
             {tabs.filter(tabName => form.layout.tabs[tabName]).map((tabName, idx) => {
                 const tab = form.layout.tabs[tabName];
                 return (
-                    <PivotItem className="form-tab"
+                    <PivotItem className="form-tab" style={{ height:"100%" }}
                         headerText={getTabName(tab) ?? tabName}
                         key={tabName}
                         itemKey={tabName}

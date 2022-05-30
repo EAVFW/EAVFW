@@ -29,6 +29,7 @@ import {
     IObjectWithKey,
     MessageBar,
     MessageBarType,
+    IDetailsColumnProps,
 } from "@fluentui/react";
 import { FormValidation, FieldValidation } from "@rjsf/core";
 
@@ -91,6 +92,7 @@ export type ModelDrivenGridViewerProps = {
     listComponent?: React.ComponentType<IDetailsListProps & { formData: any, onChange?: (related: any) => void }>
     onChange?: (data: any) => void
     formData?: any;
+    onHeaderRender?: IRenderFunction<IDetailsColumnProps>
 }
 
 const RibbonStyles: IStackStyles = {
@@ -346,6 +348,8 @@ const getCellText = (item: any, column: IColumn): string => {
     return value;
 };
 
+
+
 const ConditionRenderComponent: React.FC<any> = (
     {
         recordRouteGenerator,
@@ -398,7 +402,7 @@ const ConditionRenderComponent: React.FC<any> = (
 
  
 
-export default function ModelDrivenGridViewer(
+export function ModelDrivenGridViewer(
     {
         locale,
         entity,
@@ -414,7 +418,8 @@ export default function ModelDrivenGridViewer(
         viewName,
         recordRouteGenerator,
         padding,
-        entityName, defaultValues
+        entityName, defaultValues,
+        onHeaderRender
     }: ModelDrivenGridViewerProps) {
 
     const app = useModelDrivenApp();
@@ -598,7 +603,13 @@ export default function ModelDrivenGridViewer(
 
             const columnKeys = Object.keys(view?.columns ?? {}).filter(c => attributes[c] && !(attributes[c].isPrimaryKey ?? false));
 
+            //const headerRender: IRenderFunction<IDetailsColumnProps> = (props, defaultRender) => {
+            //    console.log("Render header", props);
+                
+            //    const DefaultRender =  HeaderRender;
 
+            //    return <DefaultRender {...props!} styles={{ cellName:{ border: "solid 2px black"}, root: { border: "solid 2px black" } }} />
+            //}
 
             console.log("VIEWS", [attributes, view, columnKeys])
             const columns1: Array<IColumn> = columnKeys
@@ -616,6 +627,8 @@ export default function ModelDrivenGridViewer(
                     iconName: columns.find(x => x.key == attributes[column].schemaName)?.iconName,
                     onColumnClick: (e, c) => _onColumnClick(e, c),
                     className: classNames.cell,
+                    onRenderHeader: onHeaderRender,
+                   
                 }));
             console.log("Set Columns", [columns1]);
             return columns1
@@ -703,7 +716,7 @@ export default function ModelDrivenGridViewer(
                             onRenderRow={_onRenderRow}
                             onChange={onChange}
                             formData={formData}
-                            onRenderDetailsHeader={onRenderDetailsHeader}
+                                onRenderDetailsHeader={onRenderDetailsHeader}
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent entityName={entityName}
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
                                 setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
@@ -726,3 +739,5 @@ export function useModelDrivenGridViewerContext<T>() { return useContext<ModelDr
 export function ModelDrivenGridViewerContextProvider<T>({ children, ...props }: PropsWithChildren<ModelDrivenGridViewerContextProps & T>) {
     return <ModelDrivenGridViewerContext.Provider value={props} >{children}</ModelDrivenGridViewerContext.Provider>
 }
+
+export default ModelDrivenGridViewer;

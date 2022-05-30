@@ -49,7 +49,7 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
                 }
             }}>
                 {Object.keys(columns).map((columnName, idx) => (
-                    <Stack.Item grow key={columnName}>
+                    <Stack.Item className={columnName} grow key={columnName}>
                         <ColumnComponent<T>
                             form={form}
                             sections={columns[columnName].sections}

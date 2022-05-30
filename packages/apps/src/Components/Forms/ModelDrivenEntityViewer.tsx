@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { IDropdownOption, IPivotProps, Stack, Sticky, StickyPositionType } from "@fluentui/react";
  
 import isEqual from "react-fast-compare";
@@ -21,6 +21,8 @@ import FormComponent from "./AutoForm/FormComponent";
 
 
 
+const FormHostContext = createContext({ formDefinition: {} as FormDefinition });
+export const useFormHost = () => useContext(FormHostContext);
 
 
 const groupBy = function <T extends { [key: string]: any }>(xs: Array<T>, key: (a: T) => string) {
@@ -94,9 +96,12 @@ function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent:any)
     const [evaluatedForm, setevaluatedForm] = useState(evaluatedFormDelayed);
 
     useEffect(() => {
-        if (!isEvaluatedFormLoading && evaluatedFormDelayed !== evaluatedForm)
+        console.log("useEvaluateFormDefinition: ", [evaluatedForm, isEvaluatedFormLoading]);
+        if (!isEvaluatedFormLoading && evaluatedFormDelayed !== evaluatedForm) {
+            console.log("useEvaluateFormDefinition: setting new form definition", [evaluatedForm, isEvaluatedFormLoading]);
             setevaluatedForm(evaluatedFormDelayed);
-    }, [evaluatedForm, isEvaluatedFormLoading])
+        }
+    }, [evaluatedForm,evaluatedFormDelayed, isEvaluatedFormLoading])
 
     return evaluatedForm;
     //-
@@ -150,7 +155,7 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
   
 
     const evaluatedForm = useEvaluateFormDefinition(form, formDataRef.current);
-
+    const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
     
 
     const getTabName = useCallback((tab: FormTabDefinition) => {
@@ -221,7 +226,7 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
 
     
     return <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
-              
+        <FormHostContext.Provider value={formHostContextValue}>
            
          <Stack verticalFill>
 
@@ -249,7 +254,7 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
 
             />
         </Stack.Item>
-         </Stack>
+            </Stack>     </FormHostContext.Provider>
      </RibbonHost>
 }
 

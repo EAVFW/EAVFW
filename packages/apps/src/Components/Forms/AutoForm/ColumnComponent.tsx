@@ -59,7 +59,7 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
         const ui = (
             <Stack verticalFill className="form-column">
                 {Object.keys(sections).map((sectionName, idx) => (
-                    <Stack.Item grow key={sectionName}>
+                    <Stack.Item  grow key={sectionName}>
                         <SectionComponent<T>
                             form={form}
                             tabName={tabName}

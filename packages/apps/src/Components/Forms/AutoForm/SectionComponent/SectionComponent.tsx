@@ -10,7 +10,7 @@ import { useBoolean } from "@fluentui/react-hooks";
 import { SectionComponentProps } from "./SectionComponentProps";
 import { useChangeDetector } from "@eavfw/hooks";
 import { useModelDrivenApp } from "../../../../useModelDrivenApp";
-import { BaseNestedType, deleteRecordSWR, ViewReference } from "@eavfw/manifest";
+import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, FormTabDefinition, hasColumns, hasControl, ViewReference } from "@eavfw/manifest";
 import { ControlJsonSchemaObject } from "../ControlJsonSchema";
 import { capitalize } from "@eavfw/utils";
 import { useUserProfile } from "../../../Profile/useUserProfile";
@@ -24,6 +24,8 @@ import ControlsComponent from "../ControlsComponent";
 import { RibbonContextProvider } from "../../../Ribbon/RibbonContextProvider";
 import ModelDrivenGridViewer from "../../../Views/ModelDrivenGridViewer";
 import { Views } from "../../../Views/ViewRegister";
+import ColumnComponent from "../ColumnComponent";
+import { Controls } from "../../../Controls/ControlRegister";
 
 
 
@@ -37,6 +39,17 @@ import { Views } from "../../../Views/ViewRegister";
 
 function throwError(err: Error) {
     throw err;
+}
+
+function findEntry(columns: Required<AutoFormColumnsDefinition>["columns"], columnName: string, sectionName: string) {
+
+    if (columnName in columns) {
+        let sections = columns[columnName].sections;
+        if (sectionName in sections) {
+            return sections[sectionName];
+        }
+    }
+  
 }
 
 
@@ -76,6 +89,56 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         useChangeDetector(`SectionComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} locale`, locale, renderId);
 
         const columns = form.columns;
+
+        const section = findEntry(form.layout.tabs[tabName].columns, columnName, sectionName);
+
+        if (hasColumns(section)) {
+            const columns = section.columns;
+            const ui = (
+                <Stack verticalFill horizontal gap={25} styles={{
+                    root: {
+                        display: "grid",
+                        gridTemplateColumns: `${Object.keys(columns).map(c => '1fr').join(' ')};`
+                    }
+                }}>
+                    {Object.keys(columns).map((columnName, idx) => (
+                        <Stack.Item grow className={columnName} key={columnName}>
+                            <ColumnComponent<T>
+                                form={form}
+                                sections={columns[columnName].sections}
+                                tabName={tabName}
+                                columnName={columnName}
+                                entity={entity}
+                                formName={formName}
+                                formData={formData}
+                                onFormDataChange={onFormDataChange}
+                                locale={locale}
+                                entityName={entityName}
+                                factory={factory}
+                                formContext={formContext}
+                                extraErrors={extraErrors}
+                            />
+                        </Stack.Item>
+                    ))}
+                </Stack>
+            );
+            return ui;
+
+
+        } else if (hasControl(section)) {
+            if (section.control in Controls) {
+                const CustomControl = Controls[section.control];
+
+                return <Stack verticalFill  gap={25} styles={{
+                     
+                }}><Stack.Item grow>
+                        <CustomControl />
+                    </Stack.Item>
+                </Stack>
+            }
+
+        }
+
         const app = useModelDrivenApp();
         const router = useRouter();
         const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
