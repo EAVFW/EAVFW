@@ -215,6 +215,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
     const formId = useUuid();
 
    
+   
     const global_etag = useRef<string>(new Date().toISOString());
 
    // const [_errors, setLocalErrors] = useState<JsonSchemaError>();
@@ -427,10 +428,17 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
         return () => { delete callbacks[formId] };
     }, []);
 
+    useEffect(() => {
+        const equal = isEqual(state.formValues, defaultData);
+        console.log("EAVForm Default Data Reset", [state.formValues, defaultData, equal]);
+        if (!equal) {
+            state.formValues = cloneDeep(defaultData) ?? {};
+            setEtag(global_etag.current = new Date().toISOString());
+        }
 
-    //useEffect(() => {
-    //    runValidation();
-    //},[]);
+
+    }, [defaultData]);
+ 
 
     return (
         <EAVFormContext.Provider

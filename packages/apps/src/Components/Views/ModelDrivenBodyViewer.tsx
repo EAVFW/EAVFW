@@ -46,7 +46,7 @@ export function ModelDrivenBodyViewer
 
     const [selectedView, setselectedView] = useState(viewName ?? Object.keys(views)[0]);
     const hasMoreViews = Object.keys(views).length > 1;
-    const data = [recordRouteGenerator, entityName, entity, selectedView, locale];
+  //  const data = [recordRouteGenerator, entityName, entity, selectedView, locale];
 
     const app = useModelDrivenApp();
 

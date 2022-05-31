@@ -140,17 +140,21 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     const [dummyData, setDummyData] = useState<any>();
 
-    const options = useMemo(() => (hasFilterChanged ? remoteOptions: remoteOptions.concat(localOptions.current).concat(initialOptions.filter(io => remoteOptions.filter(ro => ro.key === io.key).length === 0))),
+    const options = useMemo(() => (hasFilterChanged && shouldLoadRemoteOptions ? remoteOptions: remoteOptions.concat(localOptions.current).concat(initialOptions.filter(io => remoteOptions.filter(ro => ro.key === io.key).length === 0))),
         [initialOptions, remoteOptions, dummyData, hasFilterChanged]);
 
 
     useEffect(() => {
-        if (hasFilterChangedFirst.current) {
-            setHasFilterChanged(true);
-            setSelectedKey(null);
+        if (!disabled && !!filter) {
+            console.log("Lookup Control: filter changed", [label, filter]);
+
+            if (hasFilterChangedFirst.current) {
+                setHasFilterChanged(true);
+                setSelectedKey(null);
+            }
+            hasFilterChangedFirst.current = true;
         }
-        hasFilterChangedFirst.current = true;
-    }, [filter]);
+    }, [disabled,filter]);
 
     /**
      * When a modal is submittet, it has changed the raw object data, but not persisted to database. 
@@ -294,7 +298,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     //}, [value, disabled, filter, isLoading])
 
-    console.log("Lookup Control:", [label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, hasFilterChanged, value, selectedValue, selectedKey, loadRemoteValue,
+    console.log("Lookup Control:", [label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
     return (<>
         <Modal isOpen={modalOpen} onDismiss={_hideModal} isBlocking={true} styles={{ scrollableContent: { overflowY: "hidden", maxHeight: "100%" } }}>
@@ -403,7 +407,7 @@ export function LookupControl<T>({
         selectedValue: state.formValues[logicalName.slice(0, -2)],
         value: state.formValues[logicalName],
         id: state.formValues["id"]
-    }))
+    }), "LookupControl" + attributeName);
 
     
     
@@ -412,7 +416,7 @@ export function LookupControl<T>({
 
     
 
-    console.log("Lookup Control", [attributeName, attribute, attribute?.type, column]);
+    console.log("Lookup Control", [attributeName, attribute, attribute?.type, column, logicalName, selectedValue, value, formData]);
 
     if (!isLookup(attribute.type))
         return <div>...</div>;

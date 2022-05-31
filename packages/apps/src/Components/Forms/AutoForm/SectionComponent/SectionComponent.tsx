@@ -152,8 +152,11 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const lastSchema = useRef<ControlJsonSchemaObject>();
 
         const user = useUserProfile();
-
+        //const _entity = entity;
         useEffect(() => {
+           
+         //   const entity = app.getEntity(entityName);
+            console.log("Recalculating Schema:", [entityName, entity, Object.keys(columns).join(", ")]);
             const fields = Object.keys(columns)
                 .filter(
                     (field) =>
@@ -201,7 +204,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     setSchema(schemaDef);
                 }
             }
-        }, [form]);
+        }, [columns]);
 
         useEffect(() => {
             console.groupCollapsed("Setting Related Views");

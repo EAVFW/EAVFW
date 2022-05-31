@@ -6,7 +6,7 @@ import isEqual from "react-fast-compare";
 import { useAsyncMemo, useDebouncer } from "@eavfw/hooks";
 import { AttributeDefinition, EntityDefinition, FormDefinition, FormColumnDefinition, FormTabDefinition, isLookup, queryEntitySWR, IRecord } from "@eavfw/manifest";
 
-import { EAVForm } from "@eavfw/forms"
+import { EAVForm, useEAVForm } from "@eavfw/forms"
 import { FormValidation } from "@rjsf/core";
 import { FormsConfig } from "../../FormsConfig";
 import { OptionsFactory } from "./AutoForm/OptionsFactory";
@@ -32,7 +32,10 @@ const groupBy = function <T extends { [key: string]: any }>(xs: Array<T>, key: (
     }, {} as { [key: string]: Array<T> });
 };
 
-function getForm(app: ModelDrivenApp, entity: EntityDefinition, formName: string) {
+function getForm(app: ModelDrivenApp, entityName: string, formName: string) {
+
+    console.log("Resolving Form for :",[entityName, formName]);
+    const entity = app.getEntity(entityName);
     const form: FormDefinition = entity?.forms?.[formName] ??
     {
         "name": "Main Information",
@@ -76,6 +79,9 @@ function getForm(app: ModelDrivenApp, entity: EntityDefinition, formName: string
         console.error("No form available on entity:", entity);
         throw new Error("No form available");
     }
+
+    console.log("Resolving Form for :", [entityName, formName, Object.keys(form.columns).join(", ")]);
+
     return form;
 }
 
@@ -89,28 +95,65 @@ function createRadioGroups(form: FormDefinition, entity: EntityDefinition) {
 /**
   * Load the evaludated form and only forward it when its actually updated.
   * */
-function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent:any) {
+function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent:any,formName:string,entityName:string) {
   
     const useEvaluateFormDefinition = ResolveFeature("useEvaluateFormDefinition");
     const { evaluatedForm: evaluatedFormDelayed, isEvaluatedFormLoading } = useEvaluateFormDefinition(form, formDataRefcurrent);
     const [evaluatedForm, setevaluatedForm] = useState(evaluatedFormDelayed);
+    const [isLoadingForm, setisLoadingForm] = useState(true);
+
+   // const key = useMemo(() => `${formName}${entityName}`, [formName, entityName])
+
+    const [oldKey, setOldKey] = useState(`${formName}${entityName}`);
+
+  
+
+    //useEffect(() => {
+    //    setOldKey(`${formName}${entityName}`);
+    //}, [formName, entityName]);
+
+    //useEffect(() => {
+
+    //    if (oldKey !== `${formName}${entityName}`) {
+    //        setisLoadingForm(true);
+    //    }
+    //}, [formName, entityName, oldKey]);
+
+
+    //useEffect(() => {
+    //    setisLoadingForm(true);
+    //}, [formName, entityName]);
 
     useEffect(() => {
-        console.log("useEvaluateFormDefinition: ", [evaluatedForm, isEvaluatedFormLoading]);
+        console.log("useEvaluateFormDefinition: ", [entityName,formName,evaluatedForm, isEvaluatedFormLoading]);
         if (!isEvaluatedFormLoading && evaluatedFormDelayed !== evaluatedForm) {
             console.log("useEvaluateFormDefinition: setting new form definition", [evaluatedForm, isEvaluatedFormLoading]);
             setevaluatedForm(evaluatedFormDelayed);
+            setisLoadingForm(false);
         }
-    }, [evaluatedForm,evaluatedFormDelayed, isEvaluatedFormLoading])
+    }, [evaluatedForm, evaluatedFormDelayed, isEvaluatedFormLoading]);
 
-    return evaluatedForm;
+
+
+    //useEffect(() => {
+    //    setisLoadingForm(false);
+    //}, [evaluatedForm]);
+
+
+    //let current= useMemo(() => {
+
+    //    return { evaluatedForm, isLoadingForm: false, formName, entityName };
+    //}, [evaluatedForm,])
+
+    //return current;
+    return { evaluatedForm, isLoadingForm: false };
+  
     //-
 }
 
 type ModelDrivenForm = ModelDrivenEntityViewerProps & {
-    setForm: any,
     form: FormDefinition,
-    formDataRef: any,
+ //   formDataRef: any,
     onFormDataChange: any
 }
 const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
@@ -118,43 +161,32 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
     formName,
     locale,
     entityName,
-    record,
+ //   record,
     factory,
     extraErrors,
-    setForm,
     form,
-    formDataRef, onFormDataChange
+    //formDataRef,
+    onFormDataChange
 }: ModelDrivenForm) => {
 
 
     const app = useModelDrivenApp();
 
     const [selectedForm, setselectedForm] = useState(formName ?? Object.keys(entity.forms ?? {})[0]);
-    
+     
 
-    const firstFormUpdate = useRef(true);
-    useEffect(() => {
-        if (firstFormUpdate.current) {
-            firstFormUpdate.current = false;
-            return;
-        }
-        setForm(getForm(app, entity, formName));
-    }, [entity, formName]);
+    //const firstRecordUpdate = useRef(true);
+    //useEffect(() => {
+    //    if (firstRecordUpdate.current) {
+    //        firstRecordUpdate.current = false;
+    //        return;
+    //    }
+    //    console.log("Record is updated");
+    //    console.log(record);
+    //}, [record]);
 
-    const firstRecordUpdate = useRef(true);
-    useEffect(() => {
-        if (firstRecordUpdate.current) {
-            firstRecordUpdate.current = false;
-            return;
-        }
-        console.log("Record is updated");
-        console.log(record);
-    }, [record]);
-
-
-  
-
-    const evaluatedForm = useEvaluateFormDefinition(form, formDataRef.current);
+    const [{ record }] = useEAVForm((state) => ({ record: state.formValues }));
+    const { evaluatedForm, isLoadingForm } = useEvaluateFormDefinition(form, record, formName, entityName);
     const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
     
 
@@ -224,6 +256,9 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
 
  
 
+    if (isLoadingForm)
+        return <div>loading..</div>
+
     
     return <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
         <FormHostContext.Provider value={formHostContextValue}>
@@ -231,7 +266,7 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
          <Stack verticalFill>
 
         {evaluatedForm?.type !== "QuickCreate" && <Stack.Item styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
-            <h2>{formDataRef.current[primaryField?.logicalName]}</h2>
+                    <h2>{record[primaryField?.logicalName]}</h2>
             <Stack horizontal style={{ alignItems: "center" }}>
                 <h3 style={{ height: "28px" }}>{entity.locale?.[locale]?.displayName ?? entity.displayName}</h3>
                 {hasMoreForms && (
@@ -249,8 +284,8 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
         <Stack.Item grow styles={{ root: { padding: 0 } }}>
             <FormComponent {... { tabs, getTabName, entity, formName, onFormDataChange, locale, factory, extraErrors }}
                 form={evaluatedForm}
-                formData={formDataRef.current}
-                formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: formDataRef.current, onFormDataChange: onFormDataChange }}
+                        formData={record}
+                        formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: onFormDataChange }}
 
             />
         </Stack.Item>
@@ -263,9 +298,20 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
     const app = useModelDrivenApp();
 
-    const { record, entity, formName, onChange, related } = props;
+    const { record, entityName, formName, entity, onChange, related } = props;
 
-    const [form, setForm] = useState<FormDefinition>(getForm(app, entity, formName));
+    const form = useMemo(() => getForm(app, entityName, formName), [app, entityName, formName]);
+
+  //  const [form, setForm] = useState<FormDefinition>(getForm(app, entity, formName));
+
+    //const firstFormUpdate = useRef(true);
+    //useEffect(() => {
+    //    if (firstFormUpdate.current) {
+    //        firstFormUpdate.current = false;
+    //        return;
+    //    }
+    //    setForm(getForm(app, entity, formName));
+    //}, [entity, formName]);
 
     const formdatamerger = useRef({});
 
@@ -287,7 +333,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
         try {
             formdatamerger.current = {};
             console.groupCollapsed("onFormDataChange", [formDataRef.current, formdata]);
-            let oldFormData = Object.assign({}, formDataRef.current);
+            let oldFormData = Object.assign({}, record);
             let changed = false;
 
             let attributes = [...Object.keys(entity.attributes), ...(Object.keys((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}))];
@@ -411,7 +457,9 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
 
 
-            <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange} formDataRef={formDataRef} setForm={setForm} form={form} />
+            <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange}
+                //formDataRef={formDataRef}
+                form={form} />
            
 
         </EAVForm>

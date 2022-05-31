@@ -545,7 +545,7 @@ export function ModelDrivenGridViewer(
 
     //Callback to recalculate the fetchQuery.
     const fetchCallBack = useCallback(() => {
-        console.log("Recalculating fetch qury");
+        console.log("Recalculating fetch qury:", [filter]);
         let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
        
 
@@ -569,14 +569,14 @@ export function ModelDrivenGridViewer(
         } else if (filter) {
             localFilter = filter;
         }
-        console.log("localFilter", localFilter);
+        console.log("Recalculating fetch qury:", localFilter);
 
         if (q && localFilter)
             q = q + "&" + localFilter;
         else if (localFilter)
             q = localFilter;
 
-        console.log('filter', [filter, localColumnFilter, q])
+        console.log('Recalculating fetch qury:', [filter, localColumnFilter, q])
 
         if (q)
             q = '?' + q;
@@ -584,10 +584,11 @@ export function ModelDrivenGridViewer(
         setFetchQuery({ "$expand": expand, "$filter": localFilter?.substr('$filter='.length), "$select": columnAttributes.join(",") });
 
 
-    }, [attributes, columns, columnAttributes]);
+    }, [attributes, columns, columnAttributes, filter]);
 
 
     useEffect(() => {
+    
         fetchCallBack();
     }, [formData?.modifiedon, selectedView]);
 
