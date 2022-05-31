@@ -34,7 +34,7 @@ export function getJsonSchema(
 
 
         const defaultProps: ControlJsonSchema = {
-            title:
+            title: field.displayName ??
                 attribute?.locale?.[locale]?.displayName ??
                 attribute.displayName,
 

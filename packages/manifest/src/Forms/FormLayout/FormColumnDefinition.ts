@@ -17,4 +17,5 @@ export type FormColumnDefinition = {
         allowed?: string[]
     }
     minLength?: number;
+    displayName?: string;
 };
