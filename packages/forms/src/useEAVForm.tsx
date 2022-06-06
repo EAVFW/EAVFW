@@ -86,9 +86,9 @@ import { EAVFormContextState } from "./EAVFormContextState";
 //    }
 //}
 
-export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeout?: number,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeout?: number,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeout?: number,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
+export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
+export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
+export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
 export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?:number|string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>] {
 
     const {
@@ -101,6 +101,7 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
     const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
 
     const timeout = typeof (timeoutOrLogin) === "number" ? timeoutOrLogin : 0;
+    logid = typeof (timeoutOrLogin) === "string" ? logid : logid;
     const reftime = useRef(new Date().getTime());
 
     useEffect(() => {

@@ -225,7 +225,7 @@ const readonlyStylesFunction: (outerProps: any, props: ITextFieldStyleProps) => 
         fieldGroup: {
             backgroundColor: props.disabled || outerProps.readOnly ? props.theme.palette.neutralLight : props.theme.palette.neutralLighterAlt,
             cursor: "default",
-            color:black,
+            color:"black",
 
         }
     }
