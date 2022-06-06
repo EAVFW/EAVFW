@@ -93,6 +93,7 @@ export type ModelDrivenGridViewerProps = {
     onChange?: (data: any) => void
     formData?: any;
     onHeaderRender?: IRenderFunction<IDetailsColumnProps>
+    onBuildFetchQuery?: <T>(q:T) => T;
 }
 
 const RibbonStyles: IStackStyles = {
@@ -400,7 +401,7 @@ const ConditionRenderComponent: React.FC<any> = (
     return <>{getCellText(item, column)}</>
 }
 
- 
+const DefaultOnBuildFetchQuery = (q:any) => q;
 
 export function ModelDrivenGridViewer(
     {
@@ -419,7 +420,8 @@ export function ModelDrivenGridViewer(
         recordRouteGenerator,
         padding,
         entityName, defaultValues,
-        onHeaderRender
+        onHeaderRender,
+        onBuildFetchQuery = DefaultOnBuildFetchQuery
     }: ModelDrivenGridViewerProps) {
 
     const app = useModelDrivenApp();
@@ -538,8 +540,8 @@ export function ModelDrivenGridViewer(
         if (columns.length === 0)
             return [];
 
-        const keys = Object.values(attributes).filter(a => a.isPrimaryKey).map(c => c.logicalName);
-         
+        const keys = Object.values(attributes).filter(a => a.isPrimaryKey || a.isRowVersion).map(c => c.logicalName);
+        
         return columns.concat(keys);
     }, [selectedView, entity]);
 
@@ -585,7 +587,7 @@ export function ModelDrivenGridViewer(
         if (q)
             q = '?' + q;
 
-        setFetchQuery({ "$expand": expand, "$filter": localFilter?.substr('$filter='.length), "$select": columnAttributes.join(",") });
+        setFetchQuery(onBuildFetchQuery({ "$expand": expand, "$filter": localFilter?.substr('$filter='.length), "$select": columnAttributes.join(",") }));
 
 
     }, [attributes, columns, columnAttributes, filter]);

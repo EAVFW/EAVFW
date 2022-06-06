@@ -5,6 +5,7 @@ import { AttributeTypeDefinition } from "./Types/AttributeTypeDefinition";
 export type AttributeDefinition = {
     isPrimaryField?: boolean;
     isPrimaryKey?: boolean;
+    isRowVersion?: boolean;
     locale?: { [locale: string]: Omit<LocaleDefinition, "pluralName"> };
     displayName: string;
     schemaName: string;
