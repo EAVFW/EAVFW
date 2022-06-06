@@ -16,7 +16,11 @@ export function getJsonSchema(
     try {
         console.group("getJsonSchema");
         console.log(arguments);
-        const description = attribute.locale?.[locale]?.description ?? attribute.description;
+
+        const { locale, descriptions } = formContext;
+        const descriptionInfo = descriptions.filter((d: any) => d.name === attribute.logicalName && d.locale == locale)?.[0];
+        const description = descriptionInfo?.description ?? attribute.locale?.[locale]?.description ?? attribute.description;
+
 
         const type =
             typeof attribute.type === "object"
@@ -39,6 +43,7 @@ export function getJsonSchema(
                 attribute.displayName,
 
             readOnly: attribute.readonly || field.readonly,
+            description: description,
             ["x-description"]: description,
             ["x-control"]: typeof (controlType) === "object" ? controlType.type : controlType,
             "x-widget": field.visible === false ? "hidden" : undefined,

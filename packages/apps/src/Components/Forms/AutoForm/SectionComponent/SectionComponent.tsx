@@ -274,7 +274,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                 {views
                     .map((gridprops) => (
 
-                        <RibbonContextProvider>
+                        <RibbonContextProvider key={gridprops.key}>
                             <ModelDrivenGridViewer
                                 {...gridprops}
                                 locale={locale}

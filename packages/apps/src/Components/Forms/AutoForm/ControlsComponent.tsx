@@ -1,8 +1,8 @@
 
 
 
-import React, { Fragment, PropsWithChildren, useContext, useMemo, useRef } from "react";
-import { FieldTemplateProps, IChangeEvent, UiSchema,  FieldValidation, AjvError } from "@rjsf/core";
+import React, { Fragment, PropsWithChildren, useCallback, useContext, useMemo, useRef } from "react";
+import { FieldTemplateProps, IChangeEvent, UiSchema, FieldValidation, AjvError, FormProps } from "@rjsf/core";
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import Form from "@rjsf/fluent-ui";
 import { mergeDeep } from "@eavfw/utils";
@@ -39,6 +39,11 @@ import { OptionsFactory } from "./OptionsFactory";
 import { ControlJsonSchemaObject } from "./ControlJsonSchema";
 import { FormValidation } from "../FormValidation";
 import { useModelDrivenApp } from "../../../useModelDrivenApp";
+import FieldTemplate, { EAVFWLabel } from "./Templates/FieldTemplate";
+import { useVisitedContext } from "../../../../../forms/src/EAVForm";
+import { useAppInfo } from "../../../useAppInfo";
+import TextWidget from "./Widgets/TextWidget";
+import CheckboxWidget from "./Widgets/CheckboxWidget";
 
 declare module '@rjsf/core' {
     interface WidgetProps {
@@ -70,17 +75,33 @@ export type ControlsComponentProps<T> = {
     extraErrors?: FormValidation;
 }
 
+function createVisitedObject(id: string) {
+    let keys = id.split('_');
+    let obj = {} as any;
+    let root = obj;
+    while (keys.length) {
+        let a = keys.shift()!;
+        obj[a] = keys.length === 0 ? true : {};
+        obj = obj[a]
+    }
+    return root;
+}
+
+
+const WidgetRegister = { SelectWidget: SelectWidget, TextWidget: TextWidget, CheckboxWidget: CheckboxWidget }
 
 const ControlsComponent =
     <T extends {}>(props1: PropsWithChildren<ControlsComponentProps<T>>) => {
         const {
-            schema, onFormDataChange, formData, locale, factory, tabName, entityName, formContext
+            schema, onFormDataChange, formData, locale, factory, tabName, formContext
             , columnName,
             sectionName,
             extraErrors = {} as FormValidation
         } = props1;
         try {
             console.group("ControlsComponent: ");
+
+            const app = useAppInfo();
 
             const renderId = useRef(new Date().toISOString());
             renderId.current = new Date().toISOString();
@@ -89,6 +110,9 @@ const ControlsComponent =
             useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} formData`, formData, renderId);
             useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} locale`, locale, renderId);
             useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} factory`, factory, renderId);
+
+
+            const { visitedFields, setVisitedFields } = useVisitedContext();
 
             // const currentData = React.useRef(formData);
             let order = Object.keys(schema.properties);
@@ -136,16 +160,18 @@ const ControlsComponent =
                 onFormDataChange?.(e.formData!);
                 // }, 500);
             }, [onFormDataChange]);
-            const onBlur = (id: string, value: any) => {
-                console.group("onBlur")
-            };
+
+            const addVisited = useCallback<Required<FormProps<any>>['onBlur']>((id, value) => {
+                setVisitedFields(id.substr(app.currentEntityName.length + 1), schema.type === "array" ? createVisitedObject(id.substr(app.currentEntityName.length + 1)) : true);
+            }, [app.currentEntityName]);
+
 
             if (!process.browser)
                 return <div>"loading"</div>
 
             let formErrors = {} as FormValidation;
             console.log("AutoForm: ControlsComponent: ExtraErrors", extraErrors);
-            for (let extraErrorsKey in Object.keys(extraErrors)) {
+            for (let extraErrorsKey of Object.keys(extraErrors)) {
                 let keys = extraErrorsKey.split('.');
                 if (keys[0] in formErrors) {
 
@@ -153,7 +179,7 @@ const ControlsComponent =
                     formErrors[keys[0]] = { __errors: formErrors?.[keys[0]]?.__errors.concat(extraErrors[extraErrorsKey].__errors) } as FieldValidation;
                     console.log("After", formErrors[keys[0]])
                 } else {
-                    console.log("Creating", extraErrors[extraErrorsKey].__errors)
+                    console.log("Creating", [extraErrorsKey,extraErrors[extraErrorsKey], /*extraErrors[extraErrorsKey].__errors*/])
                     formErrors[keys[0]] = extraErrors[extraErrorsKey];
                 }
             }
@@ -161,7 +187,7 @@ const ControlsComponent =
             return (
                 <div style={{ padding: 20 }} suppressHydrationWarning={true}>
                     <Form
-
+                        onBlur={addVisited}
                         schema={schema as JSONSchema7}
                         onChange={onChange}
                         formContext={{
@@ -171,12 +197,14 @@ const ControlsComponent =
                             extraErrors: extraErrors,
                             formErrors: formErrors
                         }}
-                        idPrefix={entityName}
+                        idPrefix={app.currentEntityName}
                         formData={formData}
                         fields={{ ControlHostWidget: ControlHostWidget }}
-                        widgets={{ SelectWidget: SelectWidget }}
+                        widgets={WidgetRegister}
                         uiSchema={uiSChema}
+                        FieldTemplate={FieldTemplate}
                         transformErrors={transformErrors}
+                        showErrorList={false}
                         extraErrors={formErrors} // Even though we have to manually access and add the error for custom widget ourself through formContext, we have to set the error here too, to make thure the errors is added to the overview.
                     ><Fragment /></Form></div>
             );
@@ -196,7 +224,8 @@ const readonlyStylesFunction: (outerProps: any, props: ITextFieldStyleProps) => 
     return {
         fieldGroup: {
             backgroundColor: props.disabled || outerProps.readOnly ? props.theme.palette.neutralLight : props.theme.palette.neutralLighterAlt,
-            cursor: "default"
+            cursor: "default",
+            color:black,
 
         }
     }
@@ -319,24 +348,24 @@ export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
 };
 
 
-const CustomLabelWrapper = ({ schema, textProps, formContext }: { schema: any, formContext: any, textProps: ITextFieldProps }) => {
+//const CustomLabelWrapper = ({ schema, textProps, formContext }: { schema: any, formContext: any, textProps: ITextFieldProps }) => {
 
 
 
-    const app = useModelDrivenApp();
-    const { attributeName, entityName, fieldName, formName
-    } = schema["x-widget-props"]!;
-    const { locale, descriptions } = formContext;
+//    const app = useModelDrivenApp();
+//    const { attributeName, entityName, fieldName, formName
+//    } = schema["x-widget-props"]!;
+//    const { locale, descriptions } = formContext;
 
-    const entity = app.getEntity(entityName!);
-    const attribute = entity.attributes[attributeName!];
-    const descriptionInfo = descriptions.filter((d: any) => d.name === attribute.logicalName && d.locale == locale)?.[0];
+//    const entity = app.getEntity(entityName!);
+//    const attribute = entity.attributes[attributeName!];
+//    const descriptionInfo = descriptions.filter((d: any) => d.name === attribute.logicalName && d.locale == locale)?.[0];
 
-    console.log("CustomLabelWrapper", [descriptions, descriptionInfo])
-    return <CustomLabel
-        label={schema.title} description={descriptionInfo?.description ?? schema["x-description"]}  {...textProps} />
+//    console.log("CustomLabelWrapper", [descriptions, descriptionInfo])
+//    return <CustomLabel
+//        label={schema.title} description={descriptionInfo?.description ?? schema["x-description"]}  {...textProps} />
 
-}
+//}
 
 
 const emojiIcon: IIconProps = { iconName: 'Clear' };
@@ -360,17 +389,16 @@ function mapUISchema(props: any, formContext: any) {
 
     if (typeof props === "object") {
         const entries = Object.keys(props).map((k) => [k, {
-            //   "ui:label": false,
             "ui:disabled": props[k]?.["x-widget-props"]?.disabled,
             "ui:widget": getControl(props[k], "widget"),
-            "ui:field": getControl(props[k], "field"),
-            // "ui:FieldTemplate": CustomFieldTemplate,
+            "ui:field": getControl(props[k], "field"),             
             "ui:props": {
                 ...props[k]["x-widget-props"] ?? {},
                 styles: readonlyStylesFunction.bind(null, props[k]),  //props[k].readOnly ? readonlyStylesFunction : props[k]["x-widget-props"]?.["styles"],
-                // onRenderLabel: (props: any) => null,
-                onRenderLabel: (textProps: ITextFieldProps) => <CustomLabelWrapper textProps={textProps} formContext={formContext} schema={props[k]} />,
-                onRenderCaretDown: _onRenderCaretDown.bind(null, formContext, props[k])
+                onRenderCaretDown: _onRenderCaretDown.bind(null, formContext, props[k]),
+
+                //Hack to render labels correct for booleans, due to react json form will set renderLabel=false for booleans
+                onRenderLabel: (p: any) => props[k].type === "boolean" ? <EAVFWLabel {...p} description={props[k]?.description} /> : undefined
             },
             "ui:placeholder": props[k]?.["x-widget-props"]?.placeholder,
             "ui:emptyValue": null
@@ -407,46 +435,7 @@ function getUiSchema(
     // return mapUISchema(props);
 }
 
-
-
-const CustomFieldTemplate = (props: FieldTemplateProps) => {
-    const app = useModelDrivenApp();
-
-    const { id, classNames, label, help, required, description, errors, children, schema, formContext, hidden } = props;
-
-    const { attributeName, entityName, fieldName, formName
-    } = schema["x-widget-props"]!;
-    const { locale, descriptions } = formContext;
-
-    const entity = app.getEntity(entityName!);
-    const attribute = entity.attributes[attributeName!];
-    const descriptionInfo = descriptions.filter((d: any) => d.name === attribute.logicalName && d.locale == locale)?.[0];
-    console.log("CustomFieldTemplate", [props, descriptionInfo]);
-
-    const title =
-        attribute?.locale?.[locale]?.displayName ??
-        attribute.displayName;
-
-    //if (schema.type === "boolean") {
-    //    return (
-    //        <div className={classNames} style={{ marginBottom: 15, display: hidden ? "none" : undefined }}>
-    //            <CustomLabel {...props} label={title} description={descriptionInfo?.description ?? schema["x-description"]} />
-    //            {children}
-    //            {errors}
-    //            {help}
-    //        </div>
-    //    );
-    //}
-
-    return (
-        <div className={classNames} style={{ marginBottom: 15, display: hidden ? "none" : undefined }}>
-            {/*<CustomLabel {...props} label={title} description={descriptionInfo?.description ?? schema["x-description"]} />*/}
-            {children}
-            {errors}
-            {help}
-        </div>
-    );
-}
+ 
 
 
 /**

@@ -8,7 +8,8 @@ import { Controls } from "./ControlRegister";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import ChoicesControl from "./ChoicesControl/ChoicesControl";
 import LookupControl from "./LookupControl/LookupControl";
-
+import { EAVFWLabel } from "../Forms/AutoForm/Templates/FieldTemplate";
+import { FieldTemplateProps } from "@rjsf/core";
 
 
 export type ControlHostWidgetProps = {
@@ -31,15 +32,15 @@ export type ControlHostWidgetState = {
 }
 
 
-export const ControlHostWidgetNew: React.FC = (props: any) => {
+export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
 
     const app = useModelDrivenApp();
 
     const { extraErrors, formErrors } = props.formContext;
-    const { schema, uiSchema, required, disabled, formData } = props;
+    const { schema, uiSchema, required, disabled, formData, rawDescription } = props;
 
 
-    const { ["x-control"]: control } = schema;
+    const { ["x-control"]: control } = schema as any;
     const { ["ui:props"]: { styles, onRenderLabel, entityName, fieldName, attributeName, formName } } = uiSchema;
     console.log("ControlHostWidgetNew", [props, styles, onRenderLabel, control, Controls]);
 
@@ -69,8 +70,10 @@ export const ControlHostWidgetNew: React.FC = (props: any) => {
 
     let errorMessage = formErrors[fieldName.toLowerCase().replace(' ', '')]?.__errors?.join(' ');
 
-    const LabelTemplate = () => column?.label === false ? null : (onRenderLabel?.(props) ??
-        <Label required={required} disabled={disabled}>{label}</Label>);
+    //const LabelTemplate = () => column?.label === false ? null : (onRenderLabel?.(props) ??
+    //    <Label required={required} disabled={disabled}>{label}</Label>);
+
+    const LabelTemplate = () => column?.label === false ? null : <EAVFWLabel id={props.id} disabled={disabled} required={required} label={label ?? schema.title}  description={rawDescription ?? schema.description} />
 
     if (control && control in Controls) {
         const CustomControl = Controls[control];
@@ -87,7 +90,7 @@ export const ControlHostWidgetNew: React.FC = (props: any) => {
         return (
             <>
                 <LabelTemplate />
-                <ChoicesControl value={props.formData} {...props}
+                <ChoicesControl value={props.formData} {...props as any}
                     onChange={_onChange} {...props.schema["x-widget-props"]!} />
             </>
         );
@@ -104,7 +107,7 @@ export const ControlHostWidgetNew: React.FC = (props: any) => {
     return <>
 
         <LabelTemplate />
-        <LookupControl key={props.name} value={props.formData} {...props}
+        <LookupControl key={props.id} value={props.formData} {...props as any}
             onChange={_onChange} {...props.schema["x-widget-props"]!} {...props.uiSchema}
             extraErrors={localExtraErrors} errorMessage={errorMessage} />
     </>

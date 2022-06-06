@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { IDropdownOption, IPivotProps, Stack, Sticky, StickyPositionType } from "@fluentui/react";
+import { IDropdownOption, IPivotProps, mergeStyles, ShimmerElementsGroup, ShimmerElementType, Stack, Sticky, StickyPositionType } from "@fluentui/react";
  
 import isEqual from "react-fast-compare";
 
@@ -24,6 +24,15 @@ import FormComponent from "./AutoForm/FormComponent";
 const FormHostContext = createContext({ formDefinition: {} as FormDefinition });
 export const useFormHost = () => useContext(FormHostContext);
 
+const wrapperClass = mergeStyles({
+    padding: 2,
+    selectors: {
+        '& > .ms-Shimmer-container': {
+            margin: '10px 0',
+        },
+    },
+});
+const wrapperStyle = { display: 'flex' };
 
 const groupBy = function <T extends { [key: string]: any }>(xs: Array<T>, key: (a: T) => string) {
     return xs.reduce(function (rv, x) {
@@ -246,7 +255,25 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
     }, [evaluatedForm]);
 
     if (!evaluatedForm || !tabs.length || isLoading) {
-        return <div>loading form...</div>
+
+        return <div style={wrapperStyle}>
+            <ShimmerElementsGroup
+                shimmerElements={[
+                    { type: ShimmerElementType.line, width: 180, height: 50 },
+                    { type: ShimmerElementType.gap, width: 130, height: 30 },
+                ]}
+            />
+            <ShimmerElementsGroup
+                flexWrap
+                shimmerElements={[
+                    { type: ShimmerElementType.line, width: 70, height: 30 },
+                    { type: ShimmerElementType.line, width: 70, height: 30 },
+                    { type: ShimmerElementType.gap, width: 70, height: 30 },
+                ]}
+            />
+        </div>
+
+     //   return <div>loading form...</div>
     }
     const forms = entity?.forms ?? {};
 
@@ -262,34 +289,34 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
     
     return <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
         <FormHostContext.Provider value={formHostContextValue}>
-           
-         <Stack verticalFill>
+            <Stack verticalFill>
 
-        {evaluatedForm?.type !== "QuickCreate" && <Stack.Item styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
-                    <h2>{record[primaryField?.logicalName]}</h2>
-            <Stack horizontal style={{ alignItems: "center" }}>
-                <h3 style={{ height: "28px" }}>{entity.locale?.[locale]?.displayName ?? entity.displayName}</h3>
-                {hasMoreForms && (
-                    <FormSelectorComponent
-                        onChangeView={_onChangeForm}
-                        selectedForm={selectedForm}
-                        entity={entity}
-                        styles={{ root: { padding: 0 } }}
-                    />
-                )}
+            {evaluatedForm?.type !== "QuickCreate" && <Stack.Item styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
+                        <h2>{record[primaryField?.logicalName]}</h2>
+                <Stack horizontal style={{ alignItems: "center" }}>
+                    <h3 style={{ height: "28px" }}>{entity.locale?.[locale]?.displayName ?? entity.displayName}</h3>
+                    {hasMoreForms && (
+                        <FormSelectorComponent
+                            onChangeView={_onChangeForm}
+                            selectedForm={selectedForm}
+                            entity={entity}
+                            styles={{ root: { padding: 0 } }}
+                        />
+                    )}
+                </Stack>
+            </Stack.Item>
+            }
+
+            <Stack.Item grow styles={{ root: { padding: 0 } }}>
+                <FormComponent {... { tabs, getTabName, entity, formName, onFormDataChange, locale, factory, extraErrors }}
+                    form={evaluatedForm}
+                            formData={record}
+                            formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: onFormDataChange }}
+
+                />
+            </Stack.Item>
             </Stack>
-        </Stack.Item>
-        }
-
-        <Stack.Item grow styles={{ root: { padding: 0 } }}>
-            <FormComponent {... { tabs, getTabName, entity, formName, onFormDataChange, locale, factory, extraErrors }}
-                form={evaluatedForm}
-                        formData={record}
-                        formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: onFormDataChange }}
-
-            />
-        </Stack.Item>
-            </Stack>     </FormHostContext.Provider>
+        </FormHostContext.Provider>
      </RibbonHost>
 }
 
