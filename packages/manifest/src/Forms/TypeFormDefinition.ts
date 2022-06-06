@@ -7,5 +7,6 @@ export type TypeFormDefinition = {
     column: string;
     section: string;
     view?: string;
+    filter?: string;
     ribbon?: RibbonViewInfo,
 };

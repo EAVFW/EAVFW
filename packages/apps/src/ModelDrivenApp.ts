@@ -169,6 +169,7 @@ export class ModelDrivenApp {
                                     entityName: entity.logicalName,
                                     attribute: attribute.logicalName,
                                     entity: entity,
+                                    filter: form.filter,
                                     key: entity.logicalName + attribute.logicalName
                                 });
                             } else {

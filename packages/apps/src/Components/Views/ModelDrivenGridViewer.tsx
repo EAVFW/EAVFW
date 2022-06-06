@@ -558,6 +558,10 @@ export function ModelDrivenGridViewer(
                 let cData = c.data['columnFilter'] as IColumnData;
                 return cData.odataFilter;
             });
+        let manifestFilter = entity.views?.[selectedView]?.filter;
+        if (manifestFilter) {
+            localFilters.push(manifestFilter); 
+        }
 
         let localColumnFilter = localFilters.join(" and ");
 

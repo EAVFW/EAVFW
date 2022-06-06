@@ -279,7 +279,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                 {...gridprops}
                                 locale={locale}
                                 onChange={onFormDataChange}
-                                filter={`$filter=${gridprops.attribute} eq ${formData.id}`}
+                                filter={`$filter=${gridprops.attribute} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter :'')}
                                 formData={formData}
                                 newRecord={formData.id ? false : true}
                                 defaultValues={formData[gridprops.entity.collectionSchemaName.toLowerCase()]}

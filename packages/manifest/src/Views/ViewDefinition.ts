@@ -8,6 +8,7 @@ export type ViewDefinition = {
         allowed?: string[]
     },
     ribbon?: RibbonViewInfo,
+    filter?: string,
     columns?: {
         [column: string]: ViewColumnDefinition;
 
