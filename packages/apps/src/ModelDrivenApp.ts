@@ -162,10 +162,13 @@ export class ModelDrivenApp {
                         const form = attribute.type.forms[formKey];
                         if (form.type === "Main") {
                             if ((formKey === formName || formName === form.name) && this.isMatchingForm(form, tabName, columnName, sectionName)) {
+
+                                const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];
+
                                 references.push({
-                                    viewName: form.view,
-                                    ribbon: form.ribbon,
-                                    view: entity?.views?.[form.view!],
+                                    viewName: viewName ,
+                                    ribbon: form.ribbon ?? entity?.views?.[viewName]?.ribbon ,
+                                    view: entity?.views?.[viewName],
                                     entityName: entity.logicalName,
                                     attribute: attribute.logicalName,
                                     entity: entity,

@@ -218,7 +218,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                         sectionName
                     );
                 console.log(app);
-                console.log(views);
+                console.log("Setting Views",views);
                 setViews(views);
             } finally {
                 console.groupEnd();
