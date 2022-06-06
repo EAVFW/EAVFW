@@ -330,7 +330,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             disabled={disabled || isLoading}
             
             ariaLabel={label}
-            styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
+            styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight, color:"black" }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
             onChange={_onChange}
             
             options={options}
