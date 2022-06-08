@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { createContext, memo, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { IDropdownOption, IPivotProps, mergeStyles, ShimmerElementsGroup, ShimmerElementType, Stack, Sticky, StickyPositionType } from "@fluentui/react";
  
 import isEqual from "react-fast-compare";
@@ -18,6 +18,7 @@ import { ResolveFeature } from "../../FeatureFlags";
 import { RibbonHost } from "../Ribbon/RibbonHost";
 import { FormSelectorComponent } from "./FormSelectorComponent";
 import FormComponent from "./AutoForm/FormComponent";
+import { useAppInfo } from "../../useAppInfo";
 
 
 
@@ -320,10 +321,28 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
      </RibbonHost>
 }
 
+const useObservable = (value:any,...deps:any[]) => {
+
+    const oldvalue = useRef(value);
+    const oldvalues = useRef(deps);
+    //const [state,setState] = useState(value);
+    useEffect(() => {
+        console.log("useObservalbe:", [value, ...deps, oldvalues.current.some((c, i) => c !== deps[i])]);
+        if (oldvalues.current.some((c, i) => c !== deps[i]) && oldvalue.current !== value) {
+            oldvalues.current = deps;
+            oldvalue.current = value;
+        //    setState(value);
+        }
+    }, [value, ...deps])
+
+    return oldvalue.current;
+}
+
 export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (props) => {
 
 
     const app = useModelDrivenApp();
+    const info = useAppInfo();
 
     const { record, entityName, formName, entity, onChange, related } = props;
 
@@ -343,24 +362,26 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     const formdatamerger = useRef({});
 
     const formDataRef = useRef(record);
-    const [etag, setEtag] = useState(new Date().toISOString());
+  //  const [etag, setEtag] = useState(new Date().toISOString());
 
+  //  const outerRecord = useObservable(record, info.currentRecordId, info.currentEntityName);
     /**
-     * When the outher recrod is updated, trigger a etag changed that dependent parts can monitor
+     * When recordid or entityname changes, reset to other record.
      **/
     useEffect(() => {
+        console.log("Changing form record state from outside", [record, info.currentRecordId, info.currentEntityName]);
         formDataRef.current = record;
-        setEtag(new Date().toISOString());
+        //  setEtag(new Date().toISOString());
     }, [record]);
 
-    const [groups] = useState(createRadioGroups(form, entity));
+    const groups = useMemo(()=>createRadioGroups(form, entity),[form,entity]);
 
 
     const onFormDataChange2 = useCallback((formdata: any) => {
         try {
             formdatamerger.current = {};
             console.groupCollapsed("onFormDataChange", [formDataRef.current, formdata]);
-            let oldFormData = Object.assign({}, record);
+            let oldFormData = Object.assign({}, formDataRef.current);
             let changed = false;
 
             let attributes = [...Object.keys(entity.attributes), ...(Object.keys((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}))];
@@ -454,14 +475,14 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                 }
             }
 
-            console.log(oldFormData);
-            console.log(formDataRef.current);
-            console.log(changed);
+            console.log("ModelDrivenEntityViewer: oldFormData", oldFormData);
+            console.log("ModelDrivenEntityViewer: formDataRef.current", formDataRef.current);
+            console.log("ModelDrivenEntityViewer: changed", changed);
 
             if (changed) {
                 formDataRef.current = oldFormData;
                 onChange?.(oldFormData);
-                setEtag(new Date().toISOString());
+               // setEtag(new Date().toISOString());
             }
 
         } finally {
@@ -482,15 +503,10 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
     return (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
-
-
-            <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange}
-                //formDataRef={formDataRef}
-                form={form} />
-           
-
+            <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange} form={form} />
         </EAVForm>
     );
+    
 }
 
 export default ModelDrivenEntityViewer

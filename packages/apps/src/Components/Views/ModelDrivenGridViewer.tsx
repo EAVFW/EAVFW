@@ -30,6 +30,7 @@ import {
     MessageBar,
     MessageBarType,
     IDetailsColumnProps,
+    useTheme,
 } from "@fluentui/react";
 import { FormValidation, FieldValidation } from "@rjsf/core";
 
@@ -57,7 +58,7 @@ import { RibbonBar } from '../Ribbon/RibbonBar';
 import { filterRoles } from '../../filterRoles';
 
 
-const theme = getTheme();
+//const theme = getTheme();
 
 export type ModelDrivenGridViewerState = {
     columns: IColumn[];
@@ -322,18 +323,7 @@ function _getKey(item: any, index?: number): string {
     return item.key;
 }
 
-const _onRenderRow: IDetailsListProps['onRenderRow'] = props => {
-    const customStyles: Partial<IDetailsRowStyles> = {};
 
-    if (props) {
-        if (props.itemIndex % 2 === 0) {
-            // Every other row renders with a different background color
-            customStyles.root = { backgroundColor: theme.palette.neutralLighterAlt };
-        }
-        return <DetailsRow {...props} styles={customStyles} />;
-    }
-    return null;
-};
 
 const getCellText = (item: any, column: IColumn): string => {
     let value = item && column && column.fieldName ? item[column.fieldName] : '';
@@ -647,6 +637,24 @@ export function ModelDrivenGridViewer(
 
     const hasMoreViews = Object.keys(entity?.views ?? {}).length > 1;
 
+
+    const theme = useTheme();
+
+    const _onRenderRow = useCallback<Required<IDetailsListProps>['onRenderRow']>( props => {
+        const customStyles: Partial<IDetailsRowStyles> = {};
+
+        if (props) {
+            if (props.itemIndex % 2 === 0) {
+                // Every other row renders with a different background color
+                customStyles.root = { backgroundColor: theme.palette.neutralLighterAlt };
+            }
+            return <DetailsRow {...props} styles={customStyles} />;
+        }
+        return null;
+    }, [theme.palette.neutralLighterAlt]);
+
+    console.log("WithTimeButton Theme", theme.palette.themePrimary);
+
     if (!columns.length)
         return <div>loading data</div>
 
@@ -656,6 +664,8 @@ export function ModelDrivenGridViewer(
         window.location.href = recordRouteGenerator(item);
     }
     console.log([showViewSelector, hasMoreViews]);
+
+
 
 
     return (
