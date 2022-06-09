@@ -161,12 +161,12 @@ function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent:any,
     //-
 }
 
-type ModelDrivenForm = ModelDrivenEntityViewerProps & {
+type ModelDrivenFormProps = ModelDrivenEntityViewerProps & {
     form: FormDefinition,
  //   formDataRef: any,
     onFormDataChange: any
 }
-const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
+const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     entity,
     formName,
     locale,
@@ -177,7 +177,7 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
     form,
     //formDataRef,
     onFormDataChange
-}: ModelDrivenForm) => {
+}) => {
 
 
     const app = useModelDrivenApp();
@@ -195,7 +195,7 @@ const ModelDrivenForm: React.FC<ModelDrivenForm> = ({
     //    console.log(record);
     //}, [record]);
 
-    const [{ record }] = useEAVForm((state) => ({ record: state.formValues }));
+    const [{ record }] = useEAVForm((state) => ({ record: state.formValues }),"ModelDrivenForm FormValues");
     const { evaluatedForm, isLoadingForm } = useEvaluateFormDefinition(form, record, formName, entityName);
     const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
     
@@ -368,11 +368,11 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     /**
      * When recordid or entityname changes, reset to other record.
      **/
-    useEffect(() => {
-        console.log("Changing form record state from outside", [record, info.currentRecordId, info.currentEntityName]);
-        formDataRef.current = record;
-        //  setEtag(new Date().toISOString());
-    }, [record]);
+    //useEffect(() => {
+    //    console.log("Changing form record state from outside", [record, info.currentRecordId, info.currentEntityName]);
+    //    formDataRef.current = record;
+    //    //  setEtag(new Date().toISOString());
+    //}, [record]);
 
     const groups = useMemo(()=>createRadioGroups(form, entity),[form,entity]);
 
@@ -502,8 +502,8 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     }, [onFormDataChange2]);
 
     return (
-        <EAVForm defaultData={record} onChange={onFormDataChange}>
-            <ModelDrivenForm key={`${info.currentEntityName}${info.currentRecordId}`}  {...props} onFormDataChange={onFormDataChange} form={form} />
+        <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
+            <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange} form={form} />
         </EAVForm>
     );
     
