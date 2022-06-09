@@ -586,7 +586,10 @@ export function ModelDrivenGridViewer(
         if (q)
             q = '?' + q;
 
-        setFetchQuery(onBuildFetchQuery({ "$expand": expand, "$filter": localFilter?.substr('$filter='.length), "$select": columnAttributes.join(",") }));
+        if (localFilter?.startsWith("$filter="))
+            localFilter = localFilter?.substr('$filter='.length);
+
+        setFetchQuery(onBuildFetchQuery({ "$expand": expand, "$filter": localFilter, "$select": columnAttributes.join(",") }));
 
 
     }, [attributes, columns, columnAttributes, filter]);
