@@ -195,7 +195,9 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     //    console.log(record);
     //}, [record]);
 
-    const [{ record }] = useEAVForm((state) => ({ record: state.formValues }),"ModelDrivenForm FormValues");
+    const [{ record }] = useEAVForm((state) => ({ record: state.formValues }), "ModelDrivenForm FormValues");
+    useEffect(() => { console.log("ModelDrivenForm FormValues changed",record)}, [record]);
+
     const { evaluatedForm, isLoadingForm } = useEvaluateFormDefinition(form, record, formName, entityName);
     const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
     
@@ -368,11 +370,11 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     /**
      * When recordid or entityname changes, reset to other record.
      **/
-    //useEffect(() => {
-    //    console.log("Changing form record state from outside", [record, info.currentRecordId, info.currentEntityName]);
-    //    formDataRef.current = record;
-    //    //  setEtag(new Date().toISOString());
-    //}, [record]);
+    useEffect(() => {
+        console.log("Changing form record state from outside", [record, info.currentRecordId, info.currentEntityName]);
+        formDataRef.current = record;
+        //  setEtag(new Date().toISOString());
+    }, [record]);
 
     const groups = useMemo(()=>createRadioGroups(form, entity),[form,entity]);
 

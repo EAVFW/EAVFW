@@ -162,18 +162,18 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
      * @param data
      */
     const _onModalSubmit = useCallback((data: any) => {
-
-        let o = localOptions.current;
-        if (o.filter(o => o.key === DUMMY_DATA_KEY).length === 0)
-            o.unshift({
-                key: DUMMY_DATA_KEY,
-                text: data[primaryField]
-            });
-        else
-            o.filter(o => o.key === DUMMY_DATA_KEY)[0].text = data[primaryField];
+        console.log("Submitting Modal", data);
+        //let o = localOptions.current;
+        //if (o.filter(o => o.key === DUMMY_DATA_KEY).length === 0)
+        //    o.unshift({
+        //        key: DUMMY_DATA_KEY,
+        //        text: data[primaryField]
+        //    });
+        //else
+        //    o.filter(o => o.key === DUMMY_DATA_KEY)[0].text = data[primaryField];
 
        // setOptions(o);
-        setSelectedKey("dummy");
+        setSelectedKey(DUMMY_DATA_KEY);
         setDummyData(data);
 
         onChange(props => {
@@ -320,7 +320,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                         />
                     </Stack.Item>
                 </Stack>
-                <FormRender forms={modalForms} type={type} dismissPanel={_hideModal}
+                <FormRender forms={modalForms} type={type} dismissPanel={_hideModal} record={dummyData}
                     onChange={_onModalSubmit} extraErrors={extraErrors} />
             </Stack>
         </Modal>

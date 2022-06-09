@@ -101,7 +101,7 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
     const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
 
     const timeout = typeof (timeoutOrLogin) === "number" ? timeoutOrLogin : 0;
-    logid = typeof (timeoutOrLogin) === "string" ? logid : logid;
+    logid = typeof (timeoutOrLogin) === "string" ? timeoutOrLogin : logid;
     const reftime = useRef(new Date().getTime());
 
     useEffect(() => {
