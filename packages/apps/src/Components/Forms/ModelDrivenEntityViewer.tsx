@@ -502,7 +502,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     }, [onFormDataChange2]);
 
     return (
-        <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
+        <EAVForm defaultData={record} onChange={onFormDataChange}>
             <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange} form={form} />
         </EAVForm>
     );

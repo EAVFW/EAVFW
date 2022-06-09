@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 
@@ -8,9 +8,9 @@ import isEqual from "react-fast-compare";
 
 import { useBoolean } from "@fluentui/react-hooks";
 import { SectionComponentProps } from "./SectionComponentProps";
-import { useChangeDetector } from "@eavfw/hooks";
+import { useChangeDetector, useLazyMemo } from "@eavfw/hooks";
 import { useModelDrivenApp } from "../../../../useModelDrivenApp";
-import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, FormTabDefinition, hasColumns, hasControl, ViewReference } from "@eavfw/manifest";
+import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, FormTabDefinition, getRecordSWR, hasColumns, hasControl, queryEntitySWR, ViewReference } from "@eavfw/manifest";
 import { ControlJsonSchemaObject } from "../ControlJsonSchema";
 import { capitalize } from "@eavfw/utils";
 import { useUserProfile } from "../../../Profile/useUserProfile";
@@ -26,6 +26,7 @@ import ModelDrivenGridViewer from "../../../Views/ModelDrivenGridViewer";
 import { Views } from "../../../Views/ViewRegister";
 import ColumnComponent from "../ColumnComponent";
 import { Controls } from "../../../Controls/ControlRegister";
+import { useEAVForm } from "../../../../../../forms/src";
 
 
 
@@ -142,7 +143,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const app = useModelDrivenApp();
         const router = useRouter();
         const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
-        const [views, setViews] = useState<Array<ViewReference>>([]);
+      //  const [views, setViews] = useState<Array<ViewReference>>([]);
         const [schema, setSchema] = useState<ControlJsonSchemaObject>();
         const localization = {
             new: capitalize(app.getLocalization("new") ?? "New"),
@@ -206,7 +207,11 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
             }
         }, [columns]);
 
-        useEffect(() => {
+        //TODO , make expression parsning work on views.
+        const [{ allowedforchildcreation }] = useEAVForm((state) => ({ "allowedforchildcreation": state.formValues.allowedforchildcreation }));
+        const appinfo = useAppInfo();
+        
+        const views = useLazyMemo(() => {
             console.groupCollapsed("Setting Related Views");
             try {
                 const views = app
@@ -216,14 +221,26 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                         tabName,
                         columnName,
                         sectionName
-                    );
-                console.log(app);
-                console.log("Setting Views",views);
-                setViews(views);
+                );
+                
+                console.log("Setting Views", JSON.stringify(views), allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId);
+                for (let view of views) {
+                    view.ribbon = Object.assign({}, view?.ribbon ?? {});
+                    let visible = view.ribbon.new?.visible as string | boolean;
+                    if (typeof (visible) === "string" && visible.indexOf('@') !== -1) {
+                        if (visible === "@canCreateTaskDefintion()") {
+                            view.ribbon.new.visible = allowedforchildcreation ?? false;
+                        }
+                    }
+                }
+                console.log("Setting Views", JSON.stringify(views), allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId);
+                return views;
             } finally {
                 console.groupEnd();
             }
-        }, [entity.logicalName, formName, tabName, columnName, sectionName]);
+        }, [entity.logicalName, formName, tabName, columnName, sectionName, allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId]);
+
+
 
         const [activeViewRef, setactiveViewRef] = useState<ViewReference>();
         useEffect(() => {

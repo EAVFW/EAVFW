@@ -3,6 +3,7 @@ import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
 import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
 import { RecordUrlProps } from "./RecordUrlProps";
+import cloneDeep from "clone-deep";
 
 export class ModelDrivenApp {
     _data!: ModelDrivenAppModel;
@@ -167,7 +168,7 @@ export class ModelDrivenApp {
 
                                 references.push({
                                     viewName: viewName ,
-                                    ribbon: form.ribbon ?? entity?.views?.[viewName]?.ribbon ,
+                                    ribbon: cloneDeep(form.ribbon ?? entity?.views?.[viewName]?.ribbon ?? {}),
                                     view: entity?.views?.[viewName],
                                     entityName: entity.logicalName,
                                     attribute: attribute.logicalName,

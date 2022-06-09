@@ -56,6 +56,8 @@ import { RibbonHost } from '../Ribbon/RibbonHost';
 import { ColumnFilterCallout } from '../ColumnFilter/ColumnFilterCallout';
 import { RibbonBar } from '../Ribbon/RibbonBar';
 import { filterRoles } from '../../filterRoles';
+import { useAppInfo } from '../../useAppInfo';
+import { useLazyMemo } from '../../../../hooks/src';
 
 
 //const theme = getTheme();
@@ -415,12 +417,15 @@ export function ModelDrivenGridViewer(
     }: ModelDrivenGridViewerProps) {
 
     const app = useModelDrivenApp();
+    const appinfo = useAppInfo();
     console.log("GridView: " + locale);
+
+  
 
     const [items, setItems] = useState<IRecord[]>(newRecord ? formData[entity.collectionSchemaName.toLowerCase()] ?? [] : []);
     const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
     const [announcedMessage, setannouncedMessage] = useState<string>();
-    const [isModalSelection, setisModalSelection] = useState(true);
+   
     const [isCompactMode, setisCompactMode] = useState(false);
     const [columns, setColumns] = useState<IColumn[]>([]);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
@@ -445,21 +450,20 @@ export function ModelDrivenGridViewer(
 
     }, [columns, items]);
 
-  
-
+    const [isModalSelection, setisModalSelection] = useState(entity.views?.[selectedView]?.selection !== false);
     const { setSelection, selection, selectionDetails } = useSelectionContext();
 
 
-    const [stateCommands, setCommands] = useState<ModelDrivenGridViewerState["commands"]>(commands?.({ selection }) ?? rightCommands ?? []);
+    const stateCommands = useLazyMemo<ModelDrivenGridViewerState["commands"]>(() => commands?.({ selection }) ?? rightCommands ?? [], [commands,selection, selectionDetails, appinfo.currentEntityName, appinfo.currentRecordId]);
 
-    useEffect(() => {
-        setCommands(commands?.({ selection }) ?? rightCommands ?? []);
-    }, [selection, selectionDetails]);
+    //useEffect(() => {
+    //    setCommands(commands?.({ selection }) ?? rightCommands ?? []);
+    //}, [selection, selectionDetails]);
 
     const { buttons, addButton, removeButton, events } = useRibbon();
 
     useEffect(() => {
-
+        console.log("stateCommands changed", stateCommands);
         for (let cmd of stateCommands) {
             addButton(cmd);
         }
@@ -704,12 +708,13 @@ export function ModelDrivenGridViewer(
                             layoutMode={DetailsListLayoutMode.justified}
                             isHeaderVisible={true}
                             selection={selection}
-                            selectionPreservedOnEmptyClick={true}
-                            onItemInvoked={_onItemInvoked}
+                            selectionPreservedOnEmptyClick={true}                           
                             enterModalSelectionOnTouch={true}
                             ariaLabelForSelectionColumn="Toggle selection"
                             ariaLabelForSelectAllCheckbox="Toggle selection for all items"
                             checkButtonAriaLabel="select row"
+
+                            onItemInvoked={_onItemInvoked}
                             onRenderRow={_onRenderRow}
                             onRenderDetailsHeader={onRenderDetailsHeader}
                             onChange={onChange}
@@ -721,7 +726,8 @@ export function ModelDrivenGridViewer(
                         />
                     ) : (
                         <ListComponent styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 } }}
-                            items={items}
+                                constrainMode={ConstrainMode.unconstrained}
+                                items={items}
                             compact={isCompactMode}
                             columns={columns}
                             selectionMode={SelectionMode.none}
@@ -730,10 +736,11 @@ export function ModelDrivenGridViewer(
                             layoutMode={DetailsListLayoutMode.justified}
                             isHeaderVisible={true}
                             onItemInvoked={_onItemInvoked}
-                            onRenderRow={_onRenderRow}
+                                onRenderRow={_onRenderRow}
+                                onRenderDetailsHeader={onRenderDetailsHeader}
                             onChange={onChange}
                             formData={formData}
-                                onRenderDetailsHeader={onRenderDetailsHeader}
+                                
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent entityName={entityName}
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
                                 setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
