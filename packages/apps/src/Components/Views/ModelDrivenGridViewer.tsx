@@ -58,6 +58,7 @@ import { RibbonBar } from '../Ribbon/RibbonBar';
 import { filterRoles } from '../../filterRoles';
 import { useAppInfo } from '../../useAppInfo';
 import { useLazyMemo } from '../../../../hooks/src';
+import { Controls } from '../Controls/ControlRegister';
 
 
 //const theme = getTheme();
@@ -388,8 +389,12 @@ const ConditionRenderComponent: React.FC<any> = (
 
             setItems(items.slice());
         }} type={type} attribute={attribute} item={item} recordRouteGenerator={recordRouteGenerator} />
-    }
+    } else if (column.data.control && column.data.control in Controls ) {
+        const CustomControl = Controls[column.data.control] as React.FC<{value:any}>;
 
+        return <CustomControl value={item[attribute.logicalName]}></CustomControl>
+    }
+    console.log("column", column);
     return <>{getCellText(item, column)}</>
 }
 
@@ -624,7 +629,7 @@ export function ModelDrivenGridViewer(
                     fieldName: attributes[column].logicalName,
                     isResizable: true,
                     isCollapsible: true,
-                    data: attributes[column],
+                    data: Object.assign({}, attributes[column], view.columns?.[column] ?? {}),
                     iconName: columns.find(x => x.key == attributes[column].schemaName)?.iconName,
                     onColumnClick: (e, c) => _onColumnClick(e, c),
                     className: classNames.cell,
