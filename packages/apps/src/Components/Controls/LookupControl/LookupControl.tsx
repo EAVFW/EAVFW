@@ -46,6 +46,7 @@ const commandback: IButtonStyles = {
         justifyContent: "center"
     }
 };
+const emojiIconClear: IIconProps = { iconName: 'Clear' };
 const emojiIcon: IIconProps = { iconName: 'Add' };
 const _styles: IStyleFunction<IDropdownStyleProps, IDropdownStyles> = (
     props
@@ -73,6 +74,23 @@ function nullIfEmpty<T>(items: T[]) {
 
     return null;
 }
+
+function returnQueryFilter(searchfilter: string | undefined, filter: string | undefined) {
+
+    if (searchfilter && filter)     //both defined
+        return { '$filter': searchfilter + ' and ' + filter};
+    
+    if (searchfilter && !filter)    //only searchfilter defined
+        return { '$filter': searchfilter };
+    
+    if (filter && !searchfilter)    //only filter defined
+        return { '$filter': filter };
+    
+    if (!filter && !searchfilter)
+        return {'$filter': ''};     //neither defined
+}
+
+
 export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     extraErrors,
     targetEntityName,
@@ -100,23 +118,25 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     const localization = {
         new: capitalize(app.getLocalization("new") ?? "New"),
+        clear: capitalize(app.getLocalization("clear") ?? "Clear"),
     };
 
     const targetEntity = app.getEntity(targetEntityName) as EntityDefinition;
     const primaryField = app.getPrimaryField(targetEntityName);
 
 
+    const [isFreeform, setIsFreeform] = useState(false);
 
     const [hasFilterChanged, setHasFilterChanged] = useState(false);
     const hasFilterChangedFirst = useRef(false);
-   
+
 
 
     const initialOptions = useMemo(() => (typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? DUMMY_DATA_KEY, text: selectedValue[primaryField] }] : []), [selectedValue]);
 
     const [shouldLoadRemoteOptions, setShouldLoadRemoteOptions] = useState(false);
     const [searchfilter, setSearchFilter] = useState<string>()
-    const query = useMemo(() => ({ "$select": `id,${primaryField}`, "$top": 10, ...filter ? { '$filter': searchfilter ? `${searchfilter} and ${filter}` : filter } : {} }), [filter]);
+    const query = useMemo(() => ({ "$select": `id,${primaryField}`, "$top": 10, ...returnQueryFilter(searchfilter, filter) }), [filter, searchfilter]);
     const { data: remoteItems = { items: [] as Array<IRecord> }, isLoading: isLoadingRemoteData } = queryEntitySWR(targetEntity, query, shouldLoadRemoteOptions || typeof (searchfilter) === "string");
 
     const loadRemoteValue = useMemo(() => !!value && typeof (selectedValue) === "undefined" && (!shouldLoadRemoteOptions || !isLoadingRemoteData) && remoteItems?.items.filter(x => x.id === value).length === 0, [selectedValue, isLoadingRemoteData, remoteItems?.items]);
@@ -130,7 +150,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     })) as IComboBoxOption[] ?? []).concat(remoteSelectedValue?.id ?
         [{ key: remoteSelectedValue.id, text: remoteSelectedValue[primaryField] }]:[]), [remoteItems?.items, remoteSelectedValue]);
 
-   
+
 
     const [selectedKey, setSelectedKey] = useState<string | null>(value ?? (typeof (selectedValue) === "object" ? selectedValue.id ?? DUMMY_DATA_KEY : undefined));
 
@@ -190,7 +210,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         event: React.FormEvent<IComboBox>,
         option?: IDropdownOption | IComboBoxOption,
         index?: number) => {
-         
+
         console.log("LookupControl: on change", [event, option,index]);
         onChange(props => {
             if (option?.key === "dummy") {
@@ -200,10 +220,21 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                 props[logicalName] = option?.data; //The id of selected value, but if key is dummy we picked the placeholder data
                 delete props[logicalName.slice(0, -2)]; //Proper clean up by deleting the object part unless key is dummy placeholder
             }
-            });
-       
+        });
+
+        setfreeformvalue(undefined)     //For not letting freeformvalue from searchfilter overwrite picked element
     }, [dummyData]);
 
+    const resetValue = () => {
+        //reset data
+        onChange(props => {
+            delete props[logicalName];
+            props[logicalName.slice(0, -2)] = undefined
+        });
+
+        //reset text and lookup value
+        setSelectedKey(null)
+    }
 
     /*
      * If the value changes, then find and set key; Value is ids;
@@ -227,7 +258,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
     const [freeformvalue, setfreeformvalue] = useState<string>();
 
-  
 
   //  const [isLoading, setisLoading] = useState(true);
 
@@ -328,27 +358,32 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         <ComboBox
             componentRef={ref}
             disabled={disabled || isLoading}
-            
+
             ariaLabel={label}
-            styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight, color:"black" }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
+            styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight, color: "black" }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
             onChange={_onChange}
-            
+
             options={options}
             useComboBoxAsMenuWidth
-            allowFreeform={false}
+            allowFreeform={isFreeform}
             text={freeformvalue}
             autofill={{
                 onInputValueChange: (value) => {
-                   
-                    console.log(value); ref.current?.focus(true);
+
+                    setIsFreeform(true);
+                    console.log("autofill->onInputValueChange->value:" + value + " , primaryField: " + primaryField);
+                    ref.current?.focus(true);
                     setfreeformvalue(value);
                     setSearchFilter(`contains(${primaryField}, \'${value}\')`)
-                     
 
+                    console.log("onInputValueChange has run");
 
                 }
             }}
-            onMenuOpen={() => setShouldLoadRemoteOptions(true)}
+            onMenuOpen={() => {
+                console.log("onMenuOpen has run");
+                setShouldLoadRemoteOptions(true)
+            }}
             autoComplete="off"
             placeholder={placeHolder}
             errorMessage={errorMessage}
@@ -361,7 +396,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                 setfreeformvalue(option?.text);
             }}
             caretDownButtonStyles={{ rootDisabled: { display: "none" } }}
-            
+
             onRenderLowerContent={allowCreate ? () =>
                 <div style={({
                     position: "fixed",
@@ -370,8 +405,16 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                     width: "100%",
                     boxShadow: `rgb(0 0 0 / 13%) 0px 3.2px 7.2px 0px, rgb(0 0 0 / 11%) 0px 0.6px 1.8px 0px`
                 })}>
-                    <CommandButton text={localization.new} styles={commandback} iconProps={emojiIcon}
-                        onClick={(e) => _showModal()} />
+                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <div style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
+                            <CommandButton text={localization.new} styles={commandback} iconProps={emojiIcon}
+                                onClick={(e) => _showModal()} />
+                        </div>
+                        <div style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end'}}>
+                            <CommandButton text={localization.clear} styles={commandback} iconProps={emojiIconClear}
+                                onClick={resetValue} />
+                        </div>
+                    </div>   
                 </div> : undefined}
             selectedKey={selectedKey}
         />
