@@ -380,10 +380,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
                 }
             }}
-            onMenuOpen={() => {
-                console.log("onMenuOpen has run");
-                setShouldLoadRemoteOptions(true)
-            }}
+            onMenuOpen={() => setShouldLoadRemoteOptions(true)}
             autoComplete="off"
             placeholder={placeHolder}
             errorMessage={errorMessage}
@@ -414,7 +411,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                             <CommandButton text={localization.clear} styles={commandback} iconProps={emojiIconClear}
                                 onClick={resetValue} />
                         </div>
-                    </div>   
+                    </div>
                 </div> : undefined}
             selectedKey={selectedKey}
         />
