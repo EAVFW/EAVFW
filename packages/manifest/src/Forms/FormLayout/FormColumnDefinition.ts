@@ -1,3 +1,6 @@
+ 
+import { JSONSchema7 } from "json-schema";
+
 
 export type FormColumnDefinition = {
     tab: string;
@@ -18,4 +21,5 @@ export type FormColumnDefinition = {
     }
     minLength?: number;
     displayName?: string;
+    schema?: JSONSchema7
 };
