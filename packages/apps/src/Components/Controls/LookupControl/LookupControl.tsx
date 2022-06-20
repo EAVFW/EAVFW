@@ -402,16 +402,12 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                     width: "100%",
                     boxShadow: `rgb(0 0 0 / 13%) 0px 3.2px 7.2px 0px, rgb(0 0 0 / 11%) 0px 0.6px 1.8px 0px`
                 })}>
-                    <div style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <div style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-start' }}>
-                            <CommandButton text={localization.new} styles={commandback} iconProps={emojiIcon}
-                                onClick={(e) => _showModal()} />
-                        </div>
-                        <div style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end'}}>
-                            <CommandButton text={localization.clear} styles={commandback} iconProps={emojiIconClear}
-                                onClick={resetValue} />
-                        </div>
-                    </div>
+                    <Stack style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                        <CommandButton text={localization.new} styles={commandback} iconProps={emojiIcon}
+                            onClick={(e) => _showModal()} />
+                        <CommandButton text={localization.clear} styles={commandback} iconProps={emojiIconClear}
+                            onClick={resetValue} />
+                    </Stack>
                 </div> : undefined}
             selectedKey={selectedKey}
         />
