@@ -170,7 +170,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     key: field,
                     attributeName: field,
                     fieldName: field,
-                    attribute: entity.attributes[field] ?? (entity.TPT && app.getEntity(entity.TPT)?.attributes[field]) ?? throwError(new Error(`The attribute for ${field} was not defined on ${entity.schemaName}`)),
+                    attribute: entity.attributes[field] ?? (entity.TPT && app.getEntity(entity.TPT)?.attributes[field]), //?? throwError(new Error(`The attribute for ${field} was not defined on ${entity.schemaName}`)),
                     field: columns[field]
                 }));
 
@@ -183,12 +183,12 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     type: "object",
                     dependencies: Object.fromEntries(deps.map(field =>
                         [entity.attributes[field!].logicalName, getDependencySchema(fields, field, entity, app, formName, formContext)])),
-                    required: fields.filter(f => (f.attribute.type as BaseNestedType)?.required).map(field => field.attribute.logicalName),
+                    required: fields.filter(f => (f.attribute?.type as BaseNestedType)?.required).map(field => field.attribute.logicalName),
                     properties: Object.assign(
                         {},
                         ...fields.filter(f => !f.field.dependant)
                             .map((field) => ({
-                                [field.attribute.logicalName]: getJsonSchema(field.attribute, field.field, entity, app.locale, {
+                                [field.attribute?.logicalName ?? field.key]: getJsonSchema(field.attribute, field.field, entity, app.locale, {
                                     entityName: entity.logicalName,
                                     fieldName: field.fieldName,
                                     attributeName: field.attributeName,

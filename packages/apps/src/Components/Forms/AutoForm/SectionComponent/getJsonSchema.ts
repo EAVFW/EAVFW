@@ -17,10 +17,23 @@ export function getJsonSchema(
         console.group("getJsonSchema");
         console.log(arguments);
 
-        const { locale, descriptions } = formContext;
-        const descriptionInfo = descriptions.filter((d: any) => d.name === attribute.logicalName && d.locale == locale)?.[0];
-        const description = descriptionInfo?.description ?? attribute.locale?.[locale]?.description ?? attribute.description;
+        if (field.schema) {
+            return {
+                ...field.schema,
+                readOnly:  field.readonly,
+                "x-field": "ControlHostWidget",
+                "x-widget-props": {
+                    ...formContext,
+                },
+                "x-control": typeof (field.control) === "object" ? field.control.type : field.control,
+            }
+        }
 
+        const { locale, descriptions } = formContext;
+        const descriptionInfo = descriptions.filter((d: any) => d.name === attribute?.logicalName && d.locale == locale)?.[0];
+        const description = descriptionInfo?.description ?? attribute?.locale?.[locale]?.description ?? attribute?.description;
+
+       
 
         const type =
             typeof attribute.type === "object"

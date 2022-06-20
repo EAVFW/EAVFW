@@ -221,7 +221,7 @@ export const EAVFormValidation: React.FC = ({ children }) => {
     const appInfo = useAppInfo();
     const [warnings, setWarnings] = useState<Array<{ logicalName: string, warning: string }>>([]);
   //  const entityDefinition = useMemo(() => app.getEntity(appInfo.currentEntityName), [appInfo.currentEntityName]); // hele manifest objeketet
-    const attributes = useMemo(() => app.getAttributes(appInfo.currentEntityName), [appInfo.currentEntityName]);
+    const attributes = useMemo(() => appInfo.currentEntityName ? app.getAttributes(appInfo.currentEntityName) : {}, [appInfo.currentEntityName]);
 
     const validationRules = useMemo(()=> Object.entries(attributes).filter(([key, attr]) => attr.validation).map(([key, attr]) => {
         return {
