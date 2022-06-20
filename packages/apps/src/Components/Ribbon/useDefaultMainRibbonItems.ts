@@ -8,7 +8,7 @@ import { useSelectionContext } from "../Selection/useSelectionContext";
 import { useRibbon} from "./useRibbon"
 import { capitalize} from "@eavfw/utils";
 
-export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushRoute: (url: URL) => void) => {
+export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushRoute: (url: URL) => void, withSave=true) => {
 
     const { addButton, removeButton, canSave, events } = useRibbon();
     const app = useModelDrivenApp();
@@ -52,38 +52,41 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
 
     }, [ribbonInfo.new?.visible, appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName]);
 
+    
     useEffect(() => {
-        addButton(
-            {
-                key: 'saveItem',
-                text: capitalize(app.getLocalization("save") ?? 'Save'),
-                iconProps: { iconName: 'Save' },
-                disabled: !canSave,
-                data: { order: 1 },
-                onClick: (e, i) => {
-                    console.log("Saving");
-                    events.emit("onSave", e);
-                },
-                split: true,
-                ariaLabel: 'Save',
-                subMenuProps: {
-                    items: [
-                        {
-                            key: 'newItem',
-                            text: capitalize(app.getLocalization('SaveAndClose') ?? 'Save and Close'),
-                            iconProps: { iconName: 'Save' },
-                            onClick: (e, i) => {
-                                console.log("Saving and closing");
-                                events.emit("onSaveAndClose", e);
+        if (withSave) {
+            addButton(
+                {
+                    key: 'saveItem',
+                    text: capitalize(app.getLocalization("save") ?? 'Save'),
+                    iconProps: { iconName: 'Save' },
+                    disabled: !canSave,
+                    data: { order: 1 },
+                    onClick: (e, i) => {
+                        console.log("Saving");
+                        events.emit("onSave", e);
+                    },
+                    split: true,
+                    ariaLabel: 'Save',
+                    subMenuProps: {
+                        items: [
+                            {
+                                key: 'newItem',
+                                text: capitalize(app.getLocalization('SaveAndClose') ?? 'Save and Close'),
+                                iconProps: { iconName: 'Save' },
+                                onClick: (e, i) => {
+                                    console.log("Saving and closing");
+                                    events.emit("onSaveAndClose", e);
+                                },
                             },
-                        },
-                    ],
-                },
-            });
+                        ],
+                    },
+                });
 
-        return () => {
-            removeButton('saveItem');
+            return () => {
+                removeButton('saveItem');
 
+            }
         }
 
 

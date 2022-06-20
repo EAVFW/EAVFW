@@ -394,7 +394,7 @@ const ConditionRenderComponent: React.FC<any> = (
 
         return <CustomControl value={item[attribute.logicalName]}></CustomControl>
     }
-    console.log("column", column);
+    
     return <>{getCellText(item, column)}</>
 }
 
