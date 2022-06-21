@@ -21,7 +21,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
     const [extraErrors, setExtraErrors] = useState({} as FormValidation);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entity.logicalName]);
     const formName = router.query.formname as string;
-    const query = useMemo(() => entity.forms?.[router.query.formname]?.query, [router.query.formname]);
+    const query = useMemo(() => entity.forms?.[router.query.formname as string]?.query, [router.query.formname]);
 
     const { skipRedirect, updateState: updateRibbonState, saveCompleted, events } = useRibbon();
 
