@@ -20,6 +20,8 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
     const app = useModelDrivenApp();
     const [extraErrors, setExtraErrors] = useState({} as FormValidation);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entity.logicalName]);
+    const formName = router.query.formname as string;
+    const query = useMemo(() => entity.forms?.[router.query.formname]?.query, [router.query.formname]);
 
     const { skipRedirect, updateState: updateRibbonState, saveCompleted, events } = useRibbon();
 
@@ -61,17 +63,17 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             showIndeterminateProgressIndicator();
             updateRibbonState({ canSave: false, skipRedirect: false });
 
-            console.log("Saving: ", [recordId ? record : {}, changedRecord.current, deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current)]);
+           // console.log("Saving: ", [recordId ? record : {}, changedRecord.current, deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current)]);
 
 
-            const [changed, changedValues] = cleanDiff(deepDiffMapper.map(recordId ? record : {}, changedRecord.current))
+          //  const [changed, changedValues] = cleanDiff(deepDiffMapper.map(recordId ? record : {}, changedRecord.current))
 
-            console.log("UpdatedValues Clean", [changedRecord.current, record,  changed, changedValues]);
+           // console.log("UpdatedValues Clean", [changedRecord.current, record,  changed, changedValues]);
 
 
             let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records${recordId ? `/${recordId}` : ``}`, {
                 method: recordId ? "PATCH" : "POST",
-                body: JSON.stringify(changedValues),
+                body: JSON.stringify(changedRecord.current),
                 credentials: "include"
             });
             if (rsp.ok) {
@@ -154,6 +156,9 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             console.log("refreshing data");
 
             let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
+            if (query?.["$expand"]) {
+                expand = expand + ',' + query["$expand"]
+            }
 
             let rsp = fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records/${recordId}${(expand ? `?$expand=${expand}` : '')}`, {
                 method: "GET",
