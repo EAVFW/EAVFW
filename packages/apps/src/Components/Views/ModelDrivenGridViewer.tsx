@@ -681,7 +681,7 @@ export function ModelDrivenGridViewer(
 
 
     return (
-        <RibbonHost ribbon={entity.views?.[selectedView]?.ribbon ?? {}}>
+        
             <Stack verticalFill>
 
                 <ColumnFilterCallout
@@ -757,7 +757,7 @@ export function ModelDrivenGridViewer(
                     )}
                 </Stack.Item>
             </Stack>
-        </RibbonHost>
+         
     )
 }
 

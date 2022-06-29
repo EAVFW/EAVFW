@@ -16,6 +16,7 @@ import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { Views } from "../Views/ViewRegister";
 import ModelDrivenGridViewer from "../Views/ModelDrivenGridViewer";
 import ViewSelectorComponent from "./ViewSelectorComponent";
+import { RibbonHost } from "../Ribbon/RibbonHost";
 
 
 
@@ -62,7 +63,7 @@ export function ModelDrivenBodyViewer
                 if (view.type in Views) {
                     const CustomView = Views[view.type];
                     return <CustomView view={view} entity={entity} recordRouteGenerator={recordRouteGenerator}
-                        key={entityName}
+                       
                         entityName={entityName}
                         viewName={selectedView}
                         locale={locale} />
@@ -83,7 +84,7 @@ export function ModelDrivenBodyViewer
     const _onChangeView = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => {
         setselectedView(option?.key as string);
     }
-
+    const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [ selectedView]);
     console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
         <Stack verticalFill>
@@ -96,7 +97,9 @@ export function ModelDrivenBodyViewer
                 />
             }
             <Stack.Item grow>
-                {BodyViewElement}
+                <RibbonHost ribbon={ribboninfo}>
+                    {BodyViewElement}
+                </RibbonHost>
             </Stack.Item>
         </Stack>
     )

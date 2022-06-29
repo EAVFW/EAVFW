@@ -27,6 +27,7 @@ import { Views } from "../../../Views/ViewRegister";
 import ColumnComponent from "../ColumnComponent";
 import { Controls } from "../../../Controls/ControlRegister";
 import { useEAVForm } from "../../../../../../forms/src";
+import { RibbonHost } from "../../../Ribbon/RibbonHost";
 
 
 
@@ -292,6 +293,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     .map((gridprops) => (
 
                         <RibbonContextProvider key={gridprops.key}>
+                            <RibbonHost ribbon={entity.views?.[gridprops.viewName!]?.ribbon ?? {}}>
                             <ModelDrivenGridViewer
                                 {...gridprops}
                                 locale={locale}
@@ -360,7 +362,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                         },
                                     } as ICommandBarItemProps//,
                                 ].filter((commandBarButton) => (commandBarButton.key === "newRelatedItem" && gridprops?.ribbon?.new?.visible !== false) || (commandBarButton.key === "deleteSelection" && gridprops?.ribbon?.delete?.visible !== false))}
-                            />
+                                /></RibbonHost>
                         </RibbonContextProvider>
                     ))}
             </>
