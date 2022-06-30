@@ -164,7 +164,7 @@ function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent:any,
 type ModelDrivenFormProps = ModelDrivenEntityViewerProps & {
     form: FormDefinition,
  //   formDataRef: any,
-    onFormDataChange: any
+  //  onFormDataChange: any
 }
 const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     entity,
@@ -176,7 +176,7 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     extraErrors,
     form,
     //formDataRef,
-    onFormDataChange
+  //  onFormDataChange
 }) => {
 
 
@@ -195,13 +195,13 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     //    console.log(record);
     //}, [record]);
 
-    const [{ record }] = useEAVForm((state) => ({ record: state.formValues }), "ModelDrivenForm FormValues");
+    const [{ record }, { onChange }] = useEAVForm((state) => ({ record: state.formValues }), "ModelDrivenForm FormValues");
     useEffect(() => { console.log("ModelDrivenForm FormValues changed",record)}, [record]);
 
     const { evaluatedForm, isLoadingForm } = useEvaluateFormDefinition(form, record, formName, entityName);
     const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
-    
 
+    const _onFormDataChange = useCallback((newformdata) => { onChange(form => { Object.assign(form, newformdata); }) }, [onChange]);
     const getTabName = useCallback((tab: FormTabDefinition) => {
         console.log(tab);
         return tab.locale?.[locale]?.title ?? tab.title;
@@ -310,11 +310,11 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
             </Stack.Item>
             }
 
-            <Stack.Item grow styles={{ root: { padding: 0 } }}>
-                <FormComponent {... { tabs, getTabName, entity, formName, onFormDataChange, locale, factory, extraErrors }}
+                <Stack.Item grow styles={{ root: { padding: 0 } }}>
+                    <FormComponent onFormDataChange={_onFormDataChange } {... { tabs, getTabName, entity, formName, locale, factory, extraErrors }}
                     form={evaluatedForm}
                             formData={record}
-                            formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: onFormDataChange }}
+                        formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: _onFormDataChange }}
 
                 />
             </Stack.Item>
@@ -505,7 +505,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
     return (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
-            <ModelDrivenForm  {...props} onFormDataChange={onFormDataChange} form={form} />
+            <ModelDrivenForm  {...props}  form={form} />
         </EAVForm>
     );
     
