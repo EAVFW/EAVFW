@@ -23,6 +23,9 @@ jobs:
       run: npm install conventional-changelog-conventionalcommits --force
       working-directory: ./.github/workflows
 
+    - name: NPM Install
+      run: npm ci
+
     - name: Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
