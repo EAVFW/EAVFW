@@ -24,7 +24,7 @@ jobs:
       working-directory: ./.github/workflows
 
     - name: NPM Install
-      run: npm ci
+      run: npm ci --force
 
     - name: Release
       env:
