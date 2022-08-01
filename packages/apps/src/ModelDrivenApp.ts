@@ -72,7 +72,7 @@ export class ModelDrivenApp {
     getEntity(entityName: string) {
         if (!entityName)
             throw new Error("entityName not provided");
-        return this._data.entities[entityName.toLowerCase()];
+        return this._data.entities[entityName.toLowerCase().replace(/\s/g, "")];
     }
 
     getAttributes(entityName: string) {

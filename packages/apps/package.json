@@ -4,9 +4,9 @@
   "version": "0.0.38",
   "dependencies": {},
   "peerDependencies": {
-    "react": "17.0.2",
+    "react": "18.2.0",
     "json-schema": "0.4.0",
-    "@fluentui/react": "8.48.1",
+    "@fluentui/react": "8.85.1",
     "@rjsf/fluent-ui": "3.2.1"
   },
   "devDependencies": {

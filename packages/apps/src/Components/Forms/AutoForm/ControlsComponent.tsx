@@ -162,6 +162,7 @@ const ControlsComponent =
             }, [onFormDataChange]);
 
             const addVisited = useCallback<Required<FormProps<any>>['onBlur']>((id, value) => {
+                console.log("AddVisited", [id,value]);
                 setVisitedFields(id.substr(app.currentEntityName.length + 1), schema.type === "array" ? createVisitedObject(id.substr(app.currentEntityName.length + 1)) : true);
             }, [app.currentEntityName]);
 
@@ -202,7 +203,7 @@ const ControlsComponent =
                         idPrefix={app.currentEntityName}
                         formData={formData}
                         fields={{ ControlHostWidget: ControlHostWidget }}
-                        widgets={WidgetRegister}
+                        widgets={WidgetRegister} 
                         uiSchema={uiSChema}
                         FieldTemplate={FieldTemplate}
                         transformErrors={transformErrors}

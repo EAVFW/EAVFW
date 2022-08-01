@@ -21,7 +21,8 @@ export type FormTabDefinition = {
             title: string;
         };
     };
-    columns: Required<AutoFormColumnsDefinition>["columns"]
+    columns: Required<AutoFormColumnsDefinition>["columns"],
+    control?: string;
 };
 
 export function hasColumns(a: AutoFormColumnsDefinition | AutoFormControlsDefinition): a is Required<AutoFormColumnsDefinition> {

@@ -1,6 +1,6 @@
 
 import { JSONSchema7 } from "json-schema";
-import { AttributeDefinition, ChoiceType, EntityDefinition, FormColumnDefinition, NestedType, StringType } from "@eavfw/manifest";
+import { AttributeDefinition, ChoicesType, ChoiceType, EntityDefinition, FormColumnDefinition, NestedType, StringType } from "@eavfw/manifest";
 import { ModelDrivenApp } from "../../../../ModelDrivenApp";
 import { ControlJsonSchema } from "../ControlJsonSchema";
 import { enumValuesFactory } from "./enumValuesFactory";
@@ -149,7 +149,8 @@ export function getJsonSchema(
                 };
             }
             case "choices": {
-                let options = (typeProps as ChoiceType).options ?? {};
+                let choices = (typeProps as ChoicesType);
+                let options = choices.options ?? {};
 
                 return {
                     ...defaultProps,
@@ -160,7 +161,7 @@ export function getJsonSchema(
                     items: {
                         type: "object",
                         properties: {
-                            "allowedgranttype": {
+                            [choices.logicalName]: {
                                 type: "number",
                                 enum: Object.values(options),
                                 enumNames: Object.keys(options),

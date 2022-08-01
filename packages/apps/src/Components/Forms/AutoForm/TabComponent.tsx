@@ -7,6 +7,7 @@ import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/mani
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
 import { FormValidation } from "../FormValidation";
+import { Controls, ResolveFeature } from "../../..";
 
 type TabComponentProps<T> = {
     form: FormDefinition;
@@ -23,6 +24,7 @@ type TabComponentProps<T> = {
     extraErrors?: FormValidation;
 };
 
+const StackTokens = { childrenGap: 25 };
 const TabComponent = <T,>(props: TabComponentProps<T>) => {
     const { form, columns, tabName, entity, formName, formData, onFormDataChange, locale, factory, entityName, formContext, extraErrors } = props;
     try {
@@ -39,6 +41,17 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
         useChangeDetector(`Tabcomponent: Tab: ${tabName} onFormDataChange`, onFormDataChange, renderId);
         useChangeDetector(`Tabcomponent: Tab: ${tabName} factory`, factory, renderId);
         useChangeDetector(`Tabcomponent: Tab: ${tabName} locale`, locale, renderId);
+
+        if (!columns) {
+
+            const controlName = form.layout.tabs[tabName].control;
+            if (controlName && controlName in Controls) {
+                const Component = Controls[controlName];
+
+
+                return <Stack verticalFill horizontal tokens={StackTokens}><Component /></Stack>
+            }
+        }
 
         console.log("Rendering tab");
         const ui = (

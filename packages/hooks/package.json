@@ -3,7 +3,7 @@
   "description": "EAVFW React Hooks",
   "version": "0.0.38",
   "peerDependencies": {
-    "react": "17.0.2"
+    "react": "18.2.0"
   },
   "license": "MIT",
   "files": [
