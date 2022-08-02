@@ -3,7 +3,7 @@ import { Stack } from "@fluentui/react";
 
 import ColumnComponent from "./ColumnComponent";
 
-import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
+import { EntityDefinition, FormDefinition, FormTabDefinition, FormTabDefinitionWithColumns } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
 import { FormValidation } from "../FormValidation";
@@ -11,7 +11,7 @@ import { Controls, ResolveFeature } from "../../..";
 
 type TabComponentProps<T> = {
     form: FormDefinition;
-    columns: FormTabDefinition["columns"];
+    columns?: FormTabDefinitionWithColumns["columns"];
     tabName: string;
     entity: EntityDefinition;
     formName: string;
@@ -51,6 +51,7 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
 
                 return <Stack verticalFill horizontal tokens={StackTokens}><Component /></Stack>
             }
+            throw new Error("Control or Columns must be defined, or control is not registered");
         }
 
         console.log("Rendering tab");

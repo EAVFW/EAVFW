@@ -10,7 +10,7 @@ import { useBoolean } from "@fluentui/react-hooks";
 import { SectionComponentProps } from "./SectionComponentProps";
 import { useChangeDetector, useLazyMemo } from "@eavfw/hooks";
 import { useModelDrivenApp } from "../../../../useModelDrivenApp";
-import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, FormTabDefinition, getRecordSWR, hasColumns, hasControl, queryEntitySWR, ViewReference } from "@eavfw/manifest";
+import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, FormTabDefinition, FormTabDefinitionWithColumns, getRecordSWR, hasColumns, hasControl, queryEntitySWR, ViewReference } from "@eavfw/manifest";
 import { ControlJsonSchemaObject } from "../ControlJsonSchema";
 import { capitalize } from "@eavfw/utils";
 import { useUserProfile } from "../../../Profile/useUserProfile";
@@ -91,8 +91,8 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         useChangeDetector(`SectionComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} locale`, locale, renderId);
 
         const columns = form.columns;
-
-        const section = findEntry(form.layout.tabs[tabName].columns, columnName, sectionName);
+        const tab = form.layout.tabs[tabName] as FormTabDefinitionWithColumns;
+        const section = findEntry(tab.columns, columnName, sectionName);
 
         if (hasColumns(section)) {
             const columns = section.columns;
