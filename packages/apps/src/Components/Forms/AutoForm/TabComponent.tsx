@@ -3,14 +3,15 @@ import { Stack } from "@fluentui/react";
 
 import ColumnComponent from "./ColumnComponent";
 
-import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
+import { EntityDefinition, FormDefinition, FormTabDefinition, FormTabDefinitionWithColumns } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
 import { FormValidation } from "../FormValidation";
+import { Controls, ResolveFeature } from "../../..";
 
 type TabComponentProps<T> = {
     form: FormDefinition;
-    columns: FormTabDefinition["columns"];
+    columns?: FormTabDefinitionWithColumns["columns"];
     tabName: string;
     entity: EntityDefinition;
     formName: string;
@@ -23,6 +24,7 @@ type TabComponentProps<T> = {
     extraErrors?: FormValidation;
 };
 
+const StackTokens = { childrenGap: 25 };
 const TabComponent = <T,>(props: TabComponentProps<T>) => {
     const { form, columns, tabName, entity, formName, formData, onFormDataChange, locale, factory, entityName, formContext, extraErrors } = props;
     try {
@@ -40,6 +42,18 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
         useChangeDetector(`Tabcomponent: Tab: ${tabName} factory`, factory, renderId);
         useChangeDetector(`Tabcomponent: Tab: ${tabName} locale`, locale, renderId);
 
+        if (!columns) {
+
+            const controlName = form.layout.tabs[tabName].control;
+            if (controlName && controlName in Controls) {
+                const Component = Controls[controlName];
+
+
+                return <Stack verticalFill horizontal tokens={StackTokens}><Component /></Stack>
+            }
+            throw new Error("Control or Columns must be defined, or control is not registered");
+        }
+
         console.log("Rendering tab");
         const ui = (
             <Stack verticalFill horizontal gap={25} styles={{
@@ -49,7 +63,7 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
                 }
             }}>
                 {Object.keys(columns).map((columnName, idx) => (
-                    <Stack.Item grow key={columnName}>
+                    <Stack.Item className={columnName} grow key={columnName}>
                         <ColumnComponent<T>
                             form={form}
                             sections={columns[columnName].sections}

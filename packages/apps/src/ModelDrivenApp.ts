@@ -3,6 +3,7 @@ import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
 import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
 import { RecordUrlProps } from "./RecordUrlProps";
+import cloneDeep from "clone-deep";
 
 export class ModelDrivenApp {
     _data!: ModelDrivenAppModel;
@@ -71,7 +72,7 @@ export class ModelDrivenApp {
     getEntity(entityName: string) {
         if (!entityName)
             throw new Error("entityName not provided");
-        return this._data.entities[entityName.toLowerCase()];
+        return this._data.entities[entityName.toLowerCase().replace(/\s/g, "")];
     }
 
     getAttributes(entityName: string) {
@@ -162,13 +163,17 @@ export class ModelDrivenApp {
                         const form = attribute.type.forms[formKey];
                         if (form.type === "Main") {
                             if ((formKey === formName || formName === form.name) && this.isMatchingForm(form, tabName, columnName, sectionName)) {
+
+                                const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];
+
                                 references.push({
-                                    viewName: form.view,
-                                    ribbon: form.ribbon,
-                                    view: entity?.views?.[form.view!],
+                                    viewName: viewName ,
+                                    ribbon: cloneDeep(form.ribbon ?? entity?.views?.[viewName]?.ribbon ?? {}),
+                                    view: entity?.views?.[viewName],
                                     entityName: entity.logicalName,
                                     attribute: attribute.logicalName,
                                     entity: entity,
+                                    filter: form.filter,
                                     key: entity.logicalName + attribute.logicalName
                                 });
                             } else {

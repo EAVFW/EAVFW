@@ -86,10 +86,10 @@ import { EAVFormContextState } from "./EAVFormContextState";
 //    }
 //}
 
-export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, logid?: string): [TCollected, EAVFormContextActions<TFormValues>] {
+export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
+export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
+export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
+export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?:number|string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>] {
 
     const {
         actions,
@@ -99,18 +99,30 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
 
     const oldValues = useRef(collector(state as TState));
     const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
-  
+
+    const timeout = typeof (timeoutOrLogin) === "number" ? timeoutOrLogin : 0;
+    logid = typeof (timeoutOrLogin) === "string" ? timeoutOrLogin : logid;
+    const reftime = useRef(new Date().getTime());
+
     useEffect(() => {
         console.log("useEAVForm Trigger: " + logid + " " + etag);
-        const newValues =  collector(state as TState);
-        console.debug("useEAVForm oldValues: " + logid, oldValues.current);
-        console.debug("useEAVForm newValues: " + logid, newValues);
+        const currentTime = new Date().getTime();
+        if (currentTime - timeout > reftime.current) {
 
-        if (!isEqual(oldValues.current, newValues)) {
-            console.log("Updating subscription with new values: " + logid);
-            oldValues.current = newValues;
-            setsubscriptionid(new Date().toISOString());
 
+            const newValues = collector(state as TState);
+            console.debug("useEAVForm oldValues: " + logid, oldValues.current);
+            console.debug("useEAVForm newValues: " + logid, newValues);
+
+            reftime.current = currentTime;
+
+            if (!isEqual(oldValues.current, newValues)) {
+                console.log("Updating subscription with new values: " + logid);
+                oldValues.current = newValues;
+
+                setsubscriptionid(new Date().toISOString());
+              
+            }
         }
 
     }, [etag]);

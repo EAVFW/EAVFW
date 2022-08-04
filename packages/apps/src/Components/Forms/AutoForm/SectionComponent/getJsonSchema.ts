@@ -1,6 +1,6 @@
 
 import { JSONSchema7 } from "json-schema";
-import { AttributeDefinition, ChoiceType, EntityDefinition, FormColumnDefinition, NestedType, StringType } from "@eavfw/manifest";
+import { AttributeDefinition, ChoicesType, ChoiceType, EntityDefinition, FormColumnDefinition, NestedType, StringType } from "@eavfw/manifest";
 import { ModelDrivenApp } from "../../../../ModelDrivenApp";
 import { ControlJsonSchema } from "../ControlJsonSchema";
 import { enumValuesFactory } from "./enumValuesFactory";
@@ -16,7 +16,24 @@ export function getJsonSchema(
     try {
         console.group("getJsonSchema");
         console.log(arguments);
-        const description = attribute.locale?.[locale]?.description ?? attribute.description;
+
+        if (field.schema) {
+            return {
+                ...field.schema,
+                readOnly:  field.readonly,
+                "x-field": "ControlHostWidget",
+                "x-widget-props": {
+                    ...formContext,
+                },
+                "x-control": typeof (field.control) === "object" ? field.control.type : field.control,
+            }
+        }
+
+        const { locale, descriptions } = formContext;
+        const descriptionInfo = descriptions.filter((d: any) => d.name === attribute?.logicalName && d.locale == locale)?.[0];
+        const description = descriptionInfo?.description ?? attribute?.locale?.[locale]?.description ?? attribute?.description;
+
+       
 
         const type =
             typeof attribute.type === "object"
@@ -34,11 +51,12 @@ export function getJsonSchema(
 
 
         const defaultProps: ControlJsonSchema = {
-            title:
+            title: field.displayName ??
                 attribute?.locale?.[locale]?.displayName ??
                 attribute.displayName,
 
             readOnly: attribute.readonly || field.readonly,
+            description: description,
             ["x-description"]: description,
             ["x-control"]: typeof (controlType) === "object" ? controlType.type : controlType,
             "x-widget": field.visible === false ? "hidden" : undefined,
@@ -131,7 +149,8 @@ export function getJsonSchema(
                 };
             }
             case "choices": {
-                let options = (typeProps as ChoiceType).options ?? {};
+                let choices = (typeProps as ChoicesType);
+                let options = choices.options ?? {};
 
                 return {
                     ...defaultProps,
@@ -142,7 +161,7 @@ export function getJsonSchema(
                     items: {
                         type: "object",
                         properties: {
-                            "allowedgranttype": {
+                            [choices.logicalName]: {
                                 type: "number",
                                 enum: Object.values(options),
                                 enumNames: Object.keys(options),

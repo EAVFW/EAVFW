@@ -1,6 +1,6 @@
 import { LookupType } from "@eavfw/manifest";
 import { DefaultButton, PrimaryButton, Stack, Sticky, StickyPositionType } from "@fluentui/react";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { capitalize } from "@eavfw/utils";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { FormRenderProps } from "./FormRenderProps";
@@ -20,15 +20,23 @@ export function FormRender<T>(props: FormRenderProps) {
     console.log("FormRender", [entityName, entity, forms]);
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
 
-    const record = useRef(props.record ?? {});
+  //  const record = useRef(props.record ?? {});
+    const [record, setRecord] = useState(props.record ?? {});
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
 
     const _onSave = () => {
-        onChange(record.current);
+
+
+        console.log("Closing Modal", record);
+
+
+        onChange(record);
         dismissPanel.call(undefined, "save");
     };
     useEffect(() => {
-        record.current = props.record;
+        console.log("Form Render, Record Updated:", props.record)
+      //  record.current = props.record;
+        setRecord(props.record);
     }, [props.record]);
 
     const StickyFooter = React.useCallback(({ children }) => (props.stickyFooter ?? true) ? <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky> : <>{children}</>, [props.stickyFooter]);
@@ -45,13 +53,24 @@ export function FormRender<T>(props: FormRenderProps) {
                 </Stack>
             </StickyFooter>
         ),
-        [dismissPanel],
+        [dismissPanel, record],
     );
+
+    const _onChange = useCallback(data => {
+        console.log("Data changed Modal", data);
+       // record.current = data;
+        setRecord(data);
+    }, []);
+
+     //useEffect(() => {
+     //    console.log("FormRender outer changed:", props.record);
+         
+     //}, [props.record]);
 
     return <>
         <Stack.Item grow style={{ height: 'calc(100% - 80px)' }}>
 
-            <ModelDrivenEntityViewer related={related} onChange={(data) => record.current = data} record={props.record} formName={formName}
+            <ModelDrivenEntityViewer key={`${entityName}${formName}`} related={related} onChange={_onChange} record={record} formName={formName}
                 entityName={entityName} entity={entity} locale={app.locale} extraErrors={extraErrors} />
 
         </Stack.Item>

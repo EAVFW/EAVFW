@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { createContext, useRef, useState } from "react";
 import { IPivotProps, Pivot, PivotItem } from "@fluentui/react";
 
 
@@ -28,6 +28,8 @@ const pivotItemStyle = {
     height: 'calc(100vh - 44px)',
     overflow: 'auto',
 }
+
+
 
 const FormComponent = <T,>(props: FormComponentProps<T>) => {
     const {
@@ -59,6 +61,8 @@ const FormComponent = <T,>(props: FormComponentProps<T>) => {
         itemContainer: { flexGrow: 1 },
     };
 
+   
+
 
     if (form?.type === "QuickCreate") {
         const [tabName, tab] = Object.entries(form.layout.tabs)[0];
@@ -89,7 +93,7 @@ const FormComponent = <T,>(props: FormComponentProps<T>) => {
             {tabs.filter(tabName => form.layout.tabs[tabName]).map((tabName, idx) => {
                 const tab = form.layout.tabs[tabName];
                 return (
-                    <PivotItem className="form-tab"
+                    <PivotItem className="form-tab" style={{ height:"100%" }}
                         headerText={getTabName(tab) ?? tabName}
                         key={tabName}
                         itemKey={tabName}

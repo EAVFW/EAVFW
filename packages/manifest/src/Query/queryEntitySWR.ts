@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import useSWR, { mutate } from "swr";
+import useSWR from "swr";
 import { getNavigationProperty } from "../Entities/Attributes/getNavigationProperty";
 import { isLookup } from "../Entities/Attributes/Types/Lookup/isLookup";
 import { EntityDefinition } from "../Entities/EntityDefinition";
@@ -26,7 +26,7 @@ export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, quer
         return key;
     }
     const key = useMemo(() => ready ? keyFactory() : null, [query, ready]);
-    const { data, error } = useSWR(key,
+    const { data, error, mutate } = useSWR(key,
         {
             revalidateOnFocus: false,
             revalidateOnMount: true,
@@ -42,6 +42,6 @@ export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, quer
         data: data as { items: Array<T> },
         isLoading: !error && !data,
         isError: error,
-        mutate: () => mutate(key)
+        mutate: mutate
     }
 }

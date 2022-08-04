@@ -29,6 +29,8 @@ import {
     IObjectWithKey,
     MessageBar,
     MessageBarType,
+    IDetailsColumnProps,
+    useTheme,
 } from "@fluentui/react";
 import { FormValidation, FieldValidation } from "@rjsf/core";
 
@@ -54,9 +56,12 @@ import { RibbonHost } from '../Ribbon/RibbonHost';
 import { ColumnFilterCallout } from '../ColumnFilter/ColumnFilterCallout';
 import { RibbonBar } from '../Ribbon/RibbonBar';
 import { filterRoles } from '../../filterRoles';
+import { useAppInfo } from '../../useAppInfo';
+import { useLazyMemo } from '../../../../hooks/src';
+import { Controls } from '../Controls/ControlRegister';
 
 
-const theme = getTheme();
+//const theme = getTheme();
 
 export type ModelDrivenGridViewerState = {
     columns: IColumn[];
@@ -91,6 +96,8 @@ export type ModelDrivenGridViewerProps = {
     listComponent?: React.ComponentType<IDetailsListProps & { formData: any, onChange?: (related: any) => void }>
     onChange?: (data: any) => void
     formData?: any;
+    onHeaderRender?: IRenderFunction<IDetailsColumnProps>
+    onBuildFetchQuery?: <T>(q:T) => T;
 }
 
 const RibbonStyles: IStackStyles = {
@@ -319,18 +326,7 @@ function _getKey(item: any, index?: number): string {
     return item.key;
 }
 
-const _onRenderRow: IDetailsListProps['onRenderRow'] = props => {
-    const customStyles: Partial<IDetailsRowStyles> = {};
 
-    if (props) {
-        if (props.itemIndex % 2 === 0) {
-            // Every other row renders with a different background color
-            customStyles.root = { backgroundColor: theme.palette.neutralLighterAlt };
-        }
-        return <DetailsRow {...props} styles={customStyles} />;
-    }
-    return null;
-};
 
 const getCellText = (item: any, column: IColumn): string => {
     let value = item && column && column.fieldName ? item[column.fieldName] : '';
@@ -345,6 +341,8 @@ const getCellText = (item: any, column: IColumn): string => {
 
     return value;
 };
+
+
 
 const ConditionRenderComponent: React.FC<any> = (
     {
@@ -391,14 +389,18 @@ const ConditionRenderComponent: React.FC<any> = (
 
             setItems(items.slice());
         }} type={type} attribute={attribute} item={item} recordRouteGenerator={recordRouteGenerator} />
-    }
+    } else if (column.data.control && column.data.control in Controls ) {
+        const CustomControl = Controls[column.data.control] as React.FC<{value:any}>;
 
+        return <CustomControl value={item[attribute.logicalName]}></CustomControl>
+    }
+    
     return <>{getCellText(item, column)}</>
 }
 
- 
+const DefaultOnBuildFetchQuery = (q:any) => q;
 
-export default function ModelDrivenGridViewer(
+export function ModelDrivenGridViewer(
     {
         locale,
         entity,
@@ -414,16 +416,21 @@ export default function ModelDrivenGridViewer(
         viewName,
         recordRouteGenerator,
         padding,
-        entityName, defaultValues
+        entityName, defaultValues,
+        onHeaderRender,
+        onBuildFetchQuery = DefaultOnBuildFetchQuery
     }: ModelDrivenGridViewerProps) {
 
     const app = useModelDrivenApp();
+    const appinfo = useAppInfo();
     console.log("GridView: " + locale);
+
+  
 
     const [items, setItems] = useState<IRecord[]>(newRecord ? formData[entity.collectionSchemaName.toLowerCase()] ?? [] : []);
     const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
     const [announcedMessage, setannouncedMessage] = useState<string>();
-    const [isModalSelection, setisModalSelection] = useState(true);
+   
     const [isCompactMode, setisCompactMode] = useState(false);
     const [columns, setColumns] = useState<IColumn[]>([]);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
@@ -448,21 +455,20 @@ export default function ModelDrivenGridViewer(
 
     }, [columns, items]);
 
-  
-
+    const [isModalSelection, setisModalSelection] = useState(entity.views?.[selectedView]?.selection !== false);
     const { setSelection, selection, selectionDetails } = useSelectionContext();
 
 
-    const [stateCommands, setCommands] = useState<ModelDrivenGridViewerState["commands"]>(commands?.({ selection }) ?? rightCommands ?? []);
+    const stateCommands = useLazyMemo<ModelDrivenGridViewerState["commands"]>(() => commands?.({ selection }) ?? rightCommands ?? [], [commands,selection, selectionDetails, appinfo.currentEntityName, appinfo.currentRecordId]);
 
-    useEffect(() => {
-        setCommands(commands?.({ selection }) ?? rightCommands ?? []);
-    }, [selection, selectionDetails]);
+    //useEffect(() => {
+    //    setCommands(commands?.({ selection }) ?? rightCommands ?? []);
+    //}, [selection, selectionDetails]);
 
     const { buttons, addButton, removeButton, events } = useRibbon();
 
     useEffect(() => {
-
+        console.log("stateCommands changed", stateCommands);
         for (let cmd of stateCommands) {
             addButton(cmd);
         }
@@ -533,14 +539,14 @@ export default function ModelDrivenGridViewer(
         if (columns.length === 0)
             return [];
 
-        const keys = Object.values(attributes).filter(a => a.isPrimaryKey).map(c => c.logicalName);
-         
+        const keys = Object.values(attributes).filter(a => a.isPrimaryKey || a.isRowVersion).map(c => c.logicalName);
+        
         return columns.concat(keys);
     }, [selectedView, entity]);
 
     //Callback to recalculate the fetchQuery.
     const fetchCallBack = useCallback(() => {
-        console.log("Recalculating fetch qury");
+        console.log("Recalculating fetch qury:", [filter]);
         let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
        
 
@@ -553,6 +559,10 @@ export default function ModelDrivenGridViewer(
                 let cData = c.data['columnFilter'] as IColumnData;
                 return cData.odataFilter;
             });
+        let manifestFilter = entity.views?.[selectedView]?.filter;
+        if (manifestFilter) {
+            localFilters.push(manifestFilter); 
+        }
 
         let localColumnFilter = localFilters.join(" and ");
 
@@ -564,25 +574,29 @@ export default function ModelDrivenGridViewer(
         } else if (filter) {
             localFilter = filter;
         }
-        console.log("localFilter", localFilter);
+        console.log("Recalculating fetch qury:", localFilter);
 
         if (q && localFilter)
             q = q + "&" + localFilter;
         else if (localFilter)
             q = localFilter;
 
-        console.log('filter', [filter, localColumnFilter, q])
+        console.log('Recalculating fetch qury:', [filter, localColumnFilter, q])
 
         if (q)
             q = '?' + q;
 
-        setFetchQuery({ "$expand": expand, "$filter": localFilter?.substr('$filter='.length), "$select": columnAttributes.join(",") });
+        if (localFilter?.startsWith("$filter="))
+            localFilter = localFilter?.substr('$filter='.length);
+
+        setFetchQuery(onBuildFetchQuery({ "$expand": expand, "$filter": localFilter, "$select": columnAttributes.join(",") }));
 
 
-    }, [attributes, columns, columnAttributes]);
+    }, [attributes, columns, columnAttributes, filter]);
 
 
     useEffect(() => {
+    
         fetchCallBack();
     }, [formData?.modifiedon, selectedView]);
 
@@ -598,7 +612,13 @@ export default function ModelDrivenGridViewer(
 
             const columnKeys = Object.keys(view?.columns ?? {}).filter(c => attributes[c] && !(attributes[c].isPrimaryKey ?? false));
 
+            //const headerRender: IRenderFunction<IDetailsColumnProps> = (props, defaultRender) => {
+            //    console.log("Render header", props);
+                
+            //    const DefaultRender =  HeaderRender;
 
+            //    return <DefaultRender {...props!} styles={{ cellName:{ border: "solid 2px black"}, root: { border: "solid 2px black" } }} />
+            //}
 
             console.log("VIEWS", [attributes, view, columnKeys])
             const columns1: Array<IColumn> = columnKeys
@@ -612,10 +632,12 @@ export default function ModelDrivenGridViewer(
                     fieldName: attributes[column].logicalName,
                     isResizable: true,
                     isCollapsible: true,
-                    data: attributes[column],
+                    data: Object.assign({}, attributes[column], view.columns?.[column] ?? {}),
                     iconName: columns.find(x => x.key == attributes[column].schemaName)?.iconName,
                     onColumnClick: (e, c) => _onColumnClick(e, c),
                     className: classNames.cell,
+                    onRenderHeader: onHeaderRender,
+                   
                 }));
             console.log("Set Columns", [columns1]);
             return columns1
@@ -626,6 +648,24 @@ export default function ModelDrivenGridViewer(
     }, [items]);
 
     const hasMoreViews = Object.keys(entity?.views ?? {}).length > 1;
+
+
+    const theme = useTheme();
+
+    const _onRenderRow = useCallback<Required<IDetailsListProps>['onRenderRow']>( props => {
+        const customStyles: Partial<IDetailsRowStyles> = {};
+
+        if (props) {
+            if (props.itemIndex % 2 === 0) {
+                // Every other row renders with a different background color
+                customStyles.root = { backgroundColor: theme.palette.neutralLighterAlt };
+            }
+            return <DetailsRow {...props} styles={customStyles} />;
+        }
+        return null;
+    }, [theme.palette.neutralLighterAlt]);
+
+    console.log("WithTimeButton Theme", theme.palette.themePrimary);
 
     if (!columns.length)
         return <div>loading data</div>
@@ -638,8 +678,10 @@ export default function ModelDrivenGridViewer(
     console.log([showViewSelector, hasMoreViews]);
 
 
+
+
     return (
-        <RibbonHost ribbon={entity.views?.[selectedView]?.ribbon ?? {}}>
+        
             <Stack verticalFill>
 
                 <ColumnFilterCallout
@@ -674,12 +716,13 @@ export default function ModelDrivenGridViewer(
                             layoutMode={DetailsListLayoutMode.justified}
                             isHeaderVisible={true}
                             selection={selection}
-                            selectionPreservedOnEmptyClick={true}
-                            onItemInvoked={_onItemInvoked}
+                            selectionPreservedOnEmptyClick={true}                           
                             enterModalSelectionOnTouch={true}
                             ariaLabelForSelectionColumn="Toggle selection"
                             ariaLabelForSelectAllCheckbox="Toggle selection for all items"
                             checkButtonAriaLabel="select row"
+
+                            onItemInvoked={_onItemInvoked}
                             onRenderRow={_onRenderRow}
                             onRenderDetailsHeader={onRenderDetailsHeader}
                             onChange={onChange}
@@ -691,7 +734,8 @@ export default function ModelDrivenGridViewer(
                         />
                     ) : (
                         <ListComponent styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 } }}
-                            items={items}
+                                constrainMode={ConstrainMode.unconstrained}
+                                items={items}
                             compact={isCompactMode}
                             columns={columns}
                             selectionMode={SelectionMode.none}
@@ -700,10 +744,11 @@ export default function ModelDrivenGridViewer(
                             layoutMode={DetailsListLayoutMode.justified}
                             isHeaderVisible={true}
                             onItemInvoked={_onItemInvoked}
-                            onRenderRow={_onRenderRow}
+                                onRenderRow={_onRenderRow}
+                                onRenderDetailsHeader={onRenderDetailsHeader}
                             onChange={onChange}
                             formData={formData}
-                            onRenderDetailsHeader={onRenderDetailsHeader}
+                                
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent entityName={entityName}
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
                                 setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
@@ -712,7 +757,7 @@ export default function ModelDrivenGridViewer(
                     )}
                 </Stack.Item>
             </Stack>
-        </RibbonHost>
+         
     )
 }
 
@@ -726,3 +771,5 @@ export function useModelDrivenGridViewerContext<T>() { return useContext<ModelDr
 export function ModelDrivenGridViewerContextProvider<T>({ children, ...props }: PropsWithChildren<ModelDrivenGridViewerContextProps & T>) {
     return <ModelDrivenGridViewerContext.Provider value={props} >{children}</ModelDrivenGridViewerContext.Provider>
 }
+
+export default ModelDrivenGridViewer;

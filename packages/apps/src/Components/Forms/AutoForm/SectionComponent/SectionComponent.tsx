@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 
@@ -8,9 +8,9 @@ import isEqual from "react-fast-compare";
 
 import { useBoolean } from "@fluentui/react-hooks";
 import { SectionComponentProps } from "./SectionComponentProps";
-import { useChangeDetector } from "@eavfw/hooks";
+import { useChangeDetector, useLazyMemo } from "@eavfw/hooks";
 import { useModelDrivenApp } from "../../../../useModelDrivenApp";
-import { BaseNestedType, deleteRecordSWR, ViewReference } from "@eavfw/manifest";
+import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, FormTabDefinition, FormTabDefinitionWithColumns, getRecordSWR, hasColumns, hasControl, queryEntitySWR, ViewReference } from "@eavfw/manifest";
 import { ControlJsonSchemaObject } from "../ControlJsonSchema";
 import { capitalize } from "@eavfw/utils";
 import { useUserProfile } from "../../../Profile/useUserProfile";
@@ -24,6 +24,10 @@ import ControlsComponent from "../ControlsComponent";
 import { RibbonContextProvider } from "../../../Ribbon/RibbonContextProvider";
 import ModelDrivenGridViewer from "../../../Views/ModelDrivenGridViewer";
 import { Views } from "../../../Views/ViewRegister";
+import ColumnComponent from "../ColumnComponent";
+import { Controls } from "../../../Controls/ControlRegister";
+import { useEAVForm } from "../../../../../../forms/src";
+import { RibbonHost } from "../../../Ribbon/RibbonHost";
 
 
 
@@ -37,6 +41,17 @@ import { Views } from "../../../Views/ViewRegister";
 
 function throwError(err: Error) {
     throw err;
+}
+
+function findEntry(columns: Required<AutoFormColumnsDefinition>["columns"], columnName: string, sectionName: string) {
+
+    if (columnName in columns) {
+        let sections = columns[columnName].sections;
+        if (sectionName in sections) {
+            return sections[sectionName];
+        }
+    }
+  
 }
 
 
@@ -76,10 +91,60 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         useChangeDetector(`SectionComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} locale`, locale, renderId);
 
         const columns = form.columns;
+        const tab = form.layout.tabs[tabName] as FormTabDefinitionWithColumns;
+        const section = findEntry(tab.columns, columnName, sectionName);
+
+        if (hasColumns(section)) {
+            const columns = section.columns;
+            const ui = (
+                <Stack verticalFill horizontal gap={25} styles={{
+                    root: {
+                        display: "grid",
+                        gridTemplateColumns: `${Object.keys(columns).map(c => '1fr').join(' ')};`
+                    }
+                }}>
+                    {Object.keys(columns).map((columnName, idx) => (
+                        <Stack.Item grow className={columnName} key={columnName}>
+                            <ColumnComponent<T>
+                                form={form}
+                                sections={columns[columnName].sections}
+                                tabName={tabName}
+                                columnName={columnName}
+                                entity={entity}
+                                formName={formName}
+                                formData={formData}
+                                onFormDataChange={onFormDataChange}
+                                locale={locale}
+                                entityName={entityName}
+                                factory={factory}
+                                formContext={formContext}
+                                extraErrors={extraErrors}
+                            />
+                        </Stack.Item>
+                    ))}
+                </Stack>
+            );
+            return ui;
+
+
+        } else if (hasControl(section)) {
+            if (section.control in Controls) {
+                const CustomControl = Controls[section.control];
+
+                return <Stack verticalFill  gap={25} styles={{
+                     
+                }}><Stack.Item grow>
+                        <CustomControl />
+                    </Stack.Item>
+                </Stack>
+            }
+
+        }
+
         const app = useModelDrivenApp();
         const router = useRouter();
         const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
-        const [views, setViews] = useState<Array<ViewReference>>([]);
+      //  const [views, setViews] = useState<Array<ViewReference>>([]);
         const [schema, setSchema] = useState<ControlJsonSchemaObject>();
         const localization = {
             new: capitalize(app.getLocalization("new") ?? "New"),
@@ -89,8 +154,11 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const lastSchema = useRef<ControlJsonSchemaObject>();
 
         const user = useUserProfile();
-
+        //const _entity = entity;
         useEffect(() => {
+           
+         //   const entity = app.getEntity(entityName);
+            console.log("Recalculating Schema:", [entityName, entity, Object.keys(columns).join(", ")]);
             const fields = Object.keys(columns)
                 .filter(
                     (field) =>
@@ -103,7 +171,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     key: field,
                     attributeName: field,
                     fieldName: field,
-                    attribute: entity.attributes[field] ?? (entity.TPT && app.getEntity(entity.TPT)?.attributes[field]) ?? throwError(new Error(`The attribute for ${field} was not defined on ${entity.schemaName}`)),
+                    attribute: entity.attributes[field] ?? (entity.TPT && app.getEntity(entity.TPT)?.attributes[field]), //?? throwError(new Error(`The attribute for ${field} was not defined on ${entity.schemaName}`)),
                     field: columns[field]
                 }));
 
@@ -116,12 +184,12 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     type: "object",
                     dependencies: Object.fromEntries(deps.map(field =>
                         [entity.attributes[field!].logicalName, getDependencySchema(fields, field, entity, app, formName, formContext)])),
-                    required: fields.filter(f => (f.attribute.type as BaseNestedType)?.required).map(field => field.attribute.logicalName),
+                    required: fields.filter(f => (f.attribute?.type as BaseNestedType)?.required).map(field => field.attribute.logicalName),
                     properties: Object.assign(
                         {},
                         ...fields.filter(f => !f.field.dependant)
                             .map((field) => ({
-                                [field.attribute.logicalName]: getJsonSchema(field.attribute, field.field, entity, app.locale, {
+                                [field.attribute?.logicalName ?? field.key]: getJsonSchema(field.attribute, field.field, entity, app.locale, {
                                     entityName: entity.logicalName,
                                     fieldName: field.fieldName,
                                     attributeName: field.attributeName,
@@ -138,9 +206,13 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     setSchema(schemaDef);
                 }
             }
-        }, [form]);
+        }, [columns]);
 
-        useEffect(() => {
+        //TODO , make expression parsning work on views.
+        const [{ allowedforchildcreation }] = useEAVForm((state) => ({ "allowedforchildcreation": state.formValues.allowedforchildcreation }));
+        const appinfo = useAppInfo();
+        
+        const views = useLazyMemo(() => {
             console.groupCollapsed("Setting Related Views");
             try {
                 const views = app
@@ -150,14 +222,26 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                         tabName,
                         columnName,
                         sectionName
-                    );
-                console.log(app);
-                console.log(views);
-                setViews(views);
+                );
+                
+                console.log("Setting Views", JSON.stringify(views), allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId);
+                for (let view of views) {
+                    view.ribbon = Object.assign({}, view?.ribbon ?? {});
+                    let visible = view.ribbon.new?.visible as string | boolean;
+                    if (typeof (visible) === "string" && visible.indexOf('@') !== -1) {
+                        if (visible === "@canCreateTaskDefintion()") {
+                            view.ribbon.new.visible = allowedforchildcreation ?? false;
+                        }
+                    }
+                }
+                console.log("Setting Views", JSON.stringify(views), allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId);
+                return views;
             } finally {
                 console.groupEnd();
             }
-        }, [entity.logicalName, formName, tabName, columnName, sectionName]);
+        }, [entity.logicalName, formName, tabName, columnName, sectionName, allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId]);
+
+
 
         const [activeViewRef, setactiveViewRef] = useState<ViewReference>();
         useEffect(() => {
@@ -208,12 +292,13 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                 {views
                     .map((gridprops) => (
 
-                        <RibbonContextProvider>
+                        <RibbonContextProvider key={gridprops.key}>
+                            <RibbonHost ribbon={entity.views?.[gridprops.viewName!]?.ribbon ?? {}}>
                             <ModelDrivenGridViewer
                                 {...gridprops}
                                 locale={locale}
                                 onChange={onFormDataChange}
-                                filter={`$filter=${gridprops.attribute} eq ${formData.id}`}
+                                filter={`$filter=${gridprops.attribute} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter :'')}
                                 formData={formData}
                                 newRecord={formData.id ? false : true}
                                 defaultValues={formData[gridprops.entity.collectionSchemaName.toLowerCase()]}
@@ -277,7 +362,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                         },
                                     } as ICommandBarItemProps//,
                                 ].filter((commandBarButton) => (commandBarButton.key === "newRelatedItem" && gridprops?.ribbon?.new?.visible !== false) || (commandBarButton.key === "deleteSelection" && gridprops?.ribbon?.delete?.visible !== false))}
-                            />
+                                /></RibbonHost>
                         </RibbonContextProvider>
                     ))}
             </>

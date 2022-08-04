@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Stack } from "@fluentui/react";
 
-import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
+import { AutoFormSectionsDefinition, EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
 import { SectionComponent } from "./SectionComponent/SectionComponent";
@@ -10,7 +10,7 @@ import { FormValidation } from "../FormValidation";
 
 export type ColumnComponentProps<T> = {
     form: FormDefinition;
-    sections: FormTabDefinition["columns"][""]["sections"];
+    sections: AutoFormSectionsDefinition;
     tabName: string;
     columnName: string;
     entityName: string;
@@ -59,7 +59,7 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
         const ui = (
             <Stack verticalFill className="form-column">
                 {Object.keys(sections).map((sectionName, idx) => (
-                    <Stack.Item grow key={sectionName}>
+                    <Stack.Item  grow key={sectionName}>
                         <SectionComponent<T>
                             form={form}
                             tabName={tabName}

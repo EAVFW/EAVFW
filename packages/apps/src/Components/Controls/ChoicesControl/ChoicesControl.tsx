@@ -1,5 +1,5 @@
 import { Dropdown, IDropdownOption, IDropdownProps } from "@fluentui/react";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { JSONSchema7 } from "json-schema";
 import { useRef } from "react";
 import { AttributeDefinition, ChoicesType, queryEntitySWR } from "@eavfw/manifest";
@@ -21,7 +21,6 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
     ({
         entityName,
         attributeName,
-        id,
         value,
         required,
         readonly,
@@ -31,7 +30,8 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
         schema,
         onChange,
         name,
-        formContext
+        formContext,
+        idSchema
     }) => {
         const app = useModelDrivenApp();
         const appInfo = useAppInfo();
@@ -120,9 +120,9 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
             onFormDataChange(relatedItems);
         }
 
-        const _onBlur = (e: any) => onBlur(id!, e.target.value);
+        const _onBlur = useCallback((e: any) => onBlur(idSchema.$id, selectedKeys), [selectedKeys]);
 
-        const _onFocus = (e: any) => onFocus?.(id!, e.target.value);
+        const _onFocus = useCallback((e: any) => onFocus?.(idSchema.$id, selectedKeys), [selectedKeys]);
 
         useEffect(() => {
             const fromFormData = formData[name]?.map((f: any) => f[choices.logicalName]) ?? [];

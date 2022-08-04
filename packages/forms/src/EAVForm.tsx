@@ -1,5 +1,5 @@
 
-import { EAVFWErrorDefinition, isEAVFWError, ManifestDefinition, } from "@eavfw/manifest";
+import { EAVFWErrorDefinition, isEAVFWError, ManifestDefinition, ValidationDefinitionV1, ValidationDefinitionV2, } from "@eavfw/manifest";
 import { useExpressionParserContext } from "@eavfw/expressions";
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
@@ -12,6 +12,8 @@ import { EAVFormContextState } from "./EAVFormContextState";
 import { EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVFormContextActions";
 
 import { useUuid } from "@eavfw/hooks";
+import { useEAVForm } from "./useEAVForm";
+import { useAppInfo, useModelDrivenApp, WarningContext } from "@eavfw/apps";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
     formDefinition?: ManifestDefinition,
@@ -25,7 +27,7 @@ export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = 
 
 const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
 const validationFunction = process.env['NEXT_PUBLIC_BLAZOR_EVAL_VALIDATION'];
-
+const validationV2BlazorSupport = process.env['NEXT_PUBLIC_BLAZOR_EVAL_EXPRESSION'];
 
 
 
@@ -201,6 +203,114 @@ function clearErrors(errors: any, changes: any) {
     }
 }
 
+type validationRulesType = {
+    field: string,
+    rules: { [validationKey: string]: ValidationDefinitionV1 | ValidationDefinitionV2 }
+}
+
+type validationResponse = {
+    field: string,
+    validationKey:string,
+    message?: string,
+    messageCode?: string,
+    type: "info" | "warning" | "error"
+}
+export const EAVFormValidation: React.FC = ({ children }) => {
+
+    const app = useModelDrivenApp();
+    const appInfo = useAppInfo();
+    const [warnings, setWarnings] = useState<Array<{ logicalName: string, warning: string }>>([]);
+  //  const entityDefinition = useMemo(() => app.getEntity(appInfo.currentEntityName), [appInfo.currentEntityName]); // hele manifest objeketet
+    const attributes = useMemo(() => appInfo.currentEntityName ? app.getAttributes(appInfo.currentEntityName) : {}, [appInfo.currentEntityName]);
+
+    const validationRules = useMemo(()=> Object.entries(attributes).filter(([key, attr]) => attr.validation).map(([key, attr]) => {
+        return {
+            field: key,
+            rules: { ...attr.validation }
+        } as validationRulesType
+    }), [attributes]);
+
+    /**
+         * Get updates when formvalue changes
+         * */
+
+    const [{ localFromValues }] = useEAVForm(state => {
+        return {
+            localFromValues: state.formValues,
+        };
+    },100);
+
+
+    /**
+     * Set up initial validation rules and recreate when current entity/app/area has changed
+     */
+    if (namespace && validationV2BlazorSupport) {
+
+        useEffect(() => {
+            console.log("Extracted Validation rules", [validationRules.map(c => c.field), validationRules, localFromValues])
+            setTimeout(() => {
+                DotNet.invokeMethodAsync(namespace, "AddValidationRules", validationRules)
+                    .then(_ => console.log("Validation Rules Added"))
+                    .catch(err => console.error("Error when loading validation rules", [err]));
+            });
+        }, [validationRules]);
+    }
+
+    const currentTime = useRef(new Date().getTime());
+    /**
+     * Whever the data on form changes, send formdata to reevaluate validations
+     */
+    useEffect(() => {
+        let startTime = new Date().getTime();
+        console.log("Data changed, validating rules:");
+        console.log("localFromValues", localFromValues);
+
+        const start = currentTime.current = new Date().getTime();
+
+        if (namespace && validationV2BlazorSupport) {
+            setTimeout(() => {
+                DotNet.invokeMethodAsync(namespace, "ValidateValidationRules", localFromValues)
+                    .then(res => {
+
+                        if (start !== currentTime.current) {
+                            return;
+                        }
+
+                        console.log(`Data changed, validating rules ran in ${new Date().getTime() - startTime}:`, res);
+                        const validationResponses = res as validationResponse[];
+
+                        for (let validationResponse of validationResponses) {
+                            if (validationResponse.messageCode) {
+                                validationResponse.message = app.getLocaleErrorMessage(validationResponse.messageCode, app.locale);
+                            }
+
+                            if (validationResponse.type === "error") {
+                                console.error("Validation error: ", [validationResponse.field, validationResponse.validationKey, validationResponse.message])
+                            } else if (validationResponse.type === "warning") {
+                                console.warn("Validation warning: ", [validationResponse.field, validationResponse.validationKey, validationResponse.message])
+                            }
+                        }
+
+                        const warnings = validationResponses.filter(x => x.type === "warning").map(w => ({ logicalName: attributes[w.field].logicalName, warning: w.message! }));
+                        console.log("setting warnings: ", warnings);
+                        setWarnings(warnings);
+                        
+
+                    })
+                    .catch(err => console.error("Error occured in validation:", [err]));
+            });
+        }
+    }, [localFromValues]);
+
+    return (
+        <VisitedContainer id="root">
+            <WarningContext.Provider value={warnings}>
+                {children}
+            </WarningContext.Provider>
+        </VisitedContainer>
+    )
+}
+
 export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ stripForValidation=(a)=>a,formDefinition, defaultData, onChange, children, onValidationResult, state: initialState  }: PropsWithChildren<EAVFormProps<T, TState>>) => {
 
     const { current: state } = useRef({
@@ -214,6 +324,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
 
     const formId = useUuid();
 
+   
    
     const global_etag = useRef<string>(new Date().toISOString());
 
@@ -427,10 +538,18 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
         return () => { delete callbacks[formId] };
     }, []);
 
+    useEffect(() => {
+        const equal = isEqual(state.formValues, defaultData);
+        console.log("EAVForm Default Data Reset", [JSON.stringify(state.formValues), JSON.stringify( defaultData), equal]);
+        if (!equal) {
+            state.formValues = cloneDeep(defaultData) ?? {};
+            setEtag(global_etag.current = new Date().toISOString());
+        }
 
-    //useEffect(() => {
-    //    runValidation();
-    //},[]);
+
+    }, [defaultData]);
+
+   
 
     return (
         <EAVFormContext.Provider
@@ -439,9 +558,9 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
                 state: state,           
                 etag,           
             }}>
-            <VisitedContainer id="root">
-                {children}
-            </VisitedContainer>
+            <EAVFormValidation>
+                {children}           
+            </EAVFormValidation>
         </EAVFormContext.Provider>
     )
 }

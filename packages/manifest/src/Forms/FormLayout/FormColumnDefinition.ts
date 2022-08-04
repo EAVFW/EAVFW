@@ -1,3 +1,9 @@
+ 
+import { JSONSchema7 } from "json-schema";
+
+type addPrefixToObject<T, P extends string> = {
+    [K in keyof T as K extends string ? `${P}${K}` : never]: T[K]
+}
 
 export type FormColumnDefinition = {
     tab: string;
@@ -17,4 +23,6 @@ export type FormColumnDefinition = {
         allowed?: string[]
     }
     minLength?: number;
+    displayName?: string;
+    schema?: JSONSchema7 & addPrefixToObject<any,'x-'>
 };

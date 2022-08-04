@@ -7,6 +7,7 @@ export type ViewReference = {
     key: string,
     entity: EntityDefinition,
     viewName?: string; entityName: string; attribute: string,
+    filter?:string,
     view?: {
         control?: string, columns?: any,
         ribbon?: RibbonViewInfo

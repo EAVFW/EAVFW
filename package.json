@@ -47,6 +47,9 @@
     "release-hooks": "npm run release --workspace packages/hooks",
     "release-nextjs": "npm run release --workspace packages/nextjs"
   },
+  "config": {
+    "force": true
+  },
   "private": true,
   "workspaces": {
     "packages": [

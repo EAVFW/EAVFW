@@ -3,7 +3,7 @@
   "description": "EAVFW expressions",
   "version": "0.0.38",
   "peerDependencies": {
-    "react": "17.0.2"
+    "react": "18.2.0"
   },
   "devDependencies": {
     "@types/blazor__javascript-interop": "3.1.2"
@@ -15,8 +15,8 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts",
-  "release": {
-    "branches": [ "main", "dev" ]
-  },
-  "scripts": { "release": "semantic-release -e semantic-release-monorepo" }
+  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
+  "config": {
+    "force": true
+  }
 }
