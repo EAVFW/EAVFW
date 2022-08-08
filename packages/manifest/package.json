@@ -2,6 +2,8 @@
   "name": "@eavfw/manifest",
   "description": "Manifest Type Definitions",
   "version": "0.0.38",
+  "dependencies": {
+  },
   "peerDependencies": {
     "swr": "1.3.0",
     "react": "18.2.0"

@@ -27,11 +27,11 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         console.log("ExpressionParser FormValues Updated: ", formValues);
     }, [formValues]);
 
-    
-    useEffect(useDebouncer(() => {
-       
+
+    const _d = useDebouncer(() => {
+
         if (namespace && setVariablesFunction && isBlazorInitialized) {
-            let time = new Date().getTime();    
+            let time = new Date().getTime();
 
             console.log("ExpressionParser Variables Updating: ", _variables.current);
             DotNet.invokeMethodAsync(namespace, setVariablesFunction, _variables.current)
@@ -42,14 +42,14 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
                     console.error("ExpressionParser Variables Update error: ", [err, _variables.current]);
                 }).finally(() => {
                     console.log("ExpressionParser Variables Updated in " + (new Date().getTime() - time), _variables.current);
-                    
-                 //   alert("variables set in " + (new Date().getTime() - time));
+
+                    //   alert("variables set in " + (new Date().getTime() - time));
                 });
         }
-    }, 250, [variables, isBlazorInitialized]) as any, [variables, isBlazorInitialized]);
+    }, 250, [variables, isBlazorInitialized]) as any;
+    useEffect(() => { _d(); }, [variables, isBlazorInitialized]);
 
-    
-    useEffect(useDebouncer(() => {
+    const _dd = useDebouncer(() => {
 
         if (namespace && setVariablesFunction && isBlazorInitialized) {
             let time = new Date().getTime();
@@ -65,7 +65,8 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
                     //   alert("variables set in " + (new Date().getTime() - time));
                 });
         }
-    }, 250, [expressions, isBlazorInitialized]) as any, [expressions, isBlazorInitialized]);
+    }, 250, [expressions, isBlazorInitialized]) as any;
+    useEffect(() => { _dd(); }, [expressions, isBlazorInitialized]);
 
 
     return <ExpressionParserContext.Provider value={{
