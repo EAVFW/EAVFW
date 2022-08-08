@@ -31,6 +31,7 @@ import {
     MessageBarType,
     IDetailsColumnProps,
     useTheme,
+    IconButton,
 } from "@fluentui/react";
 import { FormValidation, FieldValidation } from "@rjsf/core";
 
@@ -59,7 +60,8 @@ import { filterRoles } from '../../filterRoles';
 import { useAppInfo } from '../../useAppInfo';
 import { useLazyMemo } from '../../../../hooks/src';
 import { Controls } from '../Controls/ControlRegister';
-
+import { IFetchQuery, usePaging } from './PagingContext';
+import styles from "./ModelDrivenGridViewer.module.scss";
 
 //const theme = getTheme();
 
@@ -97,7 +99,7 @@ export type ModelDrivenGridViewerProps = {
     onChange?: (data: any) => void
     formData?: any;
     onHeaderRender?: IRenderFunction<IDetailsColumnProps>
-    onBuildFetchQuery?: <T>(q:T) => T;
+    onBuildFetchQuery?: <T>(q: T) => T;
 }
 
 const RibbonStyles: IStackStyles = {
@@ -177,23 +179,32 @@ const classNames = mergeStyleSets({
     }
 });
 
-const onRenderDetailsFooter: IRenderFunction<IDetailsFooterProps> = (props, defaultRender) => {
+
+const RenderDetailsFooter: IRenderFunction<IDetailsFooterProps> = (props, defaultRender) => {
     if (!props) {
         return null;
     }
 
+    const { currentPage, firstItemNumber, lastItemNumber, pageSize, totalRecords, moveToFirst, moveNext, movePrevious } = usePaging();
+    const { selectedCount } = { selectedCount: 0 };
+
     return (
-        <Sticky stickyPosition={StickyPositionType.Footer} isScrollSynced={true}>
-            <div className={classNames.row}>
-                <DetailsRow
-                    columns={props.columns}
-                    item={footerItem}
-                    itemIndex={-1}
-                    selection={props.selection}
-                    selectionMode={(props.selection && props.selection.mode) || SelectionMode.none}
-                    rowWidth={props.rowWidth}
-                />
-            </div>
+        <Sticky stickyPosition={StickyPositionType.Footer} isScrollSynced={true} stickyClassName="Footer">
+
+            <Stack grow horizontal horizontalAlign="space-between">
+                <Stack.Item grow className="Footer">
+                    <Stack grow horizontal horizontalAlign="space-between">
+                        <Stack.Item grow={1} align="center">{firstItemNumber} - {lastItemNumber} of {totalRecords} ({selectedCount} selected)</Stack.Item>
+                        <Stack.Item align="center" className="FooterRight">
+                            <IconButton className="FooterIcon" iconProps={{ iconName: "DoubleChevronLeft" }} onClick={moveToFirst} />
+                            <IconButton className="FooterIcon" iconProps={{ iconName: "ChevronLeft" }} onClick={movePrevious} />
+                            <span>Page {currentPage+1}</span>
+                            <IconButton className="FooterIcon" iconProps={{ iconName: "ChevronRight" }} onClick={moveNext} />
+                        </Stack.Item>
+                    </Stack>
+                </Stack.Item>
+            </Stack>
+
         </Sticky>
     );
 };
@@ -207,7 +218,7 @@ type LookupControlRenderProps = {
 }
 
 const LookupControlRender: React.FC<LookupControlRenderProps> = ({ item, attribute, type, recordRouteGenerator, onChange }) => {
-     
+
 
     const [isOpen, { setFalse, setTrue }] = useBoolean(false);
     const save = useRibbon();
@@ -389,16 +400,20 @@ const ConditionRenderComponent: React.FC<any> = (
 
             setItems(items.slice());
         }} type={type} attribute={attribute} item={item} recordRouteGenerator={recordRouteGenerator} />
-    } else if (column.data.control && column.data.control in Controls ) {
-        const CustomControl = Controls[column.data.control] as React.FC<{value:any}>;
+    } else if (column.data.control && column.data.control in Controls) {
+        const CustomControl = Controls[column.data.control] as React.FC<{ value: any }>;
 
         return <CustomControl value={item[attribute.logicalName]}></CustomControl>
     }
-    
+
     return <>{getCellText(item, column)}</>
 }
 
-const DefaultOnBuildFetchQuery = (q:any) => q;
+const DefaultOnBuildFetchQuery = (q: any) => q;
+
+const Footer = () => {
+    return <div>Hello</div>
+}
 
 export function ModelDrivenGridViewer(
     {
@@ -425,15 +440,59 @@ export function ModelDrivenGridViewer(
     const appinfo = useAppInfo();
     console.log("GridView: " + locale);
 
-  
+
 
     const [items, setItems] = useState<IRecord[]>(newRecord ? formData[entity.collectionSchemaName.toLowerCase()] ?? [] : []);
     const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
     const [announcedMessage, setannouncedMessage] = useState<string>();
-   
+
     const [isCompactMode, setisCompactMode] = useState(false);
-    const [columns, setColumns] = useState<IColumn[]>([]);
+   // const [columns, setColumns] = useState<IColumn[]>([]);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
+
+
+    const columns = useMemo(() => {
+       // console.log("columns", columns)
+        const _getColumns = () => {
+            const view: ViewDefinition = entity.views?.[selectedView]
+                ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } };
+
+            const columnKeys = Object.keys(view?.columns ?? {}).filter(c => attributes[c] && !(attributes[c].isPrimaryKey ?? false));
+
+            //const headerRender: IRenderFunction<IDetailsColumnProps> = (props, defaultRender) => {
+            //    console.log("Render header", props);
+
+            //    const DefaultRender =  HeaderRender;
+
+            //    return <DefaultRender {...props!} styles={{ cellName:{ border: "solid 2px black"}, root: { border: "solid 2px black" } }} />
+            //}
+
+            console.log("VIEWS", [attributes, view, columnKeys])
+            const columns1: Array<IColumn> = columnKeys
+                .filter(field => (!view.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, user))
+                .map(column => ({
+                    key: column,
+                    name: attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName,
+                    minWidth: 32,
+                    currentWidth: 32,
+                    maxWidth: 150,
+                    fieldName: attributes[column].logicalName,
+                    isResizable: true,
+                    isCollapsible: true,
+                    data: Object.assign({}, attributes[column], view.columns?.[column] ?? {}),
+                  //  iconName: columns.find(x => x.key == attributes[column].schemaName)?.iconName,
+                    onColumnClick: (e, c) => _onColumnClick(e, c),
+                    className: classNames.cell,
+                    onRenderHeader: onHeaderRender
+
+                }));
+            console.log("Set Columns", [columns1]);
+            return columns1
+        };
+
+        return (_getColumns());
+
+    }, [selectedView, attributes]);
 
 
     let {
@@ -459,7 +518,7 @@ export function ModelDrivenGridViewer(
     const { setSelection, selection, selectionDetails } = useSelectionContext();
 
 
-    const stateCommands = useLazyMemo<ModelDrivenGridViewerState["commands"]>(() => commands?.({ selection }) ?? rightCommands ?? [], [commands,selection, selectionDetails, appinfo.currentEntityName, appinfo.currentRecordId]);
+    const stateCommands = useLazyMemo<ModelDrivenGridViewerState["commands"]>(() => commands?.({ selection }) ?? rightCommands ?? [], [commands, selection, selectionDetails, appinfo.currentEntityName, appinfo.currentRecordId]);
 
     //useEffect(() => {
     //    setCommands(commands?.({ selection }) ?? rightCommands ?? []);
@@ -494,7 +553,7 @@ export function ModelDrivenGridViewer(
     //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
     //}
 
-    const [fetchQuery, setFetchQuery] = useState<any>();
+    const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords } = usePaging();
     const { data, isError, isLoading, mutate } = queryEntitySWR(entity, fetchQuery, !newRecord && typeof fetchQuery !== "undefined");
 
     useEffect(() => {
@@ -532,6 +591,11 @@ export function ModelDrivenGridViewer(
         }
     }, [data, newRecord && defaultValues]);
 
+
+
+
+
+
     const columnAttributes = useMemo(() => {
         const view = entity.views?.[selectedView];
 
@@ -540,18 +604,22 @@ export function ModelDrivenGridViewer(
             return [];
 
         const keys = Object.values(attributes).filter(a => a.isPrimaryKey || a.isRowVersion).map(c => c.logicalName);
-        
+
         return columns.concat(keys);
     }, [selectedView, entity]);
 
     //Callback to recalculate the fetchQuery.
     const fetchCallBack = useCallback(() => {
-        console.log("Recalculating fetch qury:", [filter]);
+        console.log("Recalculating fetch qury:", [filter, columns]);
         let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
-       
+
 
 
         let q = expand ? `$expand=${expand}` : '';
+
+        let orderBy = columns.filter(c => c.isSorted)[0];
+
+       
 
         let localFilters = columns
             .filter(c => (c.data['columnFilter'] as IColumnData)?.odataFilter !== undefined)
@@ -561,10 +629,12 @@ export function ModelDrivenGridViewer(
             });
         let manifestFilter = entity.views?.[selectedView]?.filter;
         if (manifestFilter) {
-            localFilters.push(manifestFilter); 
+            localFilters.push(manifestFilter);
         }
 
         let localColumnFilter = localFilters.join(" and ");
+
+    
 
         let localFilter;
         if (filter && localColumnFilter) {
@@ -589,70 +659,36 @@ export function ModelDrivenGridViewer(
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
 
-        setFetchQuery(onBuildFetchQuery({ "$expand": expand, "$filter": localFilter, "$select": columnAttributes.join(",") }));
+        let query: IFetchQuery = ({ "$expand": expand, "$filter": localFilter, "$select": columnAttributes.join(","), '$count': true, '$top': pageSize, '$skip': currentPage * pageSize });
+
+        if (orderBy) {
+            query['$orderby'] = orderBy.fieldName + ' ' + (orderBy.isSortedDescending ? 'desc' : 'asc');
+        } 
+
+        setFetchQuery(onBuildFetchQuery(query));
 
 
-    }, [attributes, columns, columnAttributes, filter]);
+    }, [attributes, columns, columnAttributes, filter, currentPage, pageSize]);
 
 
     useEffect(() => {
-    
+
         fetchCallBack();
     }, [formData?.modifiedon, selectedView]);
-
+    useEffect(() => { fetchCallBack(); }, [currentPage]);
+    useEffect(() => { setTotalRecords(data?.count ?? -1); }, [data?.count]);
 
 
     const user = useUserProfile();
 
-    useEffect(() => {
-        console.log("columns", columns)
-        const _getColumns = (items: IRecord[]) => {
-            const view: ViewDefinition = entity.views?.[selectedView]
-                ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } };
-
-            const columnKeys = Object.keys(view?.columns ?? {}).filter(c => attributes[c] && !(attributes[c].isPrimaryKey ?? false));
-
-            //const headerRender: IRenderFunction<IDetailsColumnProps> = (props, defaultRender) => {
-            //    console.log("Render header", props);
-                
-            //    const DefaultRender =  HeaderRender;
-
-            //    return <DefaultRender {...props!} styles={{ cellName:{ border: "solid 2px black"}, root: { border: "solid 2px black" } }} />
-            //}
-
-            console.log("VIEWS", [attributes, view, columnKeys])
-            const columns1: Array<IColumn> = columnKeys
-                .filter(field => (!view.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, user))
-                .map(column => ({
-                    key: column,
-                    name: attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName,
-                    minWidth: 32,
-                    currentWidth: 32,
-                    maxWidth: 150,
-                    fieldName: attributes[column].logicalName,
-                    isResizable: true,
-                    isCollapsible: true,
-                    data: Object.assign({}, attributes[column], view.columns?.[column] ?? {}),
-                    iconName: columns.find(x => x.key == attributes[column].schemaName)?.iconName,
-                    onColumnClick: (e, c) => _onColumnClick(e, c),
-                    className: classNames.cell,
-                    onRenderHeader: onHeaderRender,
-                   
-                }));
-            console.log("Set Columns", [columns1]);
-            return columns1
-        };
-
-        setColumns(_getColumns(items));
-
-    }, [items]);
+    
 
     const hasMoreViews = Object.keys(entity?.views ?? {}).length > 1;
 
 
     const theme = useTheme();
 
-    const _onRenderRow = useCallback<Required<IDetailsListProps>['onRenderRow']>( props => {
+    const _onRenderRow = useCallback<Required<IDetailsListProps>['onRenderRow']>(props => {
         const customStyles: Partial<IDetailsRowStyles> = {};
 
         if (props) {
@@ -681,83 +717,86 @@ export function ModelDrivenGridViewer(
 
 
     return (
-        
-            <Stack verticalFill>
 
-                <ColumnFilterCallout
-                    columns={columns}
-                    setColumns={setColumns}
-                    menuTarget={menuTarget}
-                    isCalloutVisible={isCalloutVisible}
-                    toggleIsCalloutVisible={toggleCalloutVisible}
-                    items={items}
-                    setItems={setItems}
-                    currentColumn={currentColumn}
-                    fetchCallBack={fetchCallBack}
-                />
+        <Stack verticalFill>
 
-                <Stack.Item grow styles={({ root: { padding: padding } })}>
+            <ColumnFilterCallout
+                columns={columns}
+              //  setColumns={setColumns}
+                menuTarget={menuTarget}
+                isCalloutVisible={isCalloutVisible}
+                toggleIsCalloutVisible={toggleCalloutVisible}
+               // items={items}
+              //  setItems={setItems}
+                currentColumn={currentColumn}
+                fetchCallBack={fetchCallBack}
+            />
 
-                    {showRibbonBar && ((stateCommands.length) > 0) &&
-                        <RibbonBar hideBack />
+            <Stack.Item className={styles.gridviewWrapper} grow styles={({ root: { padding: padding } })}>
 
-                    }
+                {showRibbonBar && ((stateCommands.length) > 0) &&
+                    <RibbonBar hideBack />
+
+                }
 
 
-                    {isModalSelection ? (
-                        <ListComponent styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 }, }}
-                            constrainMode={ConstrainMode.unconstrained}
-                            items={items}
-                            compact={isCompactMode}
-                            columns={columns}
-                            selectionMode={SelectionMode.multiple}
-                            getKey={_getKey}
-                            setKey="multiple"
-                            layoutMode={DetailsListLayoutMode.justified}
-                            isHeaderVisible={true}
-                            selection={selection}
-                            selectionPreservedOnEmptyClick={true}                           
-                            enterModalSelectionOnTouch={true}
-                            ariaLabelForSelectionColumn="Toggle selection"
-                            ariaLabelForSelectAllCheckbox="Toggle selection for all items"
-                            checkButtonAriaLabel="select row"
+                {isModalSelection ? (
+                    <ListComponent className="gridview" styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 } }}
+                        constrainMode={ConstrainMode.unconstrained}
+                        items={items}
+                        compact={isCompactMode}
+                        columns={columns}
+                        selectionMode={SelectionMode.multiple}
+                        getKey={_getKey}
+                        setKey="multiple"
+                        layoutMode={DetailsListLayoutMode.justified}
+                        isHeaderVisible={true}
+                        selection={selection}
+                        selectionPreservedOnEmptyClick={true}
+                        enterModalSelectionOnTouch={true}
+                        ariaLabelForSelectionColumn="Toggle selection"
+                        ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+                        checkButtonAriaLabel="select row"
 
-                            onItemInvoked={_onItemInvoked}
-                            onRenderRow={_onRenderRow}
-                            onRenderDetailsHeader={onRenderDetailsHeader}
-                            onChange={onChange}
-                            formData={formData}
-                            onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
-                                recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
-                                setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
-                                attribute={attributes[column?.key!]} items={items} locale={locale} />}
-                        />
-                    ) : (
-                        <ListComponent styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 } }}
-                                constrainMode={ConstrainMode.unconstrained}
-                                items={items}
-                            compact={isCompactMode}
-                            columns={columns}
-                            selectionMode={SelectionMode.none}
-                            getKey={_getKey}
-                            setKey="none"
-                            layoutMode={DetailsListLayoutMode.justified}
-                            isHeaderVisible={true}
-                            onItemInvoked={_onItemInvoked}
-                                onRenderRow={_onRenderRow}
-                                onRenderDetailsHeader={onRenderDetailsHeader}
-                            onChange={onChange}
-                            formData={formData}
-                                
-                            onRenderItemColumn={(item, index, column) => <ConditionRenderComponent entityName={entityName}
-                                recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
-                                setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
-                                attribute={attributes[column?.key!]} items={items} />}
-                        />
-                    )}
-                </Stack.Item>
-            </Stack>
-         
+                        onItemInvoked={_onItemInvoked}
+                        onRenderRow={_onRenderRow}
+                        onRenderDetailsHeader={onRenderDetailsHeader}
+                        onChange={onChange}
+                        formData={formData}
+                        onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
+                            recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
+                            setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
+                            attribute={attributes[column?.key!]} items={items} locale={locale} />}
+
+                        onRenderDetailsFooter={RenderDetailsFooter}
+                    />
+                ) : (
+                    <ListComponent styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 } }}
+                        constrainMode={ConstrainMode.unconstrained}
+                        items={items}
+                        compact={isCompactMode}
+                        columns={columns}
+                        selectionMode={SelectionMode.none}
+                        getKey={_getKey}
+                        setKey="none"
+                        layoutMode={DetailsListLayoutMode.justified}
+                        isHeaderVisible={true}
+                        onItemInvoked={_onItemInvoked}
+                        onRenderRow={_onRenderRow}
+                        onRenderDetailsHeader={onRenderDetailsHeader}
+                        onChange={onChange}
+                        formData={formData}
+
+                        onRenderItemColumn={(item, index, column) => <ConditionRenderComponent entityName={entityName}
+                            recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
+                            setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
+                            attribute={attributes[column?.key!]} items={items} />}
+                    />
+                )}
+
+            </Stack.Item>
+        </Stack>
+
     )
 }
 

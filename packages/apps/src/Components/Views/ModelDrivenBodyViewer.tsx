@@ -17,6 +17,7 @@ import { Views } from "../Views/ViewRegister";
 import ModelDrivenGridViewer from "../Views/ModelDrivenGridViewer";
 import ViewSelectorComponent from "./ViewSelectorComponent";
 import { RibbonHost } from "../Ribbon/RibbonHost";
+import { PagingProvider } from "./PagingContext";
 
 
 
@@ -87,6 +88,7 @@ export function ModelDrivenBodyViewer
     const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [ selectedView]);
     console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
+        <PagingProvider>
         <Stack verticalFill>
             {showViewSelector && hasMoreViews &&
                 <ViewSelectorComponent
@@ -101,7 +103,8 @@ export function ModelDrivenBodyViewer
                     {BodyViewElement}
                 </RibbonHost>
             </Stack.Item>
-        </Stack>
+            </Stack>
+        </PagingProvider>
     )
 }
 

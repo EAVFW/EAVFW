@@ -22,9 +22,9 @@ import { ColumnFilterProps } from "./ColumnFilterProps";
 
 
  
-function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
-    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
-}
+//function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
+//    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
+//}
 
 
 
@@ -55,9 +55,9 @@ function composeOdataFilterPart(filterText: string, filterOption: ColumnOptions,
 export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
     {
         columns,
-        setColumns,
-        items,
-        setItems,
+      //  setColumns,
+      //  items,
+      //  setItems,
         menuTarget,
         isCalloutVisible,
         toggleIsCalloutVisible,
@@ -110,14 +110,14 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
             currentColumn!.iconName = undefined;
         }
         newColumns[current] = currentColumn! as IColumn;
-        setColumns(newColumns);
+       // setColumns(newColumns);
     }
 
     const applyColumnFilter = () => {
 
         if (filterText !== undefined && currentColumn !== undefined) {
 
-            const odataFilterText = composeOdataFilterPart(filterText, filterOption, currentColumn.key.toString());
+            const odataFilterText = composeOdataFilterPart(filterText, filterOption, currentColumn.fieldName!);
 
             const data: IColumnData = { filterText: filterText, odataFilter: odataFilterText, filterOption: filterOption }
 
@@ -143,7 +143,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
 
         newColumns.forEach((newCol: IColumn) => {
             if (newCol.key === currColumn.key) {
-                currColumn.isSortedDescending = order === ColumnOrder.Up;
+                currColumn.isSortedDescending = order === ColumnOrder.Down;
                 currColumn.isSorted = true;
             } else {
                 newCol.isSorted = false;
@@ -151,12 +151,15 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
             }
         });
 
-        const newItems = _copyAndSort(items, currColumn.fieldName!, currColumn.isSortedDescending);
-        console.log("Items sorted", newColumns, items.length, newItems.length);
+        toggleIsCalloutVisible();
+        fetchCallBack();
 
-        setItems(newItems);
+     //   const newItems = _copyAndSort(items, currColumn.fieldName!, currColumn.isSortedDescending);
+      //  console.log("Items sorted", newColumns, items.length, newItems.length);
 
-        setColumns(newColumns);
+//        setItems(newItems);
+
+      //  setColumns(newColumns);
     };
 
     // Load saved filter data
@@ -215,13 +218,13 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
                         >
                             <Stack.Item styles={({ root: { padding: padding } })}>
                                 <DefaultButton text={aToz} onClick={() => {
-                                    sortCurrentColumn(ColumnOrder.Down)
+                                    sortCurrentColumn(ColumnOrder.Up)
                                 }} />
                             </Stack.Item>
 
                             <Stack.Item styles={({ root: { padding: padding } })}>
                                 <DefaultButton text={zToa} onClick={() => {
-                                    sortCurrentColumn(ColumnOrder.Up)
+                                    sortCurrentColumn(ColumnOrder.Down)
                                 }} />
                             </Stack.Item>
                         </Stack>
