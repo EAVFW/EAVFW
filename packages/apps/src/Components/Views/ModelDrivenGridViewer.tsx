@@ -613,7 +613,7 @@ export function ModelDrivenGridViewer(
         console.log("Recalculating fetch qury:", [filter, columns]);
         let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
 
-
+        
 
         let q = expand ? `$expand=${expand}` : '';
 
@@ -634,7 +634,7 @@ export function ModelDrivenGridViewer(
 
         let localColumnFilter = localFilters.join(" and ");
 
-    
+
 
         let localFilter;
         if (filter && localColumnFilter) {
