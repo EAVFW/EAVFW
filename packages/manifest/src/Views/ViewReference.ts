@@ -1,5 +1,6 @@
 import { EntityDefinition } from "../Entities";
 import { RibbonViewInfo } from "../Ribbon";
+import { ViewDefinition } from "./ViewDefinition";
 
 
 export type ViewReference = {
@@ -7,9 +8,6 @@ export type ViewReference = {
     key: string,
     entity: EntityDefinition,
     viewName?: string; entityName: string; attribute: string,
-    filter?:string,
-    view?: {
-        control?: string, columns?: any,
-        ribbon?: RibbonViewInfo
-    }
+    filter?: string,
+    view?: ViewDefinition
 }

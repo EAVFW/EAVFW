@@ -1,6 +1,10 @@
 import { RibbonViewInfo } from "../Ribbon";
 import { ViewColumnDefinition } from "./ViewColumnDefinition";
 
+export type ViewPagingDefinition={
+    enabled: boolean
+}
+
 export type ViewDefinition = {
     type?: string,
     title?: string,
@@ -10,6 +14,8 @@ export type ViewDefinition = {
     ribbon?: RibbonViewInfo,
     selection?: boolean;
     filter?: string,
+    control?: string,
+    paging?: boolean | ViewPagingDefinition
     columns?: {
         [column: string]: ViewColumnDefinition;
 

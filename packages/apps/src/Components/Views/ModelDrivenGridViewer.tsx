@@ -451,7 +451,7 @@ export function ModelDrivenGridViewer(
     const [isCompactMode, setisCompactMode] = useState(false);
    // const [columns, setColumns] = useState<IColumn[]>([]);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
-
+    const viewDefinition = useMemo(() => entity.views?.[selectedView], [selectedView]);
 
     const columns = useMemo(() => {
        // console.log("columns", columns)
@@ -555,12 +555,13 @@ export function ModelDrivenGridViewer(
     //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
     //}
 
-    const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords, enabled: pagingEnabled } = usePaging();
+    const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords, enabled: pagingContextEnabled } = usePaging();
+    const pagingDisabled = useMemo(() => viewDefinition?.paging === false || (typeof (viewDefinition?.paging) === "object" && viewDefinition?.paging?.enabled === false), [viewDefinition]);
 
-    if (!pagingEnabled && !allowNoPaging)
+    if (!pagingContextEnabled && (!allowNoPaging || pagingDisabled))
         throw new Error("Please wrap ModelDrivenEntityViewer with the PagingProvider or set allowNoPaging=true");
 
-    console.log("Render FetchQuery", fetchQuery);
+    console.log("Render FetchQuery", [viewDefinition,fetchQuery]);
     const { data, isError, isLoading, mutate } = queryEntitySWR(entity, fetchQuery, !newRecord && typeof fetchQuery !== "undefined");
 
     useEffect(() => {
@@ -777,7 +778,7 @@ export function ModelDrivenGridViewer(
                             setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
                             attribute={attributes[column?.key!]} items={items} locale={locale} />}
 
-                        onRenderDetailsFooter={RenderDetailsFooter}
+                        onRenderDetailsFooter={pagingDisabled || !pagingContextEnabled ? undefined:RenderDetailsFooter }
                     />
                 ) : (
                     <ListComponent styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 } }}

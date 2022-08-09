@@ -12,6 +12,11 @@ import { EAVFWLabel } from "../Forms/AutoForm/Templates/FieldTemplate";
 import { FieldTemplateProps } from "@rjsf/core";
 
 
+
+ 
+
+
+
 export type ControlHostWidgetProps = {
     schema: {
         "x-widget-props"?: {
@@ -75,13 +80,16 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
 
     const LabelTemplate = () => column?.label === false ? null : <EAVFWLabel id={props.id} disabled={disabled} required={required} label={label ?? schema.title}  description={rawDescription ?? schema.description} />
 
+    //@ts-ignore
+    const widgetProps = props.schema["x-widget-props"]!;
+
     if (control && control in Controls) {
         const CustomControl = Controls[control];
         return (
             <>
                 <LabelTemplate />
                 <CustomControl value={formData} {...props}
-                    onChange={_onChange} {...props.schema["x-widget-props"]!} />
+                    onChange={_onChange} {...widgetProps} />
             </>
         )
     }
@@ -91,7 +99,7 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
             <>
                 <LabelTemplate />
                 <ChoicesControl value={props.formData} {...props as any}
-                    onChange={_onChange} {...props.schema["x-widget-props"]!} />
+                    onChange={_onChange} {...widgetProps} />
             </>
         );
     if (control === "PercentageControl") {
@@ -108,7 +116,7 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
 
         <LabelTemplate />
         <LookupControl key={props.id} value={props.formData} {...props as any}
-            onChange={_onChange} {...props.schema["x-widget-props"]!} {...props.uiSchema}
+            onChange={_onChange} {...widgetProps} {...props.uiSchema}
             extraErrors={localExtraErrors} errorMessage={errorMessage} />
     </>
 
