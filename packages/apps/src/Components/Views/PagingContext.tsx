@@ -10,8 +10,14 @@ export type IFetchQuery = {
     '$orderby'?: string;
     '$expand'?: string;
 } | undefined;
-
-const PagingContext = createContext({ setTotalRecords: (n: number) => { } ,fetchQuery: {} as IFetchQuery, setFetchQuery: (q: IFetchQuery) => { }, firstItemNumber: 0, lastItemNumber: undefined as number | undefined, totalRecords: undefined as number | undefined, currentPage: 0, pageSize: 0, moveNext: () => { }, movePrevious: () => { }, moveToFirst: () => { } });
+function notsupported(q: IFetchQuery) :void {
+      throw new Error("Fetch Query not enabled"); 
+}
+const PagingContext = createContext({
+    enabled: false, setTotalRecords: (n: number) => { }, fetchQuery: undefined as IFetchQuery,
+    setFetchQuery: notsupported ,
+    firstItemNumber: 0, lastItemNumber: undefined as number | undefined, totalRecords: undefined as number | undefined, currentPage: 0, pageSize: 0, moveNext: () => { }, movePrevious: () => { }, moveToFirst: () => { }
+});
 export const PagingProvider: React.FC = ({ children }) => {
 
   
@@ -29,7 +35,7 @@ export const PagingProvider: React.FC = ({ children }) => {
 
 
     return (
-        <PagingContext.Provider value={{ setTotalRecords, fetchQuery, setFetchQuery, firstItemNumber: (fetchQuery?.$skip ?? 0) + 1, lastItemNumber: Math.min(totalRecords??0,(fetchQuery?.$skip ?? 0) + pageSize), totalRecords, currentPage, pageSize, moveNext, movePrevious, moveToFirst }} >
+        <PagingContext.Provider value={{ enabled:true, setTotalRecords, fetchQuery, setFetchQuery, firstItemNumber: (fetchQuery?.$skip ?? 0) + 1, lastItemNumber: Math.min(totalRecords ?? 0, (fetchQuery?.$skip ?? 0) + pageSize), totalRecords, currentPage, pageSize, moveNext, movePrevious, moveToFirst }} >
             {children}
         </PagingContext.Provider>
     )
@@ -38,7 +44,15 @@ export const usePaging = () => {
 
 
 
-    return useContext(PagingContext);
+    let c = useContext(PagingContext);
+
+    if (!c.enabled) {
+        const [fetchQuery, setFetchQuery] = useState<IFetchQuery>();
+
+        return { ...c, fetchQuery, setFetchQuery };
+    }
+
+    return c;
 
     // return { firstItemNumber, lastItemNumber, totalRecords, currentPage, pageSize, moveNext, movePrevious, moveToFirst };
     //....

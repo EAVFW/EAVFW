@@ -82,6 +82,7 @@ export type ModelDrivenGridViewerState = {
 }
 
 export type ModelDrivenGridViewerProps = {
+    allowNoPaging?: boolean,
     defaultValues?: Array<any>
     viewName?: string;
     filter?: string;
@@ -417,6 +418,7 @@ const Footer = () => {
 
 export function ModelDrivenGridViewer(
     {
+        allowNoPaging,
         locale,
         entity,
         filter,
@@ -553,7 +555,12 @@ export function ModelDrivenGridViewer(
     //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
     //}
 
-    const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords } = usePaging();
+    const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords, enabled: pagingEnabled } = usePaging();
+
+    if (!pagingEnabled && !allowNoPaging)
+        throw new Error("Please wrap ModelDrivenEntityViewer with the PagingProvider or set allowNoPaging=true");
+
+    console.log("Render FetchQuery", fetchQuery);
     const { data, isError, isLoading, mutate } = queryEntitySWR(entity, fetchQuery, !newRecord && typeof fetchQuery !== "undefined");
 
     useEffect(() => {
@@ -615,7 +622,7 @@ export function ModelDrivenGridViewer(
 
         
 
-        let q = expand ? `$expand=${expand}` : '';
+      //  let q = expand ? `$expand=${expand}` : '';
 
         let orderBy = columns.filter(c => c.isSorted)[0];
 
@@ -646,15 +653,15 @@ export function ModelDrivenGridViewer(
         }
         console.log("Recalculating fetch qury:", localFilter);
 
-        if (q && localFilter)
-            q = q + "&" + localFilter;
-        else if (localFilter)
-            q = localFilter;
+        //if (q && localFilter)
+        //    q = q + "&" + localFilter;
+        //else if (localFilter)
+        //    q = localFilter;
 
-        console.log('Recalculating fetch qury:', [filter, localColumnFilter, q])
+      
 
-        if (q)
-            q = '?' + q;
+        //if (q)
+        //    q = '?' + q;
 
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
@@ -664,6 +671,8 @@ export function ModelDrivenGridViewer(
         if (orderBy) {
             query['$orderby'] = orderBy.fieldName + ' ' + (orderBy.isSortedDescending ? 'desc' : 'asc');
         } 
+
+        console.log('Recalculating fetch qury:', [filter, localColumnFilter, query, onBuildFetchQuery(query)])
 
         setFetchQuery(onBuildFetchQuery(query));
 
