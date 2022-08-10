@@ -110,8 +110,9 @@ export const useManifest: (props: useManifestProps) => [ManifestDefinition, (man
             console.log("Updating Manifest Source", manifest);
             return manifest;
         }
-
+        //TODO - design here to set schema from context
         return {
+            version: "1.0.0",
             entities: {
                 "Identity": {
                     "pluralName": "Identities",
