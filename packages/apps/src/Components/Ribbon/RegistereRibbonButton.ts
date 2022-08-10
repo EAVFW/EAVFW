@@ -11,12 +11,12 @@ class RibbonBuilder implements IRibbonBuilder {
     }
 
     addAlias(alias: string) {
-        RibbonButtons[alias] = RibbonButtons[this.name];
+        RibbonButtons[alias] = (props) => RibbonButtons[this.name]({ key: alias, ...props, });
         return this;
     }
 }
 export function RegistereRibbonButton(name: string, render: (props: RibbonButtonProps) => ReactNode | null | void) {
-    RibbonButtons[name] = (props: any) => render({ ...props, key: name });
+    RibbonButtons[name] = (props: any) => render({ key: name, ...props, });
 
     return new RibbonBuilder(name) as IRibbonBuilder;
 }
