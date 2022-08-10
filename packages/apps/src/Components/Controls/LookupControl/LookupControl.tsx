@@ -362,7 +362,9 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             ariaLabel={label}
             styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight, color: "black" }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
             onChange={_onChange}
-
+            onBlur={(_) => {
+                setfreeformvalue(undefined);
+            }}
             options={options}
             useComboBoxAsMenuWidth
             allowFreeform={isFreeform}
