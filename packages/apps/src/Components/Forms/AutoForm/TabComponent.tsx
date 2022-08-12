@@ -56,7 +56,7 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
 
         console.log("Rendering tab");
         const ui = (
-            <Stack verticalFill horizontal gap={25} styles={{
+            <Stack verticalFill horizontal tokens={{ childrenGap:25 }} styles={{
                 root: {
                     display: "grid",
                     gridTemplateColumns: `${Object.keys(columns).map(c => '1fr').join(' ')};`

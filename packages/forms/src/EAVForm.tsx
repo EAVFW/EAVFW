@@ -322,8 +322,9 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
         ... (initialState ?? {})
     } as TState);
 
-    const formId = useUuid();
-
+    const formId = useUuid(); 
+    
+    console.log("EAVForm: ID", [formId, (defaultData as any)?.name, (state?.formValues as any)?.name]);
    
    
     const global_etag = useRef<string>(new Date().toISOString());

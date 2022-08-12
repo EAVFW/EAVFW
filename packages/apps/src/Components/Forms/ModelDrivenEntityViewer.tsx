@@ -3,7 +3,7 @@ import { IDropdownOption, IPivotProps, mergeStyles, ShimmerElementsGroup, Shimme
  
 import isEqual from "react-fast-compare";
 
-import { useAsyncMemo, useDebouncer } from "@eavfw/hooks";
+import { useAsyncMemo, useDebouncer, useUuid } from "@eavfw/hooks";
 import { AttributeDefinition, EntityDefinition, FormDefinition, FormColumnDefinition, FormTabDefinition, isLookup, queryEntitySWR, IRecord } from "@eavfw/manifest";
 
 import { EAVForm, useEAVForm } from "@eavfw/forms"
@@ -179,7 +179,8 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
   //  onFormDataChange
 }) => {
 
-
+    const compID = useUuid();
+    console.log("ModelDrivenForm: ID", [compID]);
     const app = useModelDrivenApp();
 
     const [selectedForm, setselectedForm] = useState(formName ?? Object.keys(entity.forms ?? {})[0]);
@@ -282,8 +283,9 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
 
     const hasMoreForms = Object.keys(forms).filter(f => forms[f].type === "Main").length > 1;
 
-    const primaryField = Object.values(app.getAttributes(entityName)).find((a) => a.isPrimaryField)!;
-
+    const primaryField = useMemo(() => Object.values(app.getAttributes(entityName)).find((a) => a.isPrimaryField)!, [entityName]);
+    const primaryFieldValue = useMemo(() => record[primaryField?.logicalName], [primaryField, entityName]);
+    console.log("EntityName",[ record,entityName, primaryField, primaryFieldValue])
  
 
     if (isLoadingForm)
@@ -295,7 +297,7 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
             <Stack verticalFill>
 
             {evaluatedForm?.type !== "QuickCreate" && <Stack.Item styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
-                        <h2>{record[primaryField?.logicalName]}</h2>
+                        <h2>{primaryFieldValue}</h2>
                 <Stack horizontal style={{ alignItems: "center" }}>
                     <h3 style={{ height: "28px" }}>{entity.locale?.[locale]?.displayName ?? entity.displayName}</h3>
                     {hasMoreForms && (
@@ -342,11 +344,15 @@ const useObservable = (value:any,...deps:any[]) => {
 
 export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (props) => {
 
+    const compID = useUuid();
+    console.log("ModelDrivenEntityViewer: ID", [compID]);
 
     const app = useModelDrivenApp();
     const info = useAppInfo();
 
     const { record, entityName, formName, entity, onChange, related } = props;
+
+    console.log("ModelDrivenEntityViewer:", [record,record?.name,entityName,formName]);
 
     const form = useMemo(() => getForm(app, entityName, formName), [app, entityName, formName]);
 
@@ -371,7 +377,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
      * When recordid or entityname changes, reset to other record.
      **/
     useEffect(() => {
-        console.log("Changing form record state from outside", [record, info.currentRecordId, info.currentEntityName]);
+        console.log("Changing form record state from outside", [record,record?.name, info.currentRecordId, info.currentEntityName]);
         formDataRef.current = record;
         //  setEtag(new Date().toISOString());
     }, [record]);
@@ -503,6 +509,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
         return onFormDataChange2(formdatamerger.current);
     }, [onFormDataChange2]);
 
+    
     return (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
             <ModelDrivenForm  {...props}  form={form} />

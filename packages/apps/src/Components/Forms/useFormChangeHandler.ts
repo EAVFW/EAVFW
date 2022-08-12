@@ -1,4 +1,4 @@
-import { EntityDefinition, getNavigationProperty, isLookup } from "@eavfw/manifest";
+import { EntityDefinition, getNavigationProperty, getRecordSWR, isLookup } from "@eavfw/manifest";
 import { NextRouter, useRouter } from "next/router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { cleanDiff, deepDiffMapper } from "@eavfw/utils";
@@ -14,20 +14,37 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
     const router = useRouter();
     const [etag, setEtag] = useState(new Date().toISOString());
-    const [record, setRecord] = useState(initialdata);
-    const changedRecord = useRef(record);
-    const [isLoading, setIsLoading] = useState(recordId ? true : false);
+   
     const app = useModelDrivenApp();
     const [extraErrors, setExtraErrors] = useState({} as FormValidation);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entity.logicalName]);
     const formName = router.query.formname as string;
-    const query = useMemo(() => entity.forms?.[router.query.formname as string]?.query, [router.query.formname]);
+    const formQuery = useMemo(() => entity.forms?.[formName]?.query, [formName]);
 
     const { skipRedirect, updateState: updateRibbonState, saveCompleted, events } = useRibbon();
 
     const entitySaveMessageKey = 'entitySaved';
     const { addMessage, removeMessage } = useMessageContext();
     const { showIndeterminateProgressIndicator, hideProgressBar } = useProgressBarContext();
+
+
+    //const [record, setRecord] = useState(initialdata);
+    //
+    //const [isLoading, setIsLoading] = useState(recordId ? true : false);
+
+    const expand = useMemo(() => {
+
+        let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
+        if (formQuery?.["$expand"]) {
+            expand = expand + ',' + formQuery["$expand"]
+        }
+        return expand;
+    }, [attributes, recordId, formQuery?.["$expand"]]);
+    const { record, isLoading, isError, mutate } = getRecordSWR(entity.collectionSchemaName, recordId!, expand? `?$expand=${expand}` :'',
+        typeof (recordId) !== "undefined", initialdata)
+    const changedRecord = useRef(record);
+
+
 
     const onChangeCallback = useCallback((formData: any) => {
         console.group("CreateNewRecordPage");
@@ -149,35 +166,41 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         return () => {
             removeMessage(entitySaveMessageKey);
         };
-    }, [router.query.recordId])
+    }, [recordId])
 
-    if (recordId) {
-        useEffect(() => {
-            console.log("refreshing data");
+ 
+    //if (recordId) {
+    //    useEffect(() => {
+    //        console.log("refreshing data", [recordId]);
+    //        setRecord(undefined);
+    //        let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
+    //        if (formQuery?.["$expand"]) {
+    //            expand = expand + ',' + formQuery["$expand"]
+    //        }
 
-            let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
-            if (query?.["$expand"]) {
-                expand = expand + ',' + query["$expand"]
-            }
-
-            let rsp = fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records/${recordId}${(expand ? `?$expand=${expand}` : '')}`, {
-                method: "GET",
-                credentials: "include"
-            }).then(rsp => {
-                if (rsp.ok) {
-                    rsp.json().then(data => {
+    //        let rsp = fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records/${recordId}${(expand ? `?$expand=${expand}` : '')}`, {
+    //            method: "GET",
+    //            credentials: "include"
+    //        }).then(rsp => {
+    //            if (rsp.ok) {
+    //                rsp.json().then(data => {
 
 
-                        //record1.current = data.value;
-                        setRecord(data.value);
+    //                    //record1.current = data.value;
+    //                    setRecord(data.value);
 
-                        setIsLoading(false);
-                    });
-                }
-            });
+    //                    setIsLoading(false);
+    //                });
+    //            }
+    //        });
 
-        }, [recordId, etag]);
-    }
-
-    return { onChangeCallback, record, setRecord, isLoading: isLoading, extraErrors };
+    //    }, [recordId, etag]);
+    //}
+    console.log("RecorData", [recordId, record, isLoading,  typeof (record) === "undefined"]);
+    return {
+        onChangeCallback,
+        record,
+        isLoading: typeof (recordId) === "undefined" ? false : (isLoading || typeof (record) === "undefined"),
+        extraErrors
+    };
 }
