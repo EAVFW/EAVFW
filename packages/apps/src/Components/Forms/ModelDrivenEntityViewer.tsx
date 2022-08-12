@@ -258,6 +258,14 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
         }
     }, [evaluatedForm]);
 
+    const forms = entity?.forms ?? {};
+
+    const hasMoreForms = Object.keys(forms).filter(f => forms[f].type === "Main").length > 1;
+
+    const primaryField = useMemo(() => Object.values(app.getAttributes(entityName)).find((a) => a.isPrimaryField)!, [entityName]);
+    const primaryFieldValue = useMemo(() => record[primaryField?.logicalName], [primaryField, entityName]);
+    console.log("EntityName", [record, entityName, primaryField, primaryFieldValue])
+
     if (!evaluatedForm || !tabs.length || isLoading) {
 
         return <div style={wrapperStyle}>
@@ -279,13 +287,7 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
 
      //   return <div>loading form...</div>
     }
-    const forms = entity?.forms ?? {};
-
-    const hasMoreForms = Object.keys(forms).filter(f => forms[f].type === "Main").length > 1;
-
-    const primaryField = useMemo(() => Object.values(app.getAttributes(entityName)).find((a) => a.isPrimaryField)!, [entityName]);
-    const primaryFieldValue = useMemo(() => record[primaryField?.logicalName], [primaryField, entityName]);
-    console.log("EntityName",[ record,entityName, primaryField, primaryFieldValue])
+  
  
 
     if (isLoadingForm)
