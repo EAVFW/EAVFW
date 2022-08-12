@@ -28,7 +28,7 @@ export function getRecordSWR(entityName: string, recordId: string, query: string
 
     return {
         record: record,
-        isLoading: !error && !data,
+        isLoading: !error && !record,
         isError: error,
         mutate: () => mutate(key)
     }
