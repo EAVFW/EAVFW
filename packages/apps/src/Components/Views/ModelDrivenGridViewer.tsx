@@ -558,8 +558,8 @@ export function ModelDrivenGridViewer(
     const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords, enabled: pagingContextEnabled } = usePaging();
     const pagingDisabled = useMemo(() => viewDefinition?.paging === false || (typeof (viewDefinition?.paging) === "object" && viewDefinition?.paging?.enabled === false), [viewDefinition]);
 
-    if (!pagingContextEnabled && (!allowNoPaging || pagingDisabled))
-        throw new Error("Please wrap ModelDrivenEntityViewer with the PagingProvider or set allowNoPaging=true");
+    if (!pagingContextEnabled && !(allowNoPaging || pagingDisabled))
+        throw new Error(`Please wrap ModelDrivenEntityViewer with the PagingProvider or set allowNoPaging=true: pagingContextEnabled=${pagingContextEnabled}, allowNoPaging=${allowNoPaging}, pagingDisabled=${pagingDisabled}`);
 
     console.log("Render FetchQuery", [viewDefinition,fetchQuery]);
     const { data, isError, isLoading, mutate } = queryEntitySWR(entity, fetchQuery, !newRecord && typeof fetchQuery !== "undefined");
@@ -667,7 +667,19 @@ export function ModelDrivenGridViewer(
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
 
-        let query: IFetchQuery = ({ "$expand": expand, "$filter": localFilter, "$select": columnAttributes.join(","), '$count': true, '$top': pageSize, '$skip': currentPage * pageSize });
+        let query: IFetchQuery = ({
+            "$expand": expand,
+            "$filter": localFilter,
+            "$select": columnAttributes.join(","),
+            '$count': true,
+            '$top': pageSize,
+            '$skip': currentPage * pageSize
+        });
+
+        if (!pagingContextEnabled) {
+            delete query['$skip'];
+            delete query['$top'];
+        }
 
         if (orderBy) {
             query['$orderby'] = orderBy.fieldName + ' ' + (orderBy.isSortedDescending ? 'desc' : 'asc');

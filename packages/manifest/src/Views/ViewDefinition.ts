@@ -2,7 +2,8 @@ import { RibbonViewInfo } from "../Ribbon";
 import { ViewColumnDefinition } from "./ViewColumnDefinition";
 
 export type ViewPagingDefinition={
-    enabled: boolean
+    enabled?: boolean;
+    pageSize?: number;
 }
 
 export type ViewDefinition = {

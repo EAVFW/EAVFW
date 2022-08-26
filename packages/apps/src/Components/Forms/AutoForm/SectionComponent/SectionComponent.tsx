@@ -295,7 +295,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
 
                         <RibbonContextProvider key={gridprops.key}>
                             <RibbonHost ribbon={entity.views?.[gridprops.viewName!]?.ribbon ?? {}}>
-                                <PagingProvider>
+                                <PagingProvider initialPageSize={typeof (gridprops.view?.paging) === "object" ? gridprops.view.paging.pageSize ?? undefined : undefined} enabled={!(gridprops.view?.paging === false || (typeof (gridprops.view?.paging) === "object" && gridprops.view?.paging?.enabled === false))} >
                             <ModelDrivenGridViewer
                                 {...gridprops}
                                 locale={locale}

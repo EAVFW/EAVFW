@@ -18,13 +18,17 @@ const PagingContext = createContext({
     setFetchQuery: notsupported ,
     firstItemNumber: 0, lastItemNumber: undefined as number | undefined, totalRecords: undefined as number | undefined, currentPage: 0, pageSize: 0, moveNext: () => { }, movePrevious: () => { }, moveToFirst: () => { }
 });
-export const PagingProvider: React.FC = ({ children }) => {
+export type PagingProviderProps = {
+    initialPageSize?: number,
+    enabled?: boolean
+}
+export const PagingProvider: React.FC<PagingProviderProps> = ({ children, initialPageSize = 10, enabled = true }) => {
 
   
     const [lastItemNumber, setLastItemNumber] = useState<number>();
     const [totalRecords, setTotalRecords] = useState<number>();
     const [currentPage, setCurrentPage] = useState<number>(0);
-    const [pageSize, setPageSize] = useState<number>(10);
+    const [pageSize, setPageSize] = useState<number>(initialPageSize);
 
     const moveNext = useCallback(() => { setCurrentPage(currentPage + 1); }, [currentPage]);
     const moveToFirst = useCallback(() => { setCurrentPage(0); }, [currentPage]);
@@ -35,7 +39,7 @@ export const PagingProvider: React.FC = ({ children }) => {
 
 
     return (
-        <PagingContext.Provider value={{ enabled:true, setTotalRecords, fetchQuery, setFetchQuery, firstItemNumber: (fetchQuery?.$skip ?? 0) + 1, lastItemNumber: Math.min(totalRecords ?? 0, (fetchQuery?.$skip ?? 0) + pageSize), totalRecords, currentPage, pageSize, moveNext, movePrevious, moveToFirst }} >
+        <PagingContext.Provider value={{ enabled: enabled, setTotalRecords, fetchQuery, setFetchQuery, firstItemNumber: (fetchQuery?.$skip ?? 0) + 1, lastItemNumber: Math.min(totalRecords ?? 0, (fetchQuery?.$skip ?? 0) + pageSize), totalRecords, currentPage, pageSize, moveNext, movePrevious, moveToFirst }} >
             {children}
         </PagingContext.Provider>
     )
