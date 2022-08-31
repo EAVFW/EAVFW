@@ -11,6 +11,7 @@ export type FormColumnDefinition = {
     section: string;
     dependant?: string;
     filter?: string;
+    entityName?: string;
     disabled?: boolean;
     radio_group?: string;
     control?: string | { type: string };

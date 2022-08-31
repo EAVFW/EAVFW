@@ -454,12 +454,13 @@ export function LookupControl<T>({
 
     
 
-    console.log("Lookup Control", [attributeName, attribute, attribute?.type, column, logicalName, selectedValue, value, formData]);
-
+   
     if (!isLookup(attribute.type))
         return <div>...</div>;
 
-    const targetEntityName = isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute");
+    const targetEntityName = column.entityName ?? (isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute"));
+
+    console.log("Lookup Control", [attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData]);
 
  //  
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};

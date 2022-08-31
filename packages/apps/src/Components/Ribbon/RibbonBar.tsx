@@ -28,12 +28,7 @@ const leftribbon: IStyleFunction<ICommandBarStyleProps, ICommandBarStyles> = (pr
 export const RibbonBar: React.FC<{ hideBack?: boolean }> = ({ hideBack }) => {
 
     const { buttons } = useRibbon();
-
-    useEffect(() => {
-        console.debug("Buttons for RibbonBar updated", buttons);
-    }, [buttons]);
-
-
+     
     return <Stack horizontal id="RibbonBar" styles={RibbonStyles} >
         {!hideBack && <RibbonBarBackButton />}
         < Stack.Item grow >
