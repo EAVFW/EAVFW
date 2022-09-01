@@ -75,6 +75,9 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                 body: JSON.stringify(changedRecord.current),
                 credentials: "include"
             });
+
+            hideProgressBar();
+
             if (rsp.ok) {
                 console.log("Saved");
                 let data = await rsp.json();
@@ -100,6 +103,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                     removeMessage: removeMessage
                 }));
 
+
                 return 1;
             }
 
@@ -111,9 +115,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                 key: entitySaveMessageKey,
                 removeMessage: removeMessage, messages: errors
             }));
-
-            hideProgressBar();
-
+             
             saveCompleted({entityName: entity.logicalName});
 
             return 0;
@@ -138,7 +140,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             events.off("onSave", onSaveCallBack);
             events.off("onSaveAndClose", onSaveAndCloseCallback);
         }
-    }, [record, router.query.tabName])
+    }, [record, recordId, entity.collectionSchemaName,router.query.tabName])
 
     useEffect(() => {
         // useRef could be used here to avoid running on first render,
