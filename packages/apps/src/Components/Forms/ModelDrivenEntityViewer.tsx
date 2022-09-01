@@ -216,22 +216,7 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
         setselectedForm(option?.key as string);
     }, []);
 
-
-
-    // const _onChange = useDebouncer(onChange!, 50);
-
-    //Issue if multiople onFormDataChange called, then only latest is applied.  Need to merge state of the debouncer and
-   
-
-
-    
-
-   
-
-
-    useEffect(() => {
-        console.log("FormData Updated", record);
-    }, [record])
+     
 
     const [tabs, setTabs] = useState(Object.keys(evaluatedForm?.layout.tabs ?? {}));
 
@@ -402,7 +387,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                 let attribute = entity.attributes[attributeKey] ?? app.getEntity(entity.TPT!).attributes[attributeKey];
 
                 if (attribute.logicalName in formdata || (isLookup(attribute.type) && attribute.logicalName.slice(0, -2) in formdata)) {
-                    console.log(`Found ${attribute.logicalName} in formdata`);
+                    console.log(`Found ${attribute.logicalName} in formdata. type=${attribute.type}`);
 
 
                     if (oldFormData[attribute.logicalName] !== formdata[attribute.logicalName]) {

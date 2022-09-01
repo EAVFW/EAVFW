@@ -25,6 +25,12 @@ const dialogContentProps = {
     subText: 'Vil du gemme dine ændringer før du forlader siden?',
 };
 
+function uuidv4() {
+    //@ts-ignore
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+}
 
 export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }> = ({ children, defaultRibbons = {} }) => {
 
@@ -69,6 +75,9 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
 
     const _addButton = (command: ICommandBarItemProps) => {
         console.log("Adding Ribbon Item: ", command);
+
+        if (typeof command.cacheKey === "undefined" || command.cacheKey === command.key)
+            command.cacheKey = uuidv4();
 
         setRibbonButtons(ribbonButtonsRef.current = ribbonButtonsRef.current.filter(k => k.key !== command.key).concat([command])
             .sort((a, b) => (a.data?.order ?? Infinity) - (b.data?.order ?? Infinity)));

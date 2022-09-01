@@ -8,6 +8,13 @@ import { useSelectionContext } from "../Selection/useSelectionContext";
 import { useRibbon} from "./useRibbon"
 import { capitalize} from "@eavfw/utils";
 
+function uuidv4() {
+    //@ts-ignore
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+        (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+}
+
 export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushRoute: (url: URL) => void, withSave=true) => {
 
     const { addButton, removeButton, canSave, events } = useRibbon();
@@ -58,6 +65,7 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
             addButton(
                 {
                     key: 'saveItem',
+                    cacheKey: uuidv4(),
                     text: capitalize(app.getLocalization("save") ?? 'Save'),
                     iconProps: { iconName: 'Save' },
                     disabled: !canSave,
