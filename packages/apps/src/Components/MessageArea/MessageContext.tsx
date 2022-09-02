@@ -41,8 +41,12 @@ interface MessageProps {
  * Create the React Context
  */
 const MessagesContext = React.createContext<ContextType>({
-    messages: {}, addMessage: () => {
-    }, removeMessage: () => {
+    messages: {},
+    addMessage: () => {
+        throw new Error("MessageContext not used");
+    },
+    removeMessage: () => {
+        throw new Error("MessageContext not used");
     }
 });
 
