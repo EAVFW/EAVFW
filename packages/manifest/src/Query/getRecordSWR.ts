@@ -31,6 +31,7 @@ export function getRecordSWR(entityName: string, recordId: string, query: string
         This case is indicated when recordId is None, then no data can be retrieved.
      */
     useEffect(() => {
+        console.log("Record data is refreshed", [key,recordId, data?.value]);
         if (recordId !== undefined) {
             setRecord(data?.value);
         } else if(data?.value !== undefined){

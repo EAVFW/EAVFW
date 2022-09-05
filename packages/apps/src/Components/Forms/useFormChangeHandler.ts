@@ -12,7 +12,7 @@ import {useAppInfo} from "../../useAppInfo";
 
 export function useFormChangeHandler(entity: EntityDefinition, recordId?: string, initialdata?: any) {
     const router = useRouter();
-    const [_, setEtag] = useState(new Date().toISOString());
+  //  const [_, setEtag] = useState(new Date().toISOString());
 
     const { currentAppName, currentAreaName } = useAppInfo();
     const app = useModelDrivenApp();
@@ -36,7 +36,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         return expand;
     }, [attributes, recordId, formQuery?.["$expand"]]);
 
-    const {record, isLoading} =
+    const { record, isLoading, mutate } =
         getRecordSWR(
             entity.collectionSchemaName,
             recordId!,
@@ -48,7 +48,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
     const changedRecord = useRef(record);
 
     const onChangeCallback = useCallback((formData: any) => {
-        console.group("CreateNewRecordPage");
+      //  console.group("CreateNewRecordPage");
         console.log(formData);
         try {
             changedRecord.current = formData;
@@ -57,12 +57,13 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             console.log("UpdatedValues", [changedRecord.current, record,
                 deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
                 changed, changedValues]);
-
-            updateRibbonState({canSave: changed});
+            setTimeout(() => {
+                updateRibbonState({ canSave: changed });
+            });
         } finally {
-            console.groupEnd();
+          //  console.groupEnd();
         }
-    }, [record]);
+    }, [record?.rowversion ?? record]);
 
     useEffect(() => {
         const entitySaveMessageKey = 'entitySaved';
@@ -93,7 +94,8 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
                     router.replace(router, undefined, {shallow: true});
                 } else {
-                    setEtag(new Date().toISOString());
+                  //  setEtag(new Date().toISOString());
+                    mutate();
                 }
 
                 saveCompleted({entityName: entity.logicalName, id: data.id});
