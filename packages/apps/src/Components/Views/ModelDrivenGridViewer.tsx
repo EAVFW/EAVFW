@@ -474,7 +474,7 @@ export function ModelDrivenGridViewer(
                 .filter(field => (!view.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, user))
                 .map(column => ({
                     key: column,
-                    name: attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName,
+                    name: view.columns![column]?.displayName ?? attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName,
                     minWidth: 32,
                     currentWidth: 32,
                     maxWidth: 150,
