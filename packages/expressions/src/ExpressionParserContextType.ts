@@ -1,4 +1,5 @@
 
+
 export type ExpressionParserContextType = {
     appendVariables: (variables: any) => void;
     addExpresssion: (id: string, expression: string, context: any) => void;
@@ -7,4 +8,5 @@ export type ExpressionParserContextType = {
     variables: any;
     isVariablesUpToDate: boolean;
     formValues: any;
+    isInitialized: boolean
 };

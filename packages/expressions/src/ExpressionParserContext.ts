@@ -8,7 +8,8 @@ export const ExpressionParserContext = createContext<ExpressionParserContextType
     removeExpression: (id) => undefined,
     formValues: {},
     variables: {},
-    isVariablesUpToDate:false,
+    isVariablesUpToDate: false,
+    isInitialized: false,
     setFormValues: (values) => undefined
 });
 
