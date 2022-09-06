@@ -305,7 +305,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
                     setIsFreeform(true);
                     console.log("autofill->onInputValueChange->value:" + value + " , primaryField: " + primaryField);
-                   // ref.current?.focus(true);
+                    ref.current?.focus(true);
                     setfreeformvalue(value);
                     setSearchFilter(`contains(${primaryField}, \'${value}\')`)
 
