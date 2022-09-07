@@ -40,7 +40,7 @@ export type useExpressionParserValue<T> = {
 
 export function useExpressionParser<T = string>(expression?: string) {
 
-    const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
+    const { variables, formValues, addExpresssion, removeExpression, setExpressionResult } = useExpressionParserContext();
     const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
   //  const blazor = useBlazor();
     const id = useUuid();
@@ -51,12 +51,12 @@ export function useExpressionParser<T = string>(expression?: string) {
     var etag = useRef(new Date().getTime());
     var oldvalue = useRef(evaluated?.data);
 
-    useExpressionParserLoadingContext(evaluated?.isLoading);
+    useExpressionParserLoadingContext(evaluated?.isLoading, id);
 
     useEffect(() => { 
         const etagLocal = etag.current = new Date().getTime();
 
-        console.log("useExpressionParser:Form Values Changed expressions: " + expression, [etagLocal, formValues]);
+        console.log("useExpressionParser:Form Values Changed expressions: " + expression, [id,etagLocal, formValues]);
         //const vars = { ...variables };
 
         //if ("manifest" in vars)
@@ -77,15 +77,21 @@ export function useExpressionParser<T = string>(expression?: string) {
         if (expression && expression.indexOf("@") !== -1) {
 
             expressionResults[id] = (result: any, error: any) => {
+               //
+
                 if (error) {
                     setEvaluated({ data: undefined, isLoading: false });
+                    setExpressionResult(id, undefined, error);
                     return;
                 }
                 console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}`);
                 if (oldvalue.current !== result) {
                     setEvaluated({ data: result, isLoading: false });
+                   setExpressionResult(id, result, undefined);
                     oldvalue.current = result;
                 }
+
+
             };
             addExpresssion(id, expression, context);
 

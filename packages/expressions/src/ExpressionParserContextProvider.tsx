@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ExpressionParserContext } from "./ExpressionParserContext";
 import { EnabledBlazorContextType, useBlazor, useDebouncer } from "@eavfw/hooks";
 
@@ -12,9 +12,12 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
 
     const _variables = useRef({});
     const _expresssions = useRef({});
+  //  const _results = useRef({});
     const [variables, setVariables] = useState(_variables.current);
     const [formValues, setFormValues] = useState({});
     const [expressions, setExpressions] = useState({});
+    const [results, setResults] = useState({});
+
     const blazor = useBlazor();
     const [isVariablesUpToDate, setIsVariablesUpToDate] = useState(true);
     const [isParserContextVariablesInitialized, setisParserContextVariablesInitialized] = useState(false);
@@ -31,14 +34,33 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         setVariables(_variables.current);
     }, []);
 
-    const _appendExpression = useCallback((id: string, expresssion: string, context: any) =>
+    const _appendExpression = useCallback((id: string, expresssion: string, context: any) => {
         setExpressions(_expresssions.current = {
             ..._expresssions.current,
             [id]: {
                 expression: expresssion,
                 context: context
             }
-        }), []);
+        });
+
+        //setResults(_results.current = {
+        //    ..._results.current,
+        //    [id]: {
+        //        data: undefined, isLoading: true, error: undefined
+        //    }
+        //});    
+    }, []);
+
+    const _setResults = useCallback((id: string, result: any, error: any) => {
+        //setResults(_results.current = {
+        //    ..._results.current,
+        //    [id]: {
+        //        data: result, isLoading: false, error: error
+        //    }
+        //});    
+    }, []);
+
+  //  const allEvaluated = useMemo(() => Object.values(results).filter((x:any) => x.isLoading === true).length === 0, [results]);
 
     const _removeExpresssion = useCallback((id) => {
         let expr = { ..._expresssions.current } as any;
@@ -106,7 +128,9 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         isInitialized: isParserContextExpressionsInitialized && isParserContextVariablesInitialized,
         formValues,
         setFormValues,
+        allExpressionEvaluated: false,
         appendVariables: _appendVariables,
+        setExpressionResult: _setResults,
         addExpresssion: _appendExpression,
         removeExpression: _removeExpresssion,
         variables,

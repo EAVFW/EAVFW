@@ -41,7 +41,7 @@ export const ExpressionParserFieldProvider: React.FC<Omit<ExpressionParserAttrib
      
 
     return (
-        <ExpressionParserAttributeContext.Provider value={{ setIsLoading: _setIsLoading, isLoading: isLoading, attributeKey: attributeKey ?? parentAttributeKey, entityKey: entityKey ?? parentEntityKey, arrayIdx: (arrayIdx === -1 || arrayIdx === undefined) ? parentArrayIdx : arrayIdx }}>
+        <ExpressionParserAttributeContext.Provider value={{ ids: Object.keys(loadingInfo.current).join(","), setIsLoading: _setIsLoading, isLoading: isLoading, attributeKey: attributeKey ?? parentAttributeKey, entityKey: entityKey ?? parentEntityKey, arrayIdx: (arrayIdx === -1 || arrayIdx === undefined) ? parentArrayIdx : arrayIdx }}>
             <ExpressionParserVisibilityHost visible={visible} attributeKey={attributeKey} onVisibilityCalculated={onVisibilityCalculated}>
                {children}                
             </ExpressionParserVisibilityHost>
