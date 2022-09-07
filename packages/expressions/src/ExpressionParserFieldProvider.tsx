@@ -17,7 +17,7 @@ const StyleInjector: React.FC<{ isLoading: boolean }> = ({ children, isLoading }
 };
 
 
-export const ExpressionParserFieldProvider: React.FC<Omit<ExpressionParserAttributeContextType, "setIsLoading"|"isLoading"> & {
+export const ExpressionParserFieldProvider: React.FC<Omit<ExpressionParserAttributeContextType, "setIsLoading"|"isLoading"|"ids"> & {
     visible?: string | boolean,
     onVisibilityCalculated?: (visiblity: boolean) => void
 }> = ({ onVisibilityCalculated, children, attributeKey, entityKey, visible, arrayIdx }) => {
