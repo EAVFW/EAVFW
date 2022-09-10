@@ -65,7 +65,8 @@ export type LookupCoreControlProps = {
     type: NestedType,
     selectedValue:any,
     value: any,
-    onChange: EAVFOrmOnChangeHandler<any>
+    onChange: EAVFOrmOnChangeHandler<any>,
+    searchForLabel?: string
 }
 function nullIfEmpty<T>(items: T[]) {
 
@@ -104,7 +105,8 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     type,
     value,
     selectedValue,
-    onChange
+    onChange,
+    searchForLabel
 }) => {
 
     const ref = useRef<IComboBox>(null);
@@ -253,7 +255,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
   
     const [modalForms, setModalForms] = useState(forms ?? []);
      
-    const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
+    const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${searchForLabel ?? targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
     const [freeformvalue, setfreeformvalue] = useState<string>();
@@ -405,7 +407,8 @@ export function LookupControl<T>({
         type={attribute.type}
         forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
         filter={column?.filter ?? attribute.type.filter}
-        allowCreate={column?.disableCreate !== true }
+        allowCreate={column?.disableCreate !== true}
+        searchForLabel={column?.searchForLabel }
         label={attribute.displayName}
         extraErrors={extraErrors}
         targetEntityName={targetEntityName}

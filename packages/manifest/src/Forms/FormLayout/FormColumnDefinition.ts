@@ -18,6 +18,7 @@ export type FormColumnDefinition = {
     readonly?: boolean;
     default?: any;
     disableCreate?: boolean;
+    searchForLabel?: string;
     label?: boolean;
     visible?: boolean;
     roles?: {
