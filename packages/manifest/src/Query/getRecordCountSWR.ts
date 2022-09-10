@@ -1,9 +1,19 @@
+import { useMemo } from "react";
 import useSWR, { mutate } from "swr";
 import { jsonFetcher } from "./jsonFetcher";
 
 
-export function getRecordCount(entityName: string) {
-    const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entityName}?$top=0&$count=true`
+export function getRecordCount(entityName: string, query: any = {}, automaticallyrefreshtime=0) {
+
+    const q = useMemo(() => {
+        let q = Object.keys(query).filter(k => query[k]).map(k => `${k}=${query[k]}`).join('&');
+
+        if (q)
+            q = '&' + q;
+        return q;
+    },[query]);
+
+    const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entityName}?$top=0&$count=true${q}`
     const { data, error } = useSWR(key,
         {
             revalidateOnFocus: false,
@@ -11,7 +21,7 @@ export function getRecordCount(entityName: string) {
             revalidateOnReconnect: false,
             refreshWhenOffline: false,
             refreshWhenHidden: false,
-            refreshInterval: 0,
+            refreshInterval: automaticallyrefreshtime,
             fetcher: jsonFetcher
         }
     )
