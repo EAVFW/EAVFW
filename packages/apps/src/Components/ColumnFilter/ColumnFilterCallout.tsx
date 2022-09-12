@@ -7,6 +7,7 @@ import {
     IDropdownOption,
     IIconProps,
     PrimaryButton,
+    SpinButton,
     Stack,
     Target,
     TextField
@@ -17,33 +18,61 @@ import { IColumnData } from "./IColumnData";
 import { ColumnOrder } from "./ColumnOrder";
 import { ColumnOptions } from "./ColumnOptions";
 import { ColumnFilterProps } from "./ColumnFilterProps";
+import { AttributeTypeDefinition, LookupType, NestedType } from "@eavfw/manifest";
 
-
-
-
- 
 //function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
 //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
 //}
 
+/**[
+ * Composes the OData filter part for the given column, filterText and filterOption.
+ * @param filterValue The input for the filter operation
+ * @param filterOption contains, startswith, etc.
+ * @param columnKey The column key on which the filter is applied
+ */
+function composeOdataFilterExpression(filterValue: string | number, filterOption: ColumnOptions, columnKey?: string) {
+    if (columnKey == null) return;
+
+    const filterValueFormatted = 
+        typeof filterValue === "string"
+        ? `\'${filterValue}\'`
+        : `${filterValue}`
+        
+    switch (filterOption) {
+        case ColumnOptions.Equals:
+            return `${columnKey} ${ColumnOptions.Equals} ${filterValueFormatted}`;
+        case ColumnOptions.Contains:
+            return `${ColumnOptions.Contains}(${columnKey}, ${filterValueFormatted})`;
+        case ColumnOptions.EndsWith:
+            return `${ColumnOptions.EndsWith}(${columnKey}, ${filterValueFormatted})`;
+        case ColumnOptions.StartsWith:
+            return `${ColumnOptions.StartsWith}(${columnKey}, ${filterValueFormatted})`;
+    }
+}
 
 
 /**[
  * Composes the OData filter part for the given column, filterText and filterOption.
- * @param filterText The input for the filter operation
+ * @param filterValue The input for the filter operation
  * @param filterOption contains, startswith, etc.
- * @param columnKey The column on which the filter is applied
+ * @param column The column on which the filter is applied
  */
-function composeOdataFilterPart(filterText: string, filterOption: ColumnOptions, columnKey: string): string | undefined {
-    switch (filterOption) {
-        case ColumnOptions.Equals:
-            return `${columnKey} ${ColumnOptions.Equals} \'${filterText}\'`;
-        case ColumnOptions.Contains:
-            return `${ColumnOptions.Contains}(${columnKey}, \'${filterText}\')`;
-        case ColumnOptions.EndsWith:
-            return `${ColumnOptions.EndsWith}(${columnKey}, \'${filterText}\')`;
-        case ColumnOptions.StartsWith:
-            return `${ColumnOptions.StartsWith}(${columnKey}, \'${filterText})\')`;
+function composeOdataFilterPart(filterValue: string, filterOption: ColumnOptions, column: IColumn): string | undefined {
+    if (typeof (column.data?.type) != "object") return composeOdataFilterExpression(filterValue, filterOption, column.fieldName);
+
+    const columnType = column.data?.type as NestedType
+    switch (columnType.type) {
+        case "string": return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
+        
+        case "integer":
+        case "decimal": return composeOdataFilterExpression(+filterValue, filterOption, column.fieldName)
+        case "lookup": {
+            const lookup = columnType as LookupType
+            if (lookup.foreignKey == null) return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
+
+            const columnKey = `${lookup.foreignKey.name}/${lookup.foreignKey.principalNameColumn}`
+            return composeOdataFilterExpression(filterValue, filterOption, columnKey)
+        }
     }
 }
 
@@ -55,18 +84,18 @@ function composeOdataFilterPart(filterText: string, filterOption: ColumnOptions,
 export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
     {
         columns,
-      //  setColumns,
-      //  items,
-      //  setItems,
+        //  setColumns,
+        //  items,
+        //  setItems,
         menuTarget,
         isCalloutVisible,
         toggleIsCalloutVisible,
         currentColumn,
         fetchCallBack
     }) => {
-    
 
-    const [filterText, setFilterText] = useState<string>();
+
+    const [filterValue, setFilterText] = useState<string>();
     const app = useModelDrivenApp();
 
     const [filterOption, setFilterOption] = useState(ColumnOptions.Contains)
@@ -110,16 +139,15 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
             currentColumn!.iconName = undefined;
         }
         newColumns[current] = currentColumn! as IColumn;
-       // setColumns(newColumns);
+        // setColumns(newColumns);
     }
 
     const applyColumnFilter = () => {
 
-        if (filterText !== undefined && currentColumn !== undefined) {
-
-            const odataFilterText = composeOdataFilterPart(filterText, filterOption, currentColumn.fieldName!);
-
-            const data: IColumnData = { filterText: filterText, odataFilter: odataFilterText, filterOption: filterOption }
+        if (filterValue !== undefined && currentColumn !== undefined) {
+            console.log("Current column", currentColumn)
+            const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn);
+            const data: IColumnData = { filterText: filterValue, odataFilter: odataFilterText, filterOption: filterOption }
 
             updateCurrentColumnData(data);
         }
@@ -154,12 +182,12 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
         toggleIsCalloutVisible();
         fetchCallBack();
 
-     //   const newItems = _copyAndSort(items, currColumn.fieldName!, currColumn.isSortedDescending);
-      //  console.log("Items sorted", newColumns, items.length, newItems.length);
+        //   const newItems = _copyAndSort(items, currColumn.fieldName!, currColumn.isSortedDescending);
+        //  console.log("Items sorted", newColumns, items.length, newItems.length);
 
-//        setItems(newItems);
+        //        setItems(newItems);
 
-      //  setColumns(newColumns);
+        //  setColumns(newColumns);
     };
 
     // Load saved filter data
@@ -173,7 +201,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
         }
     }, [isCalloutVisible]);
 
-    const setFilterTextHandle = (ev: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, text?: string) => {
+    const setFilterTextHandle = (ev: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>, text?: string) => {
         setFilterText(text);
     };
 
@@ -184,6 +212,11 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
 
     let padding = 8;
     const emojiIcon: IIconProps = { iconName: 'Cancel' }
+    const currentColumnType = 
+        typeof currentColumn?.data?.type === "object"
+        ? (currentColumn?.data?.type as NestedType).type
+        : "string"
+
     return <>
         {
             isCalloutVisible && (
@@ -238,7 +271,17 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
                         </Stack.Item>
 
                         <Stack.Item styles={({ root: { padding: padding } })}>
-                            <TextField onChange={setFilterTextHandle} value={filterText} />
+                            {currentColumnType === "string" &&
+                                <TextField onChange={setFilterTextHandle} value={filterValue} />
+                            }
+
+                            {currentColumnType === "integer" &&
+                                <TextField 
+                                    type="number" 
+                                    onChange={setFilterTextHandle} 
+                                    value={filterValue == null ? undefined : ""+filterValue} 
+                                />
+                            }
                         </Stack.Item>
 
                         <Stack horizontal={true}>
