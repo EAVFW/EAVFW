@@ -257,76 +257,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
     const [freeformvalue, setfreeformvalue] = useState<string>();
-
-
-  //  const [isLoading, setisLoading] = useState(true);
-
-    //const __updateOptions = (query: any) => {
-
-    //    setOptions([{ key: 'dummy', text: loadingText, disabled: true }])
-    //    queryEntity(targetEntity, query).then(results => {
-
-    //        console.log("LookupControl: Loading additional data", [value, targetEntity.logicalName,results]);
-
-    //        let options = results.items.map((record: IRecord): IComboBoxOption => {
-    //            return {
-    //                key: record.id,
-    //                data: record.id,
-    //                text: record[primaryField] ?? "No name"
-    //            }
-    //        }
-    //        )
-    //        if (options.length === 0) {
-    //            setOptions([{ key: 'dummy', text: noResultText, disabled: true }])
-    //        } else {
-    //            setOptions(options);
-    //        }
-    //    });
-    //}
-
-    //const isFilterChanged = useRef(false);
-    //useEffect(() => {
-    //    if (isFilterChanged.current) {
-    //        //onChange(props => {
-    //        //    delete props[logicalName];
-    //        //});
-    //        setfreeformvalue(undefined);
-
-    //        setOptions((typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? "dummy", text: selectedValue[primaryField] }] : []));
-    //        setselectedKey(value ?? (typeof (selectedValue) === "object" ? selectedValue.id ?? "dummy" : undefined) as string);
-    //        setisLoading(true);
-             
-    //    }
-
-    //    isFilterChanged.current = true;
-    //}, [filter]);
-
-    //TODO, redesign all this options stuff to not use query entity, but require everything to change. filtering.
-    //useEffect(() => {
-
-
-    //    (async () => {
-    //        if (isLoading && !disabled) {
-               
-    //                let data = await queryEntity(targetEntity, filter ? { '$filter': filter, "$top": 10 } : {});
-    //                console.log("LookupControl: Loading initial data", [value, targetEntity.logicalName, data]);
-    //                const _options = data.items
-    //                    .map(m => ({
-    //                        key: m.id,
-    //                        text: m[primaryField],
-    //                        data: m.id
-    //                    })) as IComboBoxOption[];
-    //            setisLoading(false);
-               
-    //            setOptions(_options.concat(options.filter(o => _options.filter(oo => oo.key === o.key).length === 0)));
-
-
-               
-
-    //        }
-    //    })()
-
-    //}, [value, disabled, filter, isLoading])
+     
 
     console.log("Lookup Control:", [label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);

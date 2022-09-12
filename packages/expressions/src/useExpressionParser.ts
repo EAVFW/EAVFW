@@ -1,12 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useUuid } from "@eavfw/hooks";
+import { useBlazor, useUuid } from "@eavfw/hooks";
 import { useExpressionParserAttributeContext, useExpressionParserLoadingContext } from "./ExpressionParserAttributeContext";
 import { useExpressionParserContext } from "./useExpressionParserContext";
 
-
-const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
-const expressionFunction = process.env['NEXT_PUBLIC_BLAZOR_EVAL_EXPRESSION'];
-
+ 
 declare global {
     interface Window { expressionUpdated: any; expressionError: any;}
 }
@@ -43,8 +40,9 @@ export type useExpressionParserValue<T> = {
 
 export function useExpressionParser<T = string>(expression?: string) {
 
-    const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
+    const { variables, formValues, addExpresssion, removeExpression, setExpressionResult } = useExpressionParserContext();
     const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
+  //  const blazor = useBlazor();
     const id = useUuid();
 
     var [evaluated, setEvaluated] = useState<useExpressionParserValue<T>>(expression && expression.indexOf("@") !== -1 ?
@@ -53,12 +51,12 @@ export function useExpressionParser<T = string>(expression?: string) {
     var etag = useRef(new Date().getTime());
     var oldvalue = useRef(evaluated?.data);
 
-    useExpressionParserLoadingContext(evaluated?.isLoading);
+    useExpressionParserLoadingContext(evaluated?.isLoading, id);
 
     useEffect(() => { 
         const etagLocal = etag.current = new Date().getTime();
 
-        console.log("useExpressionParser:Form Values Changed expressions: " + expression, [etagLocal, formValues]);
+        console.log("useExpressionParser:Form Values Changed expressions: " + expression, [id,etagLocal, formValues]);
         //const vars = { ...variables };
 
         //if ("manifest" in vars)
@@ -76,41 +74,31 @@ export function useExpressionParser<T = string>(expression?: string) {
 
 
 
-        if (namespace && expressionFunction && expression && expression.indexOf("@") !== -1) {
+        if (expression && expression.indexOf("@") !== -1) {
 
             expressionResults[id] = (result: any, error: any) => {
+               //
+
                 if (error) {
                     setEvaluated({ data: undefined, isLoading: false });
+                    setExpressionResult(id, undefined, error);
                     return;
                 }
                 console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}`);
                 if (oldvalue.current !== result) {
                     setEvaluated({ data: result, isLoading: false });
+                   setExpressionResult(id, result, undefined);
                     oldvalue.current = result;
                 }
+
+
             };
             addExpresssion(id, expression, context);
 
             return () => {
                 removeExpression(id);
             }
-          //  setEvaluated({ data: "dummy", isLoading: false });
-
-            //setTimeout(() => {
-            //    console.time("useExpressionParser Queue");
-            //    console.debug("useExpressionParser", [etagLocal, expression, context]);
-            //    DotNet.invokeMethodAsync<T>(namespace, expressionFunction, expression, context)
-            //        .then((evaluated) => {
-            //            console.log("useExpressionParser result", [etagLocal, expression, context, evaluated]);
-            //            if (etagLocal === etag.current) {
-            //                setEvaluated({ data: evaluated, isLoading: false });
-            //            }
-            //        }).catch(err => {
-            //            console.log("useExpressionParser error", [etagLocal, expression]);
-            //            console.error(err)
-            //        });
-            //    console.timeEnd("useExpressionParser Queue");
-            //},10);
+          
         } else if (expression !== evaluated?.data) {
             setEvaluated({ data: expression, isLoading: false });
         }

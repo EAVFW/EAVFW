@@ -42,7 +42,7 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
         useChangeDetector(`Tabcomponent: Tab: ${tabName} factory`, factory, renderId);
         useChangeDetector(`Tabcomponent: Tab: ${tabName} locale`, locale, renderId);
 
-        if (!columns) {
+        if (!columns || Object.keys(columns).length===0) {
 
             const controlName = form.layout.tabs[tabName].control;
             if (controlName && controlName in Controls) {
@@ -54,7 +54,7 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
             throw new Error("Control or Columns must be defined, or control is not registered");
         }
 
-        console.log("Rendering tab");
+        console.log("Rendering tab", [Controls, columns]);
         const ui = (
             <Stack verticalFill horizontal tokens={{ childrenGap:25 }} styles={{
                 root: {
