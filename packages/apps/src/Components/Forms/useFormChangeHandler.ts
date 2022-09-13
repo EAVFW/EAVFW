@@ -25,7 +25,21 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
     const entitySaveMessageKey = 'entitySaved';
     const {addMessage, removeMessage} = useMessageContext();
-    const {showIndeterminateProgressIndicator, hideProgressBar} = useProgressBarContext();
+    const { showIndeterminateProgressIndicator, hideProgressBar } = useProgressBarContext();
+
+    const defaultData = useMemo(() => {
+
+        var data = undefined as any;
+        for (let attr of Object.values(attributes)) {
+            if (typeof (attr.default) !== "undefined") {
+                data = data ?? {};
+                data[attr.logicalName] = attr.default;
+            }
+        }
+        console.log("DEFAULT DATA", data);
+        return data ?? initialdata;
+
+    }, [initialdata,attributes]);
 
     const expand = useMemo(() => {
 
@@ -42,23 +56,34 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             recordId!,
             expand ? `?$expand=${expand}` : '',
             typeof (recordId) !== "undefined",
-            initialdata
+            defaultData
         );
 
     const changedRecord = useRef(record);
 
-    const onChangeCallback = useCallback((formData: any) => {
+    const onChangeCallback = useCallback((formData: any, ctx?: any) => {
       //  console.group("CreateNewRecordPage");
-        console.log(formData);
+        console.log("onChangeCallback",formData);
         try {
             changedRecord.current = formData;
 
             const [changed, changedValues] = cleanDiff(deepDiffMapper.map(recordId ? record : {}, changedRecord.current))
-            console.log("UpdatedValues", [changedRecord.current, record,
+            
+            console.log("onChangeCallback UpdatedValues", [changedRecord.current, record,
                 deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
                 changed, changedValues]);
+
             setTimeout(() => {
+                console.log("onChangeCallback UpdatedValues", [changedRecord.current, record,
+                deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
+                    changed, changedValues]);
+
+                console.log("onChangeCallback", [changed, changedValues]);
                 updateRibbonState({ canSave: changed });
+                if (ctx?.onCommit) {
+                    console.log("RUNNING COMMIT HANDLE");
+                    ctx.onCommit();
+                }
             });
         } finally {
           //  console.groupEnd();
@@ -80,7 +105,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             hideProgressBar();
 
             if (rsp.ok) {
-                console.log("Saved");
+                console.log("Saved", [skipRedirect, recordId]);
                 let data = await rsp.json();
                 console.log(data);
                 if (!skipRedirect && !recordId) {

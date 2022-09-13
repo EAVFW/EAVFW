@@ -18,7 +18,7 @@ import { useAppInfo, useModelDrivenApp, WarningContext } from "@eavfw/apps";
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
     formDefinition?: ManifestDefinition,
     defaultData: T
-    onChange?: (data: T) => void;
+    onChange?: (data: T, ctx?: any) => void;
     state?: Omit<TState, keyof EAVFormContextState<T>>;
     onValidationResult?: (result: { errors: EAVFWErrorDefinition, actions: EAVFormContextActions<T>, state: TState }) => void;
     stripForValidation?:(data:T)=>T
@@ -314,7 +314,14 @@ export const EAVFormValidation: React.FC = ({ children }) => {
     )
 }
 
-export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ stripForValidation=(a)=>a,formDefinition, defaultData, onChange, children, onValidationResult, state: initialState  }: PropsWithChildren<EAVFormProps<T, TState>>) => {
+export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
+    stripForValidation = (a) => a,
+    formDefinition,
+    defaultData,
+    onChange,
+    children,
+    onValidationResult,
+    state: initialState }: PropsWithChildren<EAVFormProps<T, TState>>) => {
 
     const { current: state } = useRef({
         formValues: cloneDeep(defaultData) ?? {},
@@ -495,13 +502,16 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({ s
                 setEtag(local);
 
                 if (onChange)
-                    onChange(state.formValues);
+                    onChange(state.formValues,ctx);
 
                 console.log("Updated Props Changed", [changed, state.formValues]);
                 console.log("Completed update", [global_etag.current, JSON.stringify(state.formValues)]);
 
+               
+
             }
 
+          
 
             return state;
 
