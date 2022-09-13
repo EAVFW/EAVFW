@@ -12,13 +12,13 @@ import {
     Target,
     TextField
 } from "@fluentui/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { IColumnData } from "./IColumnData";
 import { ColumnOrder } from "./ColumnOrder";
 import { ColumnOptions } from "./ColumnOptions";
 import { ColumnFilterProps } from "./ColumnFilterProps";
-import { AttributeTypeDefinition, LookupType, NestedType } from "@eavfw/manifest";
+import { AttributeTypeDefinition, isChoice, LookupType, NestedType } from "@eavfw/manifest";
 
 //function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
 //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
@@ -61,9 +61,9 @@ function composeOdataFilterPart(filterValue: string, filterOption: ColumnOptions
     if (typeof (column.data?.type) != "object") return composeOdataFilterExpression(filterValue, filterOption, column.fieldName);
 
     const columnType = column.data?.type as NestedType
-    switch (columnType.type) {
+    switch (columnType.type?.toLowerCase()) {
         case "string": return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
-        
+        case "choice": return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
         case "integer":
         case "decimal": return composeOdataFilterExpression(+filterValue, filterOption, column.fieldName)
         case "lookup": {
@@ -212,11 +212,44 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
 
     let padding = 8;
     const emojiIcon: IIconProps = { iconName: 'Cancel' }
-    const currentColumnType = 
-        typeof currentColumn?.data?.type === "object"
-        ? (currentColumn?.data?.type as NestedType).type
-        : "string"
+    const currentColumnType =
+        (typeof currentColumn?.data?.type === "object"
+            ? (currentColumn?.data?.type as NestedType).type
+            : "string").toLowerCase();
 
+   
+    const choiceOptions = useMemo(() => {
+        if (currentColumnType === "choice") {
+            let choices: IDropdownOption<number>[] = [];
+            let type = currentColumn?.data?.type;
+            if (isChoice(type)) {
+                for (let [key, value] of Object.entries(type.options ?? {})) {
+                    if (typeof value === "number") {
+                        choices.push({ key: key, data: value, text: key, ariaLabel: key, index: value, title: key });
+                    } else {
+                        choices.push({ key: key, data: value.value, text: value.locale?.[app.locale]?.displayName ?? key, ariaLabel: key, index: value.value, title: key });
+                    }
+
+                }
+            }
+            return choices;
+            
+        }
+    }, [currentColumnType]);
+
+    const [selectedChoiceKey, setSelectedChoiceKey] = useState(choiceOptions?.[0].key);
+
+    const showFilterDropDown = useMemo(() => {
+        if (choiceOptions) {
+
+            setFilterOption(ColumnOptions.Equals);
+            return false;
+        }
+
+        return true;
+    }, [choiceOptions])
+
+    console.log("currentColumnType", currentColumnType);
     return <>
         {
             isCalloutVisible && (
@@ -262,26 +295,32 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = (
                             </Stack.Item>
                         </Stack>
 
-                        <Stack.Item styles={({ root: { padding: padding } })}>
+                        {showFilterDropDown && <Stack.Item styles={({ root: { padding: padding } })}>
                             <Dropdown
                                 options={filterOptions}
                                 selectedKey={filterOption}
                                 onChange={setFilterOptionHandle}
                             />
-                        </Stack.Item>
+                        </Stack.Item>}
 
                         <Stack.Item styles={({ root: { padding: padding } })}>
-                            {currentColumnType === "string" &&
+
+                            {(currentColumnType === "string" || currentColumnType === "number" || currentColumnType === "lookup") &&
                                 <TextField onChange={setFilterTextHandle} value={filterValue} />
                             }
+                            {choiceOptions && <Dropdown
+                                options={choiceOptions}
+                                selectedKey={selectedChoiceKey}
+                                onChange={(a, b) => { setSelectedChoiceKey(b?.key as string); setFilterText(b?.key as string) }}
+                            />}
 
-                            {currentColumnType === "integer" &&
-                                <TextField 
-                                    type="number" 
-                                    onChange={setFilterTextHandle} 
-                                    value={filterValue == null ? undefined : ""+filterValue} 
-                                />
-                            }
+                            {/*{currentColumnType === "integer" &&*/}
+                            {/*    <TextField */}
+                            {/*        type="number" */}
+                            {/*        onChange={setFilterTextHandle} */}
+                            {/*        value={filterValue == null ? undefined : ""+filterValue} */}
+                            {/*    />*/}
+                            {/*}*/}
                         </Stack.Item>
 
                         <Stack horizontal={true}>
