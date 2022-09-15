@@ -4,6 +4,7 @@ import { EAVFWErrorDefinitionMap } from "./EAVFWErrorDefinitionMap";
 export type EAVFWError = {
     error: string;
     code: string;
+    visible?: boolean;
     [key: string]: any;
 }
 

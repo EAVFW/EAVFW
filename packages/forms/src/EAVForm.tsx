@@ -1,5 +1,5 @@
 
-import { EAVFWErrorDefinition, isEAVFWError, ManifestDefinition, ValidationDefinitionV1, ValidationDefinitionV2, } from "@eavfw/manifest";
+import { EAVFWErrorDefinition, EAVFWErrorDefinitionMap, isEAVFWError, ManifestDefinition, ValidationDefinitionV1, ValidationDefinitionV2, } from "@eavfw/manifest";
 import { useExpressionParserContext } from "@eavfw/expressions";
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
@@ -13,11 +13,13 @@ import { EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVForm
 
 import { useBlazor, useUuid } from "@eavfw/hooks";
 import { useEAVForm } from "./useEAVForm";
-import { useAppInfo, useModelDrivenApp, WarningContext } from "@eavfw/apps";
+import { useAppInfo, useFormChangeHandler, useModelDrivenApp, WarningContext } from "@eavfw/apps";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
     formDefinition?: ManifestDefinition,
     defaultData: T
+    initialErrors?: EAVFWErrorDefinitionMap,
+    initialVisitedFields?: VisitedFieldElement,
     onChange?: (data: T, ctx?: any) => void;
     state?: Omit<TState, keyof EAVFormContextState<T>>;
     onValidationResult?: (result: { errors: EAVFWErrorDefinition, actions: EAVFormContextActions<T>, state: TState }) => void;
@@ -41,11 +43,11 @@ const callbacks: { [key: string]: Function } = {
 }
 
 if (typeof global.window !== "undefined") {
-    window['formValuesUpdate'] = function (id:string,etag:string,validations:any) {
-        console.log('formValuesUpdate', arguments);
+    window['formValuesUpdate'] = function (id: string, etag: string, validations: any, log?: string) {
+        console.log('Run Validation Result Raw', arguments);
 
         if (id in callbacks) {
-            callbacks[id](etag, validations);
+            callbacks[id](etag, validations,log);
         }
     }
  
@@ -140,10 +142,10 @@ const VisitedContext = createContext({
 
 export const useVisitedContext = () => useContext(VisitedContext);
 
-export const VisitedContainer: React.FC<{ id: string }> = ({ id, children }) => {
+export const VisitedContainer: React.FC<{ id: string, initialdata?: VisitedFieldElement }> = ({ id, children, initialdata = {} }) => {
 
     const { setVisitedFields: setParentVisitedFields, visitedFields: rootVisitedFields } = useVisitedContext();
-    const refVisitedFields = useRef<VisitedFieldElement>({});
+    const refVisitedFields = useRef<VisitedFieldElement>(initialdata);
     const [visitedFields, setVisitedFields] = useState<VisitedFieldElement>(refVisitedFields.current);
     const updateVisitedFields = useCallback((visitedField: string, value: VisitedFieldElementValue = true) => {
         console.log("Setting visible field " + visitedField, [value, JSON.stringify( refVisitedFields.current[visitedField]), JSON.stringify(refVisitedFields.current)]);
@@ -156,6 +158,7 @@ export const VisitedContainer: React.FC<{ id: string }> = ({ id, children }) => 
         setParentVisitedFields(id, refVisitedFields.current);
     }, [id]);
 
+   
  
 
     const allvisitedFields = useMemo(() => Object.assign({}, rootVisitedFields[id] ?? {}, visitedFields), [rootVisitedFields[id], visitedFields]);
@@ -215,7 +218,7 @@ type validationResponse = {
     messageCode?: string,
     type: "info" | "warning" | "error"
 }
-export const EAVFormValidation: React.FC = ({ children }) => {
+export const EAVFormValidation: React.FC<{ initialVisitedFields?: VisitedFieldElement }> = ({ children, initialVisitedFields }) => {
 
     const app = useModelDrivenApp();
     const appInfo = useAppInfo();
@@ -306,19 +309,44 @@ export const EAVFormValidation: React.FC = ({ children }) => {
     }, [localFromValues]);
 
     return (
-        <VisitedContainer id="root">
+        <VisitedContainer id="root" initialdata={initialVisitedFields }>
             <WarningContext.Provider value={warnings}>
                 {children}
             </WarningContext.Provider>
         </VisitedContainer>
     )
 }
+function mergeErrors(err1: EAVFWErrorDefinitionMap, err2: EAVFWErrorDefinitionMap): EAVFWErrorDefinitionMap {
+    if (!err2)
+        return err1;
 
+    for (let [k, e] of Object.entries(err2)) {
+        if (Array.isArray(e)) {
+            err1[k] = e.map((ee, ii) => {
+
+                if (isEAVFWError(ee)) {
+                    return ee;
+                } else {
+                    return mergeErrors(err1[k] as EAVFWErrorDefinitionMap ?? {}, ee);
+                }
+            });
+            
+        } else if (isEAVFWError(e)) {
+            err1[k] = e;
+        } else {
+            err1[k] = mergeErrors(err1[k] as EAVFWErrorDefinitionMap ?? {} , e);
+        }
+    }
+
+    return err1;
+}
 export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     stripForValidation = (a) => a,
     formDefinition,
     defaultData,
     onChange,
+    initialErrors,
+    initialVisitedFields,
     children,
     onValidationResult,
     state: initialState }: PropsWithChildren<EAVFormProps<T, TState>>) => {
@@ -326,25 +354,44 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     const { current: state } = useRef({
         formValues: cloneDeep(defaultData) ?? {},
         formDefinition,
-        errors: {},
+        errors: initialErrors??{},
         fieldMetadata: {},
-        isErrorsUpdated:false,
+        isErrorsUpdated: typeof (initialErrors) !== "undefined",
         ... (initialState ?? {})
     } as TState);
 
     const formId = useUuid(); 
     
-    console.log("EAVForm: ID", [formId, (defaultData as any)?.name, (state?.formValues as any)?.name]);
+    console.log("EAVForm: ID", [formId, (defaultData as any)?.name, (state?.formValues as any)?.name, initialErrors]);
     const blazor = useBlazor();
    
     const global_etag = useRef<string>(new Date().toISOString());
-
-   // const [_errors, setLocalErrors] = useState<JsonSchemaError>();
     const [etag, setEtag] = useState(new Date().toISOString());
-    
-   // const { setFormValues } = useExpressionParserContext();
+
+    useEffect(() => {
+        if (blazor.isEnabled ) {
+            let t = new Date().getTime();
+             
+            setTimeout(() => {
+                if (blazor.updateFormDataFunction) {
+                    DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(
+                        blazor.namespace, blazor.updateFormDataFunction,
+                        formId,
+                        etag,
+                        stripForValidation(state.formValues),
+                        typeof (initialErrors) === "undefined", //runvalidation
+                        true, //runExpressions
+                        true) //includeLogs
+                        .finally(() => {
+                            console.log("UpdateFormData in " + (new Date().getTime() - t) + " milisecond");
+                        })
+                }
+            });
+        }
+    },[]);
 
     const runValidation = (complete?: () => void) => {
+        
         if (blazor.isEnabled) {
             //   alert("Starting validation");
             // setLocalErrors(undefined);
@@ -358,7 +405,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition }>(blazor.namespace, blazor.validateFormFunction, formDefinition, formValuesForValidation, true)
                         .then(({ errors: results }) => {
 
-                            console.log("Run Validation RESULT", [id, results, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
+                            console.log("Run Validation RESULT", [new Date().getTime() - new Date(local).getTime() + "ms", id, results, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
 
 
 
@@ -491,7 +538,11 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     state.isErrorsUpdated = false;
                     setTimeout(() => {
                         if (blazor.updateFormDataFunction) {
-                            DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(blazor.namespace, blazor.updateFormDataFunction, formId, local, stripForValidation(state.formValues))
+                            DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(
+                                blazor.namespace, blazor.updateFormDataFunction,
+                                formId,
+                                local,
+                                stripForValidation(state.formValues), true,true, true)
                                 .finally(() => {
                                     console.log("UpdateFormData in " + (new Date().getTime() - t) + " milisecond");
                                 })
@@ -530,13 +581,20 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
     useEffect(() => {
 
-        callbacks[formId] = (etag: string,  errors: EAVFWErrorDefinition) => {
+        callbacks[formId] = (etag: string,  errors: EAVFWErrorDefinition,log?:string) => {
 
             if (etag === global_etag.current) {
 
-                console.log("Run Validation Result", [errors]);
+              
                // mergeAndUpdate(state.formValues, calculated);
-                state.errors = errors;
+               var test= mergeErrors(state.errors as EAVFWErrorDefinitionMap, errors as EAVFWErrorDefinitionMap);
+             
+
+                console.log("Run Validation Result", [(new Date().getTime() - new Date(etag).getTime()) + "ms", errors, log, test, state.errors]);
+                console.log("Run Validation Result: " + log);
+
+                 
+
                 state.isErrorsUpdated = true;
                 if (onValidationResult)
                     onValidationResult({ errors: errors, actions: actions.current, state: state });
@@ -570,7 +628,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                 state: state,           
                 etag,           
             }}>
-            <EAVFormValidation>
+            <EAVFormValidation initialVisitedFields={initialVisitedFields}>
                 {children}           
             </EAVFormValidation>
         </EAVFormContext.Provider>
