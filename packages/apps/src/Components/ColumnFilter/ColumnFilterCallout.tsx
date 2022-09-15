@@ -10,7 +10,8 @@ import {
     SpinButton,
     Stack,
     Target,
-    TextField
+    TextField,
+    Toggle
 } from "@fluentui/react";
 import React, { useEffect, useMemo, useState } from "react";
 
@@ -31,7 +32,7 @@ import { useColumnFilter } from "./ColumnFilterContext";
  * @param filterOption contains, startswith, etc.
  * @param columnKey The column key on which the filter is applied
  */
-function composeOdataFilterExpression(filterValue: string | number, filterOption: ColumnOptions, columnKey?: string) {
+function composeOdataFilterExpression(filterValue: string | number | boolean, filterOption: ColumnOptions, columnKey?: string) {
     if (columnKey == null) return;
 
     const filterValueFormatted =
@@ -60,11 +61,11 @@ function composeOdataFilterExpression(filterValue: string | number, filterOption
  */
 function composeOdataFilterPart(filterValue: string, filterOption: ColumnOptions, column: IColumn): string | undefined {
     if (typeof (column.data?.type) != "object") return composeOdataFilterExpression(filterValue, filterOption, column.fieldName);
-
+    
     const columnType = column.data?.type as NestedType
     switch (columnType.type?.toLowerCase()) {
         case "string": return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
-
+        case "boolean": return composeOdataFilterExpression(filterValue === "true", filterOption, column.fieldName)
         case "integer":
         case "decimal":
         case "choice": return composeOdataFilterExpression(+filterValue, filterOption, column.fieldName)
@@ -167,6 +168,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             case "choice":
             case "choices":
             case "lookup":
+            case "boolean":
                 return [ColumnOptions.Equals]
             case "string":
             default:
@@ -235,6 +237,12 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                     onChange={(ev, value) =>
                         setFilterTextHandle(ev, value?.key == null ? "" : "" + value.key)}
                     multiSelect={currentColumnType === "choices"}
+                />
+            }
+            case "boolean": {
+                return <Toggle
+                    defaultValue={filterValue}
+                    onChange={(ev,checked) => setFilterTextHandle(ev,`${checked}`)}
                 />
             }
             case "string":
