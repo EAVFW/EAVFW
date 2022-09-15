@@ -12,7 +12,7 @@ export type ModelDrivenEntityViewerProps = {
     formName: string;
     record?: any;
     factory?: OptionsFactory;
-    onChange?: (data: any) => void;
+    onChange?: (data: any, ctx?: any) => void;
     related?: Array<string>;
     extraErrors?: FormValidation;
 } & FormsConfig;

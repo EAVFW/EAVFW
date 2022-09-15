@@ -15,4 +15,8 @@ export type LookupType = {
         name: string;
 
     };
+    cascade?: {
+        delete?: "cascade" | "noaction" | "restrict",
+        update?: "cascade" | "noaction" | "restrict"
+    }
 };

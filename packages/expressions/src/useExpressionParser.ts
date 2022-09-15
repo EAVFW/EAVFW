@@ -4,30 +4,7 @@ import { useExpressionParserAttributeContext, useExpressionParserLoadingContext 
 import { useExpressionParserContext } from "./useExpressionParserContext";
 
  
-declare global {
-    interface Window { expressionUpdated: any; expressionError: any;}
-}
 
-const expressionResults = {
-
-} as any;
-if (typeof global.window !== "undefined") {
-    window['expressionUpdated'] = function (id:any,result:any) {
-        console.log('expressionUpdated', arguments);
-        setTimeout(() => {
-            expressionResults[id](result);
-        });
-
-    }
-
-    window['expressionError'] = function (id: any, error: any) {
-        console.log('expressionError', arguments);
-        
-        setTimeout(() => {
-            expressionResults[id](undefined,error);
-        });
-    }
-}
 
 
  
@@ -40,7 +17,7 @@ export type useExpressionParserValue<T> = {
 
 export function useExpressionParser<T = string>(expression?: string) {
 
-    const { variables, formValues, addExpresssion, removeExpression, setExpressionResult } = useExpressionParserContext();
+    const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
     const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
   //  const blazor = useBlazor();
     const id = useUuid();
@@ -76,24 +53,24 @@ export function useExpressionParser<T = string>(expression?: string) {
 
         if (expression && expression.indexOf("@") !== -1) {
 
-            expressionResults[id] = (result: any, error: any) => {
-               //
+          
+            addExpresssion(id, expression, context, (result: any, error: any) => {
+                //
 
                 if (error) {
                     setEvaluated({ data: undefined, isLoading: false });
-                    setExpressionResult(id, undefined, error);
+                  //  setExpressionResult(id, undefined, error);
                     return;
                 }
                 console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}`);
                 if (oldvalue.current !== result) {
                     setEvaluated({ data: result, isLoading: false });
-                   setExpressionResult(id, result, undefined);
+               //     setExpressionResult(id, result, undefined);
                     oldvalue.current = result;
                 }
 
 
-            };
-            addExpresssion(id, expression, context);
+            });
 
             return () => {
                 removeExpression(id);

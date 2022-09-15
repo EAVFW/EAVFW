@@ -371,10 +371,12 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
     const groups = useMemo(()=>createRadioGroups(form, entity),[form,entity]);
 
+    const onCommitCollector = useRef<Function>();
 
-    const onFormDataChange2 = useCallback((formdata: any) => {
+    const onFormDataChange2 = useCallback((formdata: any, ctx?: any) => {
         try {
             formdatamerger.current = {};
+            onCommitCollector.current = undefined;
             console.groupCollapsed("onFormDataChange", [formDataRef.current, formdata]);
             let oldFormData = Object.assign({}, formDataRef.current);
             let changed = false;
@@ -476,7 +478,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
             if (changed) {
                 formDataRef.current = oldFormData;
-                onChange?.(oldFormData);
+                onChange?.(oldFormData, ctx);
                // setEtag(new Date().toISOString());
             }
 
@@ -485,15 +487,31 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
         }
     }, [record, entity]);
 
-    const onFormDataChange = useCallback((formdata: any) => {
 
-        console.log("FormData Changing", { changes: formdata, old: formdatamerger.current });
+  
+    //Collect all the incoming changes, latest is newest
+    //debounce and update.
+    const onFormDataChange = useCallback((formdata: any, ctx?:any) => {
 
-        formdatamerger.current = { ...formdatamerger.current, ...formdata };
+        console.log("FormData Changing", { changes: formdata, old: formdatamerger.current,ctx });
+
+        formdatamerger.current = { ...formdatamerger.current, ...formdata }; //TODO - should this be a deep merge.
+        if (ctx?.onCommit) {
+            const old = onCommitCollector.current;
+            const next = ctx?.onCommit;
+            onCommitCollector.current = () => {
+                console.log("onFormDataChange Wrap", [next, old]);
+                if (old)
+                    old();
+
+                next();
+            }
+        }
 
         console.log("FormData Changed", { changes: formdata, new: formdatamerger.current });
 
-        return onFormDataChange2(formdatamerger.current);
+
+        return onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
     }, [onFormDataChange2]);
 
     

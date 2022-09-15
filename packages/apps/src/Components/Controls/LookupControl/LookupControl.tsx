@@ -133,7 +133,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const hasFilterChangedFirst = useRef(false);
 
 
-
+    console.log("lookupcontrol", [selectedValue, targetEntity, primaryField, logicalName])
     const initialOptions = useMemo(() => (typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? DUMMY_DATA_KEY, text: selectedValue[primaryField] }] : []), [selectedValue]);
 
     const [shouldLoadRemoteOptions, setShouldLoadRemoteOptions] = useState(false);

@@ -12,13 +12,13 @@ import {
     Target,
     TextField
 } from "@fluentui/react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import { IColumnData } from "./IColumnData";
 import { ColumnOrder } from "./ColumnOrder";
 import { ColumnOptions } from "./ColumnOptions";
 import { ColumnFilterProps } from "./ColumnFilterProps";
-import { AttributeTypeDefinition, ChoiceOption, ChoiceType, LookupType, NestedType } from "@eavfw/manifest";
+import { AttributeTypeDefinition, isChoice, ChoiceOption, ChoiceType, LookupType, NestedType } from "@eavfw/manifest";
 import { useColumnFilter } from "./ColumnFilterContext";
 
 //function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
@@ -62,7 +62,7 @@ function composeOdataFilterPart(filterValue: string, filterOption: ColumnOptions
     if (typeof (column.data?.type) != "object") return composeOdataFilterExpression(filterValue, filterOption, column.fieldName);
 
     const columnType = column.data?.type as NestedType
-    switch (columnType.type) {
+    switch (columnType.type?.toLowerCase()) {
         case "string": return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
 
         case "integer":
@@ -231,6 +231,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             ? (currentColumn?.data?.type as NestedType).type
             : "string"
 
+    console.log("currentColumnType", currentColumnType);
     return <>
         {
             isCalloutVisible && (
@@ -276,13 +277,13 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                             </Stack.Item>
                         </Stack>
 
-                        <Stack.Item styles={({ root: { padding: padding } })}>
+                        {<Stack.Item styles={({ root: { padding: padding } })}>
                             <Dropdown
                                 options={filterOptions}
                                 selectedKey={filterOption}
                                 onChange={setFilterOptionHandle}
                             />
-                        </Stack.Item>
+                        </Stack.Item>}
 
                         <Stack.Item styles={({ root: { padding: padding } })}>
                             {currentColumnInput()}

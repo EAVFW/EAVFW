@@ -64,7 +64,12 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
     const [ribbonState, setRibbonState2] = useState<RibbonState>(stateRef.current);
     const updateRibbonState = useCallback((state: Partial<RibbonState>) => {
         stateRef.current = { ...stateRef.current, ...state };
-        console.log("updateRibbonState", stateRef.current),
+        console.log("updateRibbonState", stateRef.current);
+            try {
+                throw new Error("updateRibbonState");
+            } catch (err) {
+                console.log("updateRibbonState",err);
+            }
             setRibbonState2(stateRef.current)
     }, []);
 
@@ -129,21 +134,23 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
     //  const [oldUrl, setOldUrl] = useState<URL>();
     // prompt the user if they try and leave with unsaved changes
     useEffect(() => {
-
+        console.log("UPDATING handleBrowseAway", stateRef.current.canSave);
         // if (oldUrl?.href !== window.location.href)
         //                setOldUrl(new URL(window.location.href));
 
         //  router.
-        const unsavedChanges = ribbonState.canSave;
+        
         const warningText =
             'Du har data der ikke er gemt, er du sikker på du vil forlade siden?';
         const handleWindowClose = (e: BeforeUnloadEvent) => {
-            if (!unsavedChanges) return;
+            const hasUnSavedChanges = stateRef.current.canSave;// ribbonState.canSave;
+            if (!hasUnSavedChanges) return;
             e.preventDefault();
             return (e.returnValue = warningText);
         };
         const handleBrowseAway = (url: string, props: any) => {
-            console.log("handleBrowseAway", { url, props, currentUrl: router.asPath, unsavedChanges, pastUrl, confirmed: confirmedRef.current });
+            const hasUnSavedChanges = stateRef.current.canSave;// ribbonState.canSave;
+            console.log("handleBrowseAway", { url, props, currentUrl: router.asPath, hasUnSavedChanges, pastUrl, confirmed: confirmedRef.current });
 
             const oldUrl = new URL(router.asPath, window.location.href);
             const newUrl = new URL(url, window.location.href);
@@ -151,7 +158,7 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
             if (oldUrl.pathname === newUrl.pathname)
                 return;
 
-            if (!unsavedChanges) return;
+            if (!hasUnSavedChanges) return;
 
             console.log("handleBrowseAway", [url, pastUrl, confirmedRef.current]);
             if (url === pastUrl && confirmedRef.current)
@@ -258,36 +265,47 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
                             const starter = Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "undefined" || Object.values(entry.runAfter).length === 0);
 
                             const queue = starter.slice(0, 1);
-                            while (queue.length) {
-                                const [action, entry] = queue.pop() ?? [];
-                                console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
-                                const type = entry.type;
-                                switch (type) {
-                                    case "UpdateRecord":
 
-                                        onFormDataChange((props, ctx) => {
-                                            ctx.skipValidation = true;
-                                            Object.assign(props, entry.inputs.data)
-                                        }); //TODO wait until change is applied
+                            function handleQueue() {
+
+                                while (queue.length) {
+                                    const [action, entry] = queue.pop() ?? [];
+                                    console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
+                                    const type = entry.type;
+                                    switch (type) {
+                                        case "UpdateRecord":
+
+                                            onFormDataChange((props, ctx) => {
+                                                ctx.skipValidation = true;
+
+                                                ctx.onCommit = () => {
+                                                    console.log("Update Record Completed");
+
+                                                    queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+                                                    handleQueue();
+                                                };
+                                                Object.assign(props, entry.inputs.data)
+                                            }); //TODO wait until change is applied
 
 
-                                        queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
 
 
-                                        break;
+                                            break;
 
-                                    case "SaveForm":
+                                        case "SaveForm":
 
-                                        ribbonEvents.emit("onSave", ev);
+                                            ribbonEvents.emit("onSave", ev);
 
-                                        queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+                                            queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
 
-                                        break;
+                                            break;
+                                    }
+
+                                    console.log("Executed Workflow action", [action, entry]);
+
                                 }
-
-                                console.log("Executed Workflow action", [action, entry]);
-
-                            }
+                            };
+                            handleQueue();
                         })();
 
                     }, [button.workflow]) : button.onClick;
