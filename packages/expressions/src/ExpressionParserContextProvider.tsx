@@ -59,6 +59,9 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         setVariables(_variables.current);
     }, []);
 
+    const [_resultetag, set_resultetag] = useState(new Date().getTime());
+    const t = useRef(0);
+
     const _appendExpression = useCallback((id: string, expresssion: string, context: any, oncallback: (data: any, error: any) => void) => {
 
         _results.current[id] = { isLoading: false };
@@ -72,7 +75,11 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
             _results.current[id].isLoading = false;
             _results.current[id].error = error;
 
-            console.log("All Expressions:",_results.current);
+             window.clearTimeout(t.current);
+        t.current = window.setTimeout(() => {
+            set_resultetag(new Date().getTime());
+        },400);
+          
         };
 
         setExpressions(_expresssions.current = {
@@ -90,28 +97,8 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         //    }
         //});    
     }, []);
-    const [_resultetag, set_resultetag] = useState(new Date().getTime());
-    const t = useRef(0);
-    const _setResults = useCallback((id: string, result: any, error: any) => {
-        //setResults(_results.current = {
-        //    ..._results.current,
-        //    [id]: {
-        //        data: result, isLoading: false, error: error
-        //    }
-        //});
-         
-        _results.current[id] = _results.current[id] ?? {};
-        _results.current[id].data = result;
-        _results.current[id].isLoading = false;
-        _results.current[id].error = error;
-
-        window.clearTimeout(t.current);
-        t.current = window.setTimeout(() => {
-            set_resultetag(new Date().getTime());
-        },400);
-      
-        console.log("All Expressions:", _results.current);
-    }, []);
+   
+    
 
     const allEvaluated = useMemo(() => Object.values(_results.current).filter((x: any) => x.isLoading === true).length === 0, [_resultetag]);
 
@@ -183,7 +170,6 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         setFormValues,
         allExpressionEvaluated: allEvaluated,
         appendVariables: _appendVariables,
-        setExpressionResult: _setResults,
         expressionsResults: _results.current,
         addExpresssion: _appendExpression,
         removeExpression: _removeExpresssion,
