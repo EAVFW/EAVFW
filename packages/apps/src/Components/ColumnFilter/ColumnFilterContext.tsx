@@ -70,7 +70,7 @@ const ColumnFilterContext = React.createContext<
     } | undefined>(undefined)
 
 const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (state, action) => {
-    console.log("COLUMN ACTION", [action,state])
+    console.log("COLUMN ACTION", [action, state])
     switch (action.type) {
         case "openFilter": return {
             ...state,
@@ -118,7 +118,7 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
             console.log("Sorting...", [action.order, currentColumn, columns])
 
             columns.forEach((newCol: IColumn) => {
-                const isCurrent = newCol.key === currentColumn.key 
+                const isCurrent = newCol.key === currentColumn.key
                 newCol.isSorted = isCurrent
                 if (isCurrent) {
                     newCol.isSortedDescending = action.order === ColumnOrder.Down;
@@ -197,30 +197,19 @@ const ColumnFilterProvider = ({
         columns: []
     })
 
-    if (columnFilterState.columns.length === 0) {
-        columnFilterDispatch({
-            type: 'initializeColumns',
-            view: view,
-            attributes: attributes,
-            locale: locale,
-            onHeaderRender: onHeaderRender,
-            dispatch: columnFilterDispatch
-        })
-    }
-
     const fetchCallBack = React.useCallback(() => {
         const columns = columnFilterState.columns
         console.log("Recalculating fetch qury:", [filter, columns]);
         let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
-    
-    
-    
+
+
+
         //  let q = expand ? `$expand=${expand}` : '';
-    
+
         let orderBy = columns.filter(c => c.isSorted)[0];
-    
-    
-    
+
+
+
         let localFilters = columns
             .filter(c => (c.data['columnFilter'] as IColumnData)?.odataFilter !== undefined)
             .map(c => {
@@ -231,11 +220,11 @@ const ColumnFilterProvider = ({
         if (manifestFilter) {
             localFilters.push(manifestFilter);
         }
-    
+
         let localColumnFilter = localFilters.join(" and ");
-    
-    
-    
+
+
+
         let localFilter;
         if (filter && localColumnFilter) {
             localFilter = `${filter} and ${localColumnFilter}`;
@@ -245,20 +234,20 @@ const ColumnFilterProvider = ({
             localFilter = filter;
         }
         console.log("Recalculating fetch qury:", localFilter);
-    
+
         //if (q && localFilter)
         //    q = q + "&" + localFilter;
         //else if (localFilter)
         //    q = localFilter;
-    
-    
-    
+
+
+
         //if (q)
         //    q = '?' + q;
-    
+
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
-    
+
         const columnAttributes = columns.map(column => column.fieldName)
 
         let query: IFetchQuery = ({
@@ -269,22 +258,35 @@ const ColumnFilterProvider = ({
             '$top': pageSize,
             '$skip': currentPage * pageSize
         });
-    
+
         if (!pagingContextEnabled) {
             delete query['$skip'];
             delete query['$top'];
         }
-    
+
         if (orderBy) {
             query['$orderby'] = orderBy.fieldName + ' ' + (orderBy.isSortedDescending ? 'desc' : 'asc');
         }
-    
+
         console.log('Recalculating fetch qury:', [filter, localColumnFilter, query, onBuildFetchQuery(query)])
-    
+
         setFetchQuery(onBuildFetchQuery(query));
-    
-    
+
+
     }, [attributes, columnFilterState.columns, filter, currentPage, pageSize])
+
+    React.useMemo(() => {
+        columnFilterDispatch({
+            type: 'initializeColumns',
+            view: view,
+            attributes: attributes,
+            locale: locale,
+            onHeaderRender: onHeaderRender,
+            dispatch: columnFilterDispatch
+        })
+
+        fetchCallBack()
+    }, [view, attributes, locale])
 
     return <ColumnFilterContext.Provider value={{ columnFilterState, columnFilterDispatch }}>{children}</ColumnFilterContext.Provider>
 }

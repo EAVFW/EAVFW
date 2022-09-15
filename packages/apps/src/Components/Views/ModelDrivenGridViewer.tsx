@@ -452,7 +452,7 @@ export function ModelDrivenGridViewer(
     // const [columns, setColumns] = useState<IColumn[]>([]);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
     const viewDefinition = useMemo(() => entity.views?.[selectedView], [selectedView]);
-
+        console.log("View", [entity,viewDefinition])
     const { hideProgressBar, showIndeterminateProgressIndicator } = useProgressBarContext();
 
     const [isModalSelection, setisModalSelection] = useState(entity.views?.[selectedView]?.selection !== false);
