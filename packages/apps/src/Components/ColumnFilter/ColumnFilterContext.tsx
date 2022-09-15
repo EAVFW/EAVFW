@@ -196,19 +196,12 @@ const ColumnFilterProvider = ({
         isCalloutVisible: false,
         columns: []
     })
-
-    const fetchCallBack = React.useCallback(() => {
+    React.useEffect(() => {
         const columns = columnFilterState.columns
         console.log("Recalculating fetch qury:", [filter, columns]);
         let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
 
-
-
-        //  let q = expand ? `$expand=${expand}` : '';
-
         let orderBy = columns.filter(c => c.isSorted)[0];
-
-
 
         let localFilters = columns
             .filter(c => (c.data['columnFilter'] as IColumnData)?.odataFilter !== undefined)
@@ -223,8 +216,6 @@ const ColumnFilterProvider = ({
 
         let localColumnFilter = localFilters.join(" and ");
 
-
-
         let localFilter;
         if (filter && localColumnFilter) {
             localFilter = `${filter} and ${localColumnFilter}`;
@@ -234,16 +225,6 @@ const ColumnFilterProvider = ({
             localFilter = filter;
         }
         console.log("Recalculating fetch qury:", localFilter);
-
-        //if (q && localFilter)
-        //    q = q + "&" + localFilter;
-        //else if (localFilter)
-        //    q = localFilter;
-
-
-
-        //if (q)
-        //    q = '?' + q;
 
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
@@ -271,8 +252,6 @@ const ColumnFilterProvider = ({
         console.log('Recalculating fetch qury:', [filter, localColumnFilter, query, onBuildFetchQuery(query)])
 
         setFetchQuery(onBuildFetchQuery(query));
-
-
     }, [attributes, columnFilterState.columns, filter, currentPage, pageSize])
 
     React.useMemo(() => {
@@ -284,8 +263,6 @@ const ColumnFilterProvider = ({
             onHeaderRender: onHeaderRender,
             dispatch: columnFilterDispatch
         })
-
-        fetchCallBack()
     }, [view, attributes, locale])
 
     return <ColumnFilterContext.Provider value={{ columnFilterState, columnFilterDispatch }}>{children}</ColumnFilterContext.Provider>

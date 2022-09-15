@@ -90,15 +90,13 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
     const [filterValue, setFilterText] = useState<string>();
     const app = useModelDrivenApp();
 
-    const [filterOption, setFilterOption] = useState(ColumnOptions.Contains)
-
     const clearLabel = app.getLocalization('clear') ?? 'Clear';
     const applyLabel = app.getLocalization('apply') ?? 'Apply';
     const to = app.getLocalization('to') ?? 'to';
     const aToz = `A ${to} Z`;
     const zToa = `Z ${to} A`;
 
-    const filterOptions = [
+    const allfilterOptions = [
         {
             key: ColumnOptions.Contains,
             enumValue: ColumnOptions.Contains,
@@ -109,17 +107,18 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             enumValue: ColumnOptions.Equals,
             text: (app.getLocalization(ColumnOptions.Equals) ?? 'Equals')
         },
-        /*        {
-                    key: options.EndsWith,
-                    enumValue: options.EndsWith,
-                    text: (app.getLocalization(options.EndsWith) ?? 'Ends with')
-                },
-                {
-                    key: options.StartsWith,
-                    enumValue: options.StartsWith,
-                    text: (app.getLocalization(options.StartsWith) ?? 'Starts with')
-                },*/
+        {
+            key: ColumnOptions.EndsWith,
+            enumValue: ColumnOptions.EndsWith,
+            text: (app.getLocalization(ColumnOptions.EndsWith) ?? 'Ends with')
+        },
+        {
+            key: ColumnOptions.StartsWith,
+            enumValue: ColumnOptions.StartsWith,
+            text: (app.getLocalization(ColumnOptions.StartsWith) ?? 'Starts with')
+        }
     ];
+    
 
     const applyColumnFilter = () => {
 
@@ -153,12 +152,47 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
         })
     };
 
-    const currentColumnInput = () => {
-        const currentColumnType =
-            typeof currentColumn?.data?.type === "object"
-                ? (currentColumn?.data?.type as NestedType).type
-                : "string"
+    const cancelIcon: IIconProps = { iconName: 'Cancel' }
+    const currentColumnType =
+        typeof currentColumn?.data?.type === "object"
+            ? (currentColumn?.data?.type as NestedType).type
+            : "string"
 
+    console.log("currentColumnType", currentColumnType);
+
+    const _currentColumnOptions: () => ColumnOptions[] = () => {
+        switch (currentColumnType) {
+            case "integer":
+            case "decimal":
+            case "choice":
+            case "choices":
+            case "lookup":
+                return [ColumnOptions.Equals]
+            case "string":
+            default:
+                return [ColumnOptions.Equals, ColumnOptions.Contains]
+        }
+    }
+    const _currentFilterOptions = () => {
+        const currentColumnOptions = _currentColumnOptions()
+        return allfilterOptions.filter(x => currentColumnOptions.indexOf(x.key) !== -1)
+    }
+
+    const [filterOptions, setFilterOptions] = React.useState(_currentFilterOptions())
+    const [filterOption, setFilterOption] = useState(filterOptions[0].key)
+
+    useEffect(() => {
+        const newFilterOptions = _currentFilterOptions()
+        setFilterOptions(newFilterOptions)
+        console.log("COLUMN TYPE CHANGED", [newFilterOptions])
+    }, [currentColumnType])
+
+    useEffect(() => {
+        setFilterOption(filterOptions[0].key)
+    }, [filterOptions])
+
+
+    const currentColumnInput = () => {
         switch (currentColumnType) {
             case "integer":
             case "decimal":
@@ -230,13 +264,6 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
     };
 
     let padding = 8;
-    const cancelIcon: IIconProps = { iconName: 'Cancel' }
-    const currentColumnType =
-        typeof currentColumn?.data?.type === "object"
-            ? (currentColumn?.data?.type as NestedType).type
-            : "string"
-
-    console.log("currentColumnType", currentColumnType);
     return <>
         {
             isCalloutVisible && (
