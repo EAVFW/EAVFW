@@ -160,7 +160,6 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                 : "string"
 
         switch (currentColumnType) {
-            case "string": return <TextField onChange={setFilterTextHandle} value={filterValue} />
             case "integer":
             case "decimal":
                 return <TextField
@@ -172,10 +171,9 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             case "choices": {
                 const data = currentColumn?.data.type as ChoiceType
                 const options = data.options ?? {}
-                const optionValues = Object.keys(options)
+                const optionValues = Object.entries(options)
                 const fluentUIOptions: IDropdownOption<number>[] = optionValues
-                    .map(key => {
-                        const option = options[key]
+                    .map(([key, option]) => {
                         let value: number = -1
                         let text: string = ""
 
@@ -190,7 +188,11 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                         return {
                             key: value,
                             text: text,
-                            selected: filterValue === "" + value
+                            selected: filterValue === "" + value,
+                            data: value,
+                            ariaLabel: text,
+                            index: value,
+                            title: text
                         }
                     })
 
@@ -201,6 +203,9 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                     multiSelect={currentColumnType === "choices"}
                 />
             }
+            case "string":
+            case "lookup":
+            default: return <TextField onChange={setFilterTextHandle} value={filterValue} />
         }
     }
 
