@@ -259,8 +259,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
     const [freeformvalue, setfreeformvalue] = useState<string>();
-     
-
+    
     console.log("Lookup Control:", [label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
     return (<>
@@ -290,7 +289,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
         <ComboBox
             componentRef={ref}
-            disabled={disabled || isLoading}
+            disabled={disabled}
 
             ariaLabel={label}
             styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight, color: "black" }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
