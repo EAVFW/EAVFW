@@ -21,6 +21,7 @@ import { ColumnOptions } from "./ColumnOptions";
 import { ColumnFilterProps } from "./ColumnFilterProps";
 import { AttributeTypeDefinition, isChoice, ChoiceOption, ChoiceType, LookupType, NestedType } from "@eavfw/manifest";
 import { useColumnFilter } from "./ColumnFilterContext";
+import { ColumnFilterInputType } from "./ColumnFilterInputType";
 
 //function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
 //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
@@ -32,7 +33,7 @@ import { useColumnFilter } from "./ColumnFilterContext";
  * @param filterOption contains, startswith, etc.
  * @param columnKey The column key on which the filter is applied
  */
-function composeOdataFilterExpression(filterValue: string | number | boolean, filterOption: ColumnOptions, columnKey?: string) {
+function composeOdataFilterExpression(filterValue: string | number | boolean | undefined, filterOption: ColumnOptions, columnKey?: string) {
     if (columnKey == null) return;
 
     const filterValueFormatted =
@@ -49,6 +50,10 @@ function composeOdataFilterExpression(filterValue: string | number | boolean, fi
             return `${ColumnOptions.EndsWith}(${columnKey}, ${filterValueFormatted})`;
         case ColumnOptions.StartsWith:
             return `${ColumnOptions.StartsWith}(${columnKey}, ${filterValueFormatted})`;
+        case ColumnOptions.Null:
+            return `${columnKey} ${ColumnOptions.Null}`
+        case ColumnOptions.NotNull:
+            return `${columnKey} ${ColumnOptions.NotNull}`
     }
 }
 
@@ -59,7 +64,7 @@ function composeOdataFilterExpression(filterValue: string | number | boolean, fi
  * @param filterOption contains, startswith, etc.
  * @param column The column on which the filter is applied
  */
-function composeOdataFilterPart(filterValue: string, filterOption: ColumnOptions, column: IColumn): string | undefined {
+function composeOdataFilterPart(filterValue: string | undefined, filterOption: ColumnOptions, column: IColumn): string | undefined {
     if (typeof (column.data?.type) != "object") return composeOdataFilterExpression(filterValue, filterOption, column.fieldName);
     
     const columnType = column.data?.type as NestedType
@@ -68,7 +73,7 @@ function composeOdataFilterPart(filterValue: string, filterOption: ColumnOptions
         case "boolean": return composeOdataFilterExpression(filterValue === "true", filterOption, column.fieldName)
         case "integer":
         case "decimal":
-        case "choice": return composeOdataFilterExpression(+filterValue, filterOption, column.fieldName)
+        case "choice": return composeOdataFilterExpression(filterValue === undefined ? undefined : +filterValue, filterOption, column.fieldName)
         case "lookup": {
             const lookup = columnType as LookupType
             if (lookup.foreignKey == null) return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
@@ -101,29 +106,101 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
         {
             key: ColumnOptions.Contains,
             enumValue: ColumnOptions.Contains,
-            text: (app.getLocalization(ColumnOptions.Contains) ?? 'Contains')
+            text: (app.getLocalization(ColumnOptions.Contains) ?? 'Contains'),
+            inputType: ColumnFilterInputType.Single
         },
         {
             key: ColumnOptions.Equals,
             enumValue: ColumnOptions.Equals,
-            text: (app.getLocalization(ColumnOptions.Equals) ?? 'Equals')
+            text: (app.getLocalization(ColumnOptions.Equals) ?? 'Equals'),
+            inputType: ColumnFilterInputType.Single
         },
         {
             key: ColumnOptions.EndsWith,
             enumValue: ColumnOptions.EndsWith,
-            text: (app.getLocalization(ColumnOptions.EndsWith) ?? 'Ends with')
+            text: (app.getLocalization(ColumnOptions.EndsWith) ?? 'Ends with'),
+            inputType: ColumnFilterInputType.Single
         },
         {
             key: ColumnOptions.StartsWith,
             enumValue: ColumnOptions.StartsWith,
-            text: (app.getLocalization(ColumnOptions.StartsWith) ?? 'Starts with')
+            text: (app.getLocalization(ColumnOptions.StartsWith) ?? 'Starts with'),
+            inputType: ColumnFilterInputType.Single
+        },
+        {
+            key: ColumnOptions.Null,
+            enumValue: ColumnOptions.Null,
+            text: (app.getLocalization(ColumnOptions.Null) ?? 'Empty'),
+            inputType: ColumnFilterInputType.None
+        },
+        {
+            key: ColumnOptions.NotNull,
+            enumValue: ColumnOptions.NotNull,
+            text: (app.getLocalization(ColumnOptions.NotNull) ?? 'Not Empty'),
+            inputType: ColumnFilterInputType.None
         }
+
     ];
-    
+
+    const cancelIcon: IIconProps = { iconName: 'Cancel' }
+    const currentColumnType =
+        typeof currentColumn?.data?.type === "object"
+            ? (currentColumn?.data?.type as NestedType).type
+            : "string"
+
+    console.log("currentColumnType", currentColumnType);
+
+    const _currentColumnOptions: () => ColumnOptions[] = () => {
+        switch (currentColumnType) {
+            case "integer":
+            case "decimal":
+            case "choice":
+            case "choices":
+            case "lookup":
+            case "boolean":
+                return [
+                    ColumnOptions.Equals, 
+                    ColumnOptions.Null,
+                    ColumnOptions.NotNull
+                ]
+            case "string":
+            default:
+                return [
+                    ColumnOptions.Equals, 
+                    ColumnOptions.Contains,
+                    ColumnOptions.Null,
+                    ColumnOptions.NotNull
+                ]
+        }
+    }
+    const _currentFilterOptions = () => {
+        const currentColumnOptions = _currentColumnOptions()
+        return allfilterOptions.filter(x => currentColumnOptions.indexOf(x.key) !== -1)
+    }
+
+    const [filterOptions, setFilterOptions] = React.useState(_currentFilterOptions())
+    const [filterOption, setFilterOption] = useState(filterOptions[0].key)
+
+    useEffect(() => {
+        const newFilterOptions = _currentFilterOptions()
+        setFilterOptions(newFilterOptions)
+        console.log("COLUMN TYPE CHANGED", [newFilterOptions])
+    }, [currentColumnType])
+
+    useEffect(() => {
+        setFilterOption(filterOptions[0].key)
+    }, [filterOptions])
+
+    const currentFilterOption = filterOptions.filter(x => x.key === filterOption)[0]
+    console.log("CUrrent FIlter", currentFilterOption)
+
 
     const applyColumnFilter = () => {
+        const isFilterValueValid =
+            currentFilterOption.inputType === ColumnFilterInputType.None ||
+            (filterValue !== undefined && currentFilterOption.inputType === ColumnFilterInputType.Single)
 
-        if (filterValue !== undefined && currentColumn !== undefined) {
+        if (isFilterValueValid && currentColumn !== undefined) {
             console.log("Current column", currentColumn)
             const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn);
             const data: IColumnData = { filterText: filterValue, odataFilter: odataFilterText, filterOption: filterOption }
@@ -152,47 +229,6 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             order: order
         })
     };
-
-    const cancelIcon: IIconProps = { iconName: 'Cancel' }
-    const currentColumnType =
-        typeof currentColumn?.data?.type === "object"
-            ? (currentColumn?.data?.type as NestedType).type
-            : "string"
-
-    console.log("currentColumnType", currentColumnType);
-
-    const _currentColumnOptions: () => ColumnOptions[] = () => {
-        switch (currentColumnType) {
-            case "integer":
-            case "decimal":
-            case "choice":
-            case "choices":
-            case "lookup":
-            case "boolean":
-                return [ColumnOptions.Equals]
-            case "string":
-            default:
-                return [ColumnOptions.Equals, ColumnOptions.Contains]
-        }
-    }
-    const _currentFilterOptions = () => {
-        const currentColumnOptions = _currentColumnOptions()
-        return allfilterOptions.filter(x => currentColumnOptions.indexOf(x.key) !== -1)
-    }
-
-    const [filterOptions, setFilterOptions] = React.useState(_currentFilterOptions())
-    const [filterOption, setFilterOption] = useState(filterOptions[0].key)
-
-    useEffect(() => {
-        const newFilterOptions = _currentFilterOptions()
-        setFilterOptions(newFilterOptions)
-        console.log("COLUMN TYPE CHANGED", [newFilterOptions])
-    }, [currentColumnType])
-
-    useEffect(() => {
-        setFilterOption(filterOptions[0].key)
-    }, [filterOptions])
-
 
     const currentColumnInput = () => {
         switch (currentColumnType) {
@@ -326,7 +362,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                         </Stack.Item>}
 
                         <Stack.Item styles={({ root: { padding: padding } })}>
-                            {currentColumnInput()}
+                            {currentFilterOption?.inputType === ColumnFilterInputType.Single && currentColumnInput()}
                         </Stack.Item>
 
                         <Stack horizontal={true}>
