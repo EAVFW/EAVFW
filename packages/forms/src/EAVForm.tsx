@@ -135,9 +135,11 @@ type VisitedFieldElement = {
 };
 type VisitedFieldElementValue = VisitedFieldElement | boolean | Array<VisitedFieldElement>;
 
-const VisitedContext = createContext({
+export type SetVisitedFieldsFunction = (visitedField: string, value: VisitedFieldElementValue) => void;
+export type VisitedContextType = { visitedFields: VisitedFieldElement, setVisitedFields: SetVisitedFieldsFunction }
+const VisitedContext = createContext<VisitedContextType>({
     visitedFields: {} as VisitedFieldElement,
-    setVisitedFields: (visitedField: string, value: VisitedFieldElementValue) => { console.log("visited container updated", [visitedField, value]) }
+    setVisitedFields: (visitedField: string, value: VisitedFieldElementValue) => { console.log("visited container updated", [visitedField, value])  }
 });
 
 export const useVisitedContext = () => useContext(VisitedContext);
@@ -148,7 +150,10 @@ export const VisitedContainer: React.FC<{ id: string, initialdata?: VisitedField
     const refVisitedFields = useRef<VisitedFieldElement>(initialdata);
     const [visitedFields, setVisitedFields] = useState<VisitedFieldElement>(refVisitedFields.current);
     const updateVisitedFields = useCallback((visitedField: string, value: VisitedFieldElementValue = true) => {
-        console.log("Setting visible field " + visitedField, [value, JSON.stringify( refVisitedFields.current[visitedField]), JSON.stringify(refVisitedFields.current)]);
+        console.log("Setting visible field " + visitedField, [JSON.stringify(value),
+            JSON.stringify(refVisitedFields.current[visitedField]), JSON.stringify(refVisitedFields.current),
+            typeof value === "boolean"?value: mergeDeep(refVisitedFields.current[visitedField] ?? {}, value)
+        ]);
         if (typeof value === "boolean")
             refVisitedFields.current[visitedField] = value;
         else {
@@ -321,13 +326,14 @@ function mergeErrors(err1: EAVFWErrorDefinitionMap, err2: EAVFWErrorDefinitionMa
         return err1;
 
     for (let [k, e] of Object.entries(err2)) {
-        if (Array.isArray(e)) {
+        if (Array.isArray(e) ) {
             err1[k] = e.map((ee, ii) => {
 
                 if (isEAVFWError(ee)) {
                     return ee;
                 } else {
-                    return mergeErrors(err1[k] as EAVFWErrorDefinitionMap ?? {}, ee);
+                    let left = err1[k] as EAVFWErrorDefinitionMap[];
+                    return mergeErrors(left?.[ii] ?? {}, ee);
                 }
             });
             
@@ -585,13 +591,14 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
             if (etag === global_etag.current) {
 
-              
+                const clone = cloneDeep(state.errors);
                // mergeAndUpdate(state.formValues, calculated);
                var test= mergeErrors(state.errors as EAVFWErrorDefinitionMap, errors as EAVFWErrorDefinitionMap);
              
 
-                console.log("Run Validation Result", [(new Date().getTime() - new Date(etag).getTime()) + "ms", errors, log, test, state.errors]);
-                console.log("Run Validation Result: " + log);
+                console.log("Run Validation Result", [(new Date().getTime() - new Date(etag).getTime()) + "ms"]);
+                console.log("Run Validation Result: \n" + log);
+                console.log("Run Validation Result: \n" + JSON.stringify([clone, errors, state.errors]));
 
                  
 

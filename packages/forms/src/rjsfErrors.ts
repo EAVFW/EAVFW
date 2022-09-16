@@ -21,10 +21,12 @@ export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFW
             console.debug("rjsfErrors array", [errors, state])
 
             //Either its schema array or its array of errors
+            errors = errors.filter(e => !isEAVFWError(e) || e.visible !== false);
+
             if (errors.filter(c => isEAVFWError(c)).length === errors.length) {
                 return {
                     //@ts-ignore
-                    __errors: [].concat.apply([], (errors.map((e, i) => rjsfErrors(e, state, fx)) as Array<JsonSchemaErrorObject>).map(c => c.__errors))
+                    __errors: [].concat.apply([], (errors.map((e, i) => rjsfErrors(e, state[i], fx)) as Array<JsonSchemaErrorObject>).map(c => c.__errors))
                 }
             } else {
 
