@@ -63,7 +63,7 @@ import { useLazyMemo } from '../../../../hooks/src';
 import { Controls } from '../Controls/ControlRegister';
 import { IFetchQuery, usePaging } from './PagingContext';
 import styles from "./ModelDrivenGridViewer.module.scss";
-import ModelDrivenList from './ModelDrivenList';
+import { useModelDrivenGridViewerContext } from './ModelDrivenGridViewer';
 
 //const theme = getTheme();
 
@@ -83,26 +83,17 @@ export type ModelDrivenGridViewerState = {
     commands: ICommandBarItemProps[],
 }
 
-export type ModelDrivenGridViewerProps = {
-    allowNoPaging?: boolean,
-    defaultValues?: Array<any>
-    viewName?: string;
-    filter?: string;
-    newRecord?: boolean;
-    entityName?: string;
-    entity: EntityDefinition;
-    locale: string;
-    showViewSelector?: boolean;
-    showRibbonBar?: boolean;
-    padding?: number;
-    rightCommands?: ICommandBarItemProps[],
-    commands?: (ctx: { selection: Selection<Partial<IRecord> & IObjectWithKey> }) => ICommandBarItemProps[],
-    recordRouteGenerator: (record: IRecord) => string;
+export type ModelDrivenListProps = {
     listComponent?: React.ComponentType<IDetailsListProps & { formData: any, onChange?: (related: any) => void }>
     onChange?: (data: any) => void
     formData?: any;
-    onHeaderRender?: IRenderFunction<IDetailsColumnProps>
-    onBuildFetchQuery?: <T>(q: T) => T;
+    onRenderDetailsFooter?: IRenderFunction<IDetailsFooterProps>
+    onRenderItemColumn: (item?: any, index?: number, column?: IColumn) => React.ReactNode
+    className?: string
+    selectionMode: SelectionMode
+    setKey: string,
+    items: any[],
+    onItemInvoked: (item: IRecord) => void
 }
 
 const RibbonStyles: IStackStyles = {
@@ -418,149 +409,26 @@ const Footer = () => {
     return <div>Hello</div>
 }
 
-export function ModelDrivenGridViewer(
-    {
-        allowNoPaging,
-        locale,
-        entity,
-        filter,
-        onChange,
+export function ModelDrivenList(
+    { onChange,
         formData,
         listComponent,
-        showViewSelector = true,
-        newRecord,
-        showRibbonBar,
-        commands,
-        rightCommands,
-        viewName,
-        recordRouteGenerator,
-        padding,
-        entityName, defaultValues,
-        onHeaderRender,
-        onBuildFetchQuery = DefaultOnBuildFetchQuery
-    }: ModelDrivenGridViewerProps) {
-
-    const app = useModelDrivenApp();
-    const appinfo = useAppInfo();
-    console.log("GridView: " + locale);
-
-    const [items, setItems] = useState<IRecord[]>(newRecord ? formData[entity.collectionSchemaName.toLowerCase()] ?? [] : []);
-    const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
-    const [announcedMessage, setannouncedMessage] = useState<string>();
-
+        onRenderDetailsFooter,
+        onItemInvoked,
+        onRenderItemColumn,
+        className,
+        selectionMode,
+        setKey,
+        items
+    }: ModelDrivenListProps) {
     const [isCompactMode, setisCompactMode] = useState(false);
-    // const [columns, setColumns] = useState<IColumn[]>([]);
-    const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
-    const viewDefinition = useMemo(() => entity.views?.[selectedView], [selectedView]);
-        console.log("View", [entity,viewDefinition])
-    const { hideProgressBar, showIndeterminateProgressIndicator } = useProgressBarContext();
 
-    const [isModalSelection, setisModalSelection] = useState(entity.views?.[selectedView]?.selection !== false);
     const { setSelection, selection, selectionDetails } = useSelectionContext();
+    const { columnFilterState, columnFilterDispatch } = useColumnFilter()
+    const { columns } = columnFilterState
 
-
-    const stateCommands = useLazyMemo<ModelDrivenGridViewerState["commands"]>(() => commands?.({ selection }) ?? rightCommands ?? [], [commands, selection, selectionDetails, appinfo.currentEntityName, appinfo.currentRecordId]);
-
-    //useEffect(() => {
-    //    setCommands(commands?.({ selection }) ?? rightCommands ?? []);
-    //}, [selection, selectionDetails]);
-
-    const { buttons, addButton, removeButton, events } = useRibbon();
-
-    useEffect(() => {
-        console.log("stateCommands changed", stateCommands);
-        for (let cmd of stateCommands) {
-            addButton(cmd);
-        }
-
-        return () => {
-            for (let cmd of stateCommands) {
-                removeButton(cmd.key);
-            }
-        }
-    }, [stateCommands]);
-
-
-
-
-    //  setSelection(selection.current);
-
-
-
-
-
-
-    //function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
-    //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
-    //}
-
-    const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords, enabled: pagingContextEnabled } = usePaging();
-    const pagingDisabled = useMemo(() => viewDefinition?.paging === false || (typeof (viewDefinition?.paging) === "object" && viewDefinition?.paging?.enabled === false), [viewDefinition]);
-
-    if (!pagingContextEnabled && !(allowNoPaging || pagingDisabled))
-        throw new Error(`Please wrap ModelDrivenEntityViewer with the PagingProvider or set allowNoPaging=true: pagingContextEnabled=${pagingContextEnabled}, allowNoPaging=${allowNoPaging}, pagingDisabled=${pagingDisabled}`);
-
-    console.log("Render FetchQuery", [viewDefinition, fetchQuery]);
-    const { data, isError, isLoading, mutate } = queryEntitySWR(entity, fetchQuery, !newRecord && typeof fetchQuery !== "undefined");
-
-    useEffect(() => {
-
-        mutate();
-
-    }, [formData?.modifiedon]);
-
-    //Show loading bar based on loading from data.
-    useEffect(() => {
-        console.log("isLoading", isLoading);
-        console.log("isError", isError);
-        if (isLoading && !newRecord)
-            showIndeterminateProgressIndicator();
-        else {
-            hideProgressBar();
-        }
-        return () => {
-            console.log("hide");
-            hideProgressBar();
-        }
-    }, [isLoading, isError]);
-
-
-    //Set items whenever its done loading and augment with entityName.
-    useEffect(() => {
-        console.log("setItems from data", [data, isLoading, defaultValues]);
-
-        if (data)
-            setItems(data.items.map(item => Object.assign(item, { entityName: entity.logicalName })));
-
-        if (newRecord && defaultValues) {
-            setItems(defaultValues.map(item => Object.assign(item, { entityName: entity.logicalName })));
-
-        }
-    }, [data, newRecord && defaultValues]);
-
-
-
-
-
-
-
-    //Callback to recalculate the fetchQuery.
-
-
-    // KIG HER TORSDAG; HVORDAN BLIVER MODIFIED ON SAT?
-    // useEffect(() => {
-
-    //     fetchCallBack();
-    // }, [formData?.modifiedon, selectedView]);
-    useEffect(() => { setTotalRecords(data?.count ?? -1); }, [data?.count]);
-
-
-    const user = useUserProfile();
-
-
-
-    const hasMoreViews = Object.keys(entity?.views ?? {}).length > 1;
-
+    if (!columns?.length)
+        return <div>loading data</div>
 
     const theme = useTheme();
 
@@ -579,90 +447,39 @@ export function ModelDrivenGridViewer(
 
     console.log("WithTimeButton Theme", theme.palette.themePrimary);
 
+
     const ListComponent = listComponent ?? DetailsList;
 
-    const _onItemInvoked = (item: IRecord): void => {
-        window.location.href = recordRouteGenerator(item);
-    }
-    console.log([showViewSelector, hasMoreViews]);
-
-
-
-
     return (
+        <ListComponent className={className} styles={{ headerWrapper: { paddingTop: 0 }, focusZone: { paddingTop: 0 } }}
+            constrainMode={ConstrainMode.unconstrained}
+            items={items}
+            compact={isCompactMode}
+            columns={columns}
+            selectionMode={selectionMode}
+            getKey={_getKey}
+            setKey={setKey}
+            layoutMode={DetailsListLayoutMode.justified}
+            isHeaderVisible={true}
+            selection={selection}
+            selectionPreservedOnEmptyClick={true}
+            enterModalSelectionOnTouch={true}
+            ariaLabelForSelectionColumn="Toggle selection"
+            ariaLabelForSelectAllCheckbox="Toggle selection for all items"
+            checkButtonAriaLabel="select row"
 
-        <Stack verticalFill>
-            <ColumnFilterProvider
-                view={viewDefinition}
-                attributes={attributes}
-                locale={locale}
-                onHeaderRender={onHeaderRender}
-                onBuildFetchQuery={onBuildFetchQuery}
-                setFetchQuery={setFetchQuery}
-                currentPage={currentPage}
-                pageSize={pageSize}
-                pagingContextEnabled={pagingContextEnabled}
-                app={app}
-            >
-                <ColumnFilterCallout/>
+            onItemInvoked={onItemInvoked}
+            onRenderRow={_onRenderRow}
+            onRenderDetailsHeader={onRenderDetailsHeader}
+            onChange={onChange}
+            formData={formData}
+            onRenderItemColumn={onRenderItemColumn}
 
-                <Stack.Item className={styles.gridviewWrapper} grow styles={({ root: { padding: padding } })}>
+            onRenderDetailsFooter={onRenderDetailsFooter}
+        />
 
-                    {showRibbonBar && ((stateCommands.length) > 0) &&
-                        <RibbonBar hideBack />
-
-                    }
-
-
-                    {isModalSelection ? (
-                        <ModelDrivenList
-                            className="gridview"
-                            items={items}
-                            selectionMode={SelectionMode.multiple}
-                            setKey="multiple"
-                            onChange={onChange}
-                            formData={formData}
-                            onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
-                                recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
-                                setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
-                                attribute={attributes[column?.key!]} items={items} locale={locale} />}
-                            onItemInvoked={_onItemInvoked}
-
-                            onRenderDetailsFooter={pagingDisabled || !pagingContextEnabled ? undefined : RenderDetailsFooter}
-                        />
-                    ) : (
-                        <ModelDrivenList
-                            items={items}
-                            selectionMode={SelectionMode.none}
-                            setKey="none"
-                            onChange={onChange}
-                            formData={formData}
-                            onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
-                                recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
-                                setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
-                                attribute={attributes[column?.key!]} items={items} locale={locale} />}
-                            onItemInvoked={_onItemInvoked}
-
-                            onRenderDetailsFooter={pagingDisabled || !pagingContextEnabled ? undefined : RenderDetailsFooter}
-                        />
-                    )}
-
-                </Stack.Item>
-            </ColumnFilterProvider>
-        </Stack>
 
     )
 }
 
-
-export type ModelDrivenGridViewerContextProps = {
-    onRenderPrimaryField: React.FC<{ recordRouteGenerator: (record: IRecord) => string; item: IRecord, column: IColumn }>;
-}
-
-const ModelDrivenGridViewerContext = createContext<ModelDrivenGridViewerContextProps>({ onRenderPrimaryField: ({ recordRouteGenerator, item, column }) => <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link> });
-export function useModelDrivenGridViewerContext<T>() { return useContext<ModelDrivenGridViewerContextProps>(ModelDrivenGridViewerContext) as ModelDrivenGridViewerContextProps & T };
-export function ModelDrivenGridViewerContextProvider<T>({ children, ...props }: PropsWithChildren<ModelDrivenGridViewerContextProps & T>) {
-    return <ModelDrivenGridViewerContext.Provider value={props} >{children}</ModelDrivenGridViewerContext.Provider>
-}
-
-export default ModelDrivenGridViewer;
+export default ModelDrivenList;
