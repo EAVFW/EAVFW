@@ -180,6 +180,24 @@ export const VisitedContainer: React.FC<{ id: string, initialdata?: VisitedField
     </VisitedContext.Provider>)
 }
 
+function clearErrorsFromDiff(errors: any, diffs: any) {
+    if (!errors)
+        return;
+
+    for (let [k, v] of Object.entries<any>(diffs)) {
+        if (typeof v === "object" && v) {
+            if ("__type" in v) {
+                if (v["__type"] !== "unchanged") {
+                    delete errors[k];
+                }
+            } else {
+                
+                    clearErrorsFromDiff(errors[k], v);
+                
+            }
+        }
+    }
+}
 function clearErrors(errors: any, changes: any) {
     
     if (!changes)
@@ -524,7 +542,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
             const a = deepDiffMapper.map(state.formValues, updatedProps);
             const [_, changedValues] = cleanDiff(a);
 
-            console.log("Updated Props", [updatedProps, changedValues, state, changed, ctx]);
+            console.log("Updated Props", [updatedProps, changedValues, state, changed, ctx,a]);
              
 
             if (changed) {
@@ -535,8 +553,10 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                 console.log("Updated Props", [changed, changedValues, JSON.stringify(state.formValues, null, 4), state]);
               //  state.errors = {}; //TODO, only clear errors on fields that updated;
               //  console.log("Clearing Errors from changed Values", [changedValues,state.errors]);
-                clearErrors(state.errors, changedValues);
-                console.log("Cleared Errors from changed Values", [state.errors]);
+                let cloneerrors = cloneDeep(state.errors);
+                clearErrorsFromDiff(state.errors, a);
+               // clearErrors(state.errors, changedValues);
+                console.log(`Run Validation: Cleared Errors from changed Values[\n${JSON.stringify(cloneerrors)},\n${JSON.stringify(changedValues)},\n${JSON.stringify(state.errors) }]`);
 
 
                 if (blazor.isEnabled) {
