@@ -20,7 +20,7 @@ export function FormRender<T>(props: FormRenderProps) {
     console.log("FormRender", [entityName, entity, forms]);
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
 
-  //  const record = useRef(props.record ?? {});
+    //  const record = useRef(props.record ?? {});
     const [record, setRecord] = useState(props.record ?? {});
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
 
@@ -35,7 +35,7 @@ export function FormRender<T>(props: FormRenderProps) {
     };
     useEffect(() => {
         console.log("Form Render, Record Updated:", props.record)
-      //  record.current = props.record;
+        //  record.current = props.record;
         setRecord(props.record);
     }, [props.record]);
 
@@ -43,29 +43,27 @@ export function FormRender<T>(props: FormRenderProps) {
 
     const RenderFooterContent = React.useCallback(
         () => (
-            <StickyFooter>
-                <Stack horizontal horizontalAlign="end" styles={{ root: { margin: 24 } }}>
-                    <PrimaryButton onClick={_onSave} styles={buttonStyles}>
-                        {capitalize(app.getLocalization("save") ?? 'Save')}
-                    </PrimaryButton>
-                    <DefaultButton
-                        onClick={dismissPanel.bind(undefined, "cancel")}>{capitalize(app.getLocalization("close") ?? 'Close')}</DefaultButton>
-                </Stack>
-            </StickyFooter>
+            <Stack horizontal horizontalAlign="end" styles={{ root: { margin: 24 } }}>
+                <PrimaryButton onClick={_onSave} styles={buttonStyles}>
+                    {capitalize(app.getLocalization("save") ?? 'Save')}
+                </PrimaryButton>
+                <DefaultButton
+                    onClick={dismissPanel.bind(undefined, "cancel")}>{capitalize(app.getLocalization("close") ?? 'Close')}</DefaultButton>
+            </Stack>
         ),
         [dismissPanel, record],
     );
 
     const _onChange = useCallback(data => {
         console.log("Data changed Modal", data);
-       // record.current = data;
+        // record.current = data;
         setRecord(data);
     }, []);
 
-     //useEffect(() => {
-     //    console.log("FormRender outer changed:", props.record);
-         
-     //}, [props.record]);
+    //useEffect(() => {
+    //    console.log("FormRender outer changed:", props.record);
+
+    //}, [props.record]);
 
     return <>
         <Stack.Item grow style={{ height: 'calc(100% - 80px)' }}>
@@ -73,7 +71,7 @@ export function FormRender<T>(props: FormRenderProps) {
             <ModelDrivenEntityViewer key={`${entityName}${formName}`} related={related} onChange={_onChange} record={record} formName={formName}
                 entityName={entityName} entity={entity} locale={app.locale} extraErrors={extraErrors} />
 
+            <RenderFooterContent />
         </Stack.Item>
-        <RenderFooterContent />
     </>
 }

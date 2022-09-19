@@ -192,23 +192,21 @@ const RenderDetailsFooter: IRenderFunction<IDetailsFooterProps> = (props, defaul
     const { selectedCount } = { selectedCount: 0 };
 
     return (
-        <Sticky stickyPosition={StickyPositionType.Footer} isScrollSynced={true} stickyClassName="Footer">
-
-            <Stack grow horizontal horizontalAlign="space-between">
-                <Stack.Item grow className="Footer">
-                    <Stack grow horizontal horizontalAlign="space-between">
-                        <Stack.Item grow={1} align="center">{firstItemNumber} - {lastItemNumber} of {totalRecords} ({selectedCount} selected)</Stack.Item>
-                        <Stack.Item align="center" className="FooterRight">
+        <Stack grow horizontal horizontalAlign="space-between" >
+            <Stack.Item grow className="Footer" align='end'>
+                <Stack grow horizontal horizontalAlign="space-between">
+                    <Stack.Item grow={1} align="center">{firstItemNumber} - {lastItemNumber} of {totalRecords} ({selectedCount} selected)</Stack.Item>
+                    <Stack.Item align="center" className="FooterRight">
+                        <Stack grow horizontal verticalAlign='center'>
                             <IconButton className="FooterIcon" iconProps={{ iconName: "DoubleChevronLeft" }} onClick={moveToFirst} />
                             <IconButton className="FooterIcon" iconProps={{ iconName: "ChevronLeft" }} onClick={movePrevious} />
-                            <span>Page {currentPage + 1}</span>
+                            <span style={{ display: "block" }}>Page {currentPage + 1}</span>
                             <IconButton className="FooterIcon" iconProps={{ iconName: "ChevronRight" }} onClick={moveNext} />
-                        </Stack.Item>
-                    </Stack>
-                </Stack.Item>
-            </Stack>
-
-        </Sticky>
+                        </Stack>
+                    </Stack.Item>
+                </Stack>
+            </Stack.Item>
+        </Stack>
     );
 };
 
@@ -452,7 +450,7 @@ export function ModelDrivenGridViewer(
     // const [columns, setColumns] = useState<IColumn[]>([]);
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
     const viewDefinition = useMemo(() => entity.views?.[selectedView], [selectedView]);
-        console.log("View", [entity,viewDefinition])
+    console.log("View", [entity, viewDefinition])
     const { hideProgressBar, showIndeterminateProgressIndicator } = useProgressBarContext();
 
     const [isModalSelection, setisModalSelection] = useState(entity.views?.[selectedView]?.selection !== false);
@@ -604,7 +602,7 @@ export function ModelDrivenGridViewer(
                 pagingContextEnabled={pagingContextEnabled}
                 app={app}
             >
-                <ColumnFilterCallout/>
+                <ColumnFilterCallout />
 
                 <Stack.Item className={styles.gridviewWrapper} grow styles={({ root: { padding: padding } })}>
 
