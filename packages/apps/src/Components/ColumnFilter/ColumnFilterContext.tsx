@@ -196,6 +196,24 @@ const ColumnFilterProvider = ({
         isCalloutVisible: false,
         columns: []
     })
+
+    const columnAttributes = React.useMemo(() => {
+        const columns =
+            Object.keys(view?.columns ?? {})
+                .filter(c => attributes[c] && (!attributes[c].isPrimaryKey))
+                .map(c => attributes[c].logicalName);
+
+        if (columns.length === 0) return [];
+
+        const keys = 
+            Object.values(attributes)
+            .filter(a => a.isPrimaryKey || a.isRowVersion)
+            .map(c => c.logicalName);
+
+        return columns.concat(keys);
+    }, [view, attributes]);
+
+
     React.useEffect(() => {
         const columns = columnFilterState.columns
         console.log("Recalculating fetch qury:", [filter, columns]);
@@ -229,8 +247,6 @@ const ColumnFilterProvider = ({
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
 
-        const columnAttributes = columns.map(column => column.fieldName)
-
         let query: IFetchQuery = ({
             "$expand": expand,
             "$filter": localFilter,
@@ -252,7 +268,7 @@ const ColumnFilterProvider = ({
         console.log('Recalculating fetch qury:', [filter, localColumnFilter, query, onBuildFetchQuery(query)])
 
         setFetchQuery(onBuildFetchQuery(query));
-    }, [attributes, columnFilterState.columns, filter, currentPage, pageSize])
+    }, [attributes, columnFilterState.columns, filter, currentPage, pageSize, columnAttributes])
 
     React.useMemo(() => {
         columnFilterDispatch({
