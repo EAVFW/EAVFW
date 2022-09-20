@@ -527,7 +527,7 @@ export function ModelDrivenGridViewer(
 
     //Set items whenever its done loading and augment with entityName.
     useEffect(() => {
-        console.log("setItems from data", [data, isLoading, defaultValues]);
+        console.log("setItems from data", [data, isLoading, defaultValues, fetchQuery]);
 
         if (data)
             setItems(data.items.map(item => Object.assign(item, { entityName: entity.logicalName })));
@@ -594,6 +594,7 @@ export function ModelDrivenGridViewer(
         <Stack verticalFill>
             <ColumnFilterProvider
                 view={viewDefinition}
+                filter={filter}
                 attributes={attributes}
                 locale={locale}
                 onHeaderRender={onHeaderRender}
