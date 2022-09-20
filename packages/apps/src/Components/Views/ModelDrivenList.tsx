@@ -426,7 +426,7 @@ export function ModelDrivenList(
     const { setSelection, selection, selectionDetails } = useSelectionContext();
     const { columnFilterState, columnFilterDispatch } = useColumnFilter()
     const { columns } = columnFilterState
-
+    console.log("ModelDrivenList", columns);
     if (!columns?.length)
         return <div>loading data</div>
 

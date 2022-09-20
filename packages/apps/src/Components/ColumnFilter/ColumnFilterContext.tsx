@@ -135,6 +135,8 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
         case "initializeColumns": {
             const { view, attributes, locale, dispatch, onHeaderRender } = action
             const user = useUserProfile();
+
+           
             const columnKeys = Object.keys(view?.columns ?? {}).filter(c => attributes[c] && !(attributes[c].isPrimaryKey ?? false));
 
             console.log("VIEWS", [attributes, view, columnKeys])
@@ -273,7 +275,7 @@ const ColumnFilterProvider = ({
     React.useMemo(() => {
         columnFilterDispatch({
             type: 'initializeColumns',
-            view: view,
+            view: view  ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } },
             attributes: attributes,
             locale: locale,
             onHeaderRender: onHeaderRender,
