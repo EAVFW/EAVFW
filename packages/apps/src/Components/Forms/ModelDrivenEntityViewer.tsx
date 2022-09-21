@@ -275,8 +275,8 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
         return <div>loading..</div>
 
 
-    return <Stack verticalFill>
-        <Stack.Item>
+    return <Stack verticalFill className="model-drive-form">
+         
             <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
                 <FormHostContext.Provider value={formHostContextValue}>
 
@@ -306,7 +306,7 @@ const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
                     </Stack.Item>
                 </FormHostContext.Provider>
             </RibbonHost>
-        </Stack.Item>
+
     </Stack>
 }
 
