@@ -91,8 +91,8 @@ function composeOdataFilterPart(filterValue: string | undefined, filterOption: C
  */
 export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
 
-    const { columnFilterState, columnFilterDispatch } = useColumnFilter()
-    const { currentColumn, columns, isCalloutVisible } = columnFilterState
+    const [{ currentColumn, menuTarget,  isCalloutVisible }, columnFilterDispatch ] = useColumnFilter()
+    
     const [filterValue, setFilterText] = useState<string>();
     const app = useModelDrivenApp();
 
@@ -313,7 +313,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             isCalloutVisible && (
                 <Callout
                     gapSpace={0}
-                    target={columnFilterState.menuTarget}
+                    target={menuTarget}
                     onDismiss={() => columnFilterDispatch({ type: 'closeFilter' })}
                     setInitialFocus
                 >

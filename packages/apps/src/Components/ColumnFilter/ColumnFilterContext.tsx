@@ -64,10 +64,10 @@ type ColumnFilterAction =
 
 type ColumnFilterDispatch = (action: ColumnFilterAction) => void
 const ColumnFilterContext = React.createContext<
-    {
+    [
         columnFilterState: IColumnFilterContext,
         columnFilterDispatch: ColumnFilterDispatch
-    } | undefined>(undefined)
+    ] | undefined>(undefined)
 
 const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (state, action) => {
     console.log("COLUMN ACTION", [action, state])
@@ -282,8 +282,8 @@ const ColumnFilterProvider = ({
             dispatch: columnFilterDispatch
         })
     }, [view, attributes, locale])
-
-    return <ColumnFilterContext.Provider value={{ columnFilterState, columnFilterDispatch }}>{children}</ColumnFilterContext.Provider>
+    
+    return <ColumnFilterContext.Provider value={[columnFilterState, columnFilterDispatch ]}>{children}</ColumnFilterContext.Provider>
 }
 
 const useColumnFilter = () => {

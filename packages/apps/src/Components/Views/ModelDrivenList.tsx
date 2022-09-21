@@ -424,8 +424,8 @@ export function ModelDrivenList(
     const [isCompactMode, setisCompactMode] = useState(false);
 
     const { setSelection, selection, selectionDetails } = useSelectionContext();
-    const { columnFilterState, columnFilterDispatch } = useColumnFilter()
-    const { columns } = columnFilterState
+    const [ { columns } ] = useColumnFilter()
+  
     console.log("ModelDrivenList", columns);
     if (!columns?.length)
         return <div>loading data</div>
