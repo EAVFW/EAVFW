@@ -156,7 +156,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             case "decimal":
             case "choice":
             case "choices":
-            case "lookup":
+          
             case "boolean":
                 return [
                     ColumnOptions.Equals, 
@@ -164,6 +164,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                     ColumnOptions.NotNull
                 ]
             case "string":
+            case "lookup":
             default:
                 return [
                     ColumnOptions.Equals, 

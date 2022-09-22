@@ -97,7 +97,7 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
         etag
     } = useContext<EAVFormContextProps<TFormValues>>(EAVFormContext);
 
-    const oldValues = useRef(collector(state as TState));
+    const oldValues = useRef(cloneDeep(collector(state as TState)));
     const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
 
     const timeout = typeof (timeoutOrLogin) === "number" ? timeoutOrLogin : 0;
@@ -111,14 +111,14 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
 
 
             const newValues = collector(state as TState);
-            console.debug("useEAVForm oldValues: " + logid, oldValues.current);
-            console.debug("useEAVForm newValues: " + logid, newValues);
+            console.debug("useEAVForm oldValues: " + logid, [JSON.stringify(oldValues.current)]);
+            console.debug("useEAVForm newValues: " + logid, [JSON.stringify( newValues)]);
 
             reftime.current = currentTime;
 
             if (!isEqual(oldValues.current, newValues)) {
                 console.log("Updating subscription with new values: " + logid);
-                oldValues.current = newValues;
+                oldValues.current = cloneDeep(newValues);
 
                 setsubscriptionid(new Date().toISOString());
               
@@ -129,13 +129,13 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
 
   
     const collected = useMemo(() => {
-        console.log("useEAVForm collected: " + logid, collector(state as TState));
+       
 
         let collected = collector(state as TState);
-
+        console.log("useEAVForm collected: " + logid, [JSON.stringify( collected)]);
         return [
             cloneDeep(collected), actions] as [TCollected, EAVFormContextActions<TFormValues>];
-    }, [subscriptionid]);
+    }, [state,subscriptionid]);
      
     
 

@@ -613,7 +613,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
                 const clone = cloneDeep(state.errors);
                // mergeAndUpdate(state.formValues, calculated);
-               var test= mergeErrors(state.errors as EAVFWErrorDefinitionMap, errors as EAVFWErrorDefinitionMap);
+                var test = mergeErrors(state.errors as EAVFWErrorDefinitionMap, errors as EAVFWErrorDefinitionMap);
              
 
                 console.log("Run Validation Result", [(new Date().getTime() - new Date(etag).getTime()) + "ms"]);
