@@ -29,8 +29,8 @@ export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFW
                     __errors: [].concat.apply([], (errors.map((e, i) => rjsfErrors(e, Array.isArray( state) ? state[i] : state, fx)) as Array<JsonSchemaErrorObject>).map(c => c.__errors))
                 }
             } else {
-
-                return errors.map((e, i) => rjsfErrors(e, Array.isArray(state) ? state?.[i] : state, fx)) as Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
+                //The stateobject is not a real array, object with "0" "1" ect. no good way to detect if shold use state[i] or state
+                return errors.map((e, i) => rjsfErrors(e, state?.[i] ?? state, fx)) as Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
             }
         }
 
