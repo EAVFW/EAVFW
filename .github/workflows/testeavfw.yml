@@ -32,6 +32,9 @@ jobs:
         run: dotnet new --install EAVFW.Templates
 
       - name: link
+        run: npm install --force --ignore-scripts
+
+      - name: link
         run: npm run link
 
       - name: create directory for test project
