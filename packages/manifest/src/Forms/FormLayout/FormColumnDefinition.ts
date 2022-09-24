@@ -11,12 +11,14 @@ export type FormColumnDefinition = {
     section: string;
     dependant?: string;
     filter?: string;
+    entityName?: string;
     disabled?: boolean;
     radio_group?: string;
     control?: string | { type: string };
     readonly?: boolean;
     default?: any;
     disableCreate?: boolean;
+    searchForLabel?: string;
     label?: boolean;
     visible?: boolean;
     roles?: {

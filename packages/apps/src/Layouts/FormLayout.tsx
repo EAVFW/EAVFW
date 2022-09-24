@@ -2,7 +2,7 @@ import { useModelDrivenApp } from "../useModelDrivenApp";
 import { PageLayoutProps } from "./PageLayoutProps";
 
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React, { createContext, SetStateAction, useContext, useState } from "react";
 import { IRecord } from "@eavfw/manifest";
 import { IObjectWithKey, ScrollablePane, ScrollbarVisibility, Selection, Stack, Sticky, StickyPositionType } from "@fluentui/react";
 import { ModelDrivenGridViewerState } from "../Components/Views/ModelDrivenGridViewer";
@@ -16,7 +16,8 @@ import { PageStackStyles } from "./PageStackStyles";
 import ModelDrivenNavigation from "../Components/Navigation/ModelDrivenNavigation";
 import { RibbonBar } from "../Components/Ribbon/RibbonBar";
 
- 
+const FormLayoutContext = createContext({ mutator: { mutate: () => { } }, setMutator: (a: SetStateAction<{ mutate: () => void }>) => { } });
+export const useFormLayoutContext = () => useContext(FormLayoutContext);
 
 export function FormLayout(props: PageLayoutProps) {
     console.group("FormLayout");
@@ -58,11 +59,12 @@ export function FormLayout(props: PageLayoutProps) {
 
 
         const [selectionDetails, setselectionDetails] = useState<ModelDrivenGridViewerState["selectionDetails"]>(_getSelectionDetails());
-
+        const [mutater, setMutator] = useState({ mutate: () => { } });
         const topBarTheme = ResolveFeature("topBarTheme");
 
         return (
             <ModelDrivenGridViewerSelectedContext.Provider value={{ setSelection, selection: selection!, selectionDetails }}>
+                <FormLayoutContext.Provider value={{ mutator: mutater, setMutator: setMutator }}>
                 <RibbonContextProvider>
                     <Stack verticalFill>
 
@@ -92,8 +94,8 @@ export function FormLayout(props: PageLayoutProps) {
                         </MessagesProvider>
 
 
-                    </Stack>
-                </RibbonContextProvider>
+                        </Stack>
+                    </RibbonContextProvider></FormLayoutContext.Provider>
             </ModelDrivenGridViewerSelectedContext.Provider>
         );
     } finally {

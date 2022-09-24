@@ -1,7 +1,7 @@
 import { EAVFormContextState } from "./EAVFormContextState";
 
 
-export type EAVFormOnChangeCallbackContext = { skipValidation?: boolean }
+export type EAVFormOnChangeCallbackContext = { skipValidation?: boolean, onCommit?: Function }
 export type EAVFormOnChangeCallback<T> = (props: T, ctx: EAVFormOnChangeCallbackContext) => void
 export type EAVFOrmOnChangeHandler<T> = (cb: EAVFormOnChangeCallback<T>) => void
 

@@ -6,8 +6,7 @@ import { FormsConfig } from "./FormsConfig";
 import { AppPickerLayout, EmptyLayout, FormLayout, PageLayout, RootLayout } from "./Layouts";
 
 
-
-const Features: {
+export type FeatureMap = {
     useEvaluateFormDefinition: (form: FormDefinition, formdata: any) => { evaluatedForm: FormDefinition, isEvaluatedFormLoading: boolean }
     formsConfig: FormsConfig,
     defaultTheme?: Theme,
@@ -16,8 +15,10 @@ const Features: {
     "EmptyLayout": typeof EmptyLayout,
     "PageLayout": typeof PageLayout,
     "AppPickerLayout": typeof AppPickerLayout,
-    "FormLayout": typeof FormLayout
-} = {
+    "FormLayout": typeof FormLayout,
+    [key: string]: any
+}
+const Features: FeatureMap = {
     useEvaluateFormDefinition: (form, data) => ({ evaluatedForm: form, isEvaluatedFormLoading:false }),
     formsConfig: {  
         alwaysShowFormSelector: false

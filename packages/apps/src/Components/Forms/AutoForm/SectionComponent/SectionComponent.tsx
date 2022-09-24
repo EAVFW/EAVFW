@@ -28,6 +28,7 @@ import ColumnComponent from "../ColumnComponent";
 import { Controls } from "../../../Controls/ControlRegister";
 import { useEAVForm } from "../../../../../../forms/src";
 import { RibbonHost } from "../../../Ribbon/RibbonHost";
+import { PagingProvider } from "../../../Views/PagingContext";
 
 
 
@@ -213,7 +214,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const appinfo = useAppInfo();
         
         const views = useLazyMemo(() => {
-            console.groupCollapsed("Setting Related Views");
+            console.groupCollapsed("Setting Related Views: " + entity.logicalName);
             try {
                 const views = app
                     .getReferences(
@@ -293,7 +294,8 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     .map((gridprops) => (
 
                         <RibbonContextProvider key={gridprops.key}>
-                            <RibbonHost ribbon={entity.views?.[gridprops.viewName!]?.ribbon ?? {}}>
+                            <RibbonHost ribbon={gridprops.ribbon ?? {}}>
+                                <PagingProvider initialPageSize={typeof (gridprops.view?.paging) === "object" ? gridprops.view.paging.pageSize ?? undefined : undefined} enabled={!(gridprops.view?.paging === false || (typeof (gridprops.view?.paging) === "object" && gridprops.view?.paging?.enabled === false))} >
                             <ModelDrivenGridViewer
                                 {...gridprops}
                                 locale={locale}
@@ -362,7 +364,9 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                         },
                                     } as ICommandBarItemProps//,
                                 ].filter((commandBarButton) => (commandBarButton.key === "newRelatedItem" && gridprops?.ribbon?.new?.visible !== false) || (commandBarButton.key === "deleteSelection" && gridprops?.ribbon?.delete?.visible !== false))}
-                                /></RibbonHost>
+                                    />
+                                </PagingProvider>
+                            </RibbonHost>
                         </RibbonContextProvider>
                     ))}
             </>

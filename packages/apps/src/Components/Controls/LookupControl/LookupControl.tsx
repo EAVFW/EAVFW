@@ -65,7 +65,8 @@ export type LookupCoreControlProps = {
     type: NestedType,
     selectedValue:any,
     value: any,
-    onChange: EAVFOrmOnChangeHandler<any>
+    onChange: EAVFOrmOnChangeHandler<any>,
+    searchForLabel?: string
 }
 function nullIfEmpty<T>(items: T[]) {
 
@@ -104,7 +105,8 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     type,
     value,
     selectedValue,
-    onChange
+    onChange,
+    searchForLabel
 }) => {
 
     const ref = useRef<IComboBox>(null);
@@ -131,7 +133,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const hasFilterChangedFirst = useRef(false);
 
 
-
+    console.log("lookupcontrol", [selectedValue, targetEntity, primaryField, logicalName])
     const initialOptions = useMemo(() => (typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? DUMMY_DATA_KEY, text: selectedValue[primaryField] }] : []), [selectedValue]);
 
     const [shouldLoadRemoteOptions, setShouldLoadRemoteOptions] = useState(false);
@@ -253,81 +255,11 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
   
     const [modalForms, setModalForms] = useState(forms ?? []);
      
-    const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
+    const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${searchForLabel ?? targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
     const [freeformvalue, setfreeformvalue] = useState<string>();
-
-
-  //  const [isLoading, setisLoading] = useState(true);
-
-    //const __updateOptions = (query: any) => {
-
-    //    setOptions([{ key: 'dummy', text: loadingText, disabled: true }])
-    //    queryEntity(targetEntity, query).then(results => {
-
-    //        console.log("LookupControl: Loading additional data", [value, targetEntity.logicalName,results]);
-
-    //        let options = results.items.map((record: IRecord): IComboBoxOption => {
-    //            return {
-    //                key: record.id,
-    //                data: record.id,
-    //                text: record[primaryField] ?? "No name"
-    //            }
-    //        }
-    //        )
-    //        if (options.length === 0) {
-    //            setOptions([{ key: 'dummy', text: noResultText, disabled: true }])
-    //        } else {
-    //            setOptions(options);
-    //        }
-    //    });
-    //}
-
-    //const isFilterChanged = useRef(false);
-    //useEffect(() => {
-    //    if (isFilterChanged.current) {
-    //        //onChange(props => {
-    //        //    delete props[logicalName];
-    //        //});
-    //        setfreeformvalue(undefined);
-
-    //        setOptions((typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? "dummy", text: selectedValue[primaryField] }] : []));
-    //        setselectedKey(value ?? (typeof (selectedValue) === "object" ? selectedValue.id ?? "dummy" : undefined) as string);
-    //        setisLoading(true);
-             
-    //    }
-
-    //    isFilterChanged.current = true;
-    //}, [filter]);
-
-    //TODO, redesign all this options stuff to not use query entity, but require everything to change. filtering.
-    //useEffect(() => {
-
-
-    //    (async () => {
-    //        if (isLoading && !disabled) {
-               
-    //                let data = await queryEntity(targetEntity, filter ? { '$filter': filter, "$top": 10 } : {});
-    //                console.log("LookupControl: Loading initial data", [value, targetEntity.logicalName, data]);
-    //                const _options = data.items
-    //                    .map(m => ({
-    //                        key: m.id,
-    //                        text: m[primaryField],
-    //                        data: m.id
-    //                    })) as IComboBoxOption[];
-    //            setisLoading(false);
-               
-    //            setOptions(_options.concat(options.filter(o => _options.filter(oo => oo.key === o.key).length === 0)));
-
-
-               
-
-    //        }
-    //    })()
-
-    //}, [value, disabled, filter, isLoading])
-
+    
     console.log("Lookup Control:", [label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
     return (<>
@@ -357,12 +289,14 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
         <ComboBox
             componentRef={ref}
-            disabled={disabled || isLoading}
+            disabled={disabled}
 
             ariaLabel={label}
             styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight, color: "black" }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
             onChange={_onChange}
-
+            onBlur={(_) => {
+                setfreeformvalue(undefined);
+            }}
             options={options}
             useComboBoxAsMenuWidth
             allowFreeform={isFreeform}
@@ -452,12 +386,13 @@ export function LookupControl<T>({
 
     
 
-    console.log("Lookup Control", [attributeName, attribute, attribute?.type, column, logicalName, selectedValue, value, formData]);
-
+   
     if (!isLookup(attribute.type))
         return <div>...</div>;
 
-    const targetEntityName = isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute");
+    const targetEntityName = column.entityName ?? (isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute"));
+
+    console.log("Lookup Control", [attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData]);
 
  //  
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
@@ -471,7 +406,8 @@ export function LookupControl<T>({
         type={attribute.type}
         forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
         filter={column?.filter ?? attribute.type.filter}
-        allowCreate={column?.disableCreate !== true }
+        allowCreate={column?.disableCreate !== true}
+        searchForLabel={column?.searchForLabel }
         label={attribute.displayName}
         extraErrors={extraErrors}
         targetEntityName={targetEntityName}

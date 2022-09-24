@@ -17,7 +17,7 @@ const StyleInjector: React.FC<{ isLoading: boolean }> = ({ children, isLoading }
 };
 
 
-export const ExpressionParserFieldProvider: React.FC<Omit<ExpressionParserAttributeContextType, "setIsLoading"|"isLoading"> & {
+export const ExpressionParserFieldProvider: React.FC<Omit<ExpressionParserAttributeContextType, "setIsLoading"|"isLoading"|"ids"> & {
     visible?: string | boolean,
     onVisibilityCalculated?: (visiblity: boolean) => void
 }> = ({ onVisibilityCalculated, children, attributeKey, entityKey, visible, arrayIdx }) => {
@@ -41,7 +41,7 @@ export const ExpressionParserFieldProvider: React.FC<Omit<ExpressionParserAttrib
      
 
     return (
-        <ExpressionParserAttributeContext.Provider value={{ setIsLoading: _setIsLoading, isLoading: isLoading, attributeKey: attributeKey ?? parentAttributeKey, entityKey: entityKey ?? parentEntityKey, arrayIdx: (arrayIdx === -1 || arrayIdx === undefined) ? parentArrayIdx : arrayIdx }}>
+        <ExpressionParserAttributeContext.Provider value={{ ids: Object.keys(loadingInfo.current).join(","), setIsLoading: _setIsLoading, isLoading: isLoading, attributeKey: attributeKey ?? parentAttributeKey, entityKey: entityKey ?? parentEntityKey, arrayIdx: (arrayIdx === -1 || arrayIdx === undefined) ? parentArrayIdx : arrayIdx }}>
             <ExpressionParserVisibilityHost visible={visible} attributeKey={attributeKey} onVisibilityCalculated={onVisibilityCalculated}>
                {children}                
             </ExpressionParserVisibilityHost>

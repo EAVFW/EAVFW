@@ -9,20 +9,14 @@ import { jsonFetcher } from "./jsonFetcher";
 
 export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, query: any = {}, ready = true) {
 
+    console.log("queryEntitySWR: render", [entity.collectionSchemaName,ready, query]);
 
-    
     function keyFactory() {
-        let expand = Object.values(entity.attributes)
-            .filter((a) => isLookup(a.type))
-            .map((a) => getNavigationProperty(a))
-            .join(",");
-        if (expand && !('$expand' in query))
-            query['$expand'] = expand;
-
+         
         let q = Object.keys(query).filter(k => query[k]).map(k => `${k}=${query[k]}`).join('&');
 
         const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`;
-        console.log("queryEntitySWR: " + (ready ? key : null), [query]);
+        console.log("queryEntitySWR: keygen" + (ready ? key : null), [query]);
         return key;
     }
     const key = useMemo(() => ready ? keyFactory() : null, [query, ready]);
@@ -39,7 +33,7 @@ export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, quer
     )
     console.log(data, error);
     return {
-        data: data as { items: Array<T> },
+        data: data as { items: Array<T>, count?: number },
         isLoading: !error && !data,
         isError: error,
         mutate: mutate

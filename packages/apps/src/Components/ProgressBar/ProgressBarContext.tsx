@@ -22,13 +22,18 @@ type ContextType = {
 };
 
 const ProgressBarContext = React.createContext<ContextType>({
-    progressBarProps: {}, setProgressBarProps: () => {
+    progressBarProps: {},
+    setProgressBarProps: () => {
+        throw new Error("ProgressBar Context not set");
     },
     showDefaultProgressIndicator: () => {
+        throw new Error("ProgressBar Context not set");
     },
     showIndeterminateProgressIndicator: () => {
+        throw new Error("ProgressBar Context not set");
     },
     hideProgressBar: () => {
+        throw new Error("ProgressBar Context not set");
     }
 });
 
@@ -63,7 +68,7 @@ const ProgressBarProvider = (props: any) => {
     }
 
     let hideProgressBar = function (): void {
-
+        console.log("Hiding Progress Bar", [promise.current]);
         if (promise.current) {
             promise.current.then(_ => { if (!promise.current) setProgressPropsState({ progressHidden: true }) });
             promise.current = undefined;  //Dont cancel the timer if its been startet again.

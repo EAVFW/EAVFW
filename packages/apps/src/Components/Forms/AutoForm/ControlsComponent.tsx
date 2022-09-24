@@ -56,7 +56,8 @@ declare module 'json-schema' {
             attributeName?: string,
             entityName?: string,
             fieldName?: string,
-            formName?: string
+            formName?: string,
+
         }
     }
 }

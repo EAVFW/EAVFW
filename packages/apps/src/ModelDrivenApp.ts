@@ -1,4 +1,4 @@
-import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference } from "@eavfw/manifest";
+import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty } from "@eavfw/manifest";
 import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
 import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
@@ -140,6 +140,24 @@ export class ModelDrivenApp {
     }
     getEntityFromCollectionSchemaName(key: string) {
         return this.getEntity(this._data.entityCollectionSchemaNameMap[key]);
+    }
+    getExpandQueryParam(entityDefinition: EntityDefinition, expandall=false, includeHierachi=false) {
+
+      
+
+        let attributes = this.getAttributes(entityDefinition.logicalName);
+
+        if (expandall) {
+            let expand = Object.values(includeHierachi? attributes: entityDefinition.attributes)
+                .filter(isAttributeLookup)
+                .map((a) => getNavigationProperty(a))
+                .join(",");
+
+            return expand
+        } 
+        
+        let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(this.getAttributes(this.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
+        return expand;
     }
 
     getReferences(entityName: string, formName: string, tabName: string, columnName: string, sectionName: string) {

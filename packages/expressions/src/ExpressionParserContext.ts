@@ -6,9 +6,12 @@ export const ExpressionParserContext = createContext<ExpressionParserContextType
     appendVariables: (variables) => undefined,
     addExpresssion: (expression) => undefined,
     removeExpression: (id) => undefined,
+    allExpressionEvaluated:false,
     formValues: {},
     variables: {},
-    isVariablesUpToDate:false,
+    expressionsResults: {},
+    isVariablesUpToDate: false,
+    isInitialized: false,
     setFormValues: (values) => undefined
 });
 

@@ -17,6 +17,7 @@ import { Views } from "../Views/ViewRegister";
 import ModelDrivenGridViewer from "../Views/ModelDrivenGridViewer";
 import ViewSelectorComponent from "./ViewSelectorComponent";
 import { RibbonHost } from "../Ribbon/RibbonHost";
+import { PagingProvider } from "./PagingContext";
 
 
 
@@ -84,9 +85,11 @@ export function ModelDrivenBodyViewer
     const _onChangeView = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => {
         setselectedView(option?.key as string);
     }
+    const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
     const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [ selectedView]);
     console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
+        <PagingProvider initialPageSize={typeof (view?.paging) === "object" ? view.paging.pageSize ?? undefined : undefined} enabled={!(view?.paging === false || (typeof (view?.paging) === "object" && view?.paging?.enabled === false))} >
         <Stack verticalFill>
             {showViewSelector && hasMoreViews &&
                 <ViewSelectorComponent
@@ -101,7 +104,8 @@ export function ModelDrivenBodyViewer
                     {BodyViewElement}
                 </RibbonHost>
             </Stack.Item>
-        </Stack>
+            </Stack>
+        </PagingProvider>
     )
 }
 
