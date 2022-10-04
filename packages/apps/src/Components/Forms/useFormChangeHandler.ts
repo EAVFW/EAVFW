@@ -56,7 +56,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             recordId!,
             expand ? `?$expand=${expand}` : '',
             typeof (recordId) !== "undefined",
-            defaultData
+            { defaultData, ...initialdata }
         );
 
     const changedRecord = useRef(record);
