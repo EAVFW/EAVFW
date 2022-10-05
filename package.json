@@ -42,7 +42,8 @@
     "release-forms": "npm run release --workspace packages/forms",
     "release-utils": "npm run release --workspace packages/utils",
     "release-hooks": "npm run release --workspace packages/hooks",
-    "release-nextjs": "npm run release --workspace packages/nextjs"
+    "release-nextjs": "npm run release --workspace packages/nextjs",
+    "release-codeeditor": "npm run release --workspace packages/codeeditor"
   },
   "config": {
     "force": true
