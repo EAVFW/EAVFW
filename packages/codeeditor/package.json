@@ -1,0 +1,23 @@
+{
+  "version": "1.0.0",
+  "name": "@eavfw/codeeditor",
+  "devDependencies": {
+    "@monaco-editor/react": "4.4.5",
+    "pako": "2.0.4",
+    "@types/pako": "2.0.0"
+  },
+  "license": "MIT",
+  "files": [
+    "src"
+  ],
+  "author": "Poul Kjeldager <poul@kjeldager.com>",
+  "type": "module",
+  "main": "./src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
+  },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  }
+}
