@@ -29,7 +29,7 @@ jobs:
           node-version: ${{ inputs.nodeversion }}
           
       - name: install EAVFW template
-        run: dotnet new --install EAVFW.Templates
+        run: (dotnet new --debug:rebuildcache) -and (dotnet new --install EAVFW.Templates)
 
       - name: link
         run: npm install --force --ignore-scripts
