@@ -4,18 +4,23 @@ import { getNavigationProperty } from "../Entities/Attributes/getNavigationPrope
 import { isLookup } from "../Entities/Attributes/Types/Lookup/isLookup";
 import { EntityDefinition } from "../Entities/EntityDefinition";
 import { IRecord } from "../Types/IRecord";
-import { jsonFetcher } from "./jsonFetcher";
+import { useClientContext } from "./clientContext";
+import { useJsonFetcher } from "./jsonFetcher";
 
 
 export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, query: any = {}, ready = true) {
 
-    console.log("queryEntitySWR: render", [entity.collectionSchemaName,ready, query]);
+    const [baseUrl, jsonFetcher] = useJsonFetcher();
+
+    console.log("queryEntitySWR: render", [entity.collectionSchemaName, ready, query, baseUrl]);
+
+  
 
     function keyFactory() {
          
         let q = Object.keys(query).filter(k => query[k]).map(k => `${k}=${query[k]}`).join('&');
 
-        const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`;
+        const key = `${baseUrl}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`;
         console.log("queryEntitySWR: keygen" + (ready ? key : null), [query]);
         return key;
     }

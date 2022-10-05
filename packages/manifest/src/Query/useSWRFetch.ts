@@ -1,8 +1,12 @@
 import useSWR, { mutate } from "swr";
-import { jsonFetcher } from "./jsonFetcher";
+import { useClientContext } from "./clientContext";
+import { useJsonFetcher } from "./jsonFetcher";
 
 export function useSWRFetch(path?: string) {
-    const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}${path}`;
+
+    const [baseUrl, jsonFetcher] = useJsonFetcher();
+
+    const key = `${baseUrl}${path}`;
     const { data, error } = useSWR(path ? key : null,
         {
             revalidateOnFocus: false,

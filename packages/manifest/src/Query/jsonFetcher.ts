@@ -1,9 +1,15 @@
+import { useCallback } from "react";
+import { useClientContext } from "./clientContext";
+
 export const jsonFetcher = async (
     input: RequestInfo,
     init: RequestInit,
     ...args: any[]
 ) => {
-    const res = await fetch(input, { ...init, credentials: "include" });
+    const res = await fetch(input, {
+        ...init,
+        credentials: "include"
+    });
 
     // If the status code is not in the range 200-299,
     // we still try to parse and throw it.
@@ -21,3 +27,23 @@ export const jsonFetcher = async (
 
     return res.json();
 };
+
+export const useJsonFetcher = () => {
+
+    const { baseUrl,onRequestInit } = useClientContext();
+
+    const fetcher = useCallback((
+        input: RequestInfo,
+        init: RequestInit,
+        ...args: any[]) => {
+
+        if (onRequestInit)
+           init= onRequestInit(init);
+
+        return jsonFetcher(input, init, args);
+    }, [onRequestInit]);
+
+
+    return [baseUrl,fetcher] as [string,typeof fetcher];
+
+}

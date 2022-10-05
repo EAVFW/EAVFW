@@ -5,9 +5,9 @@
     "@types/node": "16.7.10",
     "@types/react": "17.0.38",
     "concurrently": "7.0.0",
+    "multi-semantic-release": "^3.0.1",
     "npm-run-all": "^4.1.5",
-    "multi-semantic-release": "2.12.0",
-    "semantic-release": "19.0.2",
+    "semantic-release": "^19.0.5",
     "semantic-release-monorepo": "7.0.5"
   },
   "scripts": {
@@ -19,7 +19,6 @@
     "link-utils": "npm --workspace packages/utils link",
     "link-hooks": "npm --workspace packages/hooks link",
     "link-nextjs": "npm --workspace packages/nextjs link",
-
     "publish": "npm-run-all --continue-on-error publish-*",
     "publish-apps": "npm --workspace packages/apps publish --access public",
     "publish-manifest": "npm --workspace packages/manifest publish --access public",
@@ -28,7 +27,6 @@
     "publish-utils": "npm --workspace packages/utils publish --access public",
     "publish-hooks": "npm --workspace packages/hooks publish --access public",
     "publish-nextjs": "npm --workspace packages/nextjs publish --access public",
-
     "bumb-version": "concurrently  \"npm:bumb-version-*\"",
     "bumb-version-manifest": "npm --workspace packages/manifest version patch -m \"Upgrade to %s\"",
     "bumb-version-apps": "npm --workspace packages/apps version patch -m \"Upgrade to %s\"",
@@ -37,7 +35,6 @@
     "bumb-version-utils": "npm --workspace packages/utils version patch -m \"Upgrade to %s\"",
     "bumb-version-hooks": "npm --workspace packages/hooks version patch -m \"Upgrade to %s\"",
     "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\"",
-
     "release": "npm-run-all --continue-on-error release-*",
     "release-apps": "npm run release --workspace packages/apps",
     "release-manifest": "npm run release --workspace packages/manifest",
