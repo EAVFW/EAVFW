@@ -1,4 +1,7 @@
-# EAVFW.Manifest
+# EAVFW
+
+![npm](https://img.shields.io/npm/v/@eavfw/apps?label=%40eavfw%2Fapps)
+
 This repository contains the specification of the EAVFW Manifest.
 
 With the specification the following are distributed:
