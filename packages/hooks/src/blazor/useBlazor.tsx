@@ -39,7 +39,7 @@ export const BlazorProvider: React.FC = ({ children }) => {
     const [initTime, setInitTime] = useState<string>();
     const startTime = useMemo(() => new Date().getTime(), []);
 
-    if (typeof namespace !== "undefined" && window.Blazor) {
+    if (typeof namespace !== "undefined" && typeof window !== "undefined" && window.Blazor) {
         useEffect(() => {
             console.log(window.Blazor);
             let loadedCount = 0;
