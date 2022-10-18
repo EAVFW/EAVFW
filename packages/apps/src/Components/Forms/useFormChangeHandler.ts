@@ -29,7 +29,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
     const defaultData = useMemo(() => {
 
-        var data = undefined as any;
+        var data = initialdata;
         for (let attr of Object.values(attributes)) {
             if (typeof (attr.default) !== "undefined") {
                 data = data ?? {};
@@ -37,7 +37,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             }
         }
         console.log("DEFAULT DATA", data);
-        return data ?? initialdata;
+        return data ;
 
     }, [initialdata,attributes]);
 

@@ -577,8 +577,6 @@ export function ModelDrivenGridViewer(
 
     console.log("WithTimeButton Theme", theme.palette.themePrimary);
 
-    const ListComponent = listComponent ?? DetailsList;
-
     const _onItemInvoked = (item: IRecord): void => {
         window.location.href = recordRouteGenerator(item);
     }
@@ -620,6 +618,7 @@ export function ModelDrivenGridViewer(
                             selectionMode={SelectionMode.multiple}
                             setKey="multiple"
                             onChange={onChange}
+                            listComponent={listComponent}
                             formData={formData}
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
@@ -636,6 +635,7 @@ export function ModelDrivenGridViewer(
                             setKey="none"
                             onChange={onChange}
                             formData={formData}
+                            listComponent={listComponent}
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
                                 setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
