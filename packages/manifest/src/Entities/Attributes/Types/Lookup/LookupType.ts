@@ -1,9 +1,19 @@
 import { TypeFormDefinition, TypeFormModalDefinition } from "../../../../Forms";
 
+export type PolyLookupType = {
+    type: "polylookup",
+    referenceTypes: Array<string>;
 
-export type LookupType = {
-    type: "lookup";
+}
+export type NormalLookupType = {
+    type: "lookup"  
+   
+}
+export type LookupType =
+{
+    type: "lookup" | "polylookup"
     referenceType: string;
+    referenceTypes?: Array<string>;
     forms?: {
         [formKey: string]: TypeFormDefinition | TypeFormModalDefinition;
     };
@@ -19,4 +29,4 @@ export type LookupType = {
         delete?: "cascade" | "noaction" | "restrict",
         update?: "cascade" | "noaction" | "restrict"
     }
-};
+}

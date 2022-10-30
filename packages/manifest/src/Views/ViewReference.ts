@@ -7,7 +7,10 @@ export type ViewReference = {
     ribbon?: RibbonViewInfo,
     key: string,
     entity: EntityDefinition,
-    viewName?: string; entityName: string; attribute: string,
+    viewName?: string;
+    entityName: string;
+    attribute: string,
+    attributeType?: "polylookup"|"lookup"
     filter?: string,
     view?: ViewDefinition
 }
