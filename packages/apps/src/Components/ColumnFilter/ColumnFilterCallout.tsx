@@ -69,6 +69,7 @@ function composeOdataFilterPart(filterValue: string | undefined, filterOption: C
     
     const columnType = column.data?.type as NestedType
     switch (columnType.type?.toLowerCase()) {
+        case "text":
         case "string": return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
         case "boolean": return composeOdataFilterExpression(filterValue === "true", filterOption, column.fieldName)
         case "integer":
@@ -164,6 +165,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                     ColumnOptions.NotNull
                 ]
             case "string":
+            case "text":
             case "lookup":
             default:
                 return [
@@ -205,7 +207,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             console.log("Current column", currentColumn)
             const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn);
             const data: IColumnData = { filterText: filterValue, odataFilter: odataFilterText, filterOption: filterOption }
-
+            console.log("Applying Filter Values", data);
             columnFilterDispatch({
                 type: 'setCurrentColumnFilter',
                 filter: data
@@ -283,6 +285,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                 />
             }
             case "string":
+            case "text":
             case "lookup":
             default: return <TextField onChange={setFilterTextHandle} value={filterValue} />
         }

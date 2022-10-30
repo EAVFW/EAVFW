@@ -244,7 +244,7 @@ const ColumnFilterProvider = ({
         } else if (filter) {
             localFilter = filter;
         }
-        console.log("Recalculating fetch qury:", localFilter);
+        console.log("Recalculating fetch qury:", [localColumnFilter,localFilters,filter,localFilter]);
 
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
@@ -273,6 +273,7 @@ const ColumnFilterProvider = ({
     }, [attributes, columnFilterState.columns, filter, currentPage, pageSize, columnAttributes])
 
     React.useMemo(() => {
+        console.log("Calling reducer from memo");
         columnFilterDispatch({
             type: 'initializeColumns',
             view: view  ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } },
