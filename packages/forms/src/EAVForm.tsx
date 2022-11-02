@@ -14,6 +14,7 @@ import { EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVForm
 import { useBlazor, useUuid } from "@eavfw/hooks";
 import { useEAVForm } from "./useEAVForm";
 import { useAppInfo, useFormChangeHandler, useModelDrivenApp, WarningContext } from "@eavfw/apps";
+import { DirtyContainer } from "./DirtyContext";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
     formDefinition?: ManifestDefinition,
@@ -143,6 +144,8 @@ const VisitedContext = createContext<VisitedContextType>({
 });
 
 export const useVisitedContext = () => useContext(VisitedContext);
+
+
 
 export const VisitedContainer: React.FC<{ id: string, initialdata?: VisitedFieldElement }> = ({ id, children, initialdata = {} }) => {
 
@@ -332,10 +335,12 @@ export const EAVFormValidation: React.FC<{ initialVisitedFields?: VisitedFieldEl
     }, [localFromValues]);
 
     return (
-        <VisitedContainer id="root" initialdata={initialVisitedFields }>
-            <WarningContext.Provider value={warnings}>
-                {children}
-            </WarningContext.Provider>
+        <VisitedContainer id="root" initialdata={initialVisitedFields}>
+            <DirtyContainer id="root">
+                <WarningContext.Provider value={warnings}>
+                    {children}
+                </WarningContext.Provider>
+            </DirtyContainer>
         </VisitedContainer>
     )
 }
@@ -530,20 +535,20 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
         },
         onChange: (cb) => {
-
+            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Start`, [new Error()]);
             const updatedProps = cloneDeep(state.formValues);
             const ctx: EAVFormOnChangeCallbackContext = { skipValidation:false };
-          //  const updatedProps = {};
-
+           
             cb(updatedProps,ctx);
 
             const changed = !isEqual(state.formValues, updatedProps);
 
+            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Changed`, [changed, JSON.stringify(state.formValues), JSON.stringify(updatedProps)]);
+
             const a = deepDiffMapper.map(state.formValues, updatedProps);
             const [_, changedValues] = cleanDiff(a);
-
-            console.log("Updated Props", [updatedProps, changedValues, state, changed, ctx,a]);
              
+            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Updated Props`, [updatedProps, changedValues, state, changed, ctx, a]);
 
             if (changed) {
 
