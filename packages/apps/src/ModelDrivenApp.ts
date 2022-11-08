@@ -171,12 +171,15 @@ export class ModelDrivenApp {
                 console.groupCollapsed("entity.collectionSchemaName:\n", entity.collectionSchemaName);
                 try {
                     for (const attribute of Object.values(entity.attributes).filter(isAttributeLookup)) {
-                        console.log("attribute.type:\n", [attribute.type, isAttributeLookup(attribute)]);
+                       
 
                         const referenceTypes = attribute.type.referenceTypes ?? [attribute.type.referenceType]
                         const tpt = this._data.entities[entityName].TPT;
+                        console.log("attribute.type:\n", [attribute.type, tpt, referenceTypes, entityName,
+                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]),
+                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n))]);
                         if (
-                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || tpt === n) &&
+                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n)) &&
                             //(this._data.entityMap[attribute.type.referenceType] === entityName || this._data.entities[entityName].TPT === attribute.type.referenceType) &&
                             attribute.type.forms
                         ) {
