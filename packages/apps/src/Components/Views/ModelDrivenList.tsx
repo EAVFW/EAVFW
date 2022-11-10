@@ -426,9 +426,7 @@ export function ModelDrivenList(
     const { setSelection, selection, selectionDetails } = useSelectionContext();
     const [ { columns } ] = useColumnFilter()
   
-    console.log("ModelDrivenList", columns);
-    if (!columns?.length)
-        return <div>loading data</div>
+   
 
     const theme = useTheme();
 
@@ -447,6 +445,11 @@ export function ModelDrivenList(
 
     console.log("WithTimeButton Theme", theme.palette.themePrimary);
 
+    const localColumns = useMemo(() => columns?.filter(c => c.data.visible !== false)??[], [columns]);
+
+    console.log("ModelDrivenList", localColumns);
+    if (!localColumns?.length)
+        return <div>loading data</div>
 
     const ListComponent = listComponent ?? DetailsList;
 
@@ -455,7 +458,7 @@ export function ModelDrivenList(
             constrainMode={ConstrainMode.unconstrained}
             items={items}
             compact={isCompactMode}
-            columns={columns}
+            columns={localColumns}
             selectionMode={selectionMode}
             getKey={_getKey}
             setKey={setKey}

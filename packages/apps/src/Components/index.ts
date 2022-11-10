@@ -9,3 +9,4 @@ export * from "./Navigation";
 export * from "./TopBar";
 export * from "./MessageArea";
 export * from "./ProgressBar";
+export * from "./Dialogs";
