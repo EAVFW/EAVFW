@@ -155,7 +155,7 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
                     isSorted: typeof view?.columns![column]?.sorted !== "undefined",
                     isSortedDescending: view?.columns![column]?.sorted === "descending",
                     data: Object.assign({}, attributes[column], view?.columns?.[column] ?? {}),
-                    iconName: columns?.find(x => x.key == column)?.iconName,
+                    iconName: view?.columns![column]?.iconName ?? attributes[column]?.iconName, //columns?.find(x => x.key == column)?.iconName,
                     onColumnClick: (e, c) => dispatch({
                         type: 'openFilter',
                         column: c,
