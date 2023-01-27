@@ -391,7 +391,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
     const formId = useUuid(); 
     
-    console.log("EAVForm: ID", [formId, (defaultData as any)?.name, (state?.formValues as any)?.name, initialErrors]);
+    console.log("EAVForm: ID", [formId, (defaultData as any)?.name, (state?.formValues as any)?.name, initialErrors, state?.formValues, defaultData]);
     const blazor = useBlazor();
    
     const global_etag = useRef<string>(new Date().toISOString());
@@ -543,7 +543,9 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
             const changed = !isEqual(state.formValues, updatedProps);
 
-            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Changed`, [changed, JSON.stringify(state.formValues), JSON.stringify(updatedProps)]);
+            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Changed`, [changed,
+                JSON.stringify(state.formValues),
+                JSON.stringify(updatedProps)]);
 
             const a = deepDiffMapper.map(state.formValues, updatedProps);
             const [_, changedValues] = cleanDiff(a);

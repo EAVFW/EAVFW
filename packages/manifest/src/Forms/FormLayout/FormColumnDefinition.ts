@@ -6,6 +6,7 @@ type addPrefixToObject<T, P extends string> = {
 }
 
 export type FormColumnDefinition = {
+    query?: { expand: boolean };
     tab: string;
     column: string;
     section: string;

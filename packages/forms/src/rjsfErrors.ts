@@ -35,7 +35,7 @@ export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFW
         }
 
         if (isEAVFWError(errors)) {
-            console.debug("rjsfErrors error", [errors, state, fx])
+            console.debug("rjsfErrors obj error", [errors, state, fx])
             if (fx)
                 return fx(errors,state) as JsonSchemaErrorObject;
             return { __errors: [errors.error] } as JsonSchemaErrorObject;

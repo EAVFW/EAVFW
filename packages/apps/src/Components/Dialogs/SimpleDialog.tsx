@@ -5,11 +5,13 @@ import { PropsWithChildren, useMemo } from "react";
 export type SimpleDialogProps = {
     hideDialog: boolean
     toggleHideDialog: () => void;
+    maxWidth?: number | string
+    title?: string
 }
 
  
 
-export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ hideDialog, toggleHideDialog, children }) => {
+export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({title,maxWidth, hideDialog, toggleHideDialog, children }) => {
 
     const [isDraggable, { toggle: toggleIsDraggable }] = useBoolean(true);
     const labelId: string = useId('Custom_Import_Label');
@@ -17,7 +19,7 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ h
 
     const dialogContentProps = useMemo(() => ({
         type: DialogType.normal,
-        title: 'Import',
+        title: title,
         closeButtonAriaLabel: 'Close',
     }), []);
     const modalProps = useMemo(
@@ -25,7 +27,7 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ h
             titleAriaId: labelId,
             subtitleAriaId: subTextId,
             isBlocking: false,
-            styles: { main: { maxWidth: 450 } },
+            styles: { main: { maxWidth , minHeight:"80vh"} },
             dragOptions: isDraggable ? {
                 moveMenuItemText: 'Move',
                 closeMenuItemText: 'Close',
@@ -33,11 +35,11 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ h
                 keepInBounds: true,
             } : undefined,
         }),
-        [isDraggable, labelId, subTextId],
+        [isDraggable, labelId, subTextId, maxWidth],
     );
 
     return (
-        <Dialog
+        <Dialog minWidth="60vw"
             hidden={hideDialog}
             onDismiss={toggleHideDialog}
             dialogContentProps={dialogContentProps}
@@ -46,7 +48,12 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ h
             {children}
 
             
+            
              
         </Dialog>);
 
+}
+SimpleDialog.defaultProps = {
+    maxWidth: 450,
+    title:"Import"
 }

@@ -26,7 +26,7 @@ export const ExpressionParserVisibilityHost: React.FC<{
         }
 
         if (typeof data === "boolean" && data === false) {
-            console.debug("ExpressionParserVisibilityHost " + attributeKey + ": Hiding as visibility is calculated to false")
+            console.debug("ExpressionParserVisibilityHost " + attributeKey + ": Hiding as visibility is calculated to false", [visible, data])
             
             return false;
         }
