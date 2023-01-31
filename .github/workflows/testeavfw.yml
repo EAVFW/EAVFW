@@ -5,13 +5,14 @@ on:
     inputs:
       dotnetversion:
         required: false
-        default: '6.0.302'
+        default: '6.0.308'
         type: string
       nodeversion:
         required: false
-        default: '16'
+        default: '18'
         type: string
       
+        
 jobs:
   eavfw_job:
     name: Build and Test EAVFW
@@ -20,7 +21,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - uses: actions/setup-dotnet@v1
+      - uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ inputs.dotnetversion }}
 
@@ -41,7 +42,7 @@ jobs:
         run: mkdir ./../GithubEAVTestDirectory
 
       - name: create test project from template with no extensions
-        run: ( dotnet new --debug:rebuildcache) -and (dotnet new eavfw --namespace "GithubTestOrg" --appName "GithubTestApp" --databaseName "GithubTestDB" --skipGitCommit --allow-scripts yes)
+        run: ( dotnet new --debug:rebuildcache) -and (dotnet new eavfw --namespace "GithubTestOrg" --appName "GithubTestApp" --databaseName "GithubTestDB" --skipGitCommit --allow-scripts yes --dotnetSDK ${{ inputs.dotnetversion }} --skipPortal)
         working-directory: "./../GithubEAVTestDirectory"
 
       - name: create test web portal from template
