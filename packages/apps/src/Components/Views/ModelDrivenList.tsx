@@ -348,67 +348,7 @@ const getCellText = (item: any, column: IColumn): string => {
 };
 
 
-
-const ConditionRenderComponent: React.FC<any> = (
-    {
-        recordRouteGenerator,
-        item,
-        index,
-        column,
-        setItems,
-        attribute,
-        items,
-        locale
-    }) => {
-
-    const { onRenderPrimaryField: RenderPrimaryField } = useModelDrivenGridViewerContext();
-    const type = attribute.type;
-
-    if (typeof type === "object" && type.type === "choice" && type.options && item) {
-        const value = item[column?.fieldName as string];
-
-        if (value || value === 0) {
-
-            const [key, optionValue] = Object.entries<any>(type.options).filter(([key, value]) => (typeof value === "number" ? value : value.value) === item[column?.fieldName as string])[0];
-            return <>{optionValue?.locale?.[locale]?.displayName ?? optionValue?.text ?? key}</>;
-        }
-        return null;
-
-    } else if (attribute.isPrimaryField) {
-
-        return <RenderPrimaryField recordRouteGenerator={recordRouteGenerator} item={item} column={column} />
-        //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
-
-    } else if (isLookup(type) && item[attribute.logicalName]) {
-        console.log(item);
-        //TODO - Add Toggle in manifest to use hyperlink vs modal
-        return <Link href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
-            <a>
-                {item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}
-            </a>
-        </Link>
-
-        return <LookupControlRender onChange={(data: any) => {
-            console.log("Lookup data returned", [data, item]);
-            console.log("LookupControlRender change", [item, index, column, data, JSON.stringify(items)]);
-
-            setItems(items.slice());
-        }} type={type} attribute={attribute} item={item} recordRouteGenerator={recordRouteGenerator} />
-    } else if (column.data.control && column.data.control in Controls) {
-        const CustomControl = Controls[column.data.control] as React.FC<{ value: any }>;
-
-        return <CustomControl value={item[attribute.logicalName]}></CustomControl>
-    }
-
-    return <>{getCellText(item, column)}</>
-}
-
-const DefaultOnBuildFetchQuery = (q: any) => q;
-
-const Footer = () => {
-    return <div>Hello</div>
-}
-
+   
 export function ModelDrivenList(
     { onChange,
         formData,
@@ -426,9 +366,7 @@ export function ModelDrivenList(
     const { setSelection, selection, selectionDetails } = useSelectionContext();
     const [ { columns } ] = useColumnFilter()
   
-    console.log("ModelDrivenList", columns);
-    if (!columns?.length)
-        return <div>loading data</div>
+   
 
     const theme = useTheme();
 
@@ -447,6 +385,11 @@ export function ModelDrivenList(
 
     console.log("WithTimeButton Theme", theme.palette.themePrimary);
 
+    const localColumns = useMemo(() => columns?.filter(c => c.data.visible !== false)??[], [columns]);
+
+    console.log("ModelDrivenList", localColumns);
+    if (!localColumns?.length)
+        return <div>loading data</div>
 
     const ListComponent = listComponent ?? DetailsList;
 
@@ -455,7 +398,7 @@ export function ModelDrivenList(
             constrainMode={ConstrainMode.unconstrained}
             items={items}
             compact={isCompactMode}
-            columns={columns}
+            columns={localColumns}
             selectionMode={selectionMode}
             getKey={_getKey}
             setKey={setKey}

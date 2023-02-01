@@ -1,13 +1,14 @@
 {
-  "name": "@eavfw/next",
-  "description": "Model Driven Apps",
-  "version": "0.0.38",
+  "version": "1.0.0",
+  "name": "@eavfw/codeeditor",
   "dependencies": {
-    "@eavfw/apps": "*"
+    "@monaco-editor/react": "4.4.5"
   },
   "peerDependencies": {
-    "next": "12.3.3",
-    "react": "18.2.0"
+    "pako": "2.0.4"
+  },
+  "devDependencies": {
+    "@types/pako": "2.0.0"
   },
   "license": "MIT",
   "files": [

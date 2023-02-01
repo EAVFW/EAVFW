@@ -1,9 +1,10 @@
-import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty } from "@eavfw/manifest";
+import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup , getNavigationProperty, TypeFormDefinition } from "@eavfw/manifest";
 import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
 import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
 import { RecordUrlProps } from "./RecordUrlProps";
 import cloneDeep from "clone-deep";
+
 
 export class ModelDrivenApp {
     _data!: ModelDrivenAppModel;
@@ -105,9 +106,9 @@ export class ModelDrivenApp {
         return this._data.apps[appKey];
     }
 
-    isAttributeLookup(attribute: AttributeDefinition): attribute is LookupAttributeDefinition {
-        return this.getAttributeType(attribute) === "lookup";
-    }
+    //isAttributeLookup(attribute: AttributeDefinition): attribute is LookupAttributeDefinition {
+    //    return isAttributeLookup(attribute); // this.getAttributeType(attribute) === "lookup";
+    //}
 
     isMatchingForm(form: FormColumnDefinition | undefined, tabName: string, columnName: string, sectionName: string) {
         if (typeof form === "undefined") return false;
@@ -123,7 +124,7 @@ export class ModelDrivenApp {
         for (const entity of Object.values(this._data.entities)) {
             for (const attribute of Object.values(entity.attributes)) {
                 if (
-                    this.isAttributeLookup(attribute) &&
+                    isAttributeLookup(attribute) &&
                     this._data.entityMap[attribute.type.referenceType] === entityName
                 ) {
                     relatedEntities.push(entity.collectionSchemaName.toLowerCase());
@@ -162,57 +163,72 @@ export class ModelDrivenApp {
 
     getReferences(entityName: string, formName: string, tabName: string, columnName: string, sectionName: string) {
         console.group("ModelDrivenApp::getReferences");
-        console.log("arguments:\n", arguments);
-        const references: Array<ViewReference> = [];
+      
+            console.log("arguments:\n", arguments);
+            const references: Array<ViewReference> = [];
+        try {
+            for (const entity of Object.values(this._data.entities)) {
+                console.groupCollapsed("entity.collectionSchemaName:\n", entity.collectionSchemaName);
+                try {
+                    for (const attribute of Object.values(entity.attributes).filter(isAttributeLookup)) {
+                       
 
-        for (const entity of Object.values(this._data.entities)) {
-            for (const attribute of Object.values(entity.attributes)) {
+                        const referenceTypes = attribute.type.referenceTypes ?? [attribute.type.referenceType]
+                        const tpt = this._data.entities[entityName].TPT;
+                        console.log("attribute.type:\n", [attribute.type, tpt, referenceTypes, entityName,
+                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]),
+                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n))]);
+                        if (
+                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n)) &&
+                            //(this._data.entityMap[attribute.type.referenceType] === entityName || this._data.entities[entityName].TPT === attribute.type.referenceType) &&
+                            attribute.type.forms
+                        ) {
+                            console.log("attribute.type:\n", attribute.type);
+                            console.log("attribute.type.forms:\n", attribute.type.forms);
 
-                if (
-                    this.isAttributeLookup(attribute) &&
-                    (this._data.entityMap[attribute.type.referenceType] === entityName || this._data.entities[entityName].TPT === attribute.type.referenceType) &&
-                    attribute.type.forms
-                ) {
-                    console.log("attribute.type:\n", attribute.type);
-                    console.log("attribute.type.forms:\n", attribute.type.forms);
+                            //let forms = Object.values(attribute.type.forms).filter(form => this.isMatchingForm(form, formName, tabName, columnName, sectionName));
+                            for (const formKey of Object.keys(attribute.type.forms)) {
+                                const form = attribute.type.forms[formKey] as TypeFormDefinition;
+                                if (form.type === "Main") {
+                                    if ((formKey === formName || formName === form.name) && this.isMatchingForm(form, tabName, columnName, sectionName)) {
 
-                    //let forms = Object.values(attribute.type.forms).filter(form => this.isMatchingForm(form, formName, tabName, columnName, sectionName));
-                    for (const formKey of Object.keys(attribute.type.forms)) {
-                        const form = attribute.type.forms[formKey];
-                        if (form.type === "Main") {
-                            if ((formKey === formName || formName === form.name) && this.isMatchingForm(form, tabName, columnName, sectionName)) {
+                                        const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];
 
-                                const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];
+                                        references.push({
+                                            viewName: viewName,
+                                            ribbon: cloneDeep(form.ribbon ?? entity?.views?.[viewName]?.ribbon ?? {}),
+                                            view: entity?.views?.[viewName],
+                                            entityName: entity.logicalName,
+                                            attribute: attribute.logicalName,
+                                            attributeType: attribute.type?.type,
+                                            entity: entity,
+                                            filter: form.filter,
+                                            key: entity.logicalName + attribute.logicalName
+                                        });
+                                    } else {
+                                        console.group("Form found but did not match arguments");
+                                        const _formKey = (form.name ?? formKey) === formName;
+                                        console.log(`FormKey: ${_formKey}, ${form.name ?? formKey}, ${formName}`);
+                                        console.log(`Tab: ${form.tab === tabName}, ${form.tab} ${tabName}`);
+                                        console.log(`Column: ${form.column === columnName},  ${form.column} ${columnName}`);
+                                        console.log(`Section: ${form.section === sectionName},  ${form.section} ${sectionName}`);
 
-                                references.push({
-                                    viewName: viewName ,
-                                    ribbon: cloneDeep(form.ribbon ?? entity?.views?.[viewName]?.ribbon ?? {}),
-                                    view: entity?.views?.[viewName],
-                                    entityName: entity.logicalName,
-                                    attribute: attribute.logicalName,
-                                    entity: entity,
-                                    filter: form.filter,
-                                    key: entity.logicalName + attribute.logicalName
-                                });
-                            } else {
-                                console.group("Form found but did not match arguments");
-                                const _formKey = (form.name ?? formKey) === formName;
-                                console.log(`FormKey: ${_formKey}, ${form.name ?? formKey}, ${formName}`);
-                                console.log(`Tab: ${form.tab === tabName}, ${form.tab} ${tabName}`);
-                                console.log(`Column: ${form.column === columnName},  ${form.column} ${columnName}`);
-                                console.log(`Section: ${form.section === sectionName},  ${form.section} ${sectionName}`);
-
-                                console.log("form:\n", form);
-                                console.groupEnd();
+                                        console.log("form:\n", form);
+                                        console.groupEnd();
+                                    }
+                                }
                             }
                         }
                     }
+                } finally {
+                    console.groupEnd();
                 }
             }
-        }
 
-        console.log("Found References:\n", references);
-        console.groupEnd();
+            console.log("Found References:\n", references);
+        } finally {
+            console.groupEnd();
+        }
         return references;
     }
 

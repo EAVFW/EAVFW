@@ -33,6 +33,17 @@ import { PagingProvider } from "../../../Views/PagingContext";
 
 
 
+function trimId(str: string) {
+    if (str.toLowerCase().endsWith("id"))
+        return str.slice(0, -2);
+    return str;
+}
+function padId(str: string) {
+    if (!str.toLowerCase().endsWith("id"))
+        return `${str}id`;
+    return str;
+}
+
 
 
 
@@ -299,8 +310,8 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                             <ModelDrivenGridViewer
                                 {...gridprops}
                                 locale={locale}
-                                onChange={onFormDataChange}
-                                filter={`$filter=${gridprops.attribute} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter :'')}
+                                        onChange={onFormDataChange}
+                                        filter={`$filter=${gridprops.attributeType === 'lookup' ? gridprops.attribute : `${trimId(gridprops.attribute)}/${padId(entityName)}`} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter : '')}
                                 formData={formData}
                                 newRecord={formData.id ? false : true}
                                 defaultValues={formData[gridprops.entity.collectionSchemaName.toLowerCase()]}

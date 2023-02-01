@@ -1,8 +1,14 @@
 {
   "name": "@eavfw/apps",
   "description": "Model Driven Apps",
-  "version": "0.0.38",
-  "dependencies": {},
+  "version": "0.0.0",
+  "dependencies": {
+    "@eavfw/expressions": "*",
+    "@eavfw/forms": "*",
+    "@eavfw/hooks": "*",
+    "@eavfw/manifest": "*",
+    "@eavfw/utils": "*"
+  },
   "peerDependencies": {
     "react": "18.2.0",
     "json-schema": "0.4.0",

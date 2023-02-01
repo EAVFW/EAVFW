@@ -141,18 +141,21 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
 
             console.log("VIEWS", [attributes, view, columnKeys])
             const columns: Array<IColumn> = columnKeys
+                /*.filter(field => view?.columns![field]?.visible !== false)*/
                 .filter(field => (!view?.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, user))
                 .map(column => ({
                     key: column,
                     name: view?.columns![column]?.displayName ?? attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName,
-                    minWidth: 32,
+                    minWidth: 32,                    
                     currentWidth: 32,
                     maxWidth: 150,
                     fieldName: attributes[column].logicalName,
                     isResizable: true,
                     isCollapsible: true,
+                    isSorted: typeof view?.columns![column]?.sorted !== "undefined",
+                    isSortedDescending: view?.columns![column]?.sorted === "descending",
                     data: Object.assign({}, attributes[column], view?.columns?.[column] ?? {}),
-                    iconName: columns?.find(x => x.key == column)?.iconName,
+                    iconName: view?.columns![column]?.iconName ?? attributes[column]?.iconName, //columns?.find(x => x.key == column)?.iconName,
                     onColumnClick: (e, c) => dispatch({
                         type: 'openFilter',
                         column: c,
@@ -244,7 +247,7 @@ const ColumnFilterProvider = ({
         } else if (filter) {
             localFilter = filter;
         }
-        console.log("Recalculating fetch qury:", localFilter);
+        console.log("Recalculating fetch qury:", [localColumnFilter,localFilters,filter,localFilter]);
 
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
@@ -273,6 +276,7 @@ const ColumnFilterProvider = ({
     }, [attributes, columnFilterState.columns, filter, currentPage, pageSize, columnAttributes])
 
     React.useMemo(() => {
+        console.log("Calling reducer from memo");
         columnFilterDispatch({
             type: 'initializeColumns',
             view: view  ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } },

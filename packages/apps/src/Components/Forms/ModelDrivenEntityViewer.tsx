@@ -15,6 +15,7 @@ import { RibbonHost } from "../Ribbon/RibbonHost";
 import { FormSelectorComponent } from "./FormSelectorComponent";
 import FormComponent from "./AutoForm/FormComponent";
 import { useAppInfo } from "../../useAppInfo";
+import { useFormChangeHandlerProvider } from "./useFormChangeHandler";
 
 
 
@@ -335,7 +336,10 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     const app = useModelDrivenApp();
     const info = useAppInfo();
 
-    const { record, entityName, formName, entity, onChange, related } = props;
+    const { record: record2, onChangeCallback, extraErrors: extraErrors2 } = useFormChangeHandlerProvider();
+    const { record = record2, entityName, formName, entity, onChange = onChangeCallback, related, extraErrors = extraErrors2 } = props;
+   
+   
 
     console.log("ModelDrivenEntityViewer:", [record, record?.name, entityName, formName]);
 
@@ -515,7 +519,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
     return (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
-            <ModelDrivenForm  {...props} form={form} />
+            <ModelDrivenForm  {...props} record={record} onChange={onChange} extraErrors={extraErrors} form={form} />
         </EAVForm>
     );
 

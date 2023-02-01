@@ -388,11 +388,14 @@ const ConditionRenderComponent: React.FC<any> = (
 
     } else if (isLookup(type) && item[attribute.logicalName]) {
         console.log(item);
+        console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]);
+        console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]?.length);
+        console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]?.trim()?.length);
         //TODO - Add Toggle in manifest to use hyperlink vs modal
-        return <Link href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
-            <a>
-                {item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}
-            </a>
+        return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
+           
+            <a>{item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+             
         </Link>
 
         return <LookupControlRender onChange={(data: any) => {
@@ -577,8 +580,6 @@ export function ModelDrivenGridViewer(
 
     console.log("WithTimeButton Theme", theme.palette.themePrimary);
 
-    const ListComponent = listComponent ?? DetailsList;
-
     const _onItemInvoked = (item: IRecord): void => {
         window.location.href = recordRouteGenerator(item);
     }
@@ -620,6 +621,7 @@ export function ModelDrivenGridViewer(
                             selectionMode={SelectionMode.multiple}
                             setKey="multiple"
                             onChange={onChange}
+                            listComponent={listComponent}
                             formData={formData}
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
@@ -636,6 +638,7 @@ export function ModelDrivenGridViewer(
                             setKey="none"
                             onChange={onChange}
                             formData={formData}
+                            listComponent={listComponent}
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
                                 setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
@@ -658,7 +661,7 @@ export type ModelDrivenGridViewerContextProps = {
     onRenderPrimaryField: React.FC<{ recordRouteGenerator: (record: IRecord) => string; item: IRecord, column: IColumn }>;
 }
 
-const ModelDrivenGridViewerContext = createContext<ModelDrivenGridViewerContextProps>({ onRenderPrimaryField: ({ recordRouteGenerator, item, column }) => <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link> });
+const ModelDrivenGridViewerContext = createContext<ModelDrivenGridViewerContextProps>({ onRenderPrimaryField: ({ recordRouteGenerator, item, column }) => <Link legacyBehavior={true} href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link> });
 export function useModelDrivenGridViewerContext<T>() { return useContext<ModelDrivenGridViewerContextProps>(ModelDrivenGridViewerContext) as ModelDrivenGridViewerContextProps & T };
 export function ModelDrivenGridViewerContextProvider<T>({ children, ...props }: PropsWithChildren<ModelDrivenGridViewerContextProps & T>) {
     return <ModelDrivenGridViewerContext.Provider value={props} >{children}</ModelDrivenGridViewerContext.Provider>

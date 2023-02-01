@@ -1,6 +1,6 @@
-import {EntityDefinition, getNavigationProperty, getRecordSWR, isLookup} from "@eavfw/manifest";
+import {EntityDefinition, getNavigationProperty, getRecordSWR, IRecord, isLookup} from "@eavfw/manifest";
 import {useRouter} from "next/router";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {cleanDiff, deepDiffMapper} from "@eavfw/utils";
 import {useModelDrivenApp} from "../../useModelDrivenApp";
 import {errorMessageFactory, successMessageFactory, useMessageContext} from "../MessageArea";
@@ -9,6 +9,37 @@ import {useRibbon} from "../Ribbon";
 import {handleValidationErrors} from "../../Validation";
 import {FormValidation} from "@rjsf/core";
 import {useAppInfo} from "../../useAppInfo";
+
+export type FormDataContextProps = {
+    mutate: () => void;
+    record?: IRecord;
+    isLoading: boolean;
+    onChangeCallback: (formData: any, ctx?: any) => void;
+    extraErrors?: FormValidation
+}
+const FormDataContext = createContext<FormDataContextProps>({ mutate: () => { }, isLoading: false, onChangeCallback: (data, ctx) => { } });
+export const useFormChangeHandlerProvider = () => useContext(FormDataContext);
+export const FormChangeHandlerProvider: React.FC<PropsWithChildren<{ recordId?: string }>> = ({ children, recordId }) => {
+
+    const app = useModelDrivenApp();
+    const router = useRouter();
+
+    if (!router.query.area || !router.query.entityName)
+        return <div>loading </div>
+
+    const entity = app.getEntity(router.query.entityName as string);
+    const formName = router.query.formname as string;
+   
+    const attributes = Object.values(entity.attributes).map(a => a.logicalName);
+    // const [record, setRecord] = useState(Object.fromEntries(Object.keys(router.query).filter(logicalName => attributes.indexOf(logicalName) !== -1).map(k => [k, router.query[k]])));
+    const entityName = router.query.entityName as string;
+
+    const value = useFormChangeHandler(entity, recordId, recordId? undefined: Object.fromEntries(Object.keys(router.query).filter(logicalName => attributes.indexOf(logicalName) !== -1).map(k => [k, router.query[k]])));
+
+    if (value.isLoading) return <div>loading</div>;
+
+    return <FormDataContext.Provider value={value} key={`${router.query.entityName}${formName}${value?.record?.id}`}>{children}</FormDataContext.Provider>
+}
 
 export function useFormChangeHandler(entity: EntityDefinition, recordId?: string, initialdata?: any) {
     const router = useRouter();
@@ -29,7 +60,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
     const defaultData = useMemo(() => {
 
-        var data = undefined as any;
+        var data = initialdata;
         for (let attr of Object.values(attributes)) {
             if (typeof (attr.default) !== "undefined") {
                 data = data ?? {};
@@ -37,13 +68,22 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             }
         }
         console.log("DEFAULT DATA", data);
-        return data ?? initialdata;
+        return data ;
 
     }, [initialdata,attributes]);
 
     const expand = useMemo(() => {
 
-        let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
+        if (formQuery?.version === "1.0") {
+            let form = entity.forms?.[formName];
+            let columns = form?.columns ?? {};
+            let expand = Object.entries(attributes).filter(([k, a]) => k in columns && columns[k].query?.expand !== false && isLookup(a.type)).map(([k, a]) => getNavigationProperty(a)).join(',');
+
+            return expand;
+        }
+
+
+        let expand =  Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
         if (formQuery?.["$expand"]) {
             expand = expand + ',' + formQuery["$expand"]
         }
@@ -182,6 +222,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         onChangeCallback,
         record,
         isLoading: typeof (recordId) === "undefined" ? false : (isLoading || typeof (record) === "undefined"),
-        extraErrors
+        extraErrors,
+        mutate
     };
 }

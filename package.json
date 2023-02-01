@@ -5,9 +5,9 @@
     "@types/node": "16.7.10",
     "@types/react": "17.0.38",
     "concurrently": "7.0.0",
+    "multi-semantic-release": "^3.0.1",
     "npm-run-all": "^4.1.5",
-    "multi-semantic-release": "2.12.0",
-    "semantic-release": "19.0.2",
+    "semantic-release": "^19.0.5",
     "semantic-release-monorepo": "7.0.5"
   },
   "scripts": {
@@ -19,6 +19,7 @@
     "link-utils": "npm --workspace packages/utils link",
     "link-hooks": "npm --workspace packages/hooks link",
     "link-nextjs": "npm --workspace packages/nextjs link",
+    "link-codeeditor": "npm --workspace packages/codeeditor link",
 
     "publish": "npm-run-all --continue-on-error publish-*",
     "publish-apps": "npm --workspace packages/apps publish --access public",
@@ -28,15 +29,7 @@
     "publish-utils": "npm --workspace packages/utils publish --access public",
     "publish-hooks": "npm --workspace packages/hooks publish --access public",
     "publish-nextjs": "npm --workspace packages/nextjs publish --access public",
-
-    "bumb-version": "concurrently  \"npm:bumb-version-*\"",
-    "bumb-version-manifest": "npm --workspace packages/manifest version patch -m \"Upgrade to %s\"",
-    "bumb-version-apps": "npm --workspace packages/apps version patch -m \"Upgrade to %s\"",
-    "bumb-version-expressions": "npm --workspace packages/expressions version patch -m \"Upgrade to %s\"",
-    "bumb-version-forms": "npm --workspace packages/forms version patch -m \"Upgrade to %s\"",
-    "bumb-version-utils": "npm --workspace packages/utils version patch -m \"Upgrade to %s\"",
-    "bumb-version-hooks": "npm --workspace packages/hooks version patch -m \"Upgrade to %s\"",
-    "bumb-version-nextjs": "npm --workspace packages/nextjs version patch -m \"Upgrade to %s\"",
+    "publish-codeeditor": "npm --workspace packages/codeeditor publish --access public",
 
     "release": "npm-run-all --continue-on-error release-*",
     "release-apps": "npm run release --workspace packages/apps",
@@ -45,7 +38,8 @@
     "release-forms": "npm run release --workspace packages/forms",
     "release-utils": "npm run release --workspace packages/utils",
     "release-hooks": "npm run release --workspace packages/hooks",
-    "release-nextjs": "npm run release --workspace packages/nextjs"
+    "release-nextjs": "npm run release --workspace packages/nextjs",
+    "release-codeeditor": "npm run release --workspace packages/codeeditor"
   },
   "config": {
     "force": true

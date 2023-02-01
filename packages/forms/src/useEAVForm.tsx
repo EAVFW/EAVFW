@@ -86,10 +86,10 @@ import { EAVFormContextState } from "./EAVFormContextState";
 //    }
 //}
 
-export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string,logid?: string): [TCollected, EAVFormContextActions<TFormValues>]
-export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?:number|string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>] {
+export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>, string]
+export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>, string]
+export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>, string]
+export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?:number|string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>,string] {
 
     const {
         actions,
@@ -134,7 +134,7 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
         let collected = collector(state as TState);
         console.log("useEAVForm collected: " + logid, [JSON.stringify( collected)]);
         return [
-            cloneDeep(collected), actions] as [TCollected, EAVFormContextActions<TFormValues>];
+            cloneDeep(collected), actions, etag] as [TCollected, EAVFormContextActions<TFormValues>, string];
     }, [state,subscriptionid]);
      
     

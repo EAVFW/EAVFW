@@ -2,6 +2,7 @@ import {
     ComboBox,
     CommandBar,
     CommandButton,
+    Dropdown,
     FontWeights,
     getTheme,
     IButtonStyles,
@@ -16,12 +17,13 @@ import {
     mergeStyleSets,
     Modal,
     Stack,
+    StackItem,
     useTheme
 } from "@fluentui/react";
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { EntityDefinition, getRecordSWR, IRecord, isLookup, LookupType, NestedType, queryEntity, queryEntitySWR, TypeFormModalDefinition } from "@eavfw/manifest";
+import { EntityDefinition, getRecordSWR, IRecord, isLookup, isPolyLookup, LookupType, NestedType, queryEntity, queryEntitySWR, TypeFormModalDefinition } from "@eavfw/manifest";
 import { capitalize, throwIfNotDefined } from "@eavfw/utils";
 import { LookupControlProps } from "./LookupControlProps";
 import { FormRender } from "../../Forms/FormRender";
@@ -63,7 +65,7 @@ export type LookupCoreControlProps = {
     filter?: string,
     forms?: string[],
     type: NestedType,
-    selectedValue:any,
+    selectedValue: any,
     value: any,
     onChange: EAVFOrmOnChangeHandler<any>,
     searchForLabel?: string
@@ -79,16 +81,16 @@ function nullIfEmpty<T>(items: T[]) {
 function returnQueryFilter(searchfilter: string | undefined, filter: string | undefined) {
 
     if (searchfilter && filter)     //both defined
-        return { '$filter': searchfilter + ' and ' + filter};
-    
+        return { '$filter': searchfilter + ' and ' + filter };
+
     if (searchfilter && !filter)    //only searchfilter defined
         return { '$filter': searchfilter };
-    
+
     if (filter && !searchfilter)    //only filter defined
         return { '$filter': filter };
-    
+
     if (!filter && !searchfilter)
-        return {'$filter': ''};     //neither defined
+        return { '$filter': '' };     //neither defined
 }
 
 
@@ -146,11 +148,11 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
 
     const remoteOptions = useMemo(() => (remoteItems?.items.filter(c => c.id !== remoteSelectedValue?.id).map(m => ({
-            key: m.id,
-            text: m[primaryField],
+        key: m.id,
+        text: m[primaryField],
         data: m.id
     })) as IComboBoxOption[] ?? []).concat(remoteSelectedValue?.id ?
-        [{ key: remoteSelectedValue.id, text: remoteSelectedValue[primaryField] }]:[]), [remoteItems?.items, remoteSelectedValue]);
+        [{ key: remoteSelectedValue.id, text: remoteSelectedValue[primaryField] }] : []), [remoteItems?.items, remoteSelectedValue]);
 
 
 
@@ -162,7 +164,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     const [dummyData, setDummyData] = useState<any>();
 
-    const options = useMemo(() => (hasFilterChanged && shouldLoadRemoteOptions ? remoteOptions: remoteOptions.concat(localOptions.current).concat(initialOptions.filter(io => remoteOptions.filter(ro => ro.key === io.key).length === 0))),
+    const options = useMemo(() => (hasFilterChanged && shouldLoadRemoteOptions ? remoteOptions : remoteOptions.concat(localOptions.current).concat(initialOptions.filter(io => remoteOptions.filter(ro => ro.key === io.key).length === 0))),
         [initialOptions, remoteOptions, dummyData, hasFilterChanged]);
 
 
@@ -176,7 +178,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             }
             hasFilterChangedFirst.current = true;
         }
-    }, [disabled,filter]);
+    }, [disabled, filter]);
 
     /**
      * When a modal is submittet, it has changed the raw object data, but not persisted to database. 
@@ -194,7 +196,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         //else
         //    o.filter(o => o.key === DUMMY_DATA_KEY)[0].text = data[primaryField];
 
-       // setOptions(o);
+        // setOptions(o);
         setSelectedKey(DUMMY_DATA_KEY);
         setDummyData(data);
 
@@ -213,7 +215,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         option?: IDropdownOption | IComboBoxOption,
         index?: number) => {
 
-        console.log("LookupControl: on change", [event, option,index]);
+        console.log("LookupControl: on change", [event, option, index]);
         onChange(props => {
             if (option?.key === "dummy") {
                 delete props[logicalName];
@@ -245,21 +247,21 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         console.log("LookupControl: setting selected key for " + logicalName, [value]);
         if (value && typeof value !== "object") {
             setSelectedKey(value);
-        } 
+        }
     }, [value]);
 
 
-//    const defaultOptions = useRef((typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? "dummy", text: selectedValue[primaryField] }] : []));
+    //    const defaultOptions = useRef((typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? "dummy", text: selectedValue[primaryField] }] : []));
 
-  //  const [options, setOptions] = useState<IDropdownOption[]>(defaultOptions.current);
-  
+    //  const [options, setOptions] = useState<IDropdownOption[]>(defaultOptions.current);
+
     const [modalForms, setModalForms] = useState(forms ?? []);
-     
+
     const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${searchForLabel ?? targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
     const [freeformvalue, setfreeformvalue] = useState<string>();
-    
+
     console.log("Lookup Control:", [label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
     return (<>
@@ -292,7 +294,18 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             disabled={disabled}
 
             ariaLabel={label}
-            styles={{ optionsContainerWrapper: { maxHeight: "25vh" }, inputDisabled: { background: theme?.palette.neutralLight, color: "black" }, rootDisabled: { borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight } }}
+            styles={{
+                callout: {
+                    marginBottom:92
+                },
+                optionsContainerWrapper: {
+                    maxHeight: "25vh"
+                }, inputDisabled: {
+                    background: theme?.palette.neutralLight, color: "black"
+                }, rootDisabled: {
+                    borderWidth: 1, borderStyle: "solid", borderColor: theme?.palette.black, background: theme?.palette.neutralLight
+                }
+            }}
             onChange={_onChange}
             onBlur={(_) => {
                 setfreeformvalue(undefined);
@@ -355,7 +368,7 @@ export function LookupControl<T>({
     attributeName,
     onChange,
     disabled,
-   // value,
+    // value,
     formData,
     formName,
     readonly,
@@ -366,7 +379,7 @@ export function LookupControl<T>({
 }: LookupControlProps<T>) {
 
 
-   
+
 
     const app = useModelDrivenApp();
     const entityAttributes = app.getAttributes(entityName);
@@ -379,26 +392,59 @@ export function LookupControl<T>({
         id: state.formValues["id"]
     }), "LookupControl" + attributeName);
 
-    
-    
+
+
     const { formDefinition } = useFormHost();
     const column = formDefinition?.columns[fieldName];
 
-    
 
-   
-    if (!isLookup(attribute.type))
+
+
+    if (!(isLookup(attribute.type)))
         return <div>...</div>;
+
+
+    if (isPolyLookup(attribute.type)) {
+        const [selectedEntity, setSelectedEntity] = useState(attribute.type.referenceTypes[0]);
+
+        console.log("Poly Lookup", [value]);
+
+        return <Stack horizontal tokens={{ childrenGap:10 }}>
+
+            <Dropdown styles={{ root: { width:150 } }} selectedKey={selectedEntity} onChange={(x, o) => setSelectedEntity(o?.data)} options={attribute.type.referenceTypes.map(c => ({ key: c, text: c, data: c }))} ></Dropdown>
+            <Stack.Item grow>
+                <LookupCoreControl
+                    key={selectedEntity}
+                    selectedValue={selectedValue}
+                    onChange={eavOnChange}
+                    value={value}
+                    type={attribute.type}
+                    //  forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
+                    filter={column?.filter ?? attribute.type.filter}
+                    allowCreate={column?.disableCreate !== true}
+                    searchForLabel={column?.searchForLabel}
+                    label={attribute.displayName}
+                    extraErrors={extraErrors}
+                    targetEntityName={selectedEntity}
+                    logicalName={attribute.logicalName}
+                    disabled={disabled || readonly}
+                />
+            </Stack.Item>
+        </Stack>
+    }
+
 
     const targetEntityName = column.entityName ?? (isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute"));
 
     console.log("Lookup Control", [attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData]);
 
- //  
+    //  
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
-    
-    console.log("filtering :", [column?.filter ?? attribute.type.filter])
-     
+
+    console.log("filtering :", [column?.filter ?? attribute.type.filter]);
+
+
+
     return <LookupCoreControl
         selectedValue={selectedValue}
         onChange={eavOnChange}
@@ -407,7 +453,7 @@ export function LookupControl<T>({
         forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
         filter={column?.filter ?? attribute.type.filter}
         allowCreate={column?.disableCreate !== true}
-        searchForLabel={column?.searchForLabel }
+        searchForLabel={column?.searchForLabel}
         label={attribute.displayName}
         extraErrors={extraErrors}
         targetEntityName={targetEntityName}

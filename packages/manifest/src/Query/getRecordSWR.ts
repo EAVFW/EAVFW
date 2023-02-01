@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import useSWR, { mutate  } from "swr";
 import { IRecord } from "../Types";
-import { jsonFetcher } from "./jsonFetcher";
+import { useJsonFetcher } from "./jsonFetcher";
 
 export function getRecordSWR(entityName: string, recordId: string, query: string = "", ready = true, initialData = undefined) {
-    const key = `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entityName}/records/${recordId}${query}`;
+
+    const [baseUrl, jsonFetcher] = useJsonFetcher();
+
+    const key = `${baseUrl}/entities/${entityName}/records/${recordId}${query}`;
 
     const [record, setRecord] = useState<IRecord | undefined>(initialData);
 

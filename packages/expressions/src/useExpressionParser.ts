@@ -56,13 +56,14 @@ export function useExpressionParser<T = string>(expression?: string) {
           
             addExpresssion(id, expression, context, (result: any, error: any) => {
                 //
+                console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}, error=${error}`);
 
                 if (error) {
                     setEvaluated({ data: undefined, isLoading: false });
                   //  setExpressionResult(id, undefined, error);
                     return;
                 }
-                console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}`);
+              
                 if (oldvalue.current !== result) {
                     setEvaluated({ data: result, isLoading: false });
                //     setExpressionResult(id, result, undefined);
