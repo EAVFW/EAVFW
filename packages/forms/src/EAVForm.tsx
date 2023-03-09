@@ -166,6 +166,7 @@ export const VisitedContainer: React.FC<{ id: string, initialdata?: VisitedField
         setParentVisitedFields(id, refVisitedFields.current);
     }, [id]);
 
+
    
  
 
@@ -570,7 +571,8 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     let t = new Date().getTime();
                     state.isErrorsUpdated = false;
                     setTimeout(() => {
-                        if (blazor.updateFormDataFunction) {
+                        if (blazor.updateFormDataFunction && local === global_etag.current) {
+                            console.log(`[${new Date().toISOString()}]RUN ACTION Invoking ${blazor.updateFormDataFunction}`, [local , global_etag.current,changed]);
                             DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(
                                 blazor.namespace, blazor.updateFormDataFunction,
                                 formId,
