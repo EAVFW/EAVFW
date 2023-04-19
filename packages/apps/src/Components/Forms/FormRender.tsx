@@ -47,7 +47,7 @@ export function FormRender<T>(props: FormRenderProps) {
         () => (
             <Stack horizontal horizontalAlign="end" styles={{ root: { margin: 24 } }}>
                 <PrimaryButton onClick={_onSave} styles={buttonStyles}>
-                    {saveBtnText ?? 'test' + (capitalize(app.getLocalization("save") ?? 'Save'))}
+                    {saveBtnText ?? (capitalize(app.getLocalization("save") ?? 'Save'))}
                 </PrimaryButton>
                 <DefaultButton
                     onClick={dismissPanel.bind(undefined, "cancel")}>
