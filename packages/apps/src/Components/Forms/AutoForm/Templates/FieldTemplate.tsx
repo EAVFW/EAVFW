@@ -123,6 +123,8 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     title="Warning"
                     ariaLabel="Warning"
                     onClick={toggleIsWarningCalloutVisible}
+                    onMouseEnter={() => setIsWarningCalloutVisibleOnHover(true)}
+                    onMouseLeave={() => setIsWarningCalloutVisibleOnHover(false)}
                     styles={iconWarningButtonStyles}
                 />}
             </Stack>
@@ -155,7 +157,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
             )}
 
 
-            {isWarningCalloutVisible && (
+            {(isWarningCalloutVisible || isWarningCalloutVisibleOnHover) && (
                 <Callout
                     target={'#' + iconButtonWarningId}
                     setInitialFocus
@@ -165,12 +167,12 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 >
                     <div className={contentStyles.headerWarn}>
                         <span id={titleId}>{label}</span>
-                        <IconButton
+                        {isWarningCalloutVisible && <IconButton
                             styles={iconCloseButtonStyles}
                             iconProps={cancelIcon}
                             ariaLabel="Close popup modal"
                             onClick={toggleIsWarningCalloutVisible}
-                        />
+                        />}
                     </div>
 
                     <div className={contentStyles.body}>
