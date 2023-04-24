@@ -19,6 +19,8 @@ export function FormRender<T>(props: FormRenderProps) {
     const forms = entity.forms!;
     console.log("FormRender", [entityName, entity, forms]);
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
+    const saveBtnText = forms?.[formName]?.buttons?.save?.text
+    const cancelBtnText = forms?.[formName]?.buttons?.cancel?.text
 
     //  const record = useRef(props.record ?? {});
     const [record, setRecord] = useState(props.record ?? {});
@@ -45,10 +47,12 @@ export function FormRender<T>(props: FormRenderProps) {
         () => (
             <Stack horizontal horizontalAlign="end" styles={{ root: { margin: 24 } }}>
                 <PrimaryButton onClick={_onSave} styles={buttonStyles}>
-                    {capitalize(app.getLocalization("save") ?? 'Save')}
+                    {saveBtnText ?? (capitalize(app.getLocalization("save") ?? 'Save'))}
                 </PrimaryButton>
                 <DefaultButton
-                    onClick={dismissPanel.bind(undefined, "cancel")}>{capitalize(app.getLocalization("close") ?? 'Close')}</DefaultButton>
+                    onClick={dismissPanel.bind(undefined, "cancel")}>
+                    {cancelBtnText ?? (capitalize(app.getLocalization("close") ?? 'Close'))}
+                </DefaultButton>
             </Stack>
         ),
         [dismissPanel, record],
