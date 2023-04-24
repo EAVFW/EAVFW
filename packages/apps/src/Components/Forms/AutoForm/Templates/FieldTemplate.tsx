@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { FieldTemplateProps } from "@rjsf/core";
 import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, IStackStyles, IStackTokens, ITheme, Label, mergeStyleSets, Stack, Text, ThemeContext } from "@fluentui/react";
 import { List } from "@fluentui/react";
@@ -98,6 +98,8 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const warnings = useContext(WarningContext);
     const [isWarningCalloutVisible, { toggle: toggleIsWarningCalloutVisible }] = useBoolean(false);
     const iconButtonWarningId = useId('iconButtonWarningId');
+    const [isInfoCalloutVisibleOnHover, setIsInfoCalloutVisibleOnHover] = useState(false)
+    const [isWarningCalloutVisibleOnHover, setIsWarningCalloutVisibleOnHover] = useState(false)
 
     return (
         <>
@@ -110,6 +112,10 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     title="Info"
                     ariaLabel="Info"
                     onClick={toggleIsCalloutVisible}
+                    onMouseEnter={() => setIsInfoCalloutVisibleOnHover(true)}
+                    onMouseLeave={() => setIsInfoCalloutVisibleOnHover(false)}
+                    onFocus={() => setIsInfoCalloutVisibleOnHover(true)}
+                    onBlur={() => setIsInfoCalloutVisibleOnHover(false)}
                     styles={iconButtonStyles}
                 />}
                 {warnings.length > 0 && <IconButton
@@ -118,11 +124,15 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     title="Warning"
                     ariaLabel="Warning"
                     onClick={toggleIsWarningCalloutVisible}
+                    onMouseEnter={() => setIsWarningCalloutVisibleOnHover(true)}
+                    onMouseLeave={() => setIsWarningCalloutVisibleOnHover(false)}
+                    onFocus={() => setIsWarningCalloutVisibleOnHover(true)}
+                    onBlur={() => setIsWarningCalloutVisibleOnHover(false)}
                     styles={iconWarningButtonStyles}
                 />}
             </Stack>
 
-            {isInfoCalloutVisible && (
+            {(isInfoCalloutVisible || isInfoCalloutVisibleOnHover) && (
                 <Callout
                     target={'#' + iconButtonId}
                     setInitialFocus
@@ -132,12 +142,12 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 >
                     <div className={contentStyles.header}>
                         <span id={titleId}>{label}</span>
-                        <IconButton
+                        {isInfoCalloutVisible && <IconButton
                             styles={iconCloseButtonStyles}
                             iconProps={cancelIcon}
                             ariaLabel="Close popup modal"
                             onClick={toggleIsCalloutVisible}
-                        />
+                        />}
                     </div>
 
                     <div className={contentStyles.body}>
@@ -150,7 +160,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
             )}
 
 
-            {isWarningCalloutVisible && (
+            {(isWarningCalloutVisible || isWarningCalloutVisibleOnHover) && (
                 <Callout
                     target={'#' + iconButtonWarningId}
                     setInitialFocus
@@ -160,12 +170,12 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 >
                     <div className={contentStyles.headerWarn}>
                         <span id={titleId}>{label}</span>
-                        <IconButton
+                        {isWarningCalloutVisible && <IconButton
                             styles={iconCloseButtonStyles}
                             iconProps={cancelIcon}
                             ariaLabel="Close popup modal"
                             onClick={toggleIsWarningCalloutVisible}
-                        />
+                        />}
                     </div>
 
                     <div className={contentStyles.body}>
