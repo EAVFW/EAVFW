@@ -101,7 +101,6 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const [isInfoCalloutVisibleOnHover, setIsInfoCalloutVisibleOnHover] = useState(false)
     const [isWarningCalloutVisibleOnHover, setIsWarningCalloutVisibleOnHover] = useState(false)
 
-
     return (
         <>
             <Stack horizontal verticalAlign="center" tokens={stackTokens}>
@@ -115,6 +114,8 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     onClick={toggleIsCalloutVisible}
                     onMouseEnter={() => setIsInfoCalloutVisibleOnHover(true)}
                     onMouseLeave={() => setIsInfoCalloutVisibleOnHover(false)}
+                    onFocus={() => setIsInfoCalloutVisibleOnHover(true)}
+                    onBlur={() => setIsInfoCalloutVisibleOnHover(false)}
                     styles={iconButtonStyles}
                 />}
                 {warnings.length > 0 && <IconButton
@@ -125,6 +126,8 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     onClick={toggleIsWarningCalloutVisible}
                     onMouseEnter={() => setIsWarningCalloutVisibleOnHover(true)}
                     onMouseLeave={() => setIsWarningCalloutVisibleOnHover(false)}
+                    onFocus={() => setIsWarningCalloutVisibleOnHover(true)}
+                    onBlur={() => setIsWarningCalloutVisibleOnHover(false)}
                     styles={iconWarningButtonStyles}
                 />}
             </Stack>
