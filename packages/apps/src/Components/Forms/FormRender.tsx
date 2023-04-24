@@ -19,19 +19,15 @@ export function FormRender<T>(props: FormRenderProps) {
     const forms = entity.forms!;
     console.log("FormRender", [entityName, entity, forms]);
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
-    const saveBtnText = forms?.[formName]?.buttons?.save?.text
-    const cancelBtnText = forms?.[formName]?.buttons?.cancel?.text
+    const saveBtnText = forms?.[formName]?.buttons?.save?.text      //gets text for naming of save btn in modal if it is defined
+    const cancelBtnText = forms?.[formName]?.buttons?.cancel?.text  //gets text for naming of cancel btn in modal if it is defined
 
     //  const record = useRef(props.record ?? {});
     const [record, setRecord] = useState(props.record ?? {});
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
 
     const _onSave = () => {
-
-
         console.log("Closing Modal", record);
-
-
         onChange(record);
         dismissPanel.call(undefined, "save");
     };
