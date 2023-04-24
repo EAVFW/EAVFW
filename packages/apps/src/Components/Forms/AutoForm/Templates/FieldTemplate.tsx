@@ -127,7 +127,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 />}
             </Stack>
 
-            {isInfoCalloutVisibleOnHover && (
+            {(isInfoCalloutVisible || isInfoCalloutVisibleOnHover) && (
                 <Callout
                     target={'#' + iconButtonId}
                     setInitialFocus
@@ -137,12 +137,12 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 >
                     <div className={contentStyles.header}>
                         <span id={titleId}>{label}</span>
-                        <IconButton
+                        {isInfoCalloutVisible && <IconButton
                             styles={iconCloseButtonStyles}
                             iconProps={cancelIcon}
                             ariaLabel="Close popup modal"
                             onClick={toggleIsCalloutVisible}
-                        />
+                        />}
                     </div>
 
                     <div className={contentStyles.body}>
