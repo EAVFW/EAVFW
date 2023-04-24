@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { FieldTemplateProps } from "@rjsf/core";
 import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, IStackStyles, IStackTokens, ITheme, Label, mergeStyleSets, Stack, Text, ThemeContext } from "@fluentui/react";
 import { List } from "@fluentui/react";
@@ -98,6 +98,9 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const warnings = useContext(WarningContext);
     const [isWarningCalloutVisible, { toggle: toggleIsWarningCalloutVisible }] = useBoolean(false);
     const iconButtonWarningId = useId('iconButtonWarningId');
+    const [isInfoCalloutVisibleOnHover, setIsInfoCalloutVisibleOnHover] = useState(false)
+    const [isWarningCalloutVisibleOnHover, setIsWarningCalloutVisibleOnHover] = useState(false)
+
 
     return (
         <>
@@ -110,6 +113,8 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     title="Info"
                     ariaLabel="Info"
                     onClick={toggleIsCalloutVisible}
+                    onMouseEnter={() => setIsInfoCalloutVisibleOnHover(true)}
+                    onMouseLeave={() => setIsInfoCalloutVisibleOnHover(false)}
                     styles={iconButtonStyles}
                 />}
                 {warnings.length > 0 && <IconButton
@@ -122,7 +127,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 />}
             </Stack>
 
-            {isInfoCalloutVisible && (
+            {isInfoCalloutVisibleOnHover && (
                 <Callout
                     target={'#' + iconButtonId}
                     setInitialFocus
