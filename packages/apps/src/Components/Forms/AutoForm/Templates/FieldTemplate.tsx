@@ -82,6 +82,18 @@ const cancelIcon: IIconProps = { iconName: 'Cancel' };
 export const WarningContext = createContext <Array<{logicalName:string, warning:string}>>([]);
 
 
+export type DescriptionComponentProps = {
+    descriptionId: string;
+    description: string;
+}
+
+export const DefaultDescriptionComponent = ({ description, descriptionId }: DescriptionComponentProps) => {
+    return <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": description }}></span>
+}
+
+const DescriptionComponentContext = createContext({ renderFunc: DefaultDescriptionComponent });
+
+export const DescriptionComponentProvider = (props: { renderFunc: any, children: any }) => <DescriptionComponentContext.Provider value={props}>{props.children}</DescriptionComponentContext.Provider>;
 
 export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boolean, disabled?: boolean, description: string }> = ({ id, description, required, label, disabled,...props }) => {
     const { data:_label, isLoading, error } = useExpressionParser(label);
@@ -100,6 +112,8 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const iconButtonWarningId = useId('iconButtonWarningId');
     const [isInfoCalloutVisibleOnHover, setIsInfoCalloutVisibleOnHover] = useState(false)
     const [isWarningCalloutVisibleOnHover, setIsWarningCalloutVisibleOnHover] = useState(false)
+
+    const { renderFunc : DescriptionComponent } = useContext(DescriptionComponentContext);
 
     return (
         <>
@@ -152,7 +166,8 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
 
                     <div className={contentStyles.body}>
                         <Stack tokens={stackTokens} horizontalAlign="start" styles={labelCalloutStackStyles}>
-                            {description && <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": description }}></span>}
+                            <DescriptionComponent description={description} descriptionId={descriptionId} />
+
                             {/*  <DefaultButton onClick={toggleIsCalloutVisible}>Close</DefaultButton>*/}
                         </Stack>
                     </div>
@@ -223,7 +238,7 @@ const FieldTemplate = ({
     classNames = "ms-Grid-col ms-sm12 " + classNames.replace("form-group", "");
     return (
         <WarningContext.Provider value={warnings}>
-        <div
+            <div
             className={classNames}
             style={{ marginBottom: 15, display: hidden ? "none" : undefined }}>
 
