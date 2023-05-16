@@ -7,6 +7,7 @@ export type AutoFormSectionsDefinition = {
 }
 export type AutoFormColumnsDefinition = {
     title?: string;
+    separatorLineAbove?: boolean;
     columns?: {
         [columnName: string]: {
             sections: AutoFormSectionsDefinition

@@ -40,6 +40,7 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
         formContext,
         extraErrors
     } = props;
+
     try {
         console.group("ColumnComponent: Column: " + columnName);
 
@@ -60,9 +61,6 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
             <Stack verticalFill className="form-column">
                 {Object.keys(sections).map((sectionName, idx) => (
                     <Stack.Item grow key={sectionName}>
-                        {(sections[sectionName].title !== undefined) && (
-                            <span style={{ marginLeft: 10 }}>{sections[sectionName].title}</span>)}
-
                         <SectionComponent<T>
                             form={form}
                             tabName={tabName}
