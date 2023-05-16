@@ -59,7 +59,10 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
         const ui = (
             <Stack verticalFill className="form-column">
                 {Object.keys(sections).map((sectionName, idx) => (
-                    <Stack.Item  grow key={sectionName}>
+                    <Stack.Item grow key={sectionName}>
+                        {(sections[sectionName].title !== undefined) && (
+                            <span style={{ marginLeft: 10 }}>{sections[sectionName].title}</span>)}
+
                         <SectionComponent<T>
                             form={form}
                             tabName={tabName}

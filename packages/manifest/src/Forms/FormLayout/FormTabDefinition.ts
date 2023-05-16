@@ -4,9 +4,9 @@ export type AutoFormControlsDefinition = {
 };
 export type AutoFormSectionsDefinition = {
     [sectionName: string]: AutoFormColumnsDefinition | AutoFormControlsDefinition | any;
-   
 }
 export type AutoFormColumnsDefinition = {
+    title?: string;
     columns?: {
         [columnName: string]: {
             sections: AutoFormSectionsDefinition
