@@ -280,9 +280,9 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
 
         return (
             <>
-                {(section.separatorLineAbove) && (
+                {(section?.separatorLineAbove) && (
                     <ColoredLine color="lightgray" />)}
-                {(section.title !== undefined) && (
+                {(section?.title !== undefined) && (
                     <span style={{ marginLeft: 10 }}>{section.title}</span>)}
                 <Panel
                     headerText="Quick Create" styles={{ scrollableContent: { display: 'flex', flexDirection: 'column', flexGrow: 1 } }}
