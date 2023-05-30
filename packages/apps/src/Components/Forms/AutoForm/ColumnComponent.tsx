@@ -40,6 +40,7 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
         formContext,
         extraErrors
     } = props;
+
     try {
         console.group("ColumnComponent: Column: " + columnName);
 
@@ -59,7 +60,7 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
         const ui = (
             <Stack verticalFill className="form-column">
                 {Object.keys(sections).map((sectionName, idx) => (
-                    <Stack.Item  grow key={sectionName}>
+                    <Stack.Item grow key={sectionName}>
                         <SectionComponent<T>
                             form={form}
                             tabName={tabName}

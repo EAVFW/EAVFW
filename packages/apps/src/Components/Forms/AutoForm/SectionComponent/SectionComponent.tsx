@@ -266,8 +266,24 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
 
         const { currentAppName, currentAreaName } = useAppInfo();
 
+        const ColoredLine = ({ color = "lightgray" }) => (
+            <hr
+                style={{
+                    color: color,
+                    backgroundColor: color,
+                    height: 1,
+                    marginTop: 10,
+                    marginBottom: 5
+                }}
+            />
+        );
+
         return (
             <>
+                {(section?.separatorLineAbove) && (
+                    <ColoredLine color="lightgray" />)}
+                {(section?.title !== undefined) && (
+                    <span style={{ marginLeft: 10 }}>{section.title}</span>)}
                 <Panel
                     headerText="Quick Create" styles={{ scrollableContent: { display: 'flex', flexDirection: 'column', flexGrow: 1 } }}
                     isOpen={isOpen}

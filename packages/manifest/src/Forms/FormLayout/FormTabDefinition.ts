@@ -4,9 +4,10 @@ export type AutoFormControlsDefinition = {
 };
 export type AutoFormSectionsDefinition = {
     [sectionName: string]: AutoFormColumnsDefinition | AutoFormControlsDefinition | any;
-   
 }
 export type AutoFormColumnsDefinition = {
+    title?: string;
+    separatorLineAbove?: boolean;
     columns?: {
         [columnName: string]: {
             sections: AutoFormSectionsDefinition
