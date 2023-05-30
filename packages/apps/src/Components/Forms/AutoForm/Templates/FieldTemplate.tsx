@@ -166,7 +166,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
 
                     <div className={contentStyles.body}>
                         <Stack tokens={stackTokens} horizontalAlign="start" styles={labelCalloutStackStyles}>
-                            <DescriptionComponent description={description} descriptionId={descriptionId} />
+                            <DescriptionComponent description={description} descriptionId={id ?? descriptionId} />
 
                             {/*  <DefaultButton onClick={toggleIsCalloutVisible}>Close</DefaultButton>*/}
                         </Stack>
