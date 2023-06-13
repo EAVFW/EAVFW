@@ -99,7 +99,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const { data:_label, isLoading, error } = useExpressionParser(label);
     console.log("EAVFWLabel:", id, description, required, label, disabled, props);
     const [isInfoCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
-    const descriptionId = useId('description');
+    const descriptionId = useId(id + '_description');
     const iconButtonId = useId('iconButton');
     const titleId = useId('title');
     const _theme = useContext(ThemeContext);
