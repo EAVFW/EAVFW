@@ -99,7 +99,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const { data:_label, isLoading, error } = useExpressionParser(label);
     console.log("EAVFWLabel:", id, description, required, label, disabled, props);
     const [isInfoCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
-    const descriptionId = useId(id + '_description');
+    const descriptionId = useId(id + '_description');   //id contains data attribute, so reference is possible through descriptionId
     const iconButtonId = useId('iconButton');
     const titleId = useId('title');
     const _theme = useContext(ThemeContext);
@@ -167,6 +167,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     <div className={contentStyles.body}>
                         <Stack tokens={stackTokens} horizontalAlign="start" styles={labelCalloutStackStyles}>
                             <DescriptionComponent description={description} descriptionId={descriptionId} />
+
                             {/*  <DefaultButton onClick={toggleIsCalloutVisible}>Close</DefaultButton>*/}
                         </Stack>
                     </div>
