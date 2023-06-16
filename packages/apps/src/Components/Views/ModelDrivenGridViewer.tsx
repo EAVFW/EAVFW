@@ -418,7 +418,39 @@ const DefaultOnBuildFetchQuery = (q: any) => q;
 const Footer = () => {
     return <div>Hello</div>
 }
+function setCount(fetchQuery?: IFetchQuery, count = true) {
+    if (fetchQuery) {
+        let clone = { ...fetchQuery } as IFetchQuery;
+        if (clone['$count'] !== count) {
+            clone['$count'] = count;
+            return clone;
+        }
 
+    }
+    return fetchQuery;
+}
+function setTop(fetchQuery?: IFetchQuery, top = 100) {
+    if (fetchQuery) {
+        let clone = { ...fetchQuery } as IFetchQuery;
+        if (clone['$top'] !== top) {
+            clone['$top'] = top;
+            return clone;
+        }
+
+    }
+    return fetchQuery;
+}
+function setSkip(fetchQuery?: IFetchQuery, skip = 0) {
+    if (fetchQuery) {
+        let clone = { ...fetchQuery } as IFetchQuery;
+        if (clone['$skip'] !== skip) {
+            clone['$skip'] = skip;
+            return clone;
+        }
+
+    }
+    return fetchQuery;
+}
 export function ModelDrivenGridViewer(
     {
         allowNoPaging,
@@ -481,19 +513,7 @@ export function ModelDrivenGridViewer(
         }
     }, [stateCommands]);
 
-
-
-
-    //  setSelection(selection.current);
-
-
-
-
-
-
-    //function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
-    //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
-    //}
+     
 
     const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords, enabled: pagingContextEnabled } = usePaging();
     const pagingDisabled = useMemo(() => viewDefinition?.paging === false || (typeof (viewDefinition?.paging) === "object" && viewDefinition?.paging?.enabled === false), [viewDefinition]);
@@ -502,7 +522,11 @@ export function ModelDrivenGridViewer(
         throw new Error(`Please wrap ModelDrivenEntityViewer with the PagingProvider or set allowNoPaging=true: pagingContextEnabled=${pagingContextEnabled}, allowNoPaging=${allowNoPaging}, pagingDisabled=${pagingDisabled}`);
 
     console.log("Render FetchQuery", [viewDefinition, fetchQuery]);
-    const { data, isError, isLoading, mutate } = queryEntitySWR(entity, fetchQuery, !newRecord && typeof fetchQuery !== "undefined");
+    if (fetchQuery) {
+        fetchQuery['$count'] = false;
+    }
+    const { data, isError, isLoading, mutate } = queryEntitySWR(entity, setCount( fetchQuery,false), !newRecord && typeof fetchQuery !== "undefined");
+    const { data: count } = queryEntitySWR(entity, setSkip( setTop( setCount(fetchQuery,true),0),0), !newRecord && typeof fetchQuery !== "undefined");
 
     useEffect(() => {
 
@@ -553,7 +577,7 @@ export function ModelDrivenGridViewer(
 
     //     fetchCallBack();
     // }, [formData?.modifiedon, selectedView]);
-    useEffect(() => { setTotalRecords(data?.count ?? -1); }, [data?.count]);
+    useEffect(() => { setTotalRecords(count?.count ?? -1); }, [count?.count]);
 
 
     const user = useUserProfile();
