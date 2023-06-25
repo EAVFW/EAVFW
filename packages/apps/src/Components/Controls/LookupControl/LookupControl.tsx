@@ -30,7 +30,7 @@ import { FormRender } from "../../Forms/FormRender";
 import { FormValidation } from "../../Forms/FormValidation";
 import { useModelDrivenApp } from "../../../useModelDrivenApp";
 import { useEAVForm } from "@eavfw/forms";
-import { EAVFOrmOnChangeHandler } from "../../../../../forms/src/EAVFormContextActions";
+import { EAVFormOnChangeCallbackContext, EAVFOrmOnChangeHandler } from "../../../../../forms/src/EAVFormContextActions";
 import { useFormHost } from "../../Forms/ModelDrivenEntityViewer";
 import { useAsyncMemo } from "../../../../../hooks/src";
 
@@ -185,7 +185,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
      * Modals change data inline and first saved to db as part of triggering save data.
      * @param data
      */
-    const _onModalSubmit = useCallback((data: any) => {
+    const _onModalSubmit = useCallback((data: any, localctx: EAVFormOnChangeCallbackContext) => {
         console.log("Submitting Modal", data);
         //let o = localOptions.current;
         //if (o.filter(o => o.key === DUMMY_DATA_KEY).length === 0)
@@ -200,8 +200,11 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         setSelectedKey(DUMMY_DATA_KEY);
         setDummyData(data);
 
-        onChange(props => {
-            props[logicalName.slice(0, -2)] = data
+        onChange((props, ctx: EAVFormOnChangeCallbackContext) => {
+            props[logicalName.slice(0, -2)] = data;
+            
+            ctx.autoSave = localctx?.autoSave;
+            
         });
 
     }, []);
@@ -216,7 +219,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         index?: number) => {
 
         console.log("LookupControl: on change", [event, option, index]);
-        onChange(props => {
+        onChange(props => {            
             if (option?.key === "dummy") {
                 delete props[logicalName];
                 props[logicalName.slice(0, -2)] = dummyData
@@ -290,6 +293,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         </Modal>
 
         <ComboBox
+            id={`${targetEntityName}_${logicalName}_combo`} 
             componentRef={ref}
             disabled={disabled}
 
@@ -350,7 +354,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                     boxShadow: `rgb(0 0 0 / 13%) 0px 3.2px 7.2px 0px, rgb(0 0 0 / 11%) 0px 0.6px 1.8px 0px`
                 })}>
                     <Stack style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-                        <CommandButton text={localization.new} styles={commandback} iconProps={emojiIcon}
+                        <CommandButton id={`${targetEntityName}_${logicalName}_new`} text={localization.new} styles={commandback} iconProps={emojiIcon}
                             onClick={(e) => _showModal()} />
                         <CommandButton text={localization.clear} styles={commandback} iconProps={emojiIconClear}
                             onClick={resetValue} />

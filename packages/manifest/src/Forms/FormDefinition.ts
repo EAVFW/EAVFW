@@ -14,6 +14,14 @@ export type FormDefinition = {
         }
     };
     query?:any,
+    scripts?: {
+        onInit?: {
+            [name: string]: string;
+        };
+        preSave?: {
+            [name: string]: string;
+        };
+    };
     layout: {
         tabs: {
             [tabName: string]: FormTabDefinition;

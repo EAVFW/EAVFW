@@ -1,15 +1,17 @@
-import { LookupType } from "@eavfw/manifest";
+import { EntityDefinition, FormDefinition, LookupType } from "@eavfw/manifest";
 import { DefaultButton, PrimaryButton, Stack, Sticky, StickyPositionType } from "@fluentui/react";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { capitalize } from "@eavfw/utils";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { FormRenderProps } from "./FormRenderProps";
 import ModelDrivenEntityViewer from "./ModelDrivenEntityViewer";
+import { ResolveFeature } from "../../FeatureFlags";
+import { errorMessageFactory, useMessageContext } from "../../Components/MessageArea";
 
+export type PreSaveValidator = (data: any, e: EntityDefinition) => PreSaveValidatorResult;
+export interface PreSaveValidatorResult { success: boolean, msg?: string };
 
 const buttonStyles = { root: { marginRight: 8 } };
-
-
 
 export function FormRender<T>(props: FormRenderProps) {
     const { dismissPanel, onChange, extraErrors } = props;
@@ -18,6 +20,7 @@ export function FormRender<T>(props: FormRenderProps) {
     const entity = app.getEntity(entityName);
     const forms = entity.forms!;
     console.log("FormRender", [entityName, entity, forms]);
+
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
     const saveBtnText = forms?.[formName]?.buttons?.save?.text      //gets text for naming of save btn in modal if it is defined
     const cancelBtnText = forms?.[formName]?.buttons?.cancel?.text  //gets text for naming of cancel btn in modal if it is defined
@@ -25,12 +28,39 @@ export function FormRender<T>(props: FormRenderProps) {
     //  const record = useRef(props.record ?? {});
     const [record, setRecord] = useState(props.record ?? {});
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
-
+    const [preSaveValidators, setPreSaveValidators] = useState<PreSaveValidator[]>([]);
+    const {addMessage, removeMessage} = useMessageContext();    
+    
     const _onSave = () => {
+        
         console.log("Closing Modal", record);
-        onChange(record);
-        dismissPanel.call(undefined, "save");
+        var results = preSaveValidators.map((c) => c(record, entity))
+        if (results.every(r => r.success === true))
+        {
+            onChange(record, {autoSave: preSaveValidators.length > 0});
+            dismissPanel.call(undefined, "save");
+        }
+        else {
+            addMessage('entitySaved', errorMessageFactory({
+                key: 'entitySaved',
+                messages: results.filter(s => !s.success && s.msg).map(m => m.msg!),
+                removeMessage: removeMessage
+            }));
+        }
     };
+
+    useEffect(() => {
+        const form = forms[formName];
+        if (form?.scripts?.preSave) {
+            Object.getOwnPropertyNames(form.scripts.preSave).forEach(name => {
+                const preSave = ResolveFeature(form.scripts!.preSave![name]) as PreSaveValidator;
+                if (preSave) {
+                    setPreSaveValidators([...preSaveValidators,preSave]);
+                }
+            })
+        }
+    },[]);
+
     useEffect(() => {
         console.log("Form Render, Record Updated:", props.record)
         //  record.current = props.record;
@@ -67,10 +97,8 @@ export function FormRender<T>(props: FormRenderProps) {
 
     return <>
         <Stack.Item grow style={{ height: 'calc(100% - 80px)' }}>
-
             <ModelDrivenEntityViewer key={`${entityName}${formName}`} related={related} onChange={_onChange} record={record} formName={formName}
                 entityName={entityName} entity={entity} locale={app.locale} extraErrors={extraErrors} />
-
             <RenderFooterContent />
         </Stack.Item>
     </>
