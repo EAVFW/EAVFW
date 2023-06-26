@@ -1,5 +1,5 @@
 import { EntityDefinition, FormDefinition, LookupType } from "@eavfw/manifest";
-import { DefaultButton, PrimaryButton, Stack, Sticky, StickyPositionType } from "@fluentui/react";
+import { DefaultButton, MessageBar, MessageBarType, PrimaryButton, Stack, Sticky, StickyPositionType } from "@fluentui/react";
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { capitalize } from "@eavfw/utils";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
@@ -29,7 +29,8 @@ export function FormRender<T>(props: FormRenderProps) {
     const [record, setRecord] = useState(props.record ?? {});
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
     const [preSaveValidators, setPreSaveValidators] = useState<PreSaveValidator[]>([]);
-    const {addMessage, removeMessage} = useMessageContext();    
+    const {addMessage, removeMessage} = useMessageContext();
+    const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
     
     const _onSave = () => {
         
@@ -38,12 +39,15 @@ export function FormRender<T>(props: FormRenderProps) {
         if (results.every(r => r.success === true))
         {
             onChange(record, {autoSave: preSaveValidators.length > 0});
+            setErrorMsg(undefined);
             dismissPanel.call(undefined, "save");
         }
         else {
+            const errors = results.filter(s => !s.success && s.msg).map(m => m.msg!);
+            setErrorMsg(errors.join(", "));
             addMessage('entitySaved', errorMessageFactory({
                 key: 'entitySaved',
-                messages: results.filter(s => !s.success && s.msg).map(m => m.msg!),
+                messages: errors,
                 removeMessage: removeMessage
             }));
         }
@@ -72,6 +76,7 @@ export function FormRender<T>(props: FormRenderProps) {
     const RenderFooterContent = React.useCallback(
         () => (
             <Stack horizontal horizontalAlign="end" styles={{ root: { margin: 24 } }}>
+                {errorMsg && <MessageBar messageBarType={MessageBarType.error}>{errorMsg}</MessageBar>}
                 <PrimaryButton onClick={_onSave} styles={buttonStyles}>
                     {saveBtnText ?? (capitalize(app.getLocalization("save") ?? 'Save'))}
                 </PrimaryButton>
