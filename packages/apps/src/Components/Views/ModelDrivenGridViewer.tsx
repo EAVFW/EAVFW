@@ -351,10 +351,29 @@ const getCellText = (item: any, column: IColumn): string => {
         return value.toString();
     }
 
-    return value;
+
+    return convertDateTimeFormat(value);
 };
 
-
+// Takes SQL DateTime format and converts it to DD-MM-YYYY HH:MM:SS
+function convertDateTimeFormat(inputDateTime: string): string {
+    if(inputDateTime !== "") {
+        const inputDate = new Date(inputDateTime);
+    
+        const day = String(inputDate.getUTCDate()).padStart(2, '0');
+        const month = String(inputDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const year = inputDate.getUTCFullYear();
+        
+        const hours = String(inputDate.getUTCHours()).padStart(2, '0');
+        const minutes = String(inputDate.getUTCMinutes()).padStart(2, '0');
+        const seconds = String(Math.round(inputDate.getUTCSeconds())).padStart(2, '0');
+        
+        const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
+        return formattedDateTime
+    } else {
+        return inputDateTime
+    }
+}
 
 const ConditionRenderComponent: React.FC<any> = (
     {
@@ -368,8 +387,11 @@ const ConditionRenderComponent: React.FC<any> = (
         locale
     }) => {
 
+
     const { onRenderPrimaryField: RenderPrimaryField } = useModelDrivenGridViewerContext();
     const type = attribute.type;
+
+
 
     if (typeof type === "object" && type.type === "choice" && type.options && item) {
         const value = item[column?.fieldName as string];
@@ -382,7 +404,6 @@ const ConditionRenderComponent: React.FC<any> = (
         return null;
 
     } else if (attribute.isPrimaryField) {
-
         return <RenderPrimaryField recordRouteGenerator={recordRouteGenerator} item={item} column={column} />
         //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
 
@@ -391,6 +412,7 @@ const ConditionRenderComponent: React.FC<any> = (
         console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]);
         console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]?.length);
         console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]?.trim()?.length);
+        
         //TODO - Add Toggle in manifest to use hyperlink vs modal
         return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
            
