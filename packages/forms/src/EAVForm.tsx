@@ -397,7 +397,13 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
    
     const global_etag = useRef<string>(new Date().toISOString());
     const [etag, setEtag] = useState(new Date().toISOString());
-
+    
+    useEffect(() => {
+        console.log("eavform change", defaultData); 
+        state.formValues = cloneDeep(defaultData);
+        setEtag(global_etag.current = new Date().toISOString());
+    }, [defaultData])
+    
     useEffect(() => {
         if (blazor.isEnabled ) {
             let t = new Date().getTime();
