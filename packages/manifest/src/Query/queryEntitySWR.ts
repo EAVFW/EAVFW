@@ -8,6 +8,9 @@ import { useClientContext } from "./clientContext";
 import { useJsonFetcher } from "./jsonFetcher";
 
 
+function isDefined(x: any) {
+    return !(typeof (x) === "undefined" || x === null || x==='');
+}
 export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, query: any = {}, ready = true) {
 
     const [baseUrl, jsonFetcher] = useJsonFetcher();
@@ -18,7 +21,7 @@ export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, quer
 
     function keyFactory() {
          
-        let q = Object.keys(query).filter(k => query[k]).map(k => `${k}=${query[k]}`).join('&');
+        let q = Object.keys(query).filter(k => isDefined( query[k]) ).map(k => `${k}=${query[k]}`).join('&');
 
         const key = `${baseUrl}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`;
         console.log("queryEntitySWR: keygen" + (ready ? key : null), [query]);

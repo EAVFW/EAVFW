@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { FieldTemplateProps } from "@rjsf/core";
 import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, IStackStyles, IStackTokens, ITheme, Label, mergeStyleSets, Stack, Text, ThemeContext } from "@fluentui/react";
 import { List } from "@fluentui/react";
@@ -82,12 +82,24 @@ const cancelIcon: IIconProps = { iconName: 'Cancel' };
 export const WarningContext = createContext <Array<{logicalName:string, warning:string}>>([]);
 
 
+export type DescriptionComponentProps = {
+    descriptionId: string;
+    description: string;
+}
+
+export const DefaultDescriptionComponent = ({ description, descriptionId }: DescriptionComponentProps) => {
+    return <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": description }}></span>
+}
+
+const DescriptionComponentContext = createContext({ renderFunc: DefaultDescriptionComponent });
+
+export const DescriptionComponentProvider = (props: { renderFunc: any, children: any }) => <DescriptionComponentContext.Provider value={props}>{props.children}</DescriptionComponentContext.Provider>;
 
 export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boolean, disabled?: boolean, description: string }> = ({ id, description, required, label, disabled,...props }) => {
     const { data:_label, isLoading, error } = useExpressionParser(label);
     console.log("EAVFWLabel:", id, description, required, label, disabled, props);
     const [isInfoCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
-    const descriptionId = useId('description');
+    const descriptionId = useId(id + '_description');   //id contains data attribute, so reference is possible through descriptionId
     const iconButtonId = useId('iconButton');
     const titleId = useId('title');
     const _theme = useContext(ThemeContext);
@@ -98,6 +110,10 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const warnings = useContext(WarningContext);
     const [isWarningCalloutVisible, { toggle: toggleIsWarningCalloutVisible }] = useBoolean(false);
     const iconButtonWarningId = useId('iconButtonWarningId');
+    const [isInfoCalloutVisibleOnHover, setIsInfoCalloutVisibleOnHover] = useState(false)
+    const [isWarningCalloutVisibleOnHover, setIsWarningCalloutVisibleOnHover] = useState(false)
+
+    const { renderFunc : DescriptionComponent } = useContext(DescriptionComponentContext);
 
     return (
         <>
@@ -110,6 +126,10 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     title="Info"
                     ariaLabel="Info"
                     onClick={toggleIsCalloutVisible}
+                    onMouseEnter={() => setIsInfoCalloutVisibleOnHover(true)}
+                    onMouseLeave={() => setIsInfoCalloutVisibleOnHover(false)}
+                    onFocus={() => setIsInfoCalloutVisibleOnHover(true)}
+                    onBlur={() => setIsInfoCalloutVisibleOnHover(false)}
                     styles={iconButtonStyles}
                 />}
                 {warnings.length > 0 && <IconButton
@@ -118,11 +138,15 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     title="Warning"
                     ariaLabel="Warning"
                     onClick={toggleIsWarningCalloutVisible}
+                    onMouseEnter={() => setIsWarningCalloutVisibleOnHover(true)}
+                    onMouseLeave={() => setIsWarningCalloutVisibleOnHover(false)}
+                    onFocus={() => setIsWarningCalloutVisibleOnHover(true)}
+                    onBlur={() => setIsWarningCalloutVisibleOnHover(false)}
                     styles={iconWarningButtonStyles}
                 />}
             </Stack>
 
-            {isInfoCalloutVisible && (
+            {(isInfoCalloutVisible || isInfoCalloutVisibleOnHover) && (
                 <Callout
                     target={'#' + iconButtonId}
                     setInitialFocus
@@ -132,17 +156,18 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 >
                     <div className={contentStyles.header}>
                         <span id={titleId}>{label}</span>
-                        <IconButton
+                        {isInfoCalloutVisible && <IconButton
                             styles={iconCloseButtonStyles}
                             iconProps={cancelIcon}
                             ariaLabel="Close popup modal"
                             onClick={toggleIsCalloutVisible}
-                        />
+                        />}
                     </div>
 
                     <div className={contentStyles.body}>
                         <Stack tokens={stackTokens} horizontalAlign="start" styles={labelCalloutStackStyles}>
-                            {description && <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": description }}></span>}
+                            <DescriptionComponent description={description} descriptionId={descriptionId} />
+
                             {/*  <DefaultButton onClick={toggleIsCalloutVisible}>Close</DefaultButton>*/}
                         </Stack>
                     </div>
@@ -150,7 +175,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
             )}
 
 
-            {isWarningCalloutVisible && (
+            {(isWarningCalloutVisible || isWarningCalloutVisibleOnHover) && (
                 <Callout
                     target={'#' + iconButtonWarningId}
                     setInitialFocus
@@ -160,12 +185,12 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                 >
                     <div className={contentStyles.headerWarn}>
                         <span id={titleId}>{label}</span>
-                        <IconButton
+                        {isWarningCalloutVisible && <IconButton
                             styles={iconCloseButtonStyles}
                             iconProps={cancelIcon}
                             ariaLabel="Close popup modal"
                             onClick={toggleIsWarningCalloutVisible}
-                        />
+                        />}
                     </div>
 
                     <div className={contentStyles.body}>
@@ -213,7 +238,7 @@ const FieldTemplate = ({
     classNames = "ms-Grid-col ms-sm12 " + classNames.replace("form-group", "");
     return (
         <WarningContext.Provider value={warnings}>
-        <div
+            <div
             className={classNames}
             style={{ marginBottom: 15, display: hidden ? "none" : undefined }}>
 

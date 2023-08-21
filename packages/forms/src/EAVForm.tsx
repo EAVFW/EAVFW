@@ -166,6 +166,7 @@ export const VisitedContainer: React.FC<{ id: string, initialdata?: VisitedField
         setParentVisitedFields(id, refVisitedFields.current);
     }, [id]);
 
+
    
  
 
@@ -535,6 +536,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
         },
         onChange: (cb) => {
+
             console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Start`, [new Error()]);
             const updatedProps = cloneDeep(state.formValues);
             const ctx: EAVFormOnChangeCallbackContext = { skipValidation:false };
@@ -556,13 +558,12 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
                 const local = global_etag.current = new Date().toISOString();
                 state.formValues = updatedProps;
-               // mergeAndUpdate(state.formValues=cloneDeep(state.formValues), changedValues);
+              
                 console.log("Updated Props", [changed, changedValues, JSON.stringify(state.formValues, null, 4), state]);
-              //  state.errors = {}; //TODO, only clear errors on fields that updated;
-              //  console.log("Clearing Errors from changed Values", [changedValues,state.errors]);
+               
                 let cloneerrors = cloneDeep(state.errors);
                 clearErrorsFromDiff(state.errors, a);
-               // clearErrors(state.errors, changedValues);
+               
                 console.log(`Run Validation: Cleared Errors from changed Values[\n${JSON.stringify(cloneerrors)},\n${JSON.stringify(changedValues)},\n${JSON.stringify(state.errors) }]`);
 
 
@@ -570,7 +571,8 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     let t = new Date().getTime();
                     state.isErrorsUpdated = false;
                     setTimeout(() => {
-                        if (blazor.updateFormDataFunction) {
+                        if (blazor.updateFormDataFunction && local === global_etag.current) {
+                            console.log(`[${new Date().toISOString()}]RUN ACTION Invoking ${blazor.updateFormDataFunction}`, [local , global_etag.current,changed]);
                             DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(
                                 blazor.namespace, blazor.updateFormDataFunction,
                                 formId,

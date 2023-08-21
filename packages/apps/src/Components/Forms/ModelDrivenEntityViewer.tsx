@@ -16,6 +16,7 @@ import { FormSelectorComponent } from "./FormSelectorComponent";
 import FormComponent from "./AutoForm/FormComponent";
 import { useAppInfo } from "../../useAppInfo";
 import { useFormChangeHandlerProvider } from "./useFormChangeHandler";
+import { useRibbon } from "../../Components/Ribbon";
 
 
 
@@ -338,6 +339,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
     const { record: record2, onChangeCallback, extraErrors: extraErrors2 } = useFormChangeHandlerProvider();
     const { record = record2, entityName, formName, entity, onChange = onChangeCallback, related, extraErrors = extraErrors2 } = props;
+    const { events } = useRibbon();
    
    
 
@@ -510,10 +512,17 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
             }
         }
 
+        
+
         console.log("FormData Changed", { changes: formdata, new: formdatamerger.current });
 
 
-        return onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
+        onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
+        setTimeout(() => {
+        if (ctx?.autoSave)
+        {
+            events.emit('onSave');
+        }});
     }, [onFormDataChange2]);
 
 

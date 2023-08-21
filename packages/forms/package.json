@@ -3,7 +3,7 @@
   "description": "EAVFW Forms",
   "version": "0.0.38",
   "peerDependencies": {
-    "react": "17.0.2"
+    "react": "18.2.0"
   },
   "dependencies": {
     "react-fast-compare": "3.2.0",
