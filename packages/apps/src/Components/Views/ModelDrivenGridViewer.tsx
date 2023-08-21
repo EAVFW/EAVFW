@@ -340,40 +340,59 @@ function _getKey(item: any, index?: number): string {
 
 
 
+/**
+ * @author sis@delegate.dk
+ * Retrieves the text content of a cell based on the provided item and column information.
+ * @param item The data item representing a row.
+ * @param column The column information object.
+ * @returns The text content to be displayed in the cell.
+ */
 const getCellText = (item: any, column: IColumn): string => {
+    // Get the value from the item's property specified by the column's fieldName.
     let value = item && column && column.fieldName ? item[column.fieldName] : '';
 
+    // Handle null or undefined values by setting them to an empty string.
     if (value === null || value === undefined) {
         value = '';
     }
 
+    // Convert boolean values to string representation.
     if (typeof value === 'boolean') {
         return value.toString();
     }
 
-
+    // Convert and format the value as a date and time string.
     return convertDateTimeFormat(value);
 };
 
-// Takes SQL DateTime format and converts it to DD-MM-YYYY HH:MM:SS
+/**
+ * @author sis@delegate.dk
+ * Converts a SQL DateTime format to the format DD-MM-YYYY HH:MM:SS.
+ * @param inputDateTime The input date and time in SQL DateTime format.
+ * @returns The formatted date and time string in DD-MM-YYYY HH:MM:SS format.
+ */
 function convertDateTimeFormat(inputDateTime: string): string {
-    if(inputDateTime !== "") {
+    if (inputDateTime !== "") {
         const inputDate = new Date(inputDateTime);
     
+        // Extract day, month, year, hours, minutes, and seconds from the input date.
         const day = String(inputDate.getUTCDate()).padStart(2, '0');
-        const month = String(inputDate.getUTCMonth() + 1).padStart(2, '0'); // Months are 0-based
+        const month = String(inputDate.getUTCMonth() + 1).padStart(2, '0');
         const year = inputDate.getUTCFullYear();
         
         const hours = String(inputDate.getUTCHours()).padStart(2, '0');
         const minutes = String(inputDate.getUTCMinutes()).padStart(2, '0');
         const seconds = String(Math.round(inputDate.getUTCSeconds())).padStart(2, '0');
         
+        // Construct and return the formatted date and time string.
         const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-        return formattedDateTime
+        return formattedDateTime;
     } else {
-        return inputDateTime
+        // Return the input as is when it's an empty string.
+        return inputDateTime;
     }
 }
+
 
 const ConditionRenderComponent: React.FC<any> = (
     {
