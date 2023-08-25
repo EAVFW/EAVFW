@@ -364,14 +364,6 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     //  const [etag, setEtag] = useState(new Date().toISOString());
 
     //  const outerRecord = useObservable(record, info.currentRecordId, info.currentEntityName);
-    /**
-     * When recordid or entityname changes, reset to other record.
-     **/
-    useEffect(() => {
-        console.log("Changing form record state from outside", [record, record?.name, info.currentRecordId, info.currentEntityName]);
-        formDataRef.current = record;
-        //  setEtag(new Date().toISOString());
-    }, [record]);
 
     const groups = useMemo(() => createRadioGroups(form, entity), [form, entity]);
 
@@ -525,6 +517,13 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
         }});
     }, [onFormDataChange2]);
 
+    /**
+     * When recordid or entityname changes, reset to other record.
+     **/
+    useEffect(() => {
+        console.log("Changing form record state from outside", [record, record?.name, info.currentRecordId, info.currentEntityName]);
+        onFormDataChange(record)
+    }, [record]);
 
     return (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
