@@ -181,8 +181,6 @@ const classNames = mergeStyleSets({
     }
 });
 
-
-
 const ColumnFilterProvider = ({
     children,
     view,
