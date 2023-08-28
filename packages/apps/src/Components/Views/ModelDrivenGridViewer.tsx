@@ -362,7 +362,7 @@ const getCellText = (item: any, column: IColumn): string => {
     }
 
     // Convert and format the value as a date and time string.
-    return convertDateTimeFormat(value);
+    return value;
 };
 
 /**
@@ -410,8 +410,6 @@ const ConditionRenderComponent: React.FC<any> = (
     const { onRenderPrimaryField: RenderPrimaryField } = useModelDrivenGridViewerContext();
     const type = attribute.type;
 
-
-
     if (typeof type === "object" && type.type === "choice" && type.options && item) {
         const value = item[column?.fieldName as string];
 
@@ -449,6 +447,10 @@ const ConditionRenderComponent: React.FC<any> = (
         const CustomControl = Controls[column.data.control] as React.FC<{ value: any }>;
 
         return <CustomControl value={item[attribute.logicalName]}></CustomControl>
+    } else if (type.type === 'datetime') {
+        let value = item && column && column.fieldName ? item[column.fieldName] : '';
+
+        return <>{convertDateTimeFormat(value)}</>;
     }
 
     return <>{getCellText(item, column)}</>
