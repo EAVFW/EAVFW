@@ -465,7 +465,7 @@ const getCellText = (item: any, column: IColumn): string => {
  * @returns The formatted date and time string in DD-MM-YYYY HH:MM:SS format.
  */
 function convertDateTimeFormat(inputDateTime: string): string {
-  if (inputDateTime !== undefined && isValidDateTimeString(inputDateTime)) {
+  if (inputDateTime !== undefined) {
     const inputDate = new Date(inputDateTime);
 
     // Extract day, month, year, hours, minutes, and seconds from the input date.
@@ -487,12 +487,6 @@ function convertDateTimeFormat(inputDateTime: string): string {
     // Return the input as is when it's an empty string.
     return inputDateTime;
   }
-}
-
-function isValidDateTimeString(str: string): boolean {
-  // The regular expression for date-times with a time zone offset.
-  const regex = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/;
-  return regex.test(str);
 }
 
 const ConditionRenderComponent: React.FC<any> = ({
