@@ -465,7 +465,7 @@ const getCellText = (item: any, column: IColumn): string => {
  * @returns The formatted date and time string in DD-MM-YYYY HH:MM:SS format.
  */
 function convertDateTimeFormat(inputDateTime: string): string {
-  if (inputDateTime !== undefined) {
+  if (inputDateTime != undefined) {
     const inputDate = new Date(inputDateTime);
 
     // Extract day, month, year, hours, minutes, and seconds from the input date.
