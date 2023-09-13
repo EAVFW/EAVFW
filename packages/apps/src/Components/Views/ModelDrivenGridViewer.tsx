@@ -459,7 +459,6 @@ const getCellText = (item: any, column: IColumn): string => {
 };
 
 /**
- * @author sis@delegate.dk
  * Converts a SQL DateTime format to the format DD-MM-YYYY HH:MM:SS.
  * @param inputDateTime The input date and time in SQL DateTime format.
  * @returns The formatted date and time string in DD-MM-YYYY HH:MM:SS format.
@@ -468,28 +467,26 @@ function convertDateTimeFormat(inputDateTime: string): string {
   if (inputDateTime != undefined) {
     const inputDate = new Date(inputDateTime);
 
-    // Extract day, month, year, hours, minutes, and seconds from the input date.
-    const day = String(inputDate.getUTCDate()).padStart(2, "0");
-    const month = String(inputDate.getUTCMonth() + 1).padStart(2, "0");
-    const year = inputDate.getUTCFullYear();
+    const localTimeMilliseconds = inputDate.getTime();
+    const adjustedDate = new Date(localTimeMilliseconds);
 
-    const hours = String(inputDate.getUTCHours()).padStart(2, "0");
-    const minutes = String(inputDate.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(Math.round(inputDate.getUTCSeconds())).padStart(
+    const day = String(adjustedDate.getDate()).padStart(2, "0");
+    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
+    const year = adjustedDate.getFullYear();
+
+    const hours = String(adjustedDate.getHours()).padStart(2, "0");
+    const minutes = String(adjustedDate.getMinutes()).padStart(2, "0");
+    const seconds = String(Math.round(adjustedDate.getSeconds())).padStart(
       2,
       "0"
     );
 
-    // Construct and return the formatted date and time string.
     const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
     return formattedDateTime;
   } else {
-    // Return the input as is when it's an empty string.
     return inputDateTime;
   }
 }
-
-//
 
 const ConditionRenderComponent: React.FC<any> = ({
   recordRouteGenerator,
