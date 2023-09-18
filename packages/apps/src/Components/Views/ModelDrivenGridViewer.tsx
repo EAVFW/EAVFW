@@ -434,7 +434,6 @@ function _getKey(item: any, index?: number): string {
 }
 
 /**
- * @author sis@delegate.dk
  * Retrieves the text content of a cell based on the provided item and column information.
  * @param item The data item representing a row.
  * @param column The column information object.
@@ -459,7 +458,6 @@ const getCellText = (item: any, column: IColumn): string => {
 };
 
 /**
- * @author sis@delegate.dk
  * Converts a SQL DateTime format to the format DD-MM-YYYY HH:MM:SS.
  * @param inputDateTime The input date and time in SQL DateTime format.
  * @returns The formatted date and time string in DD-MM-YYYY HH:MM:SS format.
@@ -468,28 +466,20 @@ function convertDateTimeFormat(inputDateTime: string): string {
   if (inputDateTime != undefined) {
     const inputDate = new Date(inputDateTime);
 
-    // Extract day, month, year, hours, minutes, and seconds from the input date.
-    const day = String(inputDate.getUTCDate()).padStart(2, "0");
-    const month = String(inputDate.getUTCMonth() + 1).padStart(2, "0");
-    const year = inputDate.getUTCFullYear();
+    const day = String(inputDate.getDate()).padStart(2, "0");
+    const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+    const year = inputDate.getFullYear();
 
-    const hours = String(inputDate.getUTCHours()).padStart(2, "0");
-    const minutes = String(inputDate.getUTCMinutes()).padStart(2, "0");
-    const seconds = String(Math.round(inputDate.getUTCSeconds())).padStart(
-      2,
-      "0"
-    );
+    const hours = String(inputDate.getHours()).padStart(2, "0");
+    const minutes = String(inputDate.getMinutes()).padStart(2, "0");
+    const seconds = String(Math.round(inputDate.getSeconds())).padStart(2, "0");
 
-    // Construct and return the formatted date and time string.
     const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
     return formattedDateTime;
   } else {
-    // Return the input as is when it's an empty string.
     return inputDateTime;
   }
 }
-
-//
 
 const ConditionRenderComponent: React.FC<any> = ({
   recordRouteGenerator,
