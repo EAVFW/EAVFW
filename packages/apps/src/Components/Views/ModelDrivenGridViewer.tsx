@@ -465,19 +465,14 @@ const getCellText = (item: any, column: IColumn): string => {
 function convertDateTimeFormat(inputDateTime: string): string {
   if (inputDateTime != undefined) {
     const inputDate = new Date(inputDateTime);
-    const localTimeMilliseconds = inputDate.getTime();
-    const adjustedDate = new Date(localTimeMilliseconds);
 
-    const day = String(adjustedDate.getDate()).padStart(2, "0");
-    const month = String(adjustedDate.getMonth() + 1).padStart(2, "0");
-    const year = adjustedDate.getFullYear();
+    const day = String(inputDate.getDate()).padStart(2, "0");
+    const month = String(inputDate.getMonth() + 1).padStart(2, "0");
+    const year = inputDate.getFullYear();
 
-    const hours = String(adjustedDate.getHours()).padStart(2, "0");
-    const minutes = String(adjustedDate.getMinutes()).padStart(2, "0");
-    const seconds = String(Math.round(adjustedDate.getSeconds())).padStart(
-      2,
-      "0"
-    );
+    const hours = String(inputDate.getHours()).padStart(2, "0");
+    const minutes = String(inputDate.getMinutes()).padStart(2, "0");
+    const seconds = String(Math.round(inputDate.getSeconds())).padStart(2, "0");
 
     const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
     return formattedDateTime;
