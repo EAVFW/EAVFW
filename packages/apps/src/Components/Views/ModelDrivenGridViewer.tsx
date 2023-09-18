@@ -434,7 +434,6 @@ function _getKey(item: any, index?: number): string {
 }
 
 /**
- * @author sis@delegate.dk
  * Retrieves the text content of a cell based on the provided item and column information.
  * @param item The data item representing a row.
  * @param column The column information object.
@@ -466,7 +465,6 @@ const getCellText = (item: any, column: IColumn): string => {
 function convertDateTimeFormat(inputDateTime: string): string {
   if (inputDateTime != undefined) {
     const inputDate = new Date(inputDateTime);
-
     const localTimeMilliseconds = inputDate.getTime();
     const adjustedDate = new Date(localTimeMilliseconds);
 
