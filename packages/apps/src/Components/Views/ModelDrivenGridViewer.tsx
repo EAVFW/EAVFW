@@ -42,7 +42,7 @@ import Link from 'next/link';
 import { useBoolean, useId } from "@fluentui/react-hooks"
 
 
-import { AttributeDefinition, EntityDefinition, getNavigationProperty, IRecord, isAttributeLookup, isLookup, LookupAttributeDefinition, LookupType, queryEntitySWR, ViewColumnDefinition, ViewDefinition } from '@eavfw/manifest';
+import { AttributeDefinition, EntityDefinition, getNavigationProperty, IRecord, isAttributeLookup, isLookup, isPolyLookup, LookupAttributeDefinition, LookupType, queryEntitySWR, ViewColumnDefinition, ViewDefinition } from '@eavfw/manifest';
 import { FormRenderProps } from '../Forms/FormRenderProps';
 import { useRibbon } from '../Ribbon/useRibbon';
 import { errorMessageFactory, useMessageContext } from '../MessageArea/MessageContext';
@@ -64,6 +64,7 @@ import { Controls } from '../Controls/ControlRegister';
 import { IFetchQuery, usePaging } from './PagingContext';
 import styles from "./ModelDrivenGridViewer.module.scss";
 import ModelDrivenList from './ModelDrivenList';
+import { ModelDrivenApp } from '../../ModelDrivenApp';
 
 //const theme = getTheme();
 
@@ -356,7 +357,7 @@ const getCellText = (item: any, column: IColumn): string => {
 
 
 
-const ConditionRenderComponent: React.FC<any> = (
+const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn }> = (
     {
         recordRouteGenerator,
         item,
@@ -368,9 +369,12 @@ const ConditionRenderComponent: React.FC<any> = (
         locale
     }) => {
 
+    if (!column)
+        throw new Error("Column not defined");
+
     const { onRenderPrimaryField: RenderPrimaryField } = useModelDrivenGridViewerContext();
     const type = attribute.type;
-
+    console.log("ConditionRenderComponent", [column.key, attribute,item]);
     if (typeof type === "object" && type.type === "choice" && type.options && item) {
         const value = item[column?.fieldName as string];
 
@@ -382,15 +386,49 @@ const ConditionRenderComponent: React.FC<any> = (
         return null;
 
     } else if (attribute.isPrimaryField) {
-
+        console.log("Lookup With Traverse", [column.key, item]);
         return <RenderPrimaryField recordRouteGenerator={recordRouteGenerator} item={item} column={column} />
         //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
 
-    } else if (isLookup(type) && item[attribute.logicalName]) {
-        console.log(item);
-        console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]);
-        console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]?.length);
-        console.log(item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]?.trim()?.length);
+    } else if (isLookup(type)) {
+
+        if (column.key.indexOf('/')!==-1) {
+
+
+            const app = useModelDrivenApp();
+            const [subitem, value, lookup] = traverseRecordPath(app, column, item);
+
+            console.log("Lookup With Traverse", [column.key, item, subitem]);
+            return <Link legacyBehavior={true} href={recordRouteGenerator({ id: subitem.id, entityName: subitem?.["$type"] ?? lookup.type.foreignKey?.principalTable! })} >
+
+                <a>{value}</a>
+
+            </Link>
+        }
+
+        if (!(attribute.logicalName in item)) {
+            return null;
+        }
+
+        const linkedItem = item[attribute.logicalName.slice(0, -2)];
+
+        if (isPolyLookup(type)) {
+            const app = useModelDrivenApp();
+            const referenceType = Object.values(app.getAttributes(app.getEntityFromKey(type.referenceType).logicalName))
+                .filter(a => a.logicalName in linkedItem)[0] as LookupAttributeDefinition;
+
+            const referenceItem = linkedItem[referenceType.logicalName.slice(0, -2)];
+           // return <div>{linkedItem[referenceType.logicalName]}</div>;
+               
+            return <Link legacyBehavior={true} href={recordRouteGenerator({
+                id: linkedItem[referenceType.logicalName],
+                entityName: referenceItem?.["$type"] ?? referenceType.type?.foreignKey?.principalTable!
+            })} >
+           
+                <a>{referenceItem[referenceType.type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+             
+        </Link>
+        }
         //TODO - Add Toggle in manifest to use hyperlink vs modal
         return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
            
@@ -450,10 +488,10 @@ export function ModelDrivenGridViewer(
     const [announcedMessage, setannouncedMessage] = useState<string>();
 
     const [isCompactMode, setisCompactMode] = useState(false);
-    // const [columns, setColumns] = useState<IColumn[]>([]);
+ 
     const attributes = useMemo(() => ({ ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}), ...entity.attributes }), [entityName]);
     const viewDefinition = useMemo(() => entity.views?.[selectedView], [selectedView]);
-    console.log("View", [entity, viewDefinition])
+ 
     const { hideProgressBar, showIndeterminateProgressIndicator } = useProgressBarContext();
 
     const [isModalSelection, setisModalSelection] = useState(entity.views?.[selectedView]?.selection !== false);
@@ -461,11 +499,7 @@ export function ModelDrivenGridViewer(
 
 
     const stateCommands = useLazyMemo<ModelDrivenGridViewerState["commands"]>(() => commands?.({ selection }) ?? rightCommands ?? [], [commands, selection, selectionDetails, appinfo.currentEntityName, appinfo.currentRecordId]);
-
-    //useEffect(() => {
-    //    setCommands(commands?.({ selection }) ?? rightCommands ?? []);
-    //}, [selection, selectionDetails]);
-
+ 
     const { buttons, addButton, removeButton, events } = useRibbon();
 
     useEffect(() => {
@@ -481,20 +515,7 @@ export function ModelDrivenGridViewer(
         }
     }, [stateCommands]);
 
-
-
-
-    //  setSelection(selection.current);
-
-
-
-
-
-
-    //function _copyAndSort<T>(items: T[], columnKey: keyof T, isSortedDescending?: boolean): T[] {
-    //    return items.slice(0).sort((a: T, b: T) => ((isSortedDescending ? a[columnKey] < b[columnKey] : a[columnKey] > b[columnKey]) ? 1 : -1));
-    //}
-
+     
     const { fetchQuery, setFetchQuery, pageSize, currentPage, setTotalRecords, enabled: pagingContextEnabled } = usePaging();
     const pagingDisabled = useMemo(() => viewDefinition?.paging === false || (typeof (viewDefinition?.paging) === "object" && viewDefinition?.paging?.enabled === false), [viewDefinition]);
 
@@ -626,7 +647,7 @@ export function ModelDrivenGridViewer(
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
                                 setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
-                                attribute={attributes[column?.key!]} items={items} locale={locale} />}
+                                attribute={app.getAttribute(attributes, column?.key!)} items={items} locale={locale} />}
                             onItemInvoked={_onItemInvoked}
 
                             onRenderDetailsFooter={pagingDisabled || !pagingContextEnabled ? undefined : RenderDetailsFooter}
@@ -642,7 +663,7 @@ export function ModelDrivenGridViewer(
                             onRenderItemColumn={(item, index, column) => <ConditionRenderComponent
                                 recordRouteGenerator={recordRouteGenerator} item={item} index={index} column={column}
                                 setItems={setItems} formName={Object.keys(entity.forms ?? {})[0]}
-                                attribute={attributes[column?.key!]} items={items} locale={locale} />}
+                                attribute={app.getAttribute(attributes, column?.key!)} items={items} locale={locale} />}
                             onItemInvoked={_onItemInvoked}
 
                             onRenderDetailsFooter={pagingDisabled || !pagingContextEnabled ? undefined : RenderDetailsFooter}
@@ -656,12 +677,61 @@ export function ModelDrivenGridViewer(
     )
 }
 
-
+export type DefaultPrimaryFieldRenderProps = { recordRouteGenerator: (record: IRecord) => string; item: IRecord, column: IColumn }
 export type ModelDrivenGridViewerContextProps = {
-    onRenderPrimaryField: React.FC<{ recordRouteGenerator: (record: IRecord) => string; item: IRecord, column: IColumn }>;
+    onRenderPrimaryField: React.FC<DefaultPrimaryFieldRenderProps>;
 }
 
-const ModelDrivenGridViewerContext = createContext<ModelDrivenGridViewerContextProps>({ onRenderPrimaryField: ({ recordRouteGenerator, item, column }) => <Link legacyBehavior={true} href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link> });
+const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem: any) => {
+  
+     
+
+    let parts = column.key.split('/');
+    let navattributes = app.getEntity(subitem['$type']).attributes;
+    let value = null as any;
+    console.log("DefaultPrimaryFieldRender", [column.key, parts, navattributes])
+    while (parts.length) {
+
+        let nav = parts.shift()!;
+        let attribute = navattributes[nav];
+        if (isAttributeLookup(attribute)) {
+
+          
+            subitem = subitem[attribute.logicalName.slice(0, -2)];
+
+            if (parts.length === 0)
+                return [subitem, subitem[attribute.type.foreignKey?.principalNameColumn?.toLowerCase()!], attribute];
+
+            navattributes = app.getEntityFromKey(attribute.type.referenceType).attributes;
+            console.log("DefaultPrimaryFieldRender", [nav, parts.length, navattributes, attribute, subitem])
+        } else {
+            console.log("DefaultPrimaryFieldRender", [parts, navattributes])
+            value = subitem[attribute.logicalName];
+            break;
+        }
+    }
+    return [subitem, value];
+}
+
+const DefaultPrimaryFieldRender: React.FC<DefaultPrimaryFieldRenderProps> = ({ recordRouteGenerator, item, column }) => {
+
+   
+    if (column.key.indexOf('/') !== -1) {
+       
+      
+        const app = useModelDrivenApp();
+        const [subitem, value] = traverseRecordPath(app, column, item);
+         
+     
+        return <Link legacyBehavior={true} href={recordRouteGenerator(subitem)}><a>{value}</a></Link>;
+    }
+    let value = item[column?.fieldName!] ?? '<ingen navn>';
+    return <Link legacyBehavior={true} href={recordRouteGenerator(item)}><a>{value}</a></Link>;
+}
+
+const ModelDrivenGridViewerContext = createContext<ModelDrivenGridViewerContextProps>({ onRenderPrimaryField: DefaultPrimaryFieldRender });
+
+
 export function useModelDrivenGridViewerContext<T>() { return useContext<ModelDrivenGridViewerContextProps>(ModelDrivenGridViewerContext) as ModelDrivenGridViewerContextProps & T };
 export function ModelDrivenGridViewerContextProvider<T>({ children, ...props }: PropsWithChildren<ModelDrivenGridViewerContextProps & T>) {
     return <ModelDrivenGridViewerContext.Provider value={props} >{children}</ModelDrivenGridViewerContext.Provider>

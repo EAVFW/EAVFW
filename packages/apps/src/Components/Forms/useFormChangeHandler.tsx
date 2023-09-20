@@ -15,9 +15,16 @@ export type FormDataContextProps = {
     record?: IRecord;
     isLoading: boolean;
     onChangeCallback: (formData: any, ctx?: any) => void;
+    addExpand: (str: string) => (() => void);
     extraErrors?: FormValidation
 }
-const FormDataContext = createContext<FormDataContextProps>({ mutate: () => { }, isLoading: false, onChangeCallback: (data, ctx) => { } });
+const FormDataContext = createContext<FormDataContextProps>({
+    mutate: () => { },
+    isLoading: false,
+    onChangeCallback: (data, ctx) => { },
+    addExpand: (str: string) => {
+        return () => { } }
+});
 export const useFormChangeHandlerProvider = () => useContext(FormDataContext);
 export const FormChangeHandlerProvider: React.FC<PropsWithChildren<{ recordId?: string }>> = ({ children, recordId }) => {
 
@@ -72,6 +79,14 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
     }, [initialdata,attributes]);
 
+    const [localExpands, setExpands] = useState<string[]>([]);
+    const addExpand = useCallback((str: string) => {
+       
+        setExpands((old) => [...old, str]);
+        return () => {
+            setExpands((old) => old.filter(x=>x!== str));
+        };
+    }, []);
     const expand = useMemo(() => {
 
         if (formQuery?.version === "1.0") {
@@ -83,12 +98,12 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         }
 
 
-        let expand =  Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).join(',');
+        let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).concat(localExpands).join(',');
         if (formQuery?.["$expand"]) {
             expand = expand + ',' + formQuery["$expand"]
         }
         return expand;
-    }, [attributes, recordId, formQuery?.["$expand"]]);
+    }, [attributes, recordId, formQuery?.["$expand"], localExpands]);
 
     const { record, isLoading, mutate } =
         getRecordSWR(
@@ -223,6 +238,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         record,
         isLoading: typeof (recordId) === "undefined" ? false : (isLoading || typeof (record) === "undefined"),
         extraErrors,
-        mutate
+        mutate,
+        addExpand
     };
 }

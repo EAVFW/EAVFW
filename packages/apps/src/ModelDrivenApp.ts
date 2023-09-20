@@ -1,4 +1,4 @@
-import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup , getNavigationProperty, TypeFormDefinition } from "@eavfw/manifest";
+import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty, TypeFormDefinition } from "@eavfw/manifest";
 import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
 import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
@@ -95,6 +95,36 @@ export class ModelDrivenApp {
         return typeof attribute.type === "string" ? attribute.type : attribute.type.type;
     }
 
+    getAttribute(attributes: {
+        [key: string]: AttributeDefinition
+    }, column: string) {
+
+        if (column.indexOf('/') !== -1) {
+            var parts = column.split('/');
+            var navAttributes = attributes;
+            var nav = column;
+            while (parts.length) {
+                nav = parts.shift()!;
+                var lookup = navAttributes[nav];
+
+                if (!parts.length)
+                    return lookup;
+
+                if (lookup && isAttributeLookup(lookup)) {
+
+                    var entity = this.getEntityFromKey(lookup.type.referenceType);
+                    navAttributes = entity.attributes;
+                } else {
+                    return navAttributes[nav];
+                }
+
+            }
+            return navAttributes[nav];
+        }
+
+        return attributes[column];
+    }
+
 
 
     getApps() {
@@ -142,49 +172,49 @@ export class ModelDrivenApp {
     getEntityFromCollectionSchemaName(key: string) {
         return this.getEntity(this._data.entityCollectionSchemaNameMap[key]);
     }
-    getExpandQueryParam(entityDefinition: EntityDefinition, expandall=false, includeHierachi=false) {
+    getExpandQueryParam(entityDefinition: EntityDefinition, expandall = false, includeHierachi = false) {
 
-      
+
 
         let attributes = this.getAttributes(entityDefinition.logicalName);
 
         if (expandall) {
-            let expand = Object.values(includeHierachi? attributes: entityDefinition.attributes)
+            let expand = Object.values(includeHierachi ? attributes : entityDefinition.attributes)
                 .filter(isAttributeLookup)
                 .map((a) => getNavigationProperty(a))
                 .join(",");
 
             return expand
-        } 
-        
+        }
+
         let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(this.getAttributes(this.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
         return expand;
     }
 
     getReferences(entityName: string, formName: string, tabName: string, columnName: string, sectionName: string) {
         console.group("ModelDrivenApp::getReferences");
-      
-            console.log("arguments:\n", arguments);
-            const references: Array<ViewReference> = [];
+
+        //  console.log("arguments:\n", arguments);
+        const references: Array<ViewReference> = [];
         try {
             for (const entity of Object.values(this._data.entities)) {
                 console.groupCollapsed("entity.collectionSchemaName:\n", entity.collectionSchemaName);
                 try {
                     for (const attribute of Object.values(entity.attributes).filter(isAttributeLookup)) {
-                       
+
 
                         const referenceTypes = attribute.type.referenceTypes ?? [attribute.type.referenceType]
                         const tpt = this._data.entities[entityName].TPT;
-                        console.log("attribute.type:\n", [attribute.type, tpt, referenceTypes, entityName,
-                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]),
-                            referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n))]);
+                        //   console.log("attribute.type:\n", [attribute.type, tpt, referenceTypes, entityName,
+                        //    referenceTypes.map(referenceType => this._data.entityMap[referenceType]),
+                        //    referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n))]);
                         if (
                             referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n)) &&
                             //(this._data.entityMap[attribute.type.referenceType] === entityName || this._data.entities[entityName].TPT === attribute.type.referenceType) &&
                             attribute.type.forms
                         ) {
-                            console.log("attribute.type:\n", attribute.type);
-                            console.log("attribute.type.forms:\n", attribute.type.forms);
+                            //   console.log("attribute.type:\n", attribute.type);
+                            //    console.log("attribute.type.forms:\n", attribute.type.forms);
 
                             //let forms = Object.values(attribute.type.forms).filter(form => this.isMatchingForm(form, formName, tabName, columnName, sectionName));
                             for (const formKey of Object.keys(attribute.type.forms)) {
@@ -208,12 +238,12 @@ export class ModelDrivenApp {
                                     } else {
                                         console.group("Form found but did not match arguments");
                                         const _formKey = (form.name ?? formKey) === formName;
-                                        console.log(`FormKey: ${_formKey}, ${form.name ?? formKey}, ${formName}`);
-                                        console.log(`Tab: ${form.tab === tabName}, ${form.tab} ${tabName}`);
-                                        console.log(`Column: ${form.column === columnName},  ${form.column} ${columnName}`);
-                                        console.log(`Section: ${form.section === sectionName},  ${form.section} ${sectionName}`);
+                                        //console.log(`FormKey: ${_formKey}, ${form.name ?? formKey}, ${formName}`);
+                                        //console.log(`Tab: ${form.tab === tabName}, ${form.tab} ${tabName}`);
+                                        //console.log(`Column: ${form.column === columnName},  ${form.column} ${columnName}`);
+                                        //console.log(`Section: ${form.section === sectionName},  ${form.section} ${sectionName}`);
 
-                                        console.log("form:\n", form);
+                                        //  console.log("form:\n", form);
                                         console.groupEnd();
                                     }
                                 }

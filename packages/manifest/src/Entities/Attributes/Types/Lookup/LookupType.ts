@@ -2,9 +2,10 @@ import { TypeFormDefinition, TypeFormModalDefinition } from "../../../../Forms";
 
 export type PolyLookupType = {
     type: "polylookup",
+    referenceType: string;
     referenceTypes: Array<string>;
 
-}
+} & LookupType
 export type NormalLookupType = {
     type: "lookup"  
    
