@@ -323,7 +323,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                     app.recordUrl({
                                         appName: currentAppName,
                                         areaName: currentAreaName,
-                                        entityName:
+                                        entityName: '$type' in record ? record['$type'] :
                                             record.entityName ?? entity.logicalName,
                                         recordId: record.id,
                                     })
