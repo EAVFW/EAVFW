@@ -17,26 +17,27 @@ export function FormRender<T>(props: FormRenderProps) {
     const entityName = props.entityName ?? (props.type as LookupType).foreignKey?.principalTable!;
     const entity = app.getEntity(entityName);
     const forms = entity.forms!;
-    console.log("FormRender", [entityName, entity, forms]);
+  
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
 
     //  const record = useRef(props.record ?? {});
     const [record, setRecord] = useState(props.record ?? {});
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
-
+    console.log("FormRender", [entityName, entity, forms,record]);
     const _onSave = () => {
 
 
-        console.log("Closing Modal", record);
+        console.log("FormRender, Closing Modal", record);
 
 
         onChange(record);
         dismissPanel.call(undefined, "save");
     };
     useEffect(() => {
-        console.log("Form Render, Record Updated:", props.record)
+        console.log("FormRender, Record Updated:", props.record)
         //  record.current = props.record;
-        setRecord(props.record);
+        if (props.record)
+            setRecord(props.record);
     }, [props.record]);
 
     const StickyFooter = React.useCallback(({ children }) => (props.stickyFooter ?? true) ? <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky> : <>{children}</>, [props.stickyFooter]);
@@ -55,7 +56,7 @@ export function FormRender<T>(props: FormRenderProps) {
     );
 
     const _onChange = useCallback(data => {
-        console.log("Data changed Modal", data);
+        console.log("FormRender, Data changed Modal", data);
         // record.current = data;
         setRecord(data);
     }, []);
