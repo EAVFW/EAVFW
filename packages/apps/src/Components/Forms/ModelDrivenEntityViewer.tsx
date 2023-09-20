@@ -399,8 +399,24 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                         console.log(`Found ${attribute.logicalName} in formdata that changed from '${oldFormData[attribute.logicalName]}' to '${formdata[attribute.logicalName]}'`);
 
                         oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
-                        if (formdata[attribute.logicalName] === undefined)
-                            delete oldFormData[attribute.logicalName];
+                        if (formdata[attribute.logicalName] === undefined) {                           
+
+                            /**
+                             * 
+                             * If the old data prioer to changing contains
+                             * {
+                             *    addresssid = 5,
+                             *    addresss = {... id=5}
+                             * }
+                             * and current data
+                             * {
+                             *    addressid = undefined
+                             * }
+                             */
+                           
+                            delete oldFormData[attribute.logicalName.slice(0, -2)];
+                            oldFormData[attribute.logicalName] = null;
+                        }
                         changed = true;
 
                         let partOfGroup = groups.filter(g => g.filter(gg => gg[2].logicalName === attribute.logicalName).length > 0)[0];
