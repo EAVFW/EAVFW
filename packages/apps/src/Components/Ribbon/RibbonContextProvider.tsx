@@ -197,7 +197,9 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
                         toggleHideDialog();
                         updateRibbonState({ skipRedirect: false });
                         //   setRibbonState( ribbonState.skipRedirect = true;
-                        ribbonEvents.on("saveComplete", (e: any) => {
+
+                        const onComplete = (e: any) => {
+                            ribbonEvents.off("saveComplete", onComplete);
                             console.log("dialog saveCompleted", e);
                             const entityName = pastUrl?.match(/entities\/(.*?)\//)?.[1];
                             if (entityName) {
@@ -223,7 +225,10 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
                                 router.push(pastUrl!);
                             }
 
-                        });
+                        }
+
+                        
+                        ribbonEvents.on("saveComplete", onComplete);
                         ribbonEvents.emit("onSave", e);
                     }
                 } text="Gem og forsæt" />

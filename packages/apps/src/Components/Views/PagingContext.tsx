@@ -9,12 +9,14 @@ export type IFetchQuery = {
     '$skip'?: number;
     '$orderby'?: string;
     '$expand'?: string;
-} | undefined;
+};
 function notsupported(q: IFetchQuery) :void {
       throw new Error("Fetch Query not enabled"); 
 }
 const PagingContext = createContext({
-    enabled: false, setTotalRecords: (n: number) => { }, fetchQuery: undefined as IFetchQuery,
+    enabled: false,
+    setTotalRecords: (n: number) => { },
+    fetchQuery: undefined as (IFetchQuery | undefined),
     setFetchQuery: notsupported ,
     firstItemNumber: 0, lastItemNumber: undefined as number | undefined, totalRecords: undefined as number | undefined, currentPage: 0, pageSize: 0, moveNext: () => { }, movePrevious: () => { }, moveToFirst: () => { }
 });
