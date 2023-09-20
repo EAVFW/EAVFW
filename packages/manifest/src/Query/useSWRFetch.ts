@@ -2,19 +2,19 @@ import useSWR, { mutate } from "swr";
 import { useClientContext } from "./clientContext";
 import { useJsonFetcher } from "./jsonFetcher";
 
-export function useSWRFetch(path?: string, isReady=true) {
+export function useSWRFetch<T = any>(path?: string, isReady = true, refreshInterval = 0) {
 
     const [baseUrl, jsonFetcher] = useJsonFetcher();
 
     const key = isReady === true ? `${baseUrl}${path}` : null;
-    const { data, error } = useSWR(path ? key : null,
+    const { data, error } = useSWR<T>(path ? key : null,
         {
             revalidateOnFocus: false,
             revalidateOnMount: true,
             revalidateOnReconnect: false,
             refreshWhenOffline: false,
             refreshWhenHidden: false,
-            refreshInterval: 0,
+            refreshInterval: refreshInterval,
             fetcher: jsonFetcher
         }
     )
