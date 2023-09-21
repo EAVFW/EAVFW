@@ -7,27 +7,28 @@ export type PolyLookupType = {
 
 } & LookupType
 export type NormalLookupType = {
-    type: "lookup"  
-   
+    type: "lookup"
+
 }
 export type LookupType =
-{
-    type: "lookup" | "polylookup"
-    referenceType: string;
-    referenceTypes?: Array<string>;
-    forms?: {
-        [formKey: string]: TypeFormDefinition | TypeFormModalDefinition;
-    };
-    filter?: string;
-    foreignKey?: {
-        principalTable: string;
-        principalColumn: string;
-        principalNameColumn: string;
-        name: string;
+    {
+        type: "lookup" | "polylookup"
+        referenceType: string;
+        referenceTypes?: Array<string>;
+        inline?: boolean;
+        forms?: {
+            [formKey: string]: TypeFormDefinition | TypeFormModalDefinition;
+        };
+        filter?: string;
+        foreignKey?: {
+            principalTable: string;
+            principalColumn: string;
+            principalNameColumn: string;
+            name: string;
 
-    };
-    cascade?: {
-        delete?: "cascade" | "noaction" | "restrict",
-        update?: "cascade" | "noaction" | "restrict"
+        };
+        cascade?: {
+            delete?: "cascade" | "noaction" | "restrict",
+            update?: "cascade" | "noaction" | "restrict"
+        }
     }
-}

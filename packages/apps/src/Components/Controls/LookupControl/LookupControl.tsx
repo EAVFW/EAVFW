@@ -33,6 +33,7 @@ import { useEAVForm } from "@eavfw/forms";
 import { EAVFormOnChangeCallbackContext, EAVFOrmOnChangeHandler } from "../../../../../forms/src/EAVFormContextActions";
 import { useFormHost } from "../../Forms/ModelDrivenEntityViewer";
 import { useAsyncMemo } from "../../../../../hooks/src";
+import { isAttributeLookupEntry } from "../../ColumnFilter/ColumnFilterContext";
 
 
 
@@ -390,10 +391,11 @@ export function LookupControl<T>({
 
     const attribute = entityAttributes[attributeName];
     const logicalName = attribute.logicalName;
-    const [{ selectedValue, value, id }, { onChange: eavOnChange }] = useEAVForm(state => ({
+    const [{ selectedValue, value, id, formvalues }, { onChange: eavOnChange }] = useEAVForm(state => ({
         selectedValue: state.formValues[logicalName.slice(0, -2)],
         value: state.formValues[logicalName],
-        id: state.formValues["id"]
+        id: state.formValues["id"],
+        formvalues: state.formValues
     }), "LookupControl" + attributeName);
 
 
@@ -409,7 +411,22 @@ export function LookupControl<T>({
 
 
     if (isPolyLookup(attribute.type)) {
-        const [selectedEntity, setSelectedEntity] = useState(attribute.type.referenceTypes[0]);
+        const type = attribute.type;
+
+        const defaultEntity = () => {
+
+            if (type.inline) {
+                const referencetype = Object.entries(entityAttributes).filter(isAttributeLookupEntry).filter(x => x[0] != attributeName && value && formvalues[x[1].logicalName] === value)?.[0]?.[1]?.type?.referenceType;
+
+                return referencetype ?? type.referenceTypes[0];
+
+            }
+
+
+            return type.referenceTypes[0];
+        }
+
+        const [selectedEntity, setSelectedEntity] = useState(defaultEntity);
 
         console.log("Poly Lookup", [value]);
 
@@ -430,7 +447,7 @@ export function LookupControl<T>({
                     label={attribute.displayName}
                     extraErrors={extraErrors}
                     targetEntityName={selectedEntity}
-                    logicalName={attribute.logicalName}
+                    logicalName={attribute.type.inline ? Object.entries(entityAttributes).filter(isAttributeLookupEntry).filter(x => x[1].type.referenceType === selectedEntity)[0][1].logicalName : attribute.logicalName}
                     disabled={disabled || readonly}
                 />
             </Stack.Item>
