@@ -19,8 +19,7 @@ export function FormRender<T>(props: FormRenderProps) {
     const entityName = props.entityName ?? (props.type as LookupType).foreignKey?.principalTable!;
     const entity = app.getEntity(entityName);
     const forms = entity.forms!;
-    console.log("FormRender", [entityName, entity, forms]);
-
+  
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
     const saveBtnText = forms?.[formName]?.buttons?.save?.text      //gets text for naming of save btn in modal if it is defined
     const cancelBtnText = forms?.[formName]?.buttons?.cancel?.text  //gets text for naming of cancel btn in modal if it is defined
@@ -66,9 +65,10 @@ export function FormRender<T>(props: FormRenderProps) {
     },[]);
 
     useEffect(() => {
-        console.log("Form Render, Record Updated:", props.record)
+        console.log("FormRender, Record Updated:", props.record)
         //  record.current = props.record;
-        setRecord(props.record);
+        if (props.record)
+            setRecord(props.record);
     }, [props.record]);
 
     const StickyFooter = React.useCallback(({ children }) => (props.stickyFooter ?? true) ? <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky> : <>{children}</>, [props.stickyFooter]);
@@ -90,7 +90,7 @@ export function FormRender<T>(props: FormRenderProps) {
     );
 
     const _onChange = useCallback(data => {
-        console.log("Data changed Modal", data);
+        console.log("FormRender, Data changed Modal", data);
         // record.current = data;
         setRecord(data);
     }, []);

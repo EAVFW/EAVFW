@@ -22,8 +22,8 @@ function sortObj<T>(areas: { [key: string]: T }, sort: (a: T, ai: number, b: T, 
 }
 export function generateAppContext(manifest: ManifestDefinition): ModelDrivenAppModel {
 
-    console.group("generateAppContext");
-    console.log("ALERT: Generating Model");
+    //console.group("generateAppContext");
+    //console.log("ALERT: Generating Model");
 
     const areas: { [area: string]: { [group: string]: { [key: string]: EntityDefinition & Required<SiteMapDefinition> } } } = {};
     const dashboards: { [area: string]: any } = {};
@@ -43,7 +43,7 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
         entityCollectionSchemaNameMap[entity.collectionSchemaName] = entity.logicalName;
 
         let sitemaps = entity.sitemap;
-        console.log(`${entityKey} :`, sitemaps)
+      //  console.log(`${entityKey} :`, sitemaps)
         if (typeof sitemaps === "object") {
             if (isSingleSiteMapDefinition(sitemaps)) sitemaps = { [`${entityKey}dummy`]: sitemaps };
 
@@ -55,7 +55,7 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
                 if (sitemap !== undefined && dashboards[sitemap.area] === undefined) dashboards[sitemap.area] = {};
 
                 areas[sitemap.area][sitemap.group] = areas[sitemap.area][sitemap.group] ?? {};
-                console.log("Adding sitemapkey before", [sitemapKey, sitemapKey1, areas[sitemap.area][sitemap.group][sitemapKey1], entity, sitemap]);
+               // console.log("Adding sitemapkey before", [sitemapKey, sitemapKey1, areas[sitemap.area][sitemap.group][sitemapKey1], entity, sitemap]);
 
                 areas[sitemap.area][sitemap.group][sitemapKey1] = {
                     ... (areas[sitemap.area][sitemap.group][sitemapKey1]
@@ -65,7 +65,7 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
                             title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? entity.locale?.["1030"]?.pluralName ?? entity.pluralName
                         }
                 };
-                console.log("Adding sitemapkey ater", [sitemapKey, sitemapKey1, areas[sitemap.area][sitemap.group][sitemapKey1], entity, sitemap]);
+              //  console.log("Adding sitemapkey ater", [sitemapKey, sitemapKey1, areas[sitemap.area][sitemap.group][sitemapKey1], entity, sitemap]);
                 dashboards[sitemap.area] = Object.assign(dashboards[sitemap.area], sitemap.dashboards);
             }
         }
@@ -95,9 +95,9 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
         });
     });
          
-    console.log("areas:\n", areaSorted);
+   // console.log("areas:\n", areaSorted);
 
-    console.log("dashboards:\n", dashboards);
+  //  console.log("dashboards:\n", dashboards);
     const defaultApp: ModelDrivenAppModel = {
         localization: manifest.localization,
         errorMessages: manifest.errorMessages,
@@ -113,6 +113,6 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
         },
     };
 
-    console.groupEnd();
+  //  console.groupEnd();
     return defaultApp;
 }

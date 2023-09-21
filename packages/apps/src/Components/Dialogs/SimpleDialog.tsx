@@ -5,13 +5,14 @@ import { PropsWithChildren, useMemo } from "react";
 export type SimpleDialogProps = {
     hideDialog: boolean
     toggleHideDialog: () => void;
-    maxWidth?: number | string
+    maxWidth?: number | string;
+    minWidth?: number | string;
     title?: string
 }
 
  
 
-export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({title,maxWidth, hideDialog, toggleHideDialog, children }) => {
+export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ title = "Import", maxWidth = 450, hideDialog, toggleHideDialog, children, minWidth = "60vw" }) => {
 
     const [isDraggable, { toggle: toggleIsDraggable }] = useBoolean(true);
     const labelId: string = useId('Custom_Import_Label');
@@ -39,7 +40,7 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ti
     );
 
     return (
-        <Dialog minWidth="60vw"
+        <Dialog minWidth={minWidth} 
             hidden={hideDialog}
             onDismiss={toggleHideDialog}
             dialogContentProps={dialogContentProps}
@@ -52,8 +53,4 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ti
              
         </Dialog>);
 
-}
-SimpleDialog.defaultProps = {
-    maxWidth: 450,
-    title:"Import"
 }

@@ -17,12 +17,15 @@ export const RibbonHost: React.FC<{ ribbon: { [key: string]: Partial<RibbonButto
             for (let [ribbonKey, props] of Object.entries(ribbon)
                 //  .filter(([ribbonKey, props]) => ribbonKey in RibbonButtons)
             ) {
+                props.key = ribbonKey;
                 if (ribbonKey in RibbonButtons) {
-                    console.log("Setting up ribbon v2 for " + ribbonKey);
+                    
                     let element = RibbonButtons[ribbonKey]?.(props);
+                    console.log("Setting up ribbon v2 for " + ribbonKey, [element, Array.isArray(element)]);
                     if (element) {
                         if (Array.isArray(element)) {
-                            elements.push(element[0]);
+                            let RibbonElement = element[0];
+                            elements.push(typeof (RibbonElement) === "function" ? <RibbonElement key={ribbonKey} {...props} /> : RibbonElement);
                             for (let j = 1; j < element.length; j++)
                                 contexts.push(element[j]);
                         } else {
@@ -49,9 +52,9 @@ export const RibbonHost: React.FC<{ ribbon: { [key: string]: Partial<RibbonButto
                 while (q.length) {
                     let Context = q.pop()!;
 
-                    childrenNode = <Context >{childrenNode}</Context>;
+                    childrenNode = <Context>{childrenNode}</Context>;
                 }
-                return childrenNode;
+                return <>{childrenNode}</>;
             }
 
             return <>

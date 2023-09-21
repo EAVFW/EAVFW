@@ -98,8 +98,8 @@ export function ModelDrivenBodyViewer
                     entity={entity}
                     styles={{ root: { padding: 0 } }}
                 />
-            }
-            <Stack.Item grow>
+                }
+                <Stack.Item grow style={{height:"calc(100% - 32px)"}}>
                 <RibbonHost ribbon={ribboninfo}>
                     {BodyViewElement}
                 </RibbonHost>
