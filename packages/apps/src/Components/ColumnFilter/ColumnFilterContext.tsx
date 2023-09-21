@@ -1,4 +1,4 @@
-import { AttributeDefinition, getNavigationProperty, isAttributeLookup, isPolyLookup, LookupAttributeDefinition, ViewDefinition } from "@eavfw/manifest";
+import { AttributeDefinition, getNavigationProperty, isAttributeLookup, isPolyLookup, LookupAttributeDefinition, LookupType, ViewDefinition } from "@eavfw/manifest";
 import { IColumn, IDetailsColumnProps, IRenderFunction, mergeStyleSets, Target } from "@fluentui/react";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { IFetchQuery } from "../Views";
@@ -268,28 +268,29 @@ const ColumnFilterProvider = ({
             let type = attr.type;
 
        
-          
+
             if (isPolyLookup(type)) {
                 console.log("Polylookup", [type]);
-                let expand = Object.values(app.getAttributes(app.getEntityFromKey(type.referenceType).logicalName))
+
+                let expands = (type.inline ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
                     .filter(isAttributeLookup)
-                    .map(a => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`);
-                console.log("Polylookup", [`$expand(${expand});`]);
-                return `$expand=${expand};`
+                    .map(a => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`));
+                console.log("Polylookup", expands);
+                return expands; // `$expand=${expands.join(',')};`
             } else if (isAttributeLookup(attr)) {
 
                 let a = [...new Set(columns.filter(f => f.key.split('/')[0]===key && f.key !== key).map(c => c.key.split('/')[1]))]
                     .map(nav => app.getEntityFromKey(attr.type.referenceType).attributes[nav].schemaName.slice(0,-2));
 
                 if (a.length) {
-                    return `$expand=${a.join(',')};`
+                    return a; `$expand=${a.join(',')};`
                 }
 
 
             }
 
-
-            return '';
+            return [];
+            //return '';
         }
 
         function selectPolyLookup(attr: AttributeDefinition) {
@@ -305,16 +306,17 @@ const ColumnFilterProvider = ({
             return '';
         }
 
-        function getPrimaryField(entitykey: string) {
-            return Object.values(app.getAttributes(app.getEntityFromKey(entitykey).logicalName)).filter(c => c.isPrimaryField)[0].logicalName;
+        function getPrimaryField(referenceType: string) {
+            
+            return Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName;
         }
 
         
 
         let expand = columns.filter(x => x.key in attributes)
-            .map(x => [x.key, attributes[x.key]] as [string, AttributeDefinition])          
+            .map(x => [x.key, attributes[x.key]] as [string, AttributeDefinition])
             .filter(isAttributeLookupEntry)
-            .map(([key,a]) => `${getNavigationProperty(a)}(${expandPolyLookup(key,a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(a)})`);
+            .map(([key, a]) => a.type.inline ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}($expand=${expandPolyLookup(key, a).join(',')}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(a)})`);
 
         let orderBy = columns.filter(c => c.isSorted)[0];
 

@@ -100,7 +100,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         }
 
 
-        let expand = Object.values(attributes).filter(a => isLookup(a.type)).map(a => getNavigationProperty(a)).concat(localExpands).join(',');
+        let expand = Object.values(attributes).filter(a => isLookup(a.type) && !a.type.inline).map(a => getNavigationProperty(a)).concat(localExpands).join(',');
         if (formQuery?.["$expand"]) {
             expand = expand + ',' + formQuery["$expand"]
         }
