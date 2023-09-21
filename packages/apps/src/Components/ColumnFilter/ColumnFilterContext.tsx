@@ -276,21 +276,21 @@ const ColumnFilterProvider = ({
                     .filter(isAttributeLookup)
                     .map(a => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`));
                 console.log("Polylookup", expands);
-                return expands; // `$expand=${expands.join(',')};`
+                return  `$expand=${expands.join(',')};`
             } else if (isAttributeLookup(attr)) {
 
                 let a = [...new Set(columns.filter(f => f.key.split('/')[0]===key && f.key !== key).map(c => c.key.split('/')[1]))]
                     .map(nav => app.getEntityFromKey(attr.type.referenceType).attributes[nav].schemaName.slice(0,-2));
 
                 if (a.length) {
-                    return a; `$expand=${a.join(',')};`
+                    return `$expand=${a.join(',')};`
                 }
 
 
             }
 
-            return [];
-            //return '';
+            //return [];
+            return '';
         }
 
         function selectPolyLookup(attr: AttributeDefinition) {
@@ -316,7 +316,7 @@ const ColumnFilterProvider = ({
         let expand = columns.filter(x => x.key in attributes)
             .map(x => [x.key, attributes[x.key]] as [string, AttributeDefinition])
             .filter(isAttributeLookupEntry)
-            .map(([key, a]) => a.type.inline ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}($expand=${expandPolyLookup(key, a).join(',')}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(a)})`);
+            .map(([key, a]) => a.type.inline ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}(${expandPolyLookup(key, a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(a)})`);
 
         let orderBy = columns.filter(c => c.isSorted)[0];
 

@@ -231,8 +231,9 @@ export class ModelDrivenApp {
                                             entityName: entity.logicalName,
                                             attribute: attribute.logicalName,
                                             attributeType: attribute.type?.type,
+                                            inlinePolyLookup: attribute.type?.inline,
                                             entity: entity,
-                                            filter: form.filter,
+                                            filter:   form.filter,
                                             key: entity.logicalName + attribute.logicalName
                                         });
                                     } else {

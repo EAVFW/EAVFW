@@ -311,7 +311,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                 {...gridprops}
                                 locale={locale}
                                         onChange={onFormDataChange}
-                                        filter={`$filter=${gridprops.attributeType === 'lookup' ? gridprops.attribute : `${trimId(gridprops.attribute)}/${padId(entityName)}`} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter : '')}
+                                        filter={`$filter=${gridprops.attributeType === 'lookup' || gridprops.inlinePolyLookup ? gridprops.attribute : `${trimId(gridprops.attribute)}/${padId(entityName)}`} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter : '')}
                                 formData={formData}
                                 newRecord={formData.id ? false : true}
                                 defaultValues={formData[gridprops.entity.collectionSchemaName.toLowerCase()]}
