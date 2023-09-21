@@ -68,10 +68,12 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
     const defaultData = useMemo(() => {
 
         var data = initialdata;
-        for (let attr of Object.values(attributes)) {
-            if (typeof (attr.default) !== "undefined") {
-                data = data ?? {};
-                data[attr.logicalName] = attr.default;
+        if (typeof (recordId) === "undefined") {
+            for (let attr of Object.values(attributes)) {
+                if (typeof (attr.default) !== "undefined") {
+                    data = data ?? {};
+                    data[attr.logicalName] = attr.default;
+                }
             }
         }
         console.log("DEFAULT DATA", data);
@@ -124,7 +126,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
             const [changed, changedValues] = cleanDiff(deepDiffMapper.map(recordId ? record : {}, changedRecord.current))
             
-            console.log("onChangeCallback UpdatedValues", [changedRecord.current, record,
+            console.log("onChangeCallback UpdatedValues", [JSON.stringify( changedRecord.current),JSON.stringify( record),
                 deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
                 changed, changedValues]);
 
