@@ -41,7 +41,6 @@ import Link from 'next/link';
 
 import { useBoolean, useId } from "@fluentui/react-hooks"
 
-
 import { AttributeDefinition, EntityDefinition, getNavigationProperty, IRecord, isAttributeLookup, isLookup, LookupAttributeDefinition, LookupType, queryEntitySWR, ViewColumnDefinition, ViewDefinition } from '@eavfw/manifest';
 import { FormRenderProps } from '../Forms/FormRenderProps';
 import { useRibbon } from '../Ribbon/useRibbon';
