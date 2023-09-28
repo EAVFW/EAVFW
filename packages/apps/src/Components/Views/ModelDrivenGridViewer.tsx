@@ -51,14 +51,17 @@ import { useBoolean, useId } from "@fluentui/react-hooks";
 
 import {
     AttributeDefinition,
+    ChoiceType,
     EntityDefinition,
     getNavigationProperty,
     IRecord,
     isAttributeLookup,
+    isChoice,
     isLookup,
     isPolyLookup,
     LookupAttributeDefinition,
     LookupType,
+    NestedType,
     queryEntitySWR,
     ViewColumnDefinition,
     ViewDefinition,
@@ -484,6 +487,27 @@ function convertDateTimeFormat(inputDateTime: string): string {
     }
 }
 
+
+const RenderChoiceColumn: React.FC<{ value: any, type: ChoiceType, locale:string }> = ({ value,type,locale }) => {
+    
+
+    if (value || value === 0) {
+        const [key, optionValue] = Object.entries<any>(type.options ?? {})
+            .filter(([key, option]) =>
+                (typeof option === "number" ? option : option.value) === value
+        )[0];
+
+        return (
+            <>
+                {optionValue?.locale?.[locale]?.displayName ??
+                    optionValue?.text ??
+                    key}
+            </>
+        );
+    }
+    return null;
+}
+
 const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,entity:EntityDefinition
     }> = ({
     recordRouteGenerator,
@@ -492,7 +516,6 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
     index,
     column,
     setItems,
-    attribute,
     items,
     locale,
 }) => {
@@ -500,33 +523,18 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
     if (!column)
         throw new Error("Column not defined");
 
+
+    const attribute = column.data as AttributeDefinition;
+    console.log("ConditionRenderComponent", [column,attribute]);
+
     const { onRenderPrimaryField: RenderPrimaryField } =
         useModelDrivenGridViewerContext();
-    const type = attribute.type;
 
-    if (
-        typeof type === "object" &&
-        type.type === "choice" &&
-        type.options &&
-        item
-    ) {
-        const value = item[column?.fieldName as string];
+        const type = attribute.type as NestedType;
 
-        if (value || value === 0) {
-            const [key, optionValue] = Object.entries<any>(type.options).filter(
-                ([key, value]) =>
-                    (typeof value === "number" ? value : value.value) ===
-                    item[column?.fieldName as string]
-            )[0];
-            return (
-                <>
-                    {optionValue?.locale?.[locale]?.displayName ??
-                        optionValue?.text ??
-                        key}
-                </>
-            );
-        }
-        return null;
+    if (isChoice(type) && item) {
+        return <RenderChoiceColumn value={item[column?.fieldName as string]} type={type} locale={ locale} />
+       
     } else if (attribute.isPrimaryField) {
         return (
             <RenderPrimaryField
@@ -538,14 +546,18 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
         //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
 
     } else if (isLookup(type)) {
-
+       
         if (column.key.indexOf('/') !== -1) {
 
 
             const app = useModelDrivenApp();
             const [subitem, value, lookup] = traverseRecordPath(app, column, item);
 
-            console.log("Lookup With Traverse", [column.key, item, subitem]);
+            if (isChoice(lookup.type)) {
+                return <RenderChoiceColumn value={value} type={lookup.type} locale={locale} />
+            }
+
+           // console.log("Lookup With Traverse", [column.key, item, subitem, lookup]);
             return <Link legacyBehavior={true} href={recordRouteGenerator({ id: subitem.id, entityName: subitem?.["$type"] ?? lookup.type.foreignKey?.principalTable! })} >
 
                 <a>{value}</a>
@@ -601,12 +613,7 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
 
         </Link>
 
-        return <LookupControlRender onChange={(data: any) => {
-            console.log("Lookup data returned", [data, item]);
-            console.log("LookupControlRender change", [item, index, column, data, JSON.stringify(items)]);
-
-            setItems(items.slice());
-        }} type={type} attribute={attribute} item={item} recordRouteGenerator={recordRouteGenerator} />
+       
     } else if (column.data.control && column.data.control in Controls) {
         const CustomControl = Controls[column.data.control] as React.FC<{
             value: any;
@@ -985,7 +992,7 @@ const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem: any) 
         } else {
             console.log("DefaultPrimaryFieldRender", [parts, navattributes])
             value = subitem[attribute.logicalName];
-            break;
+            return [subitem, value, attribute];
         }
     }
     return [subitem, value];
