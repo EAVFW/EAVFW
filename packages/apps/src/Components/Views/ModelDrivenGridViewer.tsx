@@ -565,18 +565,16 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
             if (type.inline) {
                 const lookups = Object.entries(app.getAttributes(entity.logicalName)).filter(isAttributeLookupEntry);
 
-                const value = type.referenceTypes.map(referenceType => lookups.filter(a => a[1].type.referenceType === referenceType && a[1].logicalName.slice(0, -2) in item))
+                const lookupsFromReferenceTypes = type.referenceTypes.map(referenceType => lookups.filter(a => a[1].type.referenceType === referenceType && a[1].logicalName.slice(0, -2) in item))
                     .filter(x => x.length > 0)[0][0];
 
-                const referenceItem = item[value[1].logicalName.slice(0, -2)];
-
-
+                const referenceItem = item[lookupsFromReferenceTypes[1].logicalName.slice(0, -2)];
                 return <Link legacyBehavior={true} href={recordRouteGenerator({
-                    id: item[value[1].logicalName],
-                    entityName: referenceItem?.["$type"] ?? value[1].type?.foreignKey?.principalTable!
+                    id: item[attribute.logicalName], //item[lookupsFromReferenceTypes[1].logicalName],
+                    entityName: referenceItem?.["$type"] ?? lookupsFromReferenceTypes[1].type?.foreignKey?.principalTable!
                 })} >
 
-                    <a>{referenceItem[value[1].type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+                    <a>{referenceItem[lookupsFromReferenceTypes[1].type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
 
                 </Link>
             }
@@ -586,7 +584,7 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
 
             const referenceItem = linkedItem[referenceType.logicalName.slice(0, -2)];
             // return <div>{linkedItem[referenceType.logicalName]}</div>;
-
+            
             return <Link legacyBehavior={true} href={recordRouteGenerator({
                 id: linkedItem[referenceType.logicalName],
                 entityName: referenceItem?.["$type"] ?? referenceType.type?.foreignKey?.principalTable!
@@ -596,7 +594,7 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
 
             </Link>
         }
-        //TODO - Add Toggle in manifest to use hyperlink vs modal
+       
         return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
 
             <a>{item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
