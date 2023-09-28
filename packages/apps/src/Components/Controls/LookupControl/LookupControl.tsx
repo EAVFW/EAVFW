@@ -255,12 +255,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     }, [value]);
 
 
-    //    const defaultOptions = useRef((typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? "dummy", text: selectedValue[primaryField] }] : []));
-
-    //  const [options, setOptions] = useState<IDropdownOption[]>(defaultOptions.current);
-
-    const [modalForms, setModalForms] = useState(forms ?? []);
-
     const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${searchForLabel ?? targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
@@ -288,7 +282,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                         />
                     </Stack.Item>
                 </Stack>
-                <FormRender forms={modalForms} type={type} dismissPanel={_hideModal} record={dummyData}
+                <FormRender entityName={targetEntityName} forms={forms} type={type} dismissPanel={_hideModal} record={dummyData}
                     onChange={_onModalSubmit} extraErrors={extraErrors} />
             </Stack>
         </Modal>
