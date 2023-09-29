@@ -114,6 +114,22 @@ export type ModelDrivenGridViewerState = {
     commands: ICommandBarItemProps[];
 };
 
+export const DefaultDataQuery = (entity: EntityDefinition, newRecord?: boolean, fetchQuery?: IFetchQuery) => {
+    return queryEntitySWR(
+        entity,
+        setCount(fetchQuery, false),
+        !newRecord && typeof fetchQuery !== "undefined"
+    );
+}
+export const DefaultDataCountQuery = (entity: EntityDefinition, newRecord?: boolean, fetchQuery?: IFetchQuery) => {
+   return queryEntitySWR(
+        entity,
+        setSkip(setTop(setCount(fetchQuery, true), 0), 0),
+        !newRecord && typeof fetchQuery !== "undefined"
+    );
+   
+}
+
 export type ModelDrivenGridViewerProps = {
     allowNoPaging?: boolean;
     defaultValues?: Array<any>;
@@ -138,6 +154,8 @@ export type ModelDrivenGridViewerProps = {
     formData?: any;
     onHeaderRender?: IRenderFunction<IDetailsColumnProps>;
     onBuildFetchQuery?: <T>(q: T) => T;
+    onQueueData?: typeof DefaultDataQuery;
+    onQueryDataCount?: typeof DefaultDataCountQuery;
 };
 
 const RibbonStyles: IStackStyles = {
@@ -635,7 +653,7 @@ const DefaultOnBuildFetchQuery = (q: any) => q;
 const Footer = () => {
     return <div>Hello</div>;
 };
-function setCount(fetchQuery?: IFetchQuery, count = true) {
+export function setCount(fetchQuery?: IFetchQuery, count = true) {
     if (fetchQuery) {
         let clone = { ...fetchQuery } as IFetchQuery;
         if (clone["$count"] !== count) {
@@ -645,7 +663,7 @@ function setCount(fetchQuery?: IFetchQuery, count = true) {
     }
     return fetchQuery;
 }
-function setTop(fetchQuery?: IFetchQuery, top = 100) {
+export function setTop(fetchQuery?: IFetchQuery, top = 100) {
     if (fetchQuery) {
         let clone = { ...fetchQuery } as IFetchQuery;
         if (clone["$top"] !== top) {
@@ -655,7 +673,7 @@ function setTop(fetchQuery?: IFetchQuery, top = 100) {
     }
     return fetchQuery;
 }
-function setSkip(fetchQuery?: IFetchQuery, skip = 0) {
+export function setSkip(fetchQuery?: IFetchQuery, skip = 0) {
     if (fetchQuery) {
         let clone = { ...fetchQuery } as IFetchQuery;
         if (clone["$skip"] !== skip) {
@@ -665,6 +683,7 @@ function setSkip(fetchQuery?: IFetchQuery, skip = 0) {
     }
     return fetchQuery;
 }
+
 export function ModelDrivenGridViewer({
     allowNoPaging,
     locale,
@@ -685,6 +704,8 @@ export function ModelDrivenGridViewer({
     defaultValues,
     onHeaderRender,
     onBuildFetchQuery = DefaultOnBuildFetchQuery,
+    onQueueData = DefaultDataQuery,
+    onQueryDataCount = DefaultDataCountQuery
 }: ModelDrivenGridViewerProps) {
     const app = useModelDrivenApp();
     const appinfo = useAppInfo();
@@ -776,15 +797,16 @@ export function ModelDrivenGridViewer({
     if (fetchQuery) {
         fetchQuery["$count"] = false;
     }
-    const { data, isError, isLoading, mutate } = queryEntitySWR(
+    const { data, isError, isLoading, mutate } = onQueueData(
         entity,
-        setCount(fetchQuery, false),
-        !newRecord && typeof fetchQuery !== "undefined"
+        newRecord,
+        fetchQuery,
+        
     );
-    const { data: count } = queryEntitySWR(
+    const { data: count } = onQueryDataCount(
         entity,
-        setSkip(setTop(setCount(fetchQuery, true), 0), 0),
-        !newRecord && typeof fetchQuery !== "undefined"
+        newRecord,
+        fetchQuery     
     );
 
     useEffect(() => {
