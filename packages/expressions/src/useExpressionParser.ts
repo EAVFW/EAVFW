@@ -65,9 +65,11 @@ export function useExpressionParser<T = string>(expression?: string) {
                 }
               
                 if (oldvalue.current !== result) {
-                    setEvaluated({ data: result, isLoading: false });
-               //     setExpressionResult(id, result, undefined);
-                    oldvalue.current = result;
+                    setTimeout(() => {
+                        setEvaluated({ data: result, isLoading: false });
+                        //     setExpressionResult(id, result, undefined);
+                        oldvalue.current = result;                                 
+                    }, 0);                 
                 }
 
 
