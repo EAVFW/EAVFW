@@ -6,7 +6,7 @@
     "@eavfw/apps": "*"
   },
   "peerDependencies": {
-    "next": "12.3.3",
+    "next": "*",
     "react": "18.2.0"
   },
   "license": "MIT",
