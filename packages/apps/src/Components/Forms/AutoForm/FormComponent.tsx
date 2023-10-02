@@ -8,7 +8,7 @@ import { useChangeDetector } from "@eavfw/hooks";
 import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
 import { useTabProvider } from "../Tabs/useTabProvider";
 import { OptionsFactory } from "./OptionsFactory";
-import { FormValidation } from "../FormValidation";
+import { FormValidation } from "@rjsf/utils";
 import { ResolveFeature } from "../../../FeatureFlags";
 
 type FormComponentProps<T> = {

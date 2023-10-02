@@ -6,8 +6,8 @@ import {useModelDrivenApp} from "../../useModelDrivenApp";
 import {errorMessageFactory, successMessageFactory, useMessageContext} from "../MessageArea";
 import {useProgressBarContext} from "../ProgressBar";
 import {useRibbon} from "../Ribbon";
-import {handleValidationErrors} from "../../Validation";
-import {FormValidation} from "@rjsf/core";
+import { handleValidationErrors } from "../../Validation";
+import { FormValidation } from "@rjsf/utils";
 import {useAppInfo} from "../../useAppInfo";
 
 export type FormDataContextProps = {

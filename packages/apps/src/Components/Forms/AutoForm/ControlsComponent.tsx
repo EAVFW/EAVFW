@@ -2,7 +2,8 @@
 
 
 import React, { Fragment, PropsWithChildren, useCallback, useContext, useMemo, useRef } from "react";
-import { FieldTemplateProps, IChangeEvent, UiSchema, FieldValidation, AjvError, FormProps } from "@rjsf/core";
+import { IChangeEvent, FormProps } from "@rjsf/core";
+import { FieldTemplateProps, UiSchema, FieldValidation, RJSFValidationError } from "@rjsf/utils"
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
 import Form from "@rjsf/fluent-ui";
 import { mergeDeep } from "@eavfw/utils";
@@ -37,7 +38,7 @@ import ControlHostWidget from "../../Controls/ControlHostWidget";
 import SelectWidget from "../../Controls/SelectWidget";
 import { OptionsFactory } from "./OptionsFactory";
 import { ControlJsonSchemaObject } from "./ControlJsonSchema";
-import { FormValidation } from "../FormValidation";
+import { FormValidation } from "@rjsf/utils";
 import { useModelDrivenApp } from "../../../useModelDrivenApp";
 import FieldTemplate, { EAVFWLabel } from "./Templates/FieldTemplate";
 import { useVisitedContext } from "../../../../../forms/src/EAVForm";
@@ -45,7 +46,9 @@ import { useAppInfo } from "../../../useAppInfo";
 import TextWidget from "./Widgets/TextWidget";
 import CheckboxWidget from "./Widgets/CheckboxWidget";
 
-declare module '@rjsf/core' {
+import validator from '@rjsf/validator-ajv8';
+
+declare module '@rjsf/utils' {
     interface WidgetProps {
     }
 }
@@ -171,13 +174,16 @@ const ControlsComponent =
             if (!process.browser)
                 return <div>"loading"</div>
 
+            //TODO INVESTIGATE THIS. seems odd its running on each render.
             let formErrors = {} as FormValidation;
             console.log("AutoForm: ControlsComponent: ExtraErrors", extraErrors);
             for (let extraErrorsKey of Object.keys(extraErrors)) {
                 let keys = extraErrorsKey.split('.');
                 if (keys[0] in formErrors) {
-
+                    //@ts-ignore
                     console.log("Adding", extraErrors[extraErrorsKey].__errors)
+
+                    //@ts-ignore
                     formErrors[keys[0]] = { __errors: formErrors?.[keys[0]]?.__errors.concat(extraErrors[extraErrorsKey].__errors) } as FieldValidation;
                     console.log("After", formErrors[keys[0]])
                 } else {
@@ -206,9 +212,10 @@ const ControlsComponent =
                         fields={{ ControlHostWidget: ControlHostWidget }}
                         widgets={WidgetRegister} 
                         uiSchema={uiSChema}
-                        FieldTemplate={FieldTemplate}
+                        templates={{ FieldTemplate: FieldTemplate }}                     
                         transformErrors={transformErrors}
                         showErrorList={false}
+                        validator={validator}                
                         extraErrors={formErrors} // Even though we have to manually access and add the error for custom widget ourself through formContext, we have to set the error here too, to make thure the errors is added to the overview.
                     ><Fragment /></Form></div>
             );
@@ -437,14 +444,13 @@ function getUiSchema(
     // return mapUISchema(props);
 }
 
- 
 
 
 /**
  * This function is used to customize error and it is used to add localization.
  * @param errors List of Error to transform
  */
-function transformErrors(errors: AjvError[]) {
+function transformErrors(errors: RJSFValidationError[], uischema?: UiSchema) {
     return errors.map((error) => {
         console.log("Heres the error")
         console.log(error)

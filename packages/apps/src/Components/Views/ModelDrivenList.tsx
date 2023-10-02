@@ -34,7 +34,7 @@ import {
     IconButton,
     DetailsHeader,
 } from "@fluentui/react";
-import { FormValidation, FieldValidation } from "@rjsf/core";
+import { FormValidation, FieldValidation } from "@rjsf/utils";
 
 
 import Link from 'next/link';

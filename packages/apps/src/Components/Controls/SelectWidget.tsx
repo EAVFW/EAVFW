@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Label, Dropdown, IDropdownOption } from "@fluentui/react";
-import { WidgetProps } from "@rjsf/core";
+import { WidgetProps } from "@rjsf/utils";
 
 
 // Keys of IDropdownProps from @fluentui/react

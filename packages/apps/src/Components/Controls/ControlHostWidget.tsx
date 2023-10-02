@@ -1,5 +1,4 @@
-import { FieldProps, ErrorSchema, FormValidation } from "@rjsf/core";
-
+import { FieldProps, ErrorSchema, FormValidation, FieldTemplateProps, UiSchema } from "@rjsf/utils";
 import React, { Component, ComponentClass } from "react"
 import { JSONSchema7 } from "json-schema";
 import { Label, TextField } from "@fluentui/react";
@@ -9,10 +8,9 @@ import { useModelDrivenApp } from "../../useModelDrivenApp";
 import ChoicesControl from "./ChoicesControl/ChoicesControl";
 import LookupControl from "./LookupControl/LookupControl";
 import { EAVFWLabel } from "../Forms/AutoForm/Templates/FieldTemplate";
-import { FieldTemplateProps } from "@rjsf/core";
 
 
-
+ 
  
 
 
@@ -46,7 +44,7 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
 
 
     const { ["x-control"]: control } = schema as any;
-    const { ["ui:props"]: { styles, onRenderLabel, entityName, fieldName, attributeName, formName } } = uiSchema;
+    const { ["ui:props"]: { styles, onRenderLabel, entityName, fieldName, attributeName, formName } } = uiSchema!;
     console.log("ControlHostWidgetNew", [props, styles, onRenderLabel, control, Controls]);
 
     const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];

@@ -1,5 +1,5 @@
 import { AttributeDefinition, ChoicesType } from "@eavfw/manifest";
-import { FieldProps } from "@rjsf/core";
+import { FieldProps } from "@rjsf/utils";
 
 export type ChoicesControlProps = {
     required: boolean;

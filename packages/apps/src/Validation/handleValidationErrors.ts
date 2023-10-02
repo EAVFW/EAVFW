@@ -1,14 +1,16 @@
 import { ModelDrivenApp } from "../ModelDrivenApp";
-import { FormValidation, FieldValidation } from "@rjsf/core";
+import { FormValidation, FieldValidation } from "@rjsf/utils";
 import { ValidationError } from "./ValidationError";
 import { stringFormat } from "@eavfw/utils";
 import { isLookup } from "@eavfw/manifest";
+
+
 
 export async function handleValidationErrors(rsp: Response, app: ModelDrivenApp) {
     console.log("An error occured");
     let errors = [];
     let extraErrors = {} as FormValidation;
-
+   
 
     if (rsp.status === 409) {
         let responseJson = (await rsp.json()).errors as ValidationError[];
@@ -28,8 +30,10 @@ export async function handleValidationErrors(rsp: Response, app: ModelDrivenApp)
 
             if (name) {
                 if (extraErrors[name] === undefined) {
-                    extraErrors[name] = { __errors: [localizedError] } as FieldValidation
+                    //@ts-ignore
+                    extraErrors[name] =  { __errors: [localizedError] } as FieldValidation
                 } else {
+                    //@ts-ignore
                     extraErrors[name].__errors.push(localizedError)
                 }
             } else {

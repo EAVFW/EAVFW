@@ -5,6 +5,7 @@ on:
     branches: 
       - main
       - dev
+      - vnext
 
 jobs:
   eavfw_test:

@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Checkbox } from "@fluentui/react";
-import { WidgetProps } from "@rjsf/core";
+import { WidgetProps } from "@rjsf/utils";
 import { usePick } from "./usePick";
  
 // Keys of ICheckboxProps from @fluentui/react

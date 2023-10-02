@@ -5,7 +5,7 @@ import { AutoFormSectionsDefinition, EntityDefinition, FormDefinition, FormTabDe
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
 import { SectionComponent } from "./SectionComponent/SectionComponent";
-import { FormValidation } from "../FormValidation";
+import { FormValidation } from "@rjsf/utils";
 
 
 export type ColumnComponentProps<T> = {

@@ -1,6 +1,6 @@
 
 import { AttributeDefinition, EntityDefinition, FormDefinition, FormColumnDefinition } from "@eavfw/manifest";
-import { FormValidation } from "@rjsf/core";
+import { FormValidation } from "@rjsf/utils";
 
 export type ModelDrivenEntityViewerState = {
     selectedForm: string;

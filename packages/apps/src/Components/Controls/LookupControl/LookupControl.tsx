@@ -27,7 +27,7 @@ import { EntityDefinition, getRecordSWR, IRecord, isLookup, isPolyLookup, Lookup
 import { capitalize, throwIfNotDefined } from "@eavfw/utils";
 import { LookupControlProps } from "./LookupControlProps";
 import { FormRender } from "../../Forms/FormRender";
-import { FormValidation } from "../../Forms/FormValidation";
+import { FormValidation } from "@rjsf/utils";
 import { useModelDrivenApp } from "../../../useModelDrivenApp";
 import { useEAVForm } from "@eavfw/forms";
 import { EAVFormOnChangeCallbackContext, EAVFOrmOnChangeHandler } from "../../../../../forms/src/EAVFormContextActions";

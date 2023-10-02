@@ -1,5 +1,5 @@
 import { EntityDefinition, FormDefinition } from "@eavfw/manifest";
-import { FormValidation } from "../../FormValidation";
+import { FormValidation } from "@rjsf/utils";
 import { OptionsFactory } from "../OptionsFactory";
 
 

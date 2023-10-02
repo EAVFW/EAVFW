@@ -4,5 +4,4 @@ export * from "./Tabs";
 export * from "./ModelDrivenEntityViewer";
 export * from "./LazyFormRender";
 export * from "./AutoForm/ControlJsonSchema";
-export * from "./FormValidation";
 export * from "./AutoForm/Templates/FieldTemplate"

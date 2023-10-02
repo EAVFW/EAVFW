@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { FieldTemplateProps } from "@rjsf/core";
+import { FieldTemplateProps } from "@rjsf/utils";
 import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, IStackStyles, IStackTokens, ITheme, Label, mergeStyleSets, Stack, Text, ThemeContext } from "@fluentui/react";
 import { List } from "@fluentui/react";
 import { useExpressionParser } from "@eavfw/expressions";
@@ -84,10 +84,14 @@ export const WarningContext = createContext <Array<{logicalName:string, warning:
 
 export type DescriptionComponentProps = {
     descriptionId: string;
-    description: string;
+    description?: string;
 }
 
 export const DefaultDescriptionComponent = ({ description, descriptionId }: DescriptionComponentProps) => {
+
+    if (!description)
+        return null;
+
     return <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": description }}></span>
 }
 
@@ -95,7 +99,7 @@ const DescriptionComponentContext = createContext({ renderFunc: DefaultDescripti
 
 export const DescriptionComponentProvider = (props: { renderFunc: any, children: any }) => <DescriptionComponentContext.Provider value={props}>{props.children}</DescriptionComponentContext.Provider>;
 
-export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boolean, disabled?: boolean, description: string }> = ({ id, description, required, label, disabled,...props }) => {
+export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boolean, disabled?: boolean, description?: string }> = ({ id, description, required, label, disabled,...props }) => {
     const { data:_label, isLoading, error } = useExpressionParser(label);
     console.log("EAVFWLabel:", id, description, required, label, disabled, props);
     const [isInfoCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
@@ -235,7 +239,7 @@ const FieldTemplate = ({
 
 
     // TODO: do this better by not returning the form-group class from master.
-    classNames = "ms-Grid-col ms-sm12 " + classNames.replace("form-group", "");
+    classNames = "ms-Grid-col ms-sm12 " + classNames?.replace("form-group", "");
     return (
         <WarningContext.Provider value={warnings}>
             <div
