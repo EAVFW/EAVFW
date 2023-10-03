@@ -65,9 +65,12 @@ export function useExpressionParser<T = string>(expression?: string) {
                 }
               
                 if (oldvalue.current !== result) {
-                    setEvaluated({ data: result, isLoading: false });
-               //     setExpressionResult(id, result, undefined);
-                    oldvalue.current = result;
+                    //Using an timeout to make sure the render loop is completed beforethe value is changes. If not the value can change back after the new value is placed
+                    setTimeout(() => {
+                        setEvaluated({ data: result, isLoading: false });
+                        //     setExpressionResult(id, result, undefined);
+                        oldvalue.current = result;                                 
+                    }, 0);                 
                 }
 
 
