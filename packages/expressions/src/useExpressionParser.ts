@@ -13,9 +13,7 @@ export enum ExpressionOrder {
     first = "first",
     orderet = "orderet",
     last = "last",
-}
-
- 
+} 
 
 export type useExpressionParserValue<T> = {
     data: T | string | undefined;

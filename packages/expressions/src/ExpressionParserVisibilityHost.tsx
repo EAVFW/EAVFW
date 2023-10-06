@@ -8,6 +8,7 @@ export const ExpressionParserVisibilityHost: React.FC<{
     visible?: string | boolean, attributeKey?: string
 }> = ({ children, visible, attributeKey, onVisibilityCalculated}) => {
 
+    
     const { data, isLoading, error } = useExpressionParser<boolean>(typeof visible === "string" ? visible : undefined, ExpressionOrder.last);
      
 
