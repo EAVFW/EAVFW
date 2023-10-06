@@ -2,7 +2,7 @@ import React, { createContext, useContext, useMemo, useState } from "react";
 import { FieldTemplateProps } from "@rjsf/core";
 import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, IStackStyles, IStackTokens, ITheme, Label, mergeStyleSets, Stack, Text, ThemeContext } from "@fluentui/react";
 import { List } from "@fluentui/react";
-import { useExpressionParser } from "@eavfw/expressions";
+import { ExpressionOrder, useExpressionParser } from "@eavfw/expressions";
 import { JSONSchema7 } from "json-schema";
 
 import { useBoolean, useId } from "@fluentui/react-hooks";
@@ -96,7 +96,7 @@ const DescriptionComponentContext = createContext({ renderFunc: DefaultDescripti
 export const DescriptionComponentProvider = (props: { renderFunc: any, children: any }) => <DescriptionComponentContext.Provider value={props}>{props.children}</DescriptionComponentContext.Provider>;
 
 export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boolean, disabled?: boolean, description: string }> = ({ id, description, required, label, disabled,...props }) => {
-    const { data:_label, isLoading, error } = useExpressionParser(label);
+    const { data:_label, isLoading, error } = useExpressionParser(label, ExpressionOrder.last);
     console.log("EAVFWLabel:", id, description, required, label, disabled, props);
     const [isInfoCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
     const descriptionId = useId(id + '_description');   //id contains data attribute, so reference is possible through descriptionId
