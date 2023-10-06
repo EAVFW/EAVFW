@@ -5,7 +5,15 @@ import { useExpressionParserContext } from "./useExpressionParserContext";
 
  
 
-
+// Enum used to set the exprssion order. 
+// Orderet is used when the expression should be orderet between other orderet expressions
+// First is used when it should be placed unorderet before the orderet expression.
+// Last is used when it should be placed unorderet after the orderet expression.
+export enum ExpressionOrder {
+    first = "first",
+    orderet = "orderet",
+    last = "last",
+}
 
  
 
@@ -15,7 +23,7 @@ export type useExpressionParserValue<T> = {
     error?: string;
 }
 
-export function useExpressionParser<T = string>(expression?: string) {
+export function useExpressionParser<T = string>(expression?: string, expressionOrder?: ExpressionOrder) {
 
     const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
     const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
@@ -46,7 +54,8 @@ export function useExpressionParser<T = string>(expression?: string) {
                 attributeKey,
                 entityKey,
                 arrayIdx
-            }
+            },
+            expressionOrder: expressionOrder
         };
 
 
