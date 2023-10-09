@@ -6,12 +6,12 @@ import { useExpressionParserContext } from "./useExpressionParserContext";
  
 
 // Enum used to set the exprssion order. 
-// Orderet is used when the expression should be orderet between other orderet expressions
-// First is used when it should be placed unorderet before the orderet expression.
-// Last is used when it should be placed unorderet after the orderet expression.
+// ordered is used when the expression should be ordered between other ordered expressions
+// First is used when it should be placed unordered before the ordered expression.
+// Last is used when it should be placed unordered after the ordered expression.
 export enum ExpressionOrder {
     first = "first",
-    orderet = "orderet",
+    ordered = "ordered",
     last = "last",
 } 
 
