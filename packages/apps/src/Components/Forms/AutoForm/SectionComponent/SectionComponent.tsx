@@ -29,6 +29,7 @@ import { Controls } from "../../../Controls/ControlRegister";
 import { useEAVForm } from "../../../../../../forms/src";
 import { RibbonHost } from "../../../Ribbon/RibbonHost";
 import { PagingProvider } from "../../../Views/PagingContext";
+import { useSelectionContext } from "../../../Selection/useSelectionContext";
 
 
 
@@ -63,7 +64,7 @@ function findEntry(columns: Required<AutoFormColumnsDefinition>["columns"], colu
             return sections[sectionName];
         }
     }
-  
+
 }
 
 
@@ -143,8 +144,8 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
             if (section.control in Controls) {
                 const CustomControl = Controls[section.control];
 
-                return <Stack verticalFill  gap={25} styles={{
-                     
+                return <Stack verticalFill gap={25} styles={{
+
                 }}><Stack.Item grow>
                         <CustomControl />
                     </Stack.Item>
@@ -156,7 +157,9 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const app = useModelDrivenApp();
         const router = useRouter();
         const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
-      //  const [views, setViews] = useState<Array<ViewReference>>([]);
+        const [isUpdateOpen, { setTrue: openUpdatePanel, setFalse: dismissUpdatePanel }] = useBoolean(false);
+        const [updateObject, setUpdateObject] = useState<any>({});
+        //  const [views, setViews] = useState<Array<ViewReference>>([]);
         const [schema, setSchema] = useState<ControlJsonSchemaObject>();
         const localization = {
             new: capitalize(app.getLocalization("new") ?? "New"),
@@ -168,8 +171,8 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const user = useUserProfile();
         //const _entity = entity;
         useEffect(() => {
-           
-         //   const entity = app.getEntity(entityName);
+
+            //   const entity = app.getEntity(entityName);
             console.log("Recalculating Schema:", [entityName, entity, Object.keys(columns).join(", ")]);
             const fields = Object.keys(columns)
                 .filter(
@@ -223,7 +226,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         //TODO , make expression parsning work on views.
         const [{ allowedforchildcreation }] = useEAVForm((state) => ({ "allowedforchildcreation": state.formValues.allowedforchildcreation }));
         const appinfo = useAppInfo();
-        
+
         const views = useLazyMemo(() => {
             console.groupCollapsed("Setting Related Views: " + entity.logicalName);
             try {
@@ -234,8 +237,8 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                         tabName,
                         columnName,
                         sectionName
-                );
-                
+                    );
+
                 console.log("Setting Views", JSON.stringify(views), allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId);
                 for (let view of views) {
                     view.ribbon = Object.assign({}, view?.ribbon ?? {});
@@ -264,6 +267,14 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
             }
         }, [activeViewRef]);
 
+        const [activeViewRefUpdate, setactiveViewRefUpdate] = useState<ViewReference>();
+        useEffect(() => {
+            if (activeViewRefUpdate) {
+                openUpdatePanel();
+            } else {
+                dismissUpdatePanel();
+            }
+        }, [activeViewRefUpdate]);
         const { currentAppName, currentAreaName } = useAppInfo();
 
         return (
@@ -276,12 +287,44 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     closeButtonAriaLabel="Close"
                 >
                     <Stack verticalFill>
-                        {activeViewRef && <FormRender stickyFooter={false} dismissPanel={(ev) => { setactiveViewRef(undefined); }} record={{}}
-                            onChange={(data) => {
-                                console.log(data);
-                                onFormDataChange?.({ [activeViewRef!.entity.collectionSchemaName.toLowerCase()]: [...formData[activeViewRef.entity.collectionSchemaName.toLowerCase()] ?? [], data] } as any);
-                            }} formName="Quick"
-                            entityName={activeViewRef!.entityName} />
+                        {activeViewRef &&
+
+                            <FormRender
+                                stickyFooter={false}
+                                dismissPanel={(ev) => { setactiveViewRef(undefined); }}
+                                record={updateObject}
+                                onChange={(data) => {
+                                    onFormDataChange?.({ [activeViewRef!.entity.collectionSchemaName.toLowerCase()]: [...formData[activeViewRef.entity.collectionSchemaName.toLowerCase()] ?? [], data] } as any);
+                                }}
+                                formName="Quick"
+                                entityName={activeViewRef!.entityName} />
+                        }
+
+                    </Stack>
+
+
+                </Panel>
+                <Panel
+                    headerText="Quick Update" styles={{ scrollableContent: { display: 'flex', flexDirection: 'column', flexGrow: 1 } }}
+                    isOpen={isUpdateOpen}
+                    onDismiss={() => setactiveViewRefUpdate(undefined)}
+                    // You MUST provide this prop! Otherwise screen readers will just say "button" with no label.
+                    closeButtonAriaLabel="Close"
+                >
+                    <Stack verticalFill>
+                        {activeViewRefUpdate &&
+
+                            <FormRender
+                                stickyFooter={false}
+                                dismissPanel={(ev) => { setactiveViewRef(undefined); }}
+                                //record={{ label: "Test1", value: 300 }}
+                                record={{}}
+                                onChange={(data) => {
+                                    console.log("SIS___TEST", data);
+                                    onFormDataChange?.({ [activeViewRefUpdate!.entity.collectionSchemaName.toLowerCase()]: [...formData[activeViewRefUpdate.entity.collectionSchemaName.toLowerCase()] ?? [], data] } as any);
+                                }}
+                                formName="Quick"
+                                entityName={activeViewRefUpdate!.entityName} />
                         }
 
                     </Stack>
@@ -307,74 +350,86 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                         <RibbonContextProvider key={gridprops.key}>
                             <RibbonHost ribbon={gridprops.ribbon ?? {}}>
                                 <PagingProvider initialPageSize={typeof (gridprops.view?.paging) === "object" ? gridprops.view.paging.pageSize ?? undefined : undefined} enabled={!(gridprops.view?.paging === false || (typeof (gridprops.view?.paging) === "object" && gridprops.view?.paging?.enabled === false))} >
-                            <ModelDrivenGridViewer
-                                {...gridprops}
-                                locale={locale}
+                                    <ModelDrivenGridViewer
+                                        {...gridprops}
+                                        locale={locale}
                                         onChange={onFormDataChange}
                                         filter={`$filter=${gridprops.attributeType === 'lookup' || gridprops.inlinePolyLookup ? gridprops.attribute : `${trimId(gridprops.attribute)}/${padId(entityName)}`} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter : '')}
-                                formData={formData}
-                                newRecord={formData.id ? false : true}
-                                defaultValues={formData[gridprops.entity.collectionSchemaName.toLowerCase()]}
-                                listComponent={gridprops.view?.control && gridprops.view?.control in Views ? Views[gridprops.view.control] : undefined}
-                                padding={0}
-                                showRibbonBar={true}
-                                showViewSelector={false}
-                                recordRouteGenerator={(record) =>
-                                    app.recordUrl({
-                                        appName: currentAppName,
-                                        areaName: currentAreaName,
-                                        entityName: '$type' in record ? record['$type'] :
-                                            record.entityName ?? entity.logicalName,
-                                        recordId: record.id,
-                                    })
-                                }
-                                commands={(view) => [
-                                    {
-                                        key: "newRelatedItem",
-                                        text: `${localization.new} ${gridprops.entity.locale?.[
-                                            app.locale
-                                        ]?.displayName ??
-                                            gridprops.entity.displayName
-                                            }`,
-                                        iconProps: { iconName: "Add" },
-                                        onClick: (e, i) => {
+                                        formData={formData}
+                                        newRecord={formData.id ? false : true}
+                                        defaultValues={formData[gridprops.entity.collectionSchemaName.toLowerCase()]}
+                                        listComponent={gridprops.view?.control && gridprops.view?.control in Views ? Views[gridprops.view.control] : undefined}
+                                        padding={0}
+                                        showRibbonBar={true}
+                                        showViewSelector={false}
+                                        recordRouteGenerator={(record) =>
+                                            app.recordUrl({
+                                                appName: currentAppName,
+                                                areaName: currentAreaName,
+                                                entityName: '$type' in record ? record['$type'] :
+                                                    record.entityName ?? entity.logicalName,
+                                                recordId: record.id,
+                                            })
+                                        }
+                                        commands={(view) => [
+                                            {
+                                                key: "newRelatedItem",
+                                                text: `${localization.new} ${gridprops.entity.locale?.[
+                                                    app.locale
+                                                ]?.displayName ??
+                                                    gridprops.entity.displayName
+                                                    }`,
+                                                iconProps: { iconName: "Add" },
+                                                onClick: (e, i) => {
 
-                                            console.log([e, view, gridprops]);
+                                                    console.log([e, view, gridprops]);
 
-                                            if (gridprops.view?.ribbon?.new?.supportQuickCreate) {
+                                                    if (gridprops.view?.ribbon?.new?.supportQuickCreate) {
 
-                                                setactiveViewRef(gridprops);
-                                            } else {
+                                                        setactiveViewRef(gridprops);
+                                                    } else {
 
-                                                router.push(app.newEntityUrl(
-                                                    router.query.appname as string,
-                                                    router.query.area as string,
-                                                    gridprops.entity.logicalName,
-                                                    undefined,
-                                                    {
-                                                        [gridprops.attribute]:
-                                                            formData?.id,
+                                                        router.push(app.newEntityUrl(
+                                                            router.query.appname as string,
+                                                            router.query.area as string,
+                                                            gridprops.entity.logicalName,
+                                                            undefined,
+                                                            {
+                                                                [gridprops.attribute]:
+                                                                    formData?.id,
+                                                            }
+                                                        ));
                                                     }
-                                                ));
-                                            }
-                                            //location.href = ;
-                                        },
-                                    } as ICommandBarItemProps,
-                                    {
-                                        key: "deleteSelection",
-                                        text: `${localization.delete}`,
-                                        iconProps: { iconName: "Delete" },
-                                        disabled: view.selection.getSelection().length === 0,
-                                        onClick: (e, i) => {
-                                            setTimeout(async () => {
-                                                let tasks = view.selection.getSelection().map(i => deleteRecordSWR(gridprops.entity, i.id!));
-                                                await Promise.all(tasks);
+                                                    //location.href = ;
+                                                },
+                                            } as ICommandBarItemProps,
+                                            {
+                                                key: "deleteSelection",
+                                                text: `${localization.delete}`,
+                                                iconProps: { iconName: "Delete" },
+                                                disabled: view.selection.getSelection().length === 0,
+                                                onClick: (e, i) => {
+                                                    setTimeout(async () => {
+                                                        let tasks = view.selection.getSelection().map(i => deleteRecordSWR(gridprops.entity, i.id!));
+                                                        await Promise.all(tasks);
 
-                                                location.reload();
-                                            });
-                                        },
-                                    } as ICommandBarItemProps//,
-                                ].filter((commandBarButton) => (commandBarButton.key === "newRelatedItem" && gridprops?.ribbon?.new?.visible !== false) || (commandBarButton.key === "deleteSelection" && gridprops?.ribbon?.delete?.visible !== false))}
+                                                        location.reload();
+                                                    });
+                                                },
+                                            } as ICommandBarItemProps//,
+                                            , {
+                                                key: "updateSelection",
+                                                text: `Update`,
+                                                iconProps: { iconName: "Delete" },
+                                                disabled: false,
+                                                onClick: (e, i) => {
+                                                    const { selection, selectionDetails } = useSelectionContext();
+                                                    let object = selection.getSelection()[0];
+                                                    setUpdateObject(object);
+                                                    setactiveViewRefUpdate(gridprops);
+                                                },
+                                            } as ICommandBarItemProps//,
+                                        ].filter((commandBarButton) => (commandBarButton.key === "newRelatedItem" && gridprops?.ribbon?.new?.visible !== false) || (commandBarButton.key === "deleteSelection" && gridprops?.ribbon?.update?.visible !== false) || (commandBarButton.key === "updateSelection" && gridprops?.ribbon?.delete?.visible !== false))}
                                     />
                                 </PagingProvider>
                             </RibbonHost>
