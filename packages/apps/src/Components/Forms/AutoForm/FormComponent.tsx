@@ -32,7 +32,7 @@ const pivotItemStyle = {
 
 
 
-const FormComponent = <T,>(props: FormComponentProps<T>) => {
+const FormComponent = <T extends { id?: string, [key: string]: any }>(props: FormComponentProps<T>) => {
     const {
         form,
         tabs,

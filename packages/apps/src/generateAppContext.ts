@@ -33,7 +33,7 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
     for (const entityKey of Object.keys(manifest.entities)) {
         //Fix all lowercase types on load
         for (const attribute of Object.values(manifest.entities[entityKey].attributes)) {
-            if (typeof attribute.type === "object")
+            if (typeof attribute.type !== "string")
                 attribute.type.type = attribute.type.type.toLowerCase() as PrimitiveType;
             else attribute.type = attribute.type.toLowerCase() as PrimitiveType;
         }

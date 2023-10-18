@@ -64,7 +64,7 @@ function uuidv4() {
 function isDefined(v: any) {
     return !(v === null || typeof v === "undefined");
 }
-function mergeAndUpdate<T>(data: any, updatedFields: T): T {
+function mergeAndUpdate<T extends object>(data: any, updatedFields: T) : T {
     console.log("mergeAndUpdate input", JSON.stringify(data), JSON.stringify( updatedFields));
 
     if (updatedFields) {

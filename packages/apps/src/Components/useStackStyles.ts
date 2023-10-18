@@ -57,6 +57,4 @@ export const useVerticalFill = makeStyles({
     },
 })
 
-export const classNames = (...args: Array<string | undefined | null>) => {
-    return args.filter(x=>x).join(' ');
-}
+ 

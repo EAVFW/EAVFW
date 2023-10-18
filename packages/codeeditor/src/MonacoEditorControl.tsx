@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 //import {EditorProps} from "react-draft-wysiwyg";
-import { FieldProps } from "@rjsf/core";
+import { FieldProps } from "@rjsf/utils";
 import { JSONSchema7 } from "json-schema";
 import { RegistereControl, useModelDrivenApp } from '@eavfw/apps';
 import Editor, { DiffEditor, useMonaco, loader, EditorProps, OnMount, OnChange } from "@monaco-editor/react";

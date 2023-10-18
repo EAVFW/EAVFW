@@ -98,7 +98,7 @@ const SelectWidget = ({
     return (
         <>
 
-            <Dropdown  {...uiProps}
+            <Dropdown  {...options}
                 label={label || schema.title}
                 multiSelect={multiple}
                 defaultSelectedKey={value}

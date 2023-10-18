@@ -19,6 +19,8 @@ import useSWR from "swr";
 import { useId, useBoolean } from '@fluentui/react-hooks';
 import { useUserProfile } from "../Profile";
 import { ResolveFeature } from "../../FeatureFlags";
+import { FluentProvider, Theme as FluentUI9Theme } from "@fluentui/react-components";
+
 
 
 export type TopBarProps = {
@@ -62,16 +64,20 @@ const contentStyles = mergeStyleSets({
 export function TopBar(props: TopBarProps) {
     const profile = useUserProfile();
     console.log(profile);
+
+    const defaultV2Theme: FluentUI9Theme = ResolveFeature("defaultV2Theme");
     const defaultTheme = ResolveFeature("defaultTheme");
+
     const [isModalOpen, { setTrue: showModal, setFalse: hideModal, toggle }] = useBoolean(false);
     const titleId = useId('title');
     //   const user = useContext(UserContext);
     return (
+        <FluentProvider theme={defaultV2Theme}>
         <ThemeProvider theme={props.theme ?? defaultTheme}>
             <Stack horizontal horizontalAlign="space-between" verticalAlign="center" tokens={{ childrenGap: 10 }}
                 styles={styles2}>
-                <Stack horizontal horizontalAlign="start">
-                    <Link href="/">
+                    <Stack horizontal horizontalAlign="start">
+                        <Link href="/" legacyBehavior>
                         <FluentLink theme={useTheme()} href="/" title="Home" role="link"> <Text
                             variant="large"> {props.title}</Text> </FluentLink>
                     </Link>
@@ -102,8 +108,10 @@ export function TopBar(props: TopBarProps) {
                                     dragOptions={undefined}
                                 >
                                     <Stack horizontal horizontalAlign="end" verticalAlign="center">
-                                        <Link href={`/.auth/logout?post_logout_redirect_uri=${location.href}`}>
-                                            <FluentLink href={`/.auth/logout?post_logout_redirect_uri=${location.href}`} title="Signout" role="link" > <Text variant="mediumPlus" >Log ud</Text> </FluentLink>
+                                        <Link href={`/.auth/logout?post_logout_redirect_uri=${location.href}`} legacyBehavior>
+                                            <FluentLink href={`/.auth/logout?post_logout_redirect_uri=${location.href}`} title="Signout" role="link" >
+                                                <Text variant="mediumPlus" >Log ud</Text>
+                                            </FluentLink>
                                         </Link>
                                     </Stack>
 
@@ -117,6 +125,7 @@ export function TopBar(props: TopBarProps) {
                         </>}
                 </Stack>
             </Stack>
-        </ThemeProvider>
+            </ThemeProvider>
+        </FluentProvider>
     );
 }

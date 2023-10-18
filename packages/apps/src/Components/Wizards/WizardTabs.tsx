@@ -1,18 +1,18 @@
-import { FormTabDefinitionWithColumns, WizardTabs } from "@eavfw/manifest"
-import { SelectTabData, SelectTabEvent, Tab, TabList, TabListProps, TabValue } from "@fluentui/react-components"
+import { FormTabDefinitionWithColumns, WizardTabsDefinition } from "@eavfw/manifest"
+import { mergeClasses, SelectTabData, SelectTabEvent, Tab, TabList, TabListProps, TabValue } from "@fluentui/react-components"
 import { ChevronCircleDown32Regular, ChevronCircleDown32Filled } from "@fluentui/react-icons"
 import { useState } from "react"
 import { ResolveFeature } from "../.."
 import { useModelDrivenApp } from "../../useModelDrivenApp"
-import { TabComponentSlim } from "../Forms/AutoForm/TabComponent"
-import { classNames, useStackStyles } from "../useStackStyles"
-import { useWizard } from "./WizardDrawer"
+import { useStackStyles } from "../useStackStyles"
+import { useWizard } from "./useWizard"
+import { WizardTab } from "./WizardTab"
 
 
 
 
 
-export const WizardTabsComponent: React.FC<{ tabs?: WizardTabs, className?: string, selectedTab?: string, onTabSelect: TabListProps["onTabSelect"] }> = (
+export const WizardTabs: React.FC<{ tabs?: WizardTabsDefinition, className?: string, selectedTab?: string, onTabSelect: TabListProps["onTabSelect"] }> = (
     { tabs = {}, className, selectedTab = Object.keys(tabs)[0], onTabSelect }
 ) => {
     const stack = useStackStyles();
@@ -42,11 +42,11 @@ export const WizardTabsComponent: React.FC<{ tabs?: WizardTabs, className?: stri
     
 
     return (
-        <div className={classNames(stack.root, stack.horizontal, className)}>
+        <div className={mergeClasses(stack.root, stack.horizontal, className)}>
             <TabList size="large" selectedValue={selectedTab} onTabSelect={onTabSelect} vertical>
                 {tabsRendere()}
             </TabList>
-            <TabComponentSlim className={classNames(stack.itemGrow)} columns={tabmodel.columns} controlName={tabmodel.control} />
+            <WizardTab className={mergeClasses(stack.itemGrow)} columns={tabmodel.columns} controlName={tabmodel.control} />
         </div>
     )
 }

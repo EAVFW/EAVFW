@@ -6,7 +6,7 @@ import { getJsonSchema } from "./getJsonSchema";
 
 export function getDependencySchema(fields: any[], field: any, entity: EntityDefinition, app: ModelDrivenApp, formName: string, formContext: any): JSONSchema7 {
     const type = entity.attributes[field!].type;
-    if (type === "boolean" || (typeof type === "object" && type.type === "boolean")) {
+    if (type === "boolean" || (typeof type !== "string" && type.type === "boolean")) {
 
         //https://jsfiddle.net/scoutm3d/3/
         function gen(value: boolean) {

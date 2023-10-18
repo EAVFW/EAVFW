@@ -47,12 +47,12 @@ export type WizardTab = {
     },
     control?: string;
 }
-export type WizardTabs = {
+export type WizardTabsDefinition = {
     [key: string]: WizardTab;
     }
 export type WizardsDefinition = {
     triggers: WizardTriggers;
-    tabs: WizardTabs;
+    tabs: WizardTabsDefinition;
     title: string;
 }
 export type WizardsCollection= {

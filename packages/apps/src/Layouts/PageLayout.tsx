@@ -25,8 +25,7 @@ export function PageLayout(props: PageLayoutProps) {
             <Stack.Item grow style={{ overflow: "hidden" }}>
                 <Stack styles={PageStackStyles} horizontal verticalFill>
                     <ModelDrivenNavigation sitemap={props.sitemap} theme={topBarTheme} />
-                    <Stack.Item grow>
-                        
+                    <Stack.Item grow>                        
                         {props.children}
                     </Stack.Item>
                 </Stack>

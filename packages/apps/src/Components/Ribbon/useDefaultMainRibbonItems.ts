@@ -8,6 +8,7 @@ import { useSelectionContext } from "../Selection/useSelectionContext";
 import { useRibbon} from "./useRibbon"
 import { capitalize} from "@eavfw/utils";
 import { useFormLayoutContext } from "../..";
+import { useWizard } from "../Wizards/useWizard";
 
 function uuidv4() {
     //@ts-ignore
@@ -23,7 +24,7 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
     const appInfo = useAppInfo();
 
     const { selection, selectionDetails } = useSelectionContext();
-    const { drawer } = useFormLayoutContext();
+    const [_, { openWizard }] = useWizard();
 
     // const router = useRouter();
 
@@ -40,7 +41,7 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
                     const wizards = app.getWizardsTriggeredByNew(appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName);
                     if (wizards.length > 0) {
 
-                        drawer.open(wizards[0]);
+                        openWizard(wizards[0]);
                         return;
                     }
 

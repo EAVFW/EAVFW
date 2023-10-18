@@ -6,8 +6,8 @@ import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
 import { SectionComponent, SectionComponentSlim } from "./SectionComponent/SectionComponent";
 import { FormValidation } from "@rjsf/utils";
-import { makeStyles } from "@fluentui/react-components";
-import { classNames, useStackStyles, useVerticalFill } from "../../useStackStyles";
+import { makeStyles, mergeClasses } from "@fluentui/react-components";
+import { useStackStyles, useVerticalFill } from "../../useStackStyles";
 
 
 export type ColumnComponentProps<T> = {
@@ -26,7 +26,7 @@ export type ColumnComponentProps<T> = {
     extraErrors?: FormValidation;
 };
 
-const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
+const ColumnComponent = <T extends { id?: string, [key: string]: any }>(props: ColumnComponentProps<T>) => {
     const {
         form,
         sections,
@@ -98,9 +98,9 @@ export const ColumnComponentSlim: React.FC<{ column: AutoFormColumnDefinition }>
    
 
     return (
-        <div className={classNames(styles.root, styles.verticalFill)}>
+        <div className={mergeClasses(styles.root, styles.verticalFill)}>
             {Object.keys(column.sections).map((sectionName, idx) => (
-                <div key={sectionName} className={classNames(styles.item)}>
+                <div key={sectionName} className={styles.item}>
                     <SectionComponentSlim section={column.sections[sectionName]} />
                 </div>
             ))}

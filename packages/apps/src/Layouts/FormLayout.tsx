@@ -15,7 +15,8 @@ import { ResolveFeature } from "../FeatureFlags";
 import { PageStackStyles } from "./PageStackStyles";
 import ModelDrivenNavigation from "../Components/Navigation/ModelDrivenNavigation";
 import { RibbonBar } from "../Components/Ribbon/RibbonBar";
-import { WizardDrawer, WizardProvider } from "../Components/Wizards/WizardDrawer";
+import { WizardDrawer } from "../Components/Wizards/WizardDrawer";
+import { WizardProvider } from "../Components/Wizards/WizardProvider";
 
 
 
@@ -23,7 +24,7 @@ import { WizardDrawer, WizardProvider } from "../Components/Wizards/WizardDrawer
 
 
 const FormLayoutContext = createContext({
-    drawer: { isOpen: false, open: (wizard: [string, WizardsDefinition]) => { }, close: () => { } },
+    
     mutator: { mutate: () => { } },
     setMutator: (a: SetStateAction<{ mutate: () => void }>) => { }
 });
@@ -75,13 +76,14 @@ export function FormLayout(props: PageLayoutProps) {
         const topBarTheme = ResolveFeature("topBarTheme");
 
       //  const [isOpen, setIsOpen] = useState(false);
-        const [wizard, setWizard] = useState<WizardsDefinition>();
+      
        
        
 
         return (
             <ModelDrivenGridViewerSelectedContext.Provider value={{ setSelection, selection: selection!, selectionDetails }}>
-                <FormLayoutContext.Provider value={{ mutator: mutater, setMutator: setMutator, drawer: { isOpen: typeof wizard !== "undefined", open: ([key, wizard]) => { setWizard(wizard); }, close: () => setWizard(undefined) } }}>
+                <FormLayoutContext.Provider value={{ mutator: mutater, setMutator: setMutator }}>
+                    <WizardProvider>
                     <RibbonContextProvider>
                         <Stack verticalFill>
 
@@ -91,9 +93,9 @@ export function FormLayout(props: PageLayoutProps) {
 
                                     <Stack grow styles={PageStackStyles} style={{ overflow: "hidden" }} horizontal verticalFill>
                                         <ModelDrivenNavigation sitemap={props.sitemap} theme={topBarTheme} />
-                                        <WizardProvider wizard={wizard}>
-                                            <WizardDrawer close={() => setWizard(undefined)} />
-                                        </WizardProvider>
+                                        
+                                            <WizardDrawer />
+                                        
                                         <Stack.Item grow>
                                           
                                             <Stack verticalFill>
@@ -115,7 +117,9 @@ export function FormLayout(props: PageLayoutProps) {
 
 
                         </Stack>
-                    </RibbonContextProvider></FormLayoutContext.Provider>
+                        </RibbonContextProvider>
+                    </WizardProvider>
+                </FormLayoutContext.Provider>
             </ModelDrivenGridViewerSelectedContext.Provider>
         );
     } finally {
