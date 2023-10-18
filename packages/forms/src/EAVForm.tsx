@@ -399,9 +399,17 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     const [etag, setEtag] = useState(new Date().toISOString());
     
     useEffect(() => {
-        console.log("eavform change", defaultData); 
-        state.formValues = cloneDeep(defaultData);
-        setEtag(global_etag.current = new Date().toISOString());
+        console.log("eavform change", defaultData);
+        /*
+         * If <EAVForm defaultData={defaultData} , onChange={setDefaultData} /> iused to control state outside eavform for data object,
+         * then the internal etag should only change when its a new object. 
+         * 
+         * The formvalues are cloned internal to ensure that local changes is not reflected in outside object before onChange is called again.
+         */
+        if (state.formValues !== defaultData) {
+            state.formValues = cloneDeep(defaultData);
+            setEtag(global_etag.current = new Date().toISOString());
+        }
     }, [defaultData])
     
     useEffect(() => {
@@ -443,7 +451,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
                             console.log("Run Validation RESULT", [new Date().getTime() - new Date(local).getTime() + "ms", id, results, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
 
-
+                            
 
                             if (local === global_etag.current) {
                                 // mergeDeep(data, updatedFields);
@@ -586,6 +594,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                                 stripForValidation(state.formValues), true,true, true)
                                 .finally(() => {
                                     console.log("UpdateFormData in " + (new Date().getTime() - t) + " milisecond");
+
                                 })
                         }
                     });

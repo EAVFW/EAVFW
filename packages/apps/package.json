@@ -16,7 +16,10 @@
     "@fluentui/react-hooks": "^8.6.10",
     "@rjsf/fluent-ui": "5.13.0",
     "@rjsf/core": "5.13.0",
-    "@rjsf/validator-ajv8": "5.13.0"
+    "@rjsf/validator-ajv8": "5.13.0",
+    "@fluentui/react-components": "9.34.2",
+    "@fluentui/react-portal-compat": "9.0.98",
+    "@fluentui/react-message-bar-preview": "0.2.1"
   },
   "devDependencies": {
     "@types/json-schema": "7.0.9"

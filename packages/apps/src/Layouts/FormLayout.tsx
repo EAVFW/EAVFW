@@ -2,8 +2,8 @@ import { useModelDrivenApp } from "../useModelDrivenApp";
 import { PageLayoutProps } from "./PageLayoutProps";
 
 import { useRouter } from "next/router";
-import React, { createContext, SetStateAction, useContext, useState } from "react";
-import { IRecord } from "@eavfw/manifest";
+import React, { createContext, SetStateAction, useContext, useEffect, useState } from "react";
+import { IRecord, WizardsDefinition } from "@eavfw/manifest";
 import { IObjectWithKey, ScrollablePane, ScrollbarVisibility, Selection, Stack, Sticky, StickyPositionType } from "@fluentui/react";
 import { ModelDrivenGridViewerState } from "../Components/Views/ModelDrivenGridViewer";
 import { ModelDrivenGridViewerSelectedContext } from "../Components/Selection/ModelDrivenGridViewerSelectedContext";
@@ -15,9 +15,21 @@ import { ResolveFeature } from "../FeatureFlags";
 import { PageStackStyles } from "./PageStackStyles";
 import ModelDrivenNavigation from "../Components/Navigation/ModelDrivenNavigation";
 import { RibbonBar } from "../Components/Ribbon/RibbonBar";
+import { WizardDrawer, WizardProvider } from "../Components/Wizards/WizardDrawer";
 
-const FormLayoutContext = createContext({ mutator: { mutate: () => { } }, setMutator: (a: SetStateAction<{ mutate: () => void }>) => { } });
+
+
+
+
+
+const FormLayoutContext = createContext({
+    drawer: { isOpen: false, open: (wizard: [string, WizardsDefinition]) => { }, close: () => { } },
+    mutator: { mutate: () => { } },
+    setMutator: (a: SetStateAction<{ mutate: () => void }>) => { }
+});
 export const useFormLayoutContext = () => useContext(FormLayoutContext);
+
+
 
 export function FormLayout(props: PageLayoutProps) {
     console.group("FormLayout");
@@ -62,36 +74,44 @@ export function FormLayout(props: PageLayoutProps) {
         const [mutater, setMutator] = useState({ mutate: () => { } });
         const topBarTheme = ResolveFeature("topBarTheme");
 
+      //  const [isOpen, setIsOpen] = useState(false);
+        const [wizard, setWizard] = useState<WizardsDefinition>();
+       
+       
+
         return (
             <ModelDrivenGridViewerSelectedContext.Provider value={{ setSelection, selection: selection!, selectionDetails }}>
-                <FormLayoutContext.Provider value={{ mutator: mutater, setMutator: setMutator }}>
-                <RibbonContextProvider>
-                    <Stack verticalFill>
+                <FormLayoutContext.Provider value={{ mutator: mutater, setMutator: setMutator, drawer: { isOpen: typeof wizard !== "undefined", open: ([key, wizard]) => { setWizard(wizard); }, close: () => setWizard(undefined) } }}>
+                    <RibbonContextProvider>
+                        <Stack verticalFill>
 
-                        <MessagesProvider>
-                            <ProgressBarProvider>
-                                <TopBar theme={topBarTheme} title={props.title} search={true} />
+                            <MessagesProvider>
+                                <ProgressBarProvider>
+                                    <TopBar theme={topBarTheme} title={props.title} search={true} />
 
-                                <Stack grow styles={PageStackStyles} style={{ overflow: "hidden" }} horizontal verticalFill>
-                                    <ModelDrivenNavigation sitemap={props.sitemap} theme={topBarTheme} />
-                                    <Stack.Item grow>
+                                    <Stack grow styles={PageStackStyles} style={{ overflow: "hidden" }} horizontal verticalFill>
+                                        <ModelDrivenNavigation sitemap={props.sitemap} theme={topBarTheme} />
+                                        <WizardProvider wizard={wizard}>
+                                            <WizardDrawer close={() => setWizard(undefined)} />
+                                        </WizardProvider>
+                                        <Stack.Item grow>
+                                          
+                                            <Stack verticalFill>
+                                                <RibbonBar />
+                                                <MessageArea />
+                                                <Stack.Item grow style={{ position: "relative" }}>
 
-                                        <Stack verticalFill>
-                                            <RibbonBar />
-                                            <MessageArea />
-                                            <Stack.Item grow style={{ position: "relative" }}>
+                                                    <ScrollablePane scrollbarVisibility={ScrollbarVisibility.always} >
+                                                        <Sticky stickyPosition={StickyPositionType.Header} ><ProgressBar /></Sticky>
+                                                        {props.children}
+                                                    </ScrollablePane>
+                                                </Stack.Item>
+                                            </Stack>
 
-                                                <ScrollablePane scrollbarVisibility={ScrollbarVisibility.always} >
-                                                    <Sticky stickyPosition={StickyPositionType.Header} ><ProgressBar /></Sticky>
-                                                    {props.children}
-                                                </ScrollablePane>
-                                            </Stack.Item>
-                                        </Stack>
-
-                                    </Stack.Item>
-                                </Stack>
-                            </ProgressBarProvider>
-                        </MessagesProvider>
+                                        </Stack.Item>
+                                    </Stack>
+                                </ProgressBarProvider>
+                            </MessagesProvider>
 
 
                         </Stack>

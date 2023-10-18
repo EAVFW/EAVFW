@@ -1,11 +1,13 @@
 import React, { useRef } from "react";
 import { Stack } from "@fluentui/react";
 
-import { AutoFormSectionsDefinition, EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
+import { AutoFormColumnDefinition, AutoFormSectionsDefinition, EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
-import { SectionComponent } from "./SectionComponent/SectionComponent";
+import { SectionComponent, SectionComponentSlim } from "./SectionComponent/SectionComponent";
 import { FormValidation } from "@rjsf/utils";
+import { makeStyles } from "@fluentui/react-components";
+import { classNames, useStackStyles, useVerticalFill } from "../../useStackStyles";
 
 
 export type ColumnComponentProps<T> = {
@@ -87,3 +89,22 @@ const ColumnComponent = <T,>(props: ColumnComponentProps<T>) => {
 };
 
 export default ColumnComponent;
+
+
+
+export const ColumnComponentSlim: React.FC<{ column: AutoFormColumnDefinition }> = ({ column }) => {
+
+    const styles = useStackStyles();
+   
+
+    return (
+        <div className={classNames(styles.root, styles.verticalFill)}>
+            {Object.keys(column.sections).map((sectionName, idx) => (
+                <div key={sectionName} className={classNames(styles.item)}>
+                    <SectionComponentSlim section={column.sections[sectionName]} />
+                </div>
+            ))}
+        </div>
+    )
+
+}

@@ -1,13 +1,16 @@
 import React, { useRef } from "react";
 import { Stack } from "@fluentui/react";
 
-import ColumnComponent from "./ColumnComponent";
+import ColumnComponent, { ColumnComponentSlim } from "./ColumnComponent";
 
 import { EntityDefinition, FormDefinition, FormTabDefinition, FormTabDefinitionWithColumns } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
 import { FormValidation } from "@rjsf/utils";
 import { Controls, ResolveFeature } from "../../..";
+import { makeStyles, shorthands, Spinner } from "@fluentui/react-components";
+import { classNames } from "../../useStackStyles";
+import { useWizard } from "../../Wizards/WizardDrawer";
 
 type TabComponentProps<T> = {
     form: FormDefinition;
@@ -90,3 +93,59 @@ const TabComponent = <T,>(props: TabComponentProps<T>) => {
 };
 
 export default TabComponent;
+
+const useOverlay = makeStyles({
+    container: { position: "relative" },
+    root: {
+        position: "absolute",
+        left: 0, top: 0, right: 0, bottom: 0,
+        backgroundColor: "rgba(255, 255, 255, 0.9)",
+        zIndex: 100
+    },
+    spinner: {
+        ...shorthands.margin(0), 
+        position: "absolute",
+        top: "50%",
+        left:"50%",
+        transform: "translate(-50%,-50%)"
+    }
+});
+
+export const TabComponentSlim: React.FC<{ className?: string, columns?: FormTabDefinitionWithColumns["columns"], controlName?: string }> = ({ columns, controlName, className }) => {
+
+    const [{ isTransitioning }] = useWizard();
+    const styles = useOverlay();
+    if (!columns || Object.keys(columns).length === 0) {
+         
+        if (controlName && controlName in Controls) {
+            const Component = Controls[controlName];
+
+
+            return <Stack verticalFill horizontal tokens={StackTokens}><Component /></Stack>
+        }
+        throw new Error("Control or Columns must be defined, or control is not registered");
+    }
+
+    console.log("Rendering tab", [Controls, columns]);
+    const ui = (
+        <Stack className={classNames(className, styles.container)} verticalFill horizontal tokens={{ childrenGap: 25 }} styles={{
+            root: {
+                display: "grid",
+                gridTemplateColumns: `${Object.keys(columns).map(c => '1fr').join(' ')};`
+            }
+        }}>
+            {isTransitioning && <div className={styles.root}>
+                <Spinner className={styles.spinner} size="huge" label="working..." />
+            </div>}
+            {Object.keys(columns).map((columnName, idx) => (
+                <Stack.Item className={columnName} grow key={columnName}>
+                    <ColumnComponentSlim column={columns[columnName]}
+                       
+                    />
+                </Stack.Item>
+            ))}
+        </Stack>
+    );
+    return ui;
+
+}

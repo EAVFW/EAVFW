@@ -30,15 +30,15 @@ export function getJsonSchema(
         }
 
         const { locale, descriptions } = formContext;
-        const descriptionInfo = descriptions.filter((d: any) => d.name === attribute?.logicalName && d.locale == locale)?.[0];
+        const descriptionInfo = descriptions?.filter((d: any) => d.name === attribute?.logicalName && d.locale == locale)?.[0];
         const description = descriptionInfo?.description ?? attribute?.locale?.[locale]?.description ?? attribute?.description;
 
        
-
+        const attributeType = attribute.type;
         const type =
-            typeof attribute.type === "object"
-                ? attribute.type.type
-                : attribute.type;
+            typeof attributeType === "string"
+                ? attributeType
+                : attributeType.type;
 
         const typeProps =
             typeof attribute.type === "object"

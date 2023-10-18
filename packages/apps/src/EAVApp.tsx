@@ -18,6 +18,8 @@ export interface EAVAppManifestProps extends EAVAppProps {
 export type Test = EAVAppModelProps | EAVAppManifestProps;
 
 export const EAVApp: React.FC<PropsWithChildren<Test>> = ({ children, baseUrl, ...props }) => <EAVClientProvider baseUrl={baseUrl}>
-    <AppContext.Provider value={"model" in props ? props.model : new ModelDrivenApp(throwIfNull(props.manifest, "Manifest or model must be given"))}>{children}</AppContext.Provider>
+    <AppContext.Provider value={"model" in props ? props.model : new ModelDrivenApp(throwIfNull(props.manifest, "Manifest or model must be given"))}>
+        {children}
+    </AppContext.Provider>
 </EAVClientProvider>
 

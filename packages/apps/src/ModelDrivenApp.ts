@@ -262,7 +262,12 @@ export class ModelDrivenApp {
         }
         return references;
     }
+    getWizardsTriggeredByNew(appname: string, area: string, entityname: string) {
+        let wizards = Object.entries(this._data.entities[entityname].wizards ?? {})
+            .filter(([key, wizard]) => Object.values(wizard.triggers ?? {}).some(x => x.ribbon && x.ribbon == "NEW"));
 
+        return wizards;
+    }
     newEntityUrl(appname: string, area: string, entityname: string, formName?: string, query?: any) {
 
         console.group("ModelDrivenApp::newEntityUrl");

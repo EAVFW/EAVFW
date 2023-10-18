@@ -1,6 +1,11 @@
 import { ThemeProvider } from "@fluentui/react";
+import { FluentProvider, Theme } from "@fluentui/react-components";
 import React, { Fragment } from "react";
 import { ResolveFeature } from "../FeatureFlags";
+import { createv8Theme } from "./shims/v8ThemeShim";
+import { createBrandVariants } from "./shims/v9BrandVariantsShim";
+import { createv9Theme } from "./shims/v9ThemeShim";
+
 
 
 
@@ -11,7 +16,13 @@ export const RootLayout: React.FC<{id?: string, layout?:string}> = (props) => {
     if (props.layout === "EmptyLayout")
         return <Fragment>{props.children}</Fragment> ;
 
+    const defaultV2Theme: Theme = ResolveFeature("defaultV2Theme");
     const defaultTheme = ResolveFeature("defaultTheme");
+    
 
-    return <ThemeProvider theme={defaultTheme} {...props} id="web-container" />
+    return (
+        <FluentProvider theme={defaultV2Theme}>
+            <ThemeProvider theme={defaultTheme} {...props} id="web-container" />
+        </FluentProvider>
+        )
 }

@@ -20,7 +20,7 @@ import { useRibbon } from "../../Components/Ribbon";
 
 
 
-const FormHostContext = createContext({ formDefinition: {} as FormDefinition });
+export const FormHostContext = createContext({ formDefinition: {} as FormDefinition });
 export const useFormHost = () => useContext(FormHostContext);
 
 const wrapperClass = mergeStyles({
@@ -103,7 +103,7 @@ function createRadioGroups(form: FormDefinition, entity: EntityDefinition) {
 /**
   * Load the evaludated form and only forward it when its actually updated.
   * */
-function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent: any, formName: string, entityName: string) {
+export function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent: any, formName: string, entityName: string) {
 
     const useEvaluateFormDefinition = ResolveFeature("useEvaluateFormDefinition");
     const { evaluatedForm: evaluatedFormDelayed, isEvaluatedFormLoading } = useEvaluateFormDefinition(form, formDataRefcurrent);
@@ -164,7 +164,7 @@ type ModelDrivenFormProps = ModelDrivenEntityViewerProps & {
     //   formDataRef: any,
     //  onFormDataChange: any
 }
-const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
+export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     entity,
     formName,
     locale,

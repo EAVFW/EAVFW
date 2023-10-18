@@ -7,6 +7,7 @@ import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { useSelectionContext } from "../Selection/useSelectionContext";
 import { useRibbon} from "./useRibbon"
 import { capitalize} from "@eavfw/utils";
+import { useFormLayoutContext } from "../..";
 
 function uuidv4() {
     //@ts-ignore
@@ -22,6 +23,7 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
     const appInfo = useAppInfo();
 
     const { selection, selectionDetails } = useSelectionContext();
+    const { drawer } = useFormLayoutContext();
 
     // const router = useRouter();
 
@@ -34,6 +36,13 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
                 text: capitalize(app.getLocalization("new") ?? 'New'),
                 iconProps: { iconName: 'Add' }, data: { order: 0 },
                 onClick: (e, i) => {
+
+                    const wizards = app.getWizardsTriggeredByNew(appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName);
+                    if (wizards.length > 0) {
+
+                        drawer.open(wizards[0]);
+                        return;
+                    }
 
                     const url = new URL(app.newEntityUrl(appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName), location.href);
                     const oldUrl = new URL(location.href);
