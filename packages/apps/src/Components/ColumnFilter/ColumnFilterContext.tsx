@@ -3,11 +3,12 @@ import { IColumn, IDetailsColumnProps, IRenderFunction, mergeStyleSets, Target }
 import { useUserProfile } from "../Profile/useUserProfile";
 import { IFetchQuery } from "../Views";
 import { filterRoles } from "../../filterRoles";
-import React, { FC, Reducer } from "react";
+import React, { FC, Reducer, useEffect } from "react";
 import { IColumnData } from "./IColumnData";
 import cloneDeep from "clone-deep";
 import { ColumnOrder } from "./ColumnOrder";
 import { ModelDrivenApp } from "../../ModelDrivenApp";
+import { UserProfile } from "../Profile";
 
 interface IColumnFilterProps {
     children: any
@@ -31,7 +32,8 @@ interface IColumnFilterContext {
     menuTarget?: Target,
     isCalloutVisible: boolean,
     currentColumn?: IColumn,
-    columns: IColumn[]
+    columns: IColumn[],
+    user?: UserProfile
 }
 
 type ColumnFilterAction =
@@ -135,7 +137,7 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
         }
         case "initializeColumns": {
             const { view, attributes, locale, dispatch, onHeaderRender, app } = action
-            const user = useUserProfile();
+            
 
 
             const columnKeys = Object.keys(view?.columns ?? {}).filter(c => c.indexOf('/') || (attributes[c] && !(attributes[c].isPrimaryKey ?? false)));
@@ -178,7 +180,7 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
             console.log("VIEWS", [attributes, view, columnKeys])
             const columns: Array<IColumn> = columnKeys
                 /*.filter(field => view?.columns![field]?.visible !== false)*/
-                .filter(field => (!view?.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, user))
+                .filter(field => (!view?.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, state.user))
                 .map(column => ({
                     key: column,
                     name: view?.columns![column]?.displayName ?? columnDisplayName(column),
@@ -238,10 +240,13 @@ const ColumnFilterProvider = ({
     onBuildFetchQuery,
     app
 }: IColumnFilterProps) => {
+    const user = useUserProfile();
     const [columnFilterState, columnFilterDispatch] = React.useReducer(columnFilterReducer, {
         isCalloutVisible: false,
-        columns: []
+        columns: [],
+        user
     })
+    
 
     const columnAttributes = React.useMemo(() => {
         const columns =
@@ -380,7 +385,7 @@ const ColumnFilterProvider = ({
         setFetchQuery(onBuildFetchQuery(query));
     }, [attributes, columnFilterState.columns, filter, currentPage, pageSize, columnAttributes])
 
-    React.useMemo(() => {
+    useEffect(() => {
         console.log("Calling reducer from memo");
         columnFilterDispatch({
             type: 'initializeColumns',
