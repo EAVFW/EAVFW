@@ -19,9 +19,9 @@ export type WizardTriggers = {
 
 }
 export type IWizardMessage = {
-    intent: 'info' | 'success' | 'warning' | 'error';
+    intent?: 'info' | 'success' | 'warning' | 'error';
     title: string;
-    message: string;
+    message?: string;
     detailedMessage?: string;
 
 }

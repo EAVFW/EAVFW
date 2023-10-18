@@ -2,9 +2,6 @@ import { ThemeProvider } from "@fluentui/react";
 import { FluentProvider, Theme } from "@fluentui/react-components";
 import React, { Fragment } from "react";
 import { ResolveFeature } from "../FeatureFlags";
-import { createv8Theme } from "./shims/v8ThemeShim";
-import { createBrandVariants } from "./shims/v9BrandVariantsShim";
-import { createv9Theme } from "./shims/v9ThemeShim";
 
 
 
