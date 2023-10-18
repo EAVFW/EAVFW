@@ -200,13 +200,13 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
                                                                         className={`${ModelDrivenGroupItemMarker(theme)} ${entry.logicalName === router.query.entityName && router.query.view === entry.viewName ? 'active' : ''}`}></div>
                                                                     <Icon iconName="AddInIcon" />
                                                                     {entry.viewName ?
-                                                                        <Link
+                                                                        <Link legacyBehavior
                                                                             href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
                                                                             <FluentLink
                                                                                 href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>    {entry.title}</FluentLink>
                                                                         </Link>
                                                                         :
-                                                                        <Link
+                                                                        <Link legacyBehavior
                                                                             href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
                                                                             <FluentLink
                                                                                 href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>    {entry.title}</FluentLink>
@@ -235,7 +235,7 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
                                                                     className={`${ModelDrivenGroupItemMarker(theme)} ${entry.logicalName === router.query.entityName && router.query.view === entry.viewName ? 'active' : ''}`}></div>
                                                                 {entry.viewName ?
                                                                     <div>
-                                                                        <Link
+                                                                        <Link legacyBehavior
                                                                             href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
                                                                             <FluentLink
                                                                                 href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
@@ -249,7 +249,7 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
                                                                     </div>
                                                                     :
                                                                     <div>
-                                                                        <Link
+                                                                        <Link legacyBehavior
                                                                             href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
                                                                             <FluentLink
                                                                                 href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
