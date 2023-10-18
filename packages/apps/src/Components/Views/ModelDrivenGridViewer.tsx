@@ -543,7 +543,7 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
 
 
     const attribute = column.data as AttributeDefinition;
-    console.log("ConditionRenderComponent", [column,attribute]);
+    
 
     const { onRenderPrimaryField: RenderPrimaryField } =
         useModelDrivenGridViewerContext();
