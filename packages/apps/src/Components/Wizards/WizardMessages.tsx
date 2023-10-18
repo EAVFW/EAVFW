@@ -10,8 +10,8 @@ export const WizardMessages: React.FC<{ setDetailedError: Dispatch<SetStateActio
     return (
         <>
         {
-            Object.entries(messages).map(([k, m]) => {
-                return (
+                Object.entries(messages).map(([k, m]) => {
+                    return typeof m.toast === "undefined" && (
                     <MessageBar key={k} shape="square" intent={m.intent}>
                         <MessageBarBody>
                             <MessageBarTitle>{m.title}</MessageBarTitle>

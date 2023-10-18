@@ -18,11 +18,15 @@ export type WizardTriggers = {
     [key: string]:WizardTrigger
 
 }
+export type IWizardMessageToast = {
+    timeout?: number
+    }
 export type IWizardMessage = {
     intent?: 'info' | 'success' | 'warning' | 'error';
     title: string;
     message?: string;
     detailedMessage?: string;
+    toast?: IWizardMessageToast
 
 }
 export type IWizardMessages = {

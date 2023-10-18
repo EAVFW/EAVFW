@@ -5,17 +5,18 @@ import { useWizard } from "./useWizard";
 
 
 const intervalDelay = 100;
-const intervalIncrement = 5;
 
-const DownloadProgressBar: React.FC<{ onDownloadEnd: () => void }> = ({
+
+const DownloadProgressBar: React.FC<{ time?: number, onDownloadEnd: () => void }> = ({
+    time=10000,
     onDownloadEnd,
 }) => {
-    const [value, setValue] = useState(100);
+    const [value, setValue] = useState(time);
     // This effect simulates progress value based on state/remote data
     useEffect(() => {
         if (value > 0) {
             const timeout = setTimeout(() => {
-                setValue((v) => Math.max(v - intervalIncrement, 0));
+                setValue((v) => Math.max(v - intervalDelay, 0));
             }, intervalDelay);
 
             return () => clearTimeout(timeout);
@@ -26,7 +27,7 @@ const DownloadProgressBar: React.FC<{ onDownloadEnd: () => void }> = ({
         }
     }, [value, onDownloadEnd]);
 
-    return <ProgressBar value={value} max={100} />;
+    return <ProgressBar value={value} max={time} />;
 };
 
 export const WizardToaster: React.FC<{ id?: string, position?: ToasterProps["position"] }> = ({ id = "toaster", position="top-end" }) => {
@@ -38,7 +39,7 @@ export const WizardToaster: React.FC<{ id?: string, position?: ToasterProps["pos
     const messageState = useRef({});
     useEffect(() => {
         for (let [x, m] of Object.entries(messages)) {
-            if (!(x in messageState.current)) {
+            if (typeof m.toast !== "undefined" && !(x in messageState.current)) {
                 dispatchToast(
                     <Toast>
                         <ToastTitle action={<Link onClick={() => dismissToast(x)}>dismiss</Link>}>{m.title}</ToastTitle>
@@ -46,7 +47,7 @@ export const WizardToaster: React.FC<{ id?: string, position?: ToasterProps["pos
                             {m.message}
                             <br />
                             {m.detailedMessage}
-                            <DownloadProgressBar onDownloadEnd={() => dismissToast(x)} />
+                            <DownloadProgressBar time={m.toast.timeout} onDownloadEnd={() => dismissToast(x)} />
                         </ToastBody>
 
                     </Toast>,
