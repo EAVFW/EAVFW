@@ -13,7 +13,7 @@ export const RootLayout: React.FC<{id?: string, layout?:string}> = (props) => {
     if (props.layout === "EmptyLayout")
         return <Fragment>{props.children}</Fragment> ;
 
-    const defaultV2Theme: Theme = ResolveFeature("defaultV2Theme");
+    const defaultV2Theme: Theme = ResolveFeature("defaultV2Theme",false);
     const defaultTheme = ResolveFeature("defaultTheme");
     
 
