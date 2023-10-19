@@ -11,9 +11,9 @@ import { WorkflowState } from "./WorkflowState";
 export const useWizard = () => {
 
     const [state, dispatch] = useContext(WizardContext)!;
-    let [values, { onChange }] = useEAVForm(x => x.formValues);
+    let [values, { onChange }] = useEAVForm(x => x.formValues, undefined,'useWizard');
 
-    const moveNext = async () => {
+    const moveNext = async (action:string) => {
         const wizard = state.wizard;
         const tabName = state.tabName!;
 
@@ -24,7 +24,7 @@ export const useWizard = () => {
 
             let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transition.workflow}/runs`, {
                 method: "POST",
-                body: JSON.stringify(values),
+                body: JSON.stringify({ trigger: action, values }),
                 credentials: "include"
             });
 
@@ -89,7 +89,7 @@ export const useWizard = () => {
              * Alternative we could store a promise on state similar to transitionIn.
              * */
             setTimeout(() => {
-                dispatch({ action: "moveNext" });
+                dispatch({ action: "moveNext", trigger: action });
 
                 for (let action of Object.values(result.actions)) {
                     if (action.type === "UpdateWizardContext") {
@@ -102,7 +102,7 @@ export const useWizard = () => {
                 }
             }, 0);
         } else {
-            dispatch({ action: "moveNext" });
+            dispatch({ action: "moveNext", trigger: action });
         }
 
 

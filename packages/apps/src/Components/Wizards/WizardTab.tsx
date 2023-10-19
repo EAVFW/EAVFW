@@ -13,7 +13,8 @@ const useOverlay = makeStyles({
         position: "absolute",
         left: 0, top: 0, right: 0, bottom: 0,
         backgroundColor: "rgba(255, 255, 255, 0.9)",
-        zIndex: 100
+        zIndex: 100,
+        ...shorthands.margin(0)
     },
     spinner: {
         ...shorthands.margin(0),
@@ -49,8 +50,8 @@ export const WizardTab: React.FC<{ className?: string, columns?: FormTabDefiniti
 
     console.log("Rendering tab", [Controls, columns]);
     const ui = (
-        <div className={mergeClasses(className, styles.grid, styles.container, stack.verticalFill, stack.horizontal)} /* tokens={{ childrenGap: 25 }}*/ style={{ gridTemplateColumns: `${Object.keys(columns).map(c => '1fr').join(' ')};` }}>
-            {isTransitioning && <div className={styles.root}>
+        <div className={mergeClasses(className, styles.grid, styles.container, stack.verticalFill, stack.horizontal)} /* tokens={{ childrenGap: 25 }}*/ style={{ gridTemplateColumns: `${Object.keys(columns).map(c => '1fr').join(' ')}` }}>
+            {isTransitioning && <div className={styles.root} style={{margin:'0px'}}>
                 <Spinner className={styles.spinner} size="huge" label="working..." />
             </div>}
             {Object.keys(columns).map((columnName, idx) => (

@@ -64,8 +64,8 @@ const SelectWidget = ({
     onBlur,
     onFocus,
 }: WidgetProps) => {
-    const { enumOptions, enumDisabled, props: uiProps = {} } = options;
-    console.log("Select Widget", [disabled, readonly, options, uiProps, schema]);
+    const { enumOptions, enumDisabled } = options;
+     
     const _onChange = (
         _ev?: React.FormEvent<HTMLElement>,
         item?: IDropdownOption

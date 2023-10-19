@@ -105,8 +105,9 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
     const reftime = useRef(new Date().getTime());
 
     useEffect(() => {
-        console.log("useEAVForm Trigger: " + logid + " " + etag);
+      
         const currentTime = new Date().getTime();
+        console.log("useEAVForm Trigger: " + logid + " " + etag, [currentTime - timeout, reftime.current, currentTime - timeout > reftime.current]);
         if (currentTime - timeout > reftime.current) {
 
 
@@ -132,7 +133,7 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
        
 
         let collected = collector(state as TState);
-        console.log("useEAVForm collected: " + logid, [JSON.stringify( collected)]);
+        console.log("useEAVForm collected: " + logid, [logid || new Error(),JSON.stringify( collected)]);
         return [
             cloneDeep(collected), actions, etag] as [TCollected, EAVFormContextActions<TFormValues>, string];
     }, [state,subscriptionid]);

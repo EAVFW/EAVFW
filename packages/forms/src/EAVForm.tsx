@@ -18,7 +18,7 @@ import { DirtyContainer } from "./DirtyContext";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
     formDefinition?: ManifestDefinition,
-    defaultData: T
+    defaultData?: T
     initialErrors?: EAVFWErrorDefinitionMap,
     initialVisitedFields?: VisitedFieldElement,
     onChange?: (data: T, ctx?: any) => void;
@@ -370,6 +370,7 @@ function mergeErrors(err1: EAVFWErrorDefinitionMap, err2: EAVFWErrorDefinitionMa
 
     return err1;
 }
+
 export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     stripForValidation = (a) => a,
     formDefinition,
@@ -406,7 +407,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
          * 
          * The formvalues are cloned internal to ensure that local changes is not reflected in outside object before onChange is called again.
          */
-        if (state.formValues !== defaultData) {
+        if (defaultData && state.formValues !== defaultData) {
             state.formValues = cloneDeep(defaultData);
             setEtag(global_etag.current = new Date().toISOString());
         }
@@ -659,16 +660,16 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
         return () => { delete callbacks[formId] };
     }, []);
 
-    useEffect(() => {
-        const equal = isEqual(state.formValues, defaultData);
-        console.log("EAVForm Default Data Reset", [JSON.stringify(state.formValues), JSON.stringify( defaultData), equal]);
-        if (!equal) {
-            state.formValues = cloneDeep(defaultData) ?? {};
-            setEtag(global_etag.current = new Date().toISOString());
-        }
+    //useEffect(() => {
+    //    const equal = isEqual(state.formValues, defaultData);
+    //    console.log("EAVForm Default Data Reset", [JSON.stringify(state.formValues), JSON.stringify( defaultData), equal]);
+    //    if (defaultData && !equal) {
+    //        state.formValues = cloneDeep(defaultData) ?? {};
+    //        setEtag(global_etag.current = new Date().toISOString());
+    //    }
 
 
-    }, [defaultData]);
+    //}, [defaultData]);
 
    
 

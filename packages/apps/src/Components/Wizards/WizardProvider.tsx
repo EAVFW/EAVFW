@@ -5,14 +5,18 @@ import { WizardReducer } from "./WizardReducer";
 export const WizardProvider: React.FC<{}> = ({ children }) => {
 
 
-    const [defaultdata, setDefaultData] = useState(() => ({}));
+    return (
+        <WizardReducer>
+            {children}
+        </WizardReducer>
 
+    )
 
     return (
-        <EAVForm defaultData={defaultdata} onChange={(data, ctx) => {
+        <EAVForm   onChange={(data, ctx) => {
             console.log("WziardData", data, ctx);
-            setDefaultData(data);
-        }}><WizardReducer data={defaultdata}>
+            
+        }}><WizardReducer >
                 {children}
             </WizardReducer>
 

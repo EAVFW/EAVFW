@@ -93,7 +93,7 @@ function createVisitedObject(id: string) {
 
 
 
-export const WidgetRegister = { SelectWidget: SelectWidget, TextWidget: TextWidget, CheckboxWidget: CheckboxWidget }
+export const WidgetRegister: FormProps["widgets"] = { SelectWidget: SelectWidget, CheckboxWidget: CheckboxWidget }
 
 
 import { ChangeEvent, FocusEvent } from 'react';
@@ -175,7 +175,7 @@ export function BaseInputTemplate<
     rawErrors,
     multiline, uiSchema
 }: BaseInputTemplateProps<T, S, F>) {
-    console.log("UIPROPS", [uiSchema, options]);
+    console.log("UIPROPS", [uiSchema, options, value]);
     const inputProps = getInputProps<T, S, F>(schema, type, options);
     const _onChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
         onChange(value === '' ? options.emptyValue : value);
@@ -527,10 +527,11 @@ function mapUISchema(props: any, formContext: any) {
 
     if (typeof props === "object") {
         const entries = Object.keys(props).map((k) => [k, {
-            "ui:disabled": props[k]?.["x-widget-props"]?.disabled,
+            
+            //"ui:disabled": props[k]?.["x-widget-props"]?.disabled,
             "ui:widget": getControl(props[k], "widget"),
             "ui:field": getControl(props[k], "field"),             
-            "ui:props": {
+            "ui:options": {
                 ...props[k]["x-widget-props"] ?? {},
                 styles: readonlyStylesFunction.bind(null, props[k]),  //props[k].readOnly ? readonlyStylesFunction : props[k]["x-widget-props"]?.["styles"],
                 onRenderCaretDown: _onRenderCaretDown.bind(null, formContext, props[k]),
@@ -538,10 +539,10 @@ function mapUISchema(props: any, formContext: any) {
                 //Hack to render labels correct for booleans, due to react json form will set renderLabel=false for booleans
                 onRenderLabel: (p: any) => props[k].type === "boolean" ? <EAVFWLabel {...p} description={props[k]?.description} /> : undefined
             },
-            "ui:placeholder": props[k]?.["x-widget-props"]?.placeholder,
+            //"ui:placeholder": props[k]?.["x-widget-props"]?.placeholder,
             "ui:emptyValue": null
         }]);
-        console.log(entries);
+        
         return Object.fromEntries(entries);
     }
 

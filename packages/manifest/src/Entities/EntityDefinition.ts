@@ -33,6 +33,15 @@ export type IWizardMessages = {
     [key: string]: IWizardMessage
 
 }
+export type IWizardTabAction = {
+    text: string;
+    workflow?: string;
+
+}
+export type IWizardTabActions = {
+    [key: string]: IWizardTabAction
+
+}
 export type WizardTab = {
     visible?: string | boolean;
     title?: string;
@@ -50,6 +59,7 @@ export type WizardTab = {
         workflow: string
     },
     control?: string;
+    actions?: IWizardTabActions
 }
 export type WizardTabsDefinition = {
     [key: string]: WizardTab;

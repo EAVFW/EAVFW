@@ -18,7 +18,7 @@ export const WizardTabs: React.FC<{ tabs?: WizardTabsDefinition, className?: str
     const stack = useStackStyles();
     const app = useModelDrivenApp();
 
-    const [{ expressions }] = useWizard(); 
+    const [{ expressions, isTransitioning }] = useWizard(); 
 
 
     if (!selectedTab)
@@ -35,7 +35,7 @@ export const WizardTabs: React.FC<{ tabs?: WizardTabsDefinition, className?: str
     const tabsRendere = () => {
         return Object.entries(tabs)
             .filter(([key, value]) => typeof value.visible === "undefined" || (typeof value.visible === "boolean" && value.visible) || (typeof value.visible === "string" && expressions[value.visible]))
-            .map(([key, tab]) => <Tab key={key} disabled={Object.keys(tabs).indexOf(key) > Object.keys(tabs).indexOf(selectedTab)} icon={Object.keys(tabs).indexOf(key) < Object.keys(tabs).indexOf(selectedTab) ? <ChevronCircleDown32Filled /> : <ChevronCircleDown32Regular />} value={key}>{tab?.locale?.[app.locale]?.title ?? tab.title ?? key}</Tab>)
+            .map(([key, tab]) => <Tab key={key} disabled={isTransitioning || Object.keys(tabs).indexOf(key) > Object.keys(tabs).indexOf(selectedTab)} icon={Object.keys(tabs).indexOf(key) < Object.keys(tabs).indexOf(selectedTab) ? <ChevronCircleDown32Filled /> : <ChevronCircleDown32Regular />} value={key}>{tab?.locale?.[app.locale]?.title ?? tab.title ?? key}</Tab>)
     }
   
  

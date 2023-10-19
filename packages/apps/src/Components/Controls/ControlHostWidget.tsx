@@ -1,4 +1,4 @@
-import { FieldProps, ErrorSchema, FormValidation, FieldTemplateProps, UiSchema } from "@rjsf/utils";
+import { FieldProps, getUiOptions, ErrorSchema, FormValidation, FieldTemplateProps, UiSchema ,UIOptionsType} from "@rjsf/utils";
 import React, { Component, ComponentClass } from "react"
 import { JSONSchema7 } from "json-schema";
 import { Label, TextField } from "@fluentui/react";
@@ -8,7 +8,6 @@ import { useModelDrivenApp } from "../../useModelDrivenApp";
 import ChoicesControl from "./ChoicesControl/ChoicesControl";
 import LookupControl from "./LookupControl/LookupControl";
 import { EAVFWLabel } from "../Forms/AutoForm/Templates/FieldTemplate";
-
 
  
  
@@ -34,6 +33,12 @@ export type ControlHostWidgetState = {
     label: string
 }
 
+export type EAVFWUIOptions = {
+    entityName: string;
+    formName: string;
+    fieldName: string;
+    styles?: any;
+} & UIOptionsType
 
 export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
 
@@ -42,10 +47,12 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
     const { extraErrors, formErrors } = props.formContext;
     const { schema, uiSchema, required, disabled, formData, rawDescription } = props;
 
+    const { widget, placeholder = '', title: uiTitle, ...options } = getUiOptions(uiSchema) as EAVFWUIOptions;
 
     const { ["x-control"]: control } = schema as any;
-    const { ["ui:props"]: { styles, onRenderLabel, entityName, fieldName, attributeName, formName } } = uiSchema!;
-    console.log("ControlHostWidgetNew", [props, styles, onRenderLabel, control, Controls]);
+    
+    const { styles, onRenderLabel, entityName, fieldName, attributeName, formName  } = options!;
+    
 
     const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];
     const label = props.schema.title!;

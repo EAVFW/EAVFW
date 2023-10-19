@@ -59,7 +59,7 @@ const TextWidget = ({
     autofocus,
     options,
     schema,
-    rawErrors,
+    rawErrors, 
 }: WidgetProps) => {
 
     const _onChange = useCallback(({
@@ -73,19 +73,21 @@ const TextWidget = ({
         target: { value },
     }: React.FocusEvent<HTMLInputElement>) => onFocus(id, value), [onFocus]);
 
-    const uiProps = usePick(options.props ?? {}, allowedProps);
+    const uiProps = usePick(options ?? {}, allowedProps);
     const inputType = schema.type === 'string' ? 'text' : `${schema.type}`
 
-    console.log("TextWidget", [id, placeholder, autofocus, required, disabled, readonly, inputType, value, rawErrors, uiProps]);
+    console.log("TextWidget", [id, placeholder, autofocus, required, disabled, readonly, inputType, value, rawErrors, options,uiProps]);
 
     return (
         <TextField
             id={id}
+            name={id}
             placeholder={placeholder}
             autoFocus={autofocus}
             required={required}
             disabled={disabled}
             readOnly={readonly}
+           
             // TODO: once fluent-ui supports the name prop, we can add it back in here.
             // name={name}
             type={inputType as string}

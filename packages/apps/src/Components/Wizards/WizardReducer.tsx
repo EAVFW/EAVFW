@@ -20,7 +20,12 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
             ...state,
             tabName: action.tabName
         }
-        case "setWizard": return {
+        case "setWizard":
+
+            if (!action.wizard)
+                return {};
+
+            return {
             ...state,
             wizard: action.wizard?.[1],
             wizardKey: action.wizard?.[0],
@@ -66,10 +71,12 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 .map(kv => kv[0]);
 
             let nextTab = keys[keys.indexOf(selectedTab) + 1];
-            let transitionIn = wizard.tabs[nextTab].onTransitionIn;
+           
 
 
             if (nextTab) {
+                let transitionIn = wizard.tabs[nextTab].onTransitionIn;
+
                 return {
                     ...state,
                     messages: transitionIn?.message ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next", ... (transitionIn.message as Partial<IWizardMessage>) } } : {},
@@ -81,7 +88,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
 
                             let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs`, {
                                 method: "POST",
-                                body: JSON.stringify(state.values),
+                                body: JSON.stringify({ trigger: action.trigger, values: state.values }),
                                 credentials: "include"
                             });
 
@@ -122,6 +129,10 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                     }) : undefined
 
                 }
+            } else {
+                return {
+                     
+                    }
             }
 
 
@@ -131,112 +142,16 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
     }
 }
 
-export const WizardReducer: React.FC<{ data: any }> = ({ children, data }) => {
+export const WizardReducer: React.FC = ({ children }) => {
 
     const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
+
+    
     const r = useReducer(wizardReducer, {
-        expressions: onFormValuesChange(data)
+        expressions: onFormValuesChange({})
     });
-    const [_, { onChange }] = useEAVForm(x => undefined);
-    /*
-     * When data is updated, we set the internal data.
-     */
-    useEffect(() => { r[1]({ action: "setValues", expressionsProvider: onFormValuesChange, values: data }) }, [data]);
 
-
-    /*
-     * Handle the transition promise when set as part of transition into a new tab.
-     */
-    useEffect(() => {
-
-        let p = r[0].transition;
-        console.log("Transition Monitor", p);
-        const dispatch = r[1];
-
-        if (p) {
-            let isCurrent = true;
-            let t5 = setTimeout(() => {
-                console.log("Transition Monitor 5000");
-                dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Still working." });
-            }, 5000);
-            let t11 = setTimeout(() => {
-                console.log("Transition Monitor 11000");
-                dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Sorry, its taking longer than expected." });
-            }, 11000);
-            let t18 = setTimeout(() => {
-                console.log("Transition Monitor 18000");
-                dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Still working, sorry for keeping you wait." });
-            }, 18000);
-
-            p.then(result => {
-                clearTimeout(t5);
-                clearTimeout(t11);
-                clearTimeout(t18);
-
-
-                if (result.status.toLowerCase() === "failed") {
-
-                    dispatch({
-                        action: "setMessages", messages: {
-                            "WorkflowFailed": {
-                                "intent": "error",
-                                "title": "Workflow Failed",
-                                "message": "Pleaes reload, and try again",
-                                "detailedMessage": result.failedReason
-                            }
-                        }
-                    });
-
-                    return;
-                }
-
-
-                for (let action of Object.values(result.actions)) {
-                    if (action.type === "UpdateWizardContext") {
-
-
-                        if (action.body?.values) {
-                            // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
-                            onChange(props => {
-                                mergeDeep(props, result.body);
-                            });
-                        }
-
-                        if (action.body?.messages) {
-                            dispatch({ action: "setMessages", messages: action.body?.messages });
-
-                        }
-
-                    }
-                }
-                onChange(props => {
-                    mergeDeep(props, result.body);
-                });
-                //  dispatch({ action: "setValues", values: result.body, expressionsProvider: onFormValuesChange, merge: true });
-
-
-                if (isCurrent) {
-                    r[1]({ action: "setTransition", transition: false });
-                }
-            });
-
-            return () => {
-                isCurrent = false;
-                clearTimeout(t5);
-                clearTimeout(t11);
-                clearTimeout(t18);
-
-                console.log("Transition Monitor Cleared");
-            }
-        } else if (r[0].isTransitioning) {
-            r[1]({ action: "setTransition", transition: false });
-        }
-
-
-
-
-
-    }, [r[0].transition]);
+    
 
     return (<WizardContext.Provider value={r}>
 

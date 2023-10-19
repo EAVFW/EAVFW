@@ -512,21 +512,30 @@ export const SectionComponentSlim: React.FC<{
             </FormHostContext.Provider>)
 
     } else if (hasJsonSchema(section)) {
-        const [formData, { onChange }] = useEAVForm(x => x.formValues);
-        console.log("UIPROPS", [section.uiSchema, section.schema]);
+        const [formData, { onChange }] = useEAVForm(x => x.formValues, undefined, "sectioncomponent schema");
+        const [a, b] = useState(formData[section.logicalName]);
+        useEffect(() => { b(formData[section.logicalName]) }, [formData,section.logicalName]);
+        console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName,a]);
         return (
             <Form
                 uiSchema={section.uiSchema}
-                schema={section.schema }
-                onChange={(e) => {
-
+                schema={section.schema}
+                onBlur={(e) => {
+                    console.log("sectioncomponent schema updating formdata", [e]);
                     onChange((props, ctx) => {
-                        props[section.logicalName] = e.formData;
+                        props[section.logicalName] = a;
                     })
+                }}
+                onChange={(e) => {
+                    console.log("sectioncomponent schema updating formdata", [e]);
+                    b(e.formData);
+                    //onChange((props, ctx) => {
+                    //    props[section.logicalName] = e.formData;
+                    //})
                 }}
                
                 idPrefix={'wizard'}
-                formData={formData[section.logicalName]}
+                formData={a}
               //  widgets={WidgetRegister} 
 
                 templates={{ BaseInputTemplate: BaseInputTemplate } }

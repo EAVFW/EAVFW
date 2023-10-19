@@ -4,7 +4,7 @@
 export type IWizardAction =
     { action: "setTab"; tabName: string; } |
     { action: "setWizard"; wizard?: [string, WizardsDefinition]; } |
-    { action: "moveNext"; } |
+    { action: "moveNext"; trigger:string} |
     { action: "setMessages"; messages: IWizardMessages; } |
     { action: "setTransition"; transition: boolean; } |
     { action: "updateMessage"; messageKey: string; message: string; } |

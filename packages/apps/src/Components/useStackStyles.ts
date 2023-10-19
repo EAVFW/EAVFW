@@ -24,10 +24,17 @@ export const useStackStyles = makeStyles({
         }
     },
     horizontal: {
-        flexDirection: 'row!important' as "row",
+        flexDirection: 'row',
         '> :not(:last-child)': {
-            marginBottom: '10px!important',
+            marginBottom: '10px',
             marginRight: '10px',
+        }
+    },
+    noGap: {
+       
+        '> :not(:last-child)': {
+            marginBottom: '0px',
+            marginRight: '0px',
         }
     },
     verticalFill: {
