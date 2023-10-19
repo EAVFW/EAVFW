@@ -27,7 +27,7 @@ import { WizardToaster } from "./WizardToaster";
 
 const Wizard: React.FC = ({ children }) => {
 
-    const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
+    //const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
 
     const [data, { onChange, updateState }] = useEAVForm(x => x.formValues, undefined, 'Wizard');
     const r = useContext(WizardContext)!;
@@ -36,7 +36,7 @@ const Wizard: React.FC = ({ children }) => {
      */
     useEffect(() => {
         console.log('WizardReducer: Setting Wizard FormValues', [data]);
-        r[1]({ action: "setValues", expressionsProvider: onFormValuesChange, values: data })
+        r[1]({ action: "setValues",  values: data })
     }, [data]);
 
     /**
@@ -100,8 +100,8 @@ const Wizard: React.FC = ({ children }) => {
 
                         if (action.body?.values) {
                             // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
-                            onChange(props => {
-                                mergeDeep(props, result.body);
+                            onChange(props => {                           
+                                dispatch({ action: "setValues", values: mergeDeep(props, result.body) });
                             });
                         }
 
@@ -113,7 +113,7 @@ const Wizard: React.FC = ({ children }) => {
                     }
                 }
                 onChange(props => {
-                    mergeDeep(props, result.body);
+                    dispatch({ action: "setValues", values: mergeDeep(props, result.body) });                    
                 });
                 //  dispatch({ action: "setValues", values: result.body, expressionsProvider: onFormValuesChange, merge: true });
 

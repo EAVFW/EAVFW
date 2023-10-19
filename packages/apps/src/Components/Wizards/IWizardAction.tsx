@@ -8,4 +8,4 @@ export type IWizardAction =
     { action: "setMessages"; messages: IWizardMessages; } |
     { action: "setTransition"; transition: boolean; } |
     { action: "updateMessage"; messageKey: string; message: string; } |
-    { action: "setValues"; values: any; expressionsProvider: (d: any) => any; merge?: boolean; };
+    { action: "setValues"; values: any; expressionsProvider?: (d: any) => any; merge?: boolean; };

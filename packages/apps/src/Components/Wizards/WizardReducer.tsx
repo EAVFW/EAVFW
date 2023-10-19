@@ -15,6 +15,7 @@ import { WizardContext } from "./WizardContext";
 
 
 const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
+    console.log('WizardReducer: ' + action.action, [state, action]);
     switch (action.action) {
         case "setTab": return {
             ...state,
@@ -46,7 +47,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
             return {
                 ...state,
                 values,
-                expressions: action.expressionsProvider(values),
+                expressions: (action.expressionsProvider ?? ResolveFeature("WizardExpressionsProvider") )(values),
             };
         case "updateMessage":
             state.messages![action.messageKey].message = action.message;

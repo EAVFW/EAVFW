@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useMemo, useRef, useState } from "react";
+import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
 
 
@@ -36,6 +36,8 @@ import { ModelDrivenApp } from "../../../../ModelDrivenApp";
 import { Form } from "@rjsf/fluent-ui";
 import FieldTemplate from "../Templates/FieldTemplate";
 import validator from '@rjsf/validator-ajv8';
+import { useWizard } from "../../../Wizards/useWizard";
+import { WizardContext } from "../../../Wizards/WizardContext";
 
 
 
@@ -512,18 +514,25 @@ export const SectionComponentSlim: React.FC<{
             </FormHostContext.Provider>)
 
     } else if (hasJsonSchema(section)) {
+
+        const [_, dispatch] = useContext(WizardContext)!;
         const [formData, { onChange }] = useEAVForm(x => x.formValues, undefined, "sectioncomponent schema");
         const [a, b] = useState(formData[section.logicalName]);
-        useEffect(() => { b(formData[section.logicalName]) }, [formData,section.logicalName]);
+        useEffect(() => {
+            b(formData[section.logicalName])
+
+        }, [formData, section.logicalName]);
         console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName,a]);
         return (
             <Form
                 uiSchema={section.uiSchema}
                 schema={section.schema}
                 onBlur={(e) => {
+                   
                     console.log("sectioncomponent schema updating formdata", [e]);
                     onChange((props, ctx) => {
                         props[section.logicalName] = a;
+                        dispatch({ action: "setValues", values: props[section.logicalName] });
                     })
                 }}
                 onChange={(e) => {
