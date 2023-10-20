@@ -8,19 +8,31 @@ const setVariablesFunction = process.env['NEXT_PUBLIC_BLAZOR_SET_VARIABLES'];
 
 
 declare global {
-    interface Window { expressionUpdated: any; expressionError: any; }
+    interface Window { expressionUpdated: any; expressionError: any; multipleExpressionsUpdated: any;}
 }
 
 const expressionResults = {
 
 } as any;
 if (typeof global.window !== "undefined") {
+
+    window['multipleExpressionsUpdated'] = function ( valuesToUpdate: {id: any, result: any | undefined, error: any | undefined}[] ) {        
+        console.log('multipleExpressionsUpdated', arguments);
+        if(valuesToUpdate != undefined && valuesToUpdate.length != 0){
+            setTimeout(() => {
+                valuesToUpdate.forEach(elem => {
+                    expressionResults[elem.id](elem.result, elem.error);                
+                });
+            });
+        }
+    }
+
+
     window['expressionUpdated'] = function (id: any, result: any) {
         console.log('expressionUpdated', arguments);
         setTimeout(() => {
             expressionResults[id](result);
         });
-
     }
 
     window['expressionError'] = function (id: any, error: any) {
@@ -62,20 +74,17 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
     const [_resultetag, set_resultetag] = useState(new Date().getTime());
     const t = useRef(0);
 
-    const _appendExpression = useCallback((id: string, expresssion: string, context: any, oncallback: (data: any, error: any) => void) => {
+    const _appendExpression = useCallback((id: string, expresssion: string, context: any, oncallback: (data: any, error: any, id?: string) => void) => {
 
         _results.current[id] = { isLoading: false };
 
         expressionResults[id] = (result: any, error: any) => {
-            //
-            oncallback(result, error);
-
-            
+            oncallback(result, error, id);
             _results.current[id].data = result;
             _results.current[id].isLoading = false;
             _results.current[id].error = error;
-
-             window.clearTimeout(t.current);
+            
+            window.clearTimeout(t.current);
         t.current = window.setTimeout(() => {
             set_resultetag(new Date().getTime());
         },400);
