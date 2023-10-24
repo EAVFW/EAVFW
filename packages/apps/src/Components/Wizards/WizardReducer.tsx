@@ -10,8 +10,7 @@ import { IWizardMessage } from "@eavfw/manifest";
 import { useEAVForm } from "@eavfw/forms";
 import { WizardContext } from "./WizardContext";
 
-
-
+import { trace, context, diag, DiagConsoleLogger, DiagLogLevel, SpanKind, propagation } from '@opentelemetry/api';
 
 
 const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
@@ -22,17 +21,102 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
             tabName: action.tabName
         }
         case "setWizard":
+            {
+                if (state.spanResolve) {
+                    state.spanResolve();
+                }
+                const wizard = action.wizard;
+                if (!wizard)
+                    return {
+                        expressions: ResolveFeature("WizardExpressionsProvider")({})
+                    };
 
-            if (!action.wizard)
-                return {};
+                // Get the active trace provider  
+                const tracerProvider = trace.getTracerProvider();
 
-            return {
-            ...state,
-            wizard: action.wizard?.[1],
-            wizardKey: action.wizard?.[0],
-            tabName: Object.keys(action.wizard?.[1]?.tabs ?? {})[0],
+                // Use the tracer provider to get a tracer  
+                const tracer = tracerProvider.getTracer('eavfw-wizard');
 
-        }
+
+                const wizardPromise = new Promise<any>((resolve, reject) => {
+                    state.spanResolve = resolve;
+                    state.spanReject = reject;
+                });
+ 
+                const parentContext = context.active();
+                const span = tracer.startSpan('eavfw-wizard-start', undefined, parentContext);
+                const contextWithSpanSet = trace.setSpan(parentContext, span);
+
+                // context.with(contextWithSpanSet, () => {
+                //    await wizardPromise;
+                //}, undefined, span);
+
+                //const monitorMe = async () => {
+                //    await tracer.startActiveSpan("eavfw-wizard-start", async (span) => {
+                //        try {
+                //            state.span = span;
+                //            span.setAttribute('wizard', wizard[0]);
+                //            const fooResult = await wizardPromise; // this or some inner function my create child spans
+                //           // span.setAttribute("fooResult", fooResult);
+                //         //   const barResult = await bar(); // this or some inner function my create child spans
+                //         //   span.setAttribute("barResult", barResult);
+                //            // ...
+                //        } catch (e) {
+                //            //@ts-ignore
+                //            span.recordException(e);
+                //        } finally {
+                //            span.end();
+                //        }
+                //    });
+                //}
+                //monitorMe();
+
+               // console.log('WizardReducer', [JSON.stringify(rootSpan.spanContext()), trace.getSpan(context.active())?.spanContext()])
+
+                // const activeContext = context.active();
+
+
+                // Assume "input" is an object with 'traceparent' & 'tracestate' keys
+                //  const input = {};
+
+                // Extracts the 'traceparent' and 'tracestate' data into a context object.
+                //
+                // You can then treat this context as the active context for your
+                // traces.
+                let activeContext = context.active(); // propagation.extract(context.active(), input);
+
+                // let tracer = trace.getTracer('app-name');
+
+                //let span = tracer.startSpan(
+                //    'eavfw-wizard-start',
+                //    {
+                //        attributes: {},
+                //    },
+                //    context.active(),
+                //);
+
+                // Set the created span as active in the deserialized context.
+               // trace.setSpan(activeContext, rootSpan);
+
+                // Use the tracer to create a new span  
+                // const span = tracer.startSpan('eavfw-wizard-start', {}, context.active());
+
+
+
+                // trace.setSpan(activeContext, span),
+
+                //   const newContext = context.with();  
+                console.log("WizardReducer", [parentContext, activeContext, contextWithSpanSet, span, state.span, trace.getSpan(activeContext), trace.getSpan(activeContext)?.spanContext(), trace.getActiveSpan(), trace.getActiveSpan()?.spanContext()!]);
+                return {
+                    ...state,
+                    tracer: tracer,
+                    otelContext: contextWithSpanSet,
+                    wizard: action.wizard?.[1],
+                    wizardKey: action.wizard?.[0],
+                    tabName: Object.keys(action.wizard?.[1]?.tabs ?? {})[0],
+
+                }
+            }
         //case "updateExpressions": return {
         //    ...state,
         //    values: action.values,
@@ -47,7 +131,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
             return {
                 ...state,
                 values,
-                expressions: (action.expressionsProvider ?? ResolveFeature("WizardExpressionsProvider") )(values),
+                expressions: (action.expressionsProvider ?? ResolveFeature("WizardExpressionsProvider"))(values),
             };
         case "updateMessage":
             state.messages![action.messageKey].message = action.message;
@@ -61,83 +145,99 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 isTransitioning: action.transition
             }
         case "moveNext":
+            return context.with(state.otelContext!, () => {
 
-            const expressionResults = state.expressions;
-            console.log("useWizardExpressionsProvider movenext", expressionResults);
-            const wizard = state.wizard!;
-            const selectedTab = state.tabName!;
+                const spanContext = trace.getSpan(context.active())?.spanContext()!;
+                console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
 
-            let keys = Object.entries(wizard?.tabs ?? {})
-                .filter(([key, value]) => typeof value.visible === "undefined" || (typeof value.visible === "boolean" && value.visible) || (typeof value.visible === "string" && expressionResults[value.visible]))
-                .map(kv => kv[0]);
+                const expressionResults = state.expressions;
+                console.log("useWizardExpressionsProvider movenext", expressionResults);
+                const wizard = state.wizard!;
+                const selectedTab = state.tabName!;
 
-            let nextTab = keys[keys.indexOf(selectedTab) + 1];
-           
+                let keys = Object.entries(wizard?.tabs ?? {})
+                    .filter(([key, value]) => typeof value.visible === "undefined" || (typeof value.visible === "boolean" && value.visible) || (typeof value.visible === "string" && expressionResults[value.visible]))
+                    .map(kv => kv[0]);
 
-
-            if (nextTab) {
-                let transitionIn = wizard.tabs[nextTab].onTransitionIn;
-
-                return {
-                    ...state,
-                    messages: transitionIn?.message ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next", ... (transitionIn.message as Partial<IWizardMessage>) } } : {},
-                    tabName: nextTab,
-                    isTransitioning: transitionIn ? true : false,
-                    transition: transitionIn ? new Promise(async (resolve, reject) => {
-                        if (transitionIn) {
+                let nextTab = keys[keys.indexOf(selectedTab) + 1];
 
 
-                            let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs`, {
-                                method: "POST",
-                                body: JSON.stringify({ trigger: action.trigger, values: state.values }),
-                                credentials: "include"
-                            });
+               
 
-                            let id = await rsp.json().then(x => x.id);
 
-                            let completed = false;
+                if (nextTab) {
+                    let transitionIn = wizard.tabs[nextTab].onTransitionIn;
 
-                            while (!completed) {
-                                let statusRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}/status`, {
+                  
 
+                    return {
+                        ...state,
+                        messages: transitionIn?.message ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next", ... (transitionIn.message as Partial<IWizardMessage>) } } : {},
+                        tabName: nextTab,
+                        isTransitioning: transitionIn ? true : false,
+                        transition: transitionIn ? new Promise(async (resolve, reject) => {
+                            if (transitionIn) {
+
+
+                                let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs`, {
+                                    method: "POST",
+                                    body: JSON.stringify({ trigger: action.trigger, values: state.values }),
+                                    credentials: "include",
+                                    //headers: {
+                                    //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
+                                    //}
+                                });
+
+                                let id = await rsp.json().then(x => x.id);
+
+                                let completed = false;
+
+                                while (!completed) {
+                                    let statusRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}/status`, {
+                                        //headers: {
+                                        //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
+                                        //},
+                                        credentials: "include"
+                                    });
+
+                                    let status = await statusRsp.json();
+                                    completed = status.completed;
+
+                                    await new Promise((resolve) => setTimeout(resolve, 5000));
+                                }
+
+                                let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}`, {
+                                    //headers: {
+                                    //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
+                                    //},
                                     credentials: "include"
                                 });
 
-                                let status = await statusRsp.json();
-                                completed = status.completed;
+                                let result = await stateRsp.json() as WorkflowState;
+                                console.log("jobstate", result);
 
-                                await new Promise((resolve) => setTimeout(resolve, 5000));
+
+                                if (rsp.ok) {
+                                    resolve(result);
+                                }
+                                else {
+                                    reject();
+                                }
+
                             }
 
-                            let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}`, {
+                        }) : undefined
 
-                                credentials: "include"
-                            });
-
-                            let result = await stateRsp.json() as WorkflowState;
-                            console.log("jobstate", result);
-
-
-                            if (rsp.ok) {
-                                resolve(result);
-                            }
-                            else {
-                                reject();
-                            }
-
-                        }
-
-                    }) : undefined
-
-                }
-            } else {
-                return {
-                     
                     }
-            }
+                } else {
+                    return {
+
+                    }
+                }
 
 
-            return state;
+                 
+            });
 
 
     }
@@ -147,12 +247,12 @@ export const WizardReducer: React.FC = ({ children }) => {
 
     const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
 
-    
+
     const r = useReducer(wizardReducer, {
         expressions: onFormValuesChange({})
     });
 
-    
+
 
     return (<WizardContext.Provider value={r}>
 

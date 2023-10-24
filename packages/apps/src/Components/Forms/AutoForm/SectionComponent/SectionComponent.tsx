@@ -532,7 +532,7 @@ export const SectionComponentSlim: React.FC<{
                     console.log("sectioncomponent schema updating formdata", [e]);
                     onChange((props, ctx) => {
                         props[section.logicalName] = a;
-                        dispatch({ action: "setValues", values: props[section.logicalName] });
+                        dispatch({ action: "setValues", values: props});
                     })
                 }}
                 onChange={(e) => {
