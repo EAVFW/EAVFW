@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
 import { EAVFormContext } from "./EAVFormContext";
-import { EAVFormContextActions } from "./EAVFormContextActions";
+import { EAVCollectContext, EAVFormContextActions } from "./EAVFormContextActions";
 import { EAVFormContextProps } from "./EAVFormContextProps";
 import cloneDeep from "clone-deep";
 import { EAVFormContextState } from "./EAVFormContextState";
@@ -86,35 +86,25 @@ import { EAVFormContextState } from "./EAVFormContextState";
 //    }
 //}
 
-export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>, string]
-export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>, string]
-export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>, string]
-export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?:number|string, logid?: string): [TCollected, EAVFormContextActions<TFormValues>,string] {
+export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, EAVFormContextState<TFormValues>>, string]
+export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, EAVFormContextState<TFormValues>>, string]
+export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, TState>, string]
+export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, TState>, string] {
 
-    const {
+    const {purpose,
         actions,
         state,        
         etag
-    } = useContext<EAVFormContextProps<TFormValues>>(EAVFormContext);
+    } = useContext<EAVFormContextProps<TFormValues, TState>>(EAVFormContext);
 
+    
   
-
-    const oldValues = useRef(cloneDeep(collector(state as TState)));
-   // const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
-
-    const timeout = typeof (timeoutOrLogin) === "number" ? timeoutOrLogin : 0;
     logid = typeof (timeoutOrLogin) === "string" ? timeoutOrLogin : logid;
-    const reftime = useRef(new Date().getTime());
-    const [collected, setCollected] = useState<[TCollected, EAVFormContextActions<TFormValues>, string]>([collector(state as TState), actions, etag]);
+   
 
-     
-    useEffect(() => {
-        //@ts-ignore
-        const { remove } = actions.registerCollector<TState, TCollected>(collector, setCollected) ?? {
-            remove: () => { } };
-        return () => remove();
-    }, []);
+    return actions.useCollector(collector);
 
+   // return [collected, actions, etag];
     //useEffect(() => {
       
     //    const currentTime = new Date().getTime();
@@ -154,5 +144,5 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
      
     
 
-    return collected;
+    
 }

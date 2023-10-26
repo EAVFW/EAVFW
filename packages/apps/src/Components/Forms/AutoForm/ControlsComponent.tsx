@@ -218,8 +218,8 @@ const ControlsComponent =
             //    b(formData)
 
             //}, [formData, section.logicalName]);
-            const [formdata1] = useEAVForm(x => x.formValues);
-            console.log("uncronlled4", [(formdata1 as any)?.name]);
+            //const [formdata1] = useEAVForm(x => x.formValues);
+          //  console.log("uncronlled4", [(formdata1 as any)?.name]);
             return (
                 <div style={{ padding: 20 }} suppressHydrationWarning={true}>
                     <Form
@@ -228,13 +228,13 @@ const ControlsComponent =
                         onChange={onChange}
                         formContext={{
                             ...(formContext ?? {}),
-                            onFormDataChange: (data: any) => onChange({ formData: { ...formdata1, ...data } }), // onFormDataChange,                            
-                            formData: formdata1,
+                            onFormDataChange: (data: any) => onChange({ formData: { ...formData, ...data } }), // onFormDataChange,                            
+                            formData: formData,
                             extraErrors: extraErrors,
                             formErrors: formErrors
                         }}
                         idPrefix={app.currentEntityName}
-                        formData={formdata1}
+                        formData={formData}
                         fields={{ ControlHostWidget: ControlHostWidget }}
                         widgets={WidgetRegister} 
                         uiSchema={uiSChema}

@@ -1,7 +1,7 @@
 
 import { EAVFWErrorDefinition, EAVFWErrorDefinitionMap, isEAVFWError, ManifestDefinition, ValidationDefinitionV1, ValidationDefinitionV2, } from "@eavfw/manifest";
 import { useExpressionParserContext } from "@eavfw/expressions";
-import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, MutableRefObject, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import isEqual from "react-fast-compare";
 import { EAVFormContext } from "./EAVFormContext";
 
@@ -9,7 +9,7 @@ import cloneDeep from "clone-deep";
 
 import { cleanDiff, deepDiffMapper, mergeDeep } from "@eavfw/utils";
 import { EAVFormContextState } from "./EAVFormContextState";
-import { EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVFormContextActions";
+import { EAVCollectContext, EAVFormCollectorRegistration, EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVFormContextActions";
 
 import { useBlazor, useUuid } from "@eavfw/hooks";
 import { useEAVForm } from "./useEAVForm";
@@ -17,13 +17,14 @@ import { useAppInfo, useFormChangeHandler, useModelDrivenApp, WarningContextProv
 import { DirtyContainer } from "./DirtyContext";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
+    purpose?:string,
     formDefinition?: ManifestDefinition,
     defaultData?: T
     initialErrors?: EAVFWErrorDefinitionMap,
     initialVisitedFields?: VisitedFieldElement,
     onChange?: (data: T, ctx?: any) => void;
     state?: Omit<TState, keyof EAVFormContextState<T>>;
-    onValidationResult?: (result: { errors: EAVFWErrorDefinition, actions: EAVFormContextActions<T>, state: TState }) => void;
+    onValidationResult?: (result: { errors: EAVFWErrorDefinition, actions: EAVFormContextActions<T,TState>, state: TState }) => void;
     stripForValidation?:(data:T)=>T
 }
 
@@ -373,6 +374,7 @@ function mergeErrors(err1: EAVFWErrorDefinitionMap, err2: EAVFWErrorDefinitionMa
 
 export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     stripForValidation = (a) => a,
+    purpose,
     formDefinition,
     defaultData,
     onChange,
@@ -501,13 +503,40 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
         }
         return false;
     }
-    const collectors = useRef<{[key:string]:any}>({});
-    const actions = useRef<EAVFormContextActions<T>>({
-        registerCollector: (collector,setresult) => {
-            let id = uuidv4();
-            collectors.current[id] = (localstate:any,actions:any,etag:any) => setresult([collector(localstate),actions,etag]);
 
-            return { remove: () => delete collectors.current[id] };
+    const collectors = useRef<{ [key: string]: EAVFormCollectorRegistration }>({});
+
+    const actions: MutableRefObject<EAVFormContextActions<T, TState>> = useRef({
+        useCollector: (collector) => {
+             
+            const [collected, setCollected] = useState<EAVCollectContext<T, TState, any>>([collector(state), actions.current, etag]);
+
+            useEffect(() => {
+
+                let id = uuidv4();
+                console.log("Registered Collector:", [id]);
+
+                collectors.current[id] = {
+                    oldValue: collected[0],
+                    trigger: (localstate: TState, etag: string) => {
+
+
+                        let newValue = collector(localstate);
+                        if (!isEqual(collectors.current[id].oldValue, newValue)) {
+                            collectors.current[id].oldValue = cloneDeep(newValue);
+                            setCollected([collector(localstate), actions.current, etag]);
+                        }
+                    }
+                };
+
+                return () => {
+                    console.log("unregistered collector:", [id]);
+
+                    delete collectors.current[id];
+                }
+            }, []);
+            return collected;
+            
            
         },
         runValidation: runValidation,
@@ -545,7 +574,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     console.log("Merged State: ", [state]);
                     let newetag = new Date().toISOString();
                     for (let collector of Object.values(collectors.current)) {
-                        collector(state, actions.current, newetag);
+                        collector.trigger(state, newetag);
                     }
                     setEtag(global_etag.current = newetag);
                 }
@@ -614,7 +643,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
                  
                 for (let collector of Object.values(collectors.current)) {
-                    collector(state, actions.current, local);
+                    collector.trigger(state, local);
                 }
                 setEtag(local);
 
@@ -643,7 +672,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
         //    setEditedFieldIds(fieldIds);
         //}
 
-    });
+    } as EAVFormContextActions<T, TState>);
 
     useEffect(() => {
 
@@ -691,6 +720,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     return (
         <EAVFormContext.Provider
             value={{         
+                purpose: purpose??"default",
                 actions: actions.current,
                 state: state,           
                 etag,           

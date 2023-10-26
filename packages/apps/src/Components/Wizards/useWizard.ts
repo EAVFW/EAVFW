@@ -8,6 +8,13 @@ import { WizardContext } from "./WizardContext";
 import { WorkflowState } from "./WorkflowState";
 
 
+export const useWizardOpener = () => {
+    const [_, dispatch] = useContext(WizardContext)!;
+    return {
+        closeWizard: () => dispatch({ action: "setWizard", wizard: undefined }),
+        openWizard: (wizard: [string, WizardsDefinition]) => dispatch({ action: "setWizard", wizard }),
+    }
+};
 
 export const useWizard = () => {
 
@@ -159,9 +166,7 @@ export const useWizard = () => {
     };
 
 
-    let actions = {
-        closeWizard: () => dispatch({ action: "setWizard", wizard: undefined }),
-        openWizard: (wizard: [string, WizardsDefinition]) => dispatch({ action: "setWizard", wizard }),
+    let actions = {       
         startTransitioning: () => dispatch({ action: "setTransition", transition: true }),
         endTransition: () => dispatch({ action: "setTransition", transition: false }),
         moveNext: moveNext,

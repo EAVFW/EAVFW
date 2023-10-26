@@ -158,21 +158,12 @@ export function React9BaseInputTemplate<
 	const _onBlur = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onBlur(id, value);
 	const _onFocus = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onFocus(id, value);
 
-	const [localValue, setLocalValue] = useState<string>(value || value === 0 ? value : '');
-	useEffect(() => {
-
-		setLocalValue(old => {
-			console.log("uncronlled1", [old, value]);
-		return value});
-	}, [value]);
+	  
 
 	const _onChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
 		let updatedValue = value === '' ? options.emptyValue : value;
 		onChange(updatedValue);
-		setLocalValue(old => {
-			console.log("uncronlled2", [old, value]);
-			return updatedValue
-		});
+		 
 	};
 
 	const uiProps = options ?? {};
@@ -192,7 +183,7 @@ export function React9BaseInputTemplate<
 
 				// name={name}
 				{...inputProps as Omit<typeof inputProps, 'type'>}
-				value={localValue}
+				value={value || value === 0 ? value : ''}
 				onChange={(onChangeOverride as any) || _onChange}
 				onBlur={_onBlur}
 				onFocus={_onFocus}

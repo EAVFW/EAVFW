@@ -518,12 +518,8 @@ export const WizardSection: React.FC<{
 
         const [_, dispatch] = useContext(WizardContext)!;
         const [formData, { onChange }] = useEAVForm(x => x.formValues, undefined, "sectioncomponent schema");
-        const [a, b] = useState(formData[section.logicalName]);
-        useEffect(() => {
-            b(formData[section.logicalName])
-
-        }, [formData, sectionName, section.logicalName]);
-        console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName,a]);
+        
+        console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName]);
         return (
             <Form key={sectionName}
                 uiSchema={section.uiSchema}
@@ -531,21 +527,21 @@ export const WizardSection: React.FC<{
                 onBlur={(e) => {
                    
                     console.log("sectioncomponent schema updating formdata", [e]);
-                    onChange((props, ctx) => {
-                        props[section.logicalName] = a;
-                        dispatch({ action: "setValues", values: props});
-                    })
+                    //onChange((props, ctx) => {
+                    //    props[section.logicalName] = a;
+                    //    dispatch({ action: "setValues", values: props});
+                    //})
                 }}
                 onChange={(e) => {
                     console.log("sectioncomponent schema updating formdata", [e]);
-                    b(e.formData);
-                    //onChange((props, ctx) => {
-                    //    props[section.logicalName] = e.formData;
-                    //})
+                    
+                    onChange((props, ctx) => {
+                        props[section.logicalName] = e.formData;
+                    })
                 }}
                
                 idPrefix={'wizard'}
-                formData={a}
+                formData={formData}
                 widgets={WidgetRegister} 
                 
                 templates={{ BaseInputTemplate: React9BaseInputTemplate, FieldTemplate: React9FieldTemplate, } }

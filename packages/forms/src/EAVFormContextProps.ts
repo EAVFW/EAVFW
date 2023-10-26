@@ -3,8 +3,9 @@ import { EAVFormContextActions } from "./EAVFormContextActions";
 import { EAVFormContextState } from "./EAVFormContextState";
 
 
-export type EAVFormContextProps<T> = {
-    actions: EAVFormContextActions<T>;
-    state: EAVFormContextState<T>;
+export type EAVFormContextProps<TFormValues, TState extends EAVFormContextState<TFormValues>> = {
+    purpose: string;    
+    actions: EAVFormContextActions<TFormValues, TState>;
+    state: TState;
     etag: string;
 }

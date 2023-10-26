@@ -8,7 +8,7 @@ import { useSelectionContext } from "../Selection/useSelectionContext";
 import { useRibbon} from "./useRibbon"
 import { capitalize} from "@eavfw/utils";
 import { useFormLayoutContext } from "../..";
-import { useWizard } from "../Wizards/useWizard";
+import { useWizard, useWizardOpener } from "../Wizards/useWizard";
 
 function uuidv4() {
     //@ts-ignore
@@ -24,7 +24,7 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
     const appInfo = useAppInfo();
 
     const { selection, selectionDetails } = useSelectionContext();
-    const [_, { openWizard }] = useWizard();
+    const { openWizard } = useWizardOpener();
 
     // const router = useRouter();
 

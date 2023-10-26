@@ -11,16 +11,5 @@ export const WizardProvider: React.FC<{}> = ({ children }) => {
         </WizardReducer>
 
     )
-
-    return (
-        <EAVForm   onChange={(data, ctx) => {
-            console.log("WziardData", data, ctx);
-            
-        }}><WizardReducer >
-                {children}
-            </WizardReducer>
-
-        </EAVForm>
-
-    )
+ 
 }

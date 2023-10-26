@@ -91,7 +91,7 @@ const TextWidget = ({
             // TODO: once fluent-ui supports the name prop, we can add it back in here.
             // name={name}
             type={inputType as string}
-            defaultValue={value || value === 0 ? value : ""}
+            value={value || value === 0 ? value : ""}
            // value={value || value === 0 ? value : ""}
             onChange={_onChange as any}
             onBlur={_onBlur}

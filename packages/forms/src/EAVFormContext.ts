@@ -2,13 +2,16 @@ import { createContext } from "react";
 import { EAVFormContextProps } from "./EAVFormContextProps";
 
 
-export const EAVFormContext = createContext<EAVFormContextProps<any>>({
+
+
+export const EAVFormContext = createContext<EAVFormContextProps<any, any>>({
+    purpose:"empty",
     actions: {
         runValidation: () => false,
-        addVisited: (id) => { },
-        onChange: () => { },
-        updateState: () => { },
-        registerCollector: (a,b) => { }
+        addVisited: (id) => { throw new Error("EAVFormContext not created") },
+        onChange: () => { throw new Error("EAVFormContext not created") },
+        updateState: () => { throw new Error("EAVFormContext not created") },
+        useCollector: (a) => {  throw new Error("EAVFormContext not created") }
     },
     state: {
         formDefinition: {} as any,

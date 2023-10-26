@@ -17,7 +17,7 @@ import { Dismiss24Regular } from "@fluentui/react-icons";
 import React, { useContext, useEffect, useState } from "react";
 import { ResolveFeature } from "../../FeatureFlags";
 import { useStackStyles } from "../useStackStyles";
-import { useWizard } from "./useWizard";
+import { useWizard, useWizardOpener } from "./useWizard";
 import { WizardContext } from "./WizardContext";
 import { WizardFooter } from "./WizardFooter";
 import { WizardMessages } from "./WizardMessages";
@@ -31,12 +31,13 @@ const Wizard: React.FC = ({ children }) => {
 
     const [data, { onChange, updateState }] = useEAVForm(x => x.formValues, undefined, 'Wizard');
     const r = useContext(WizardContext)!;
+
     /*
      * When data is updated, we set the internal data.
      */
     useEffect(() => {
         console.log('WizardReducer: Setting Wizard FormValues', [data]);
-        r[1]({ action: "setValues",  values: data })
+        r[1]({ action: "setValues", values: data })
     }, [data]);
 
     /**
@@ -100,7 +101,7 @@ const Wizard: React.FC = ({ children }) => {
 
                         if (action.body?.values) {
                             // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
-                            onChange(props => {                           
+                            onChange(props => {
                                 dispatch({ action: "setValues", values: mergeDeep(props, result.body) });
                             });
                         }
@@ -113,7 +114,7 @@ const Wizard: React.FC = ({ children }) => {
                     }
                 }
                 onChange(props => {
-                    dispatch({ action: "setValues", values: mergeDeep(props, result.body) });                    
+                    dispatch({ action: "setValues", values: mergeDeep(props, result.body) });
                 });
                 //  dispatch({ action: "setValues", values: result.body, expressionsProvider: onFormValuesChange, merge: true });
 
@@ -141,20 +142,13 @@ const Wizard: React.FC = ({ children }) => {
 
     }, [r[0].transition]);
 
-    return <>{children}</>
-}
-
-export const WizardDrawer: React.FC = ({ }) => {
 
     const stack = useStackStyles();
 
-
-
-
-
     //  const [selectedTab, setSelectedTab] = useState(Object.keys(wizard?.tabs ?? {})[0]);
     //const selectedTab = useWizardTab() ?? Object.keys(wizard?.tabs ?? {})[0];
-    const [{ tabName, wizard, isTransitioning }, { setSelectedTab, closeWizard }] = useWizard();
+    const [{ tabName, wizard, isTransitioning }, { setSelectedTab }] = useWizard();
+    const { closeWizard } = useWizardOpener();
 
     const [detailedError, setDetailedError] = useState<string>();
     if (!tabName)
@@ -169,45 +163,56 @@ export const WizardDrawer: React.FC = ({ }) => {
 
 
 
+    return (<Drawer position="end" size="large"
+        type="overlay"
+        separator
+        open={typeof wizard !== "undefined"}
+        onOpenChange={(_, { open }) => closeWizard()}
+    >
+        <ProgressBar shape="square" thickness="large" style={{ visibility: isTransitioning ? "visible" : "hidden" }} />
+        <DrawerHeader>
+            <DrawerHeaderTitle
+                action={
+                    <Button
+                        appearance="subtle"
+                        aria-label="Close"
+                        icon={<Dismiss24Regular />}
+                        onClick={closeWizard}
+                    />
+                }
+            >
+                {wizard?.title}
+            </DrawerHeaderTitle>
+        </DrawerHeader>
+        <DrawerBody>
+            {detailedError && <div dangerouslySetInnerHTML={{ __html: detailedError }}></div>}
+            <div className={mergeClasses(stack.root, stack.verticalFill)}>
+                <WizardToaster />
+                <WizardMessages setDetailedError={setDetailedError} />
+                <WizardTabs tabs={wizard?.tabs} className={stack.itemGrow} onTabSelect={onTabSelect} selectedTab={tabName} />
+                <Divider className={stack.itemShrink} />
+                <WizardFooter />
+            </div>
+        </DrawerBody>
+    </Drawer>)
+}
+
+
+export const WizardDrawer: React.FC = ({ }) => {
+
+
+
+
+
+
+
+
 
     return (
-        <EAVForm onChange={(data, ctx) => {
+        <EAVForm purpose="drawer" onChange={(data, ctx) => {
             console.log("WziardData", data, ctx);
 
-        }}><Wizard>
-                <Drawer position="end" size="large"
-                    type="overlay"
-                    separator
-                    open={typeof wizard !== "undefined"}
-                    onOpenChange={(_, { open }) => closeWizard()}
-                >
-                    <ProgressBar shape="square" thickness="large" style={{ visibility: isTransitioning ? "visible" : "hidden" }} />
-                    <DrawerHeader>
-                        <DrawerHeaderTitle
-                            action={
-                                <Button
-                                    appearance="subtle"
-                                    aria-label="Close"
-                                    icon={<Dismiss24Regular />}
-                                    onClick={closeWizard}
-                                />
-                            }
-                        >
-                            {wizard?.title}
-                        </DrawerHeaderTitle>
-                    </DrawerHeader>
-                    <DrawerBody>
-                        {detailedError && <div dangerouslySetInnerHTML={{ __html: detailedError }}></div>}
-                        <div className={mergeClasses(stack.root, stack.verticalFill)}>
-                            <WizardToaster />
-                            <WizardMessages setDetailedError={setDetailedError} />
-                            <WizardTabs tabs={wizard?.tabs} className={stack.itemGrow} onTabSelect={onTabSelect} selectedTab={tabName} />
-                            <Divider className={stack.itemShrink} />
-                            <WizardFooter />
-                        </div>
-                    </DrawerBody>
-                </Drawer>
-            </Wizard>
+        }}><Wizard />
         </EAVForm>
     )
 }
