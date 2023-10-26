@@ -5,3 +5,4 @@ export * from "./ModelDrivenEntityViewer";
 export * from "./LazyFormRender";
 export * from "./AutoForm/ControlJsonSchema";
 export * from "./AutoForm/Templates/FieldTemplate"
+export * from "./AutoForm/Templates/WarningContext"

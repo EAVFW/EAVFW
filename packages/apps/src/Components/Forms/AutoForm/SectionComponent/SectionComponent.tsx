@@ -1,43 +1,43 @@
-import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/router";
+import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 
 
 import isEqual from "react-fast-compare";
 
 
-import { useBoolean } from "@fluentui/react-hooks";
-import { SectionComponentProps } from "./SectionComponentProps";
 import { useChangeDetector, useLazyMemo } from "@eavfw/hooks";
-import { useModelDrivenApp } from "../../../../useModelDrivenApp";
-import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, EntityDefinition, FormColumnDefinition, FormDefinition, FormTabDefinition, FormTabDefinitionWithColumns, getRecordSWR, hasColumns, hasControl, hasFields, hasForm, hasHtml, hasJsonSchema, queryEntitySWR, ViewReference } from "@eavfw/manifest";
-import { ControlJsonSchemaObject } from "../ControlJsonSchema";
+import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, EntityDefinition, FormDefinition, FormTabDefinitionWithColumns, hasColumns, hasControl, hasFields, hasForm, hasHtml, hasJsonSchema, ViewReference } from "@eavfw/manifest";
 import { capitalize } from "@eavfw/utils";
-import { useUserProfile } from "../../../Profile/useUserProfile";
+import { ICommandBarItemProps, Panel, Stack } from "@fluentui/react";
+import { useBoolean } from "@fluentui/react-hooks";
+import { Form } from "@rjsf/fluent-ui";
+import validator from '@rjsf/validator-ajv8';
+import { useEAVForm } from "../../../../../../forms/src";
 import { filterRoles } from "../../../../filterRoles";
+import { ModelDrivenApp } from "../../../../ModelDrivenApp";
+import { useAppInfo } from "../../../../useAppInfo";
+import { useModelDrivenApp } from "../../../../useModelDrivenApp";
+import { Controls } from "../../../Controls/ControlRegister";
+import { useUserProfile } from "../../../Profile/useUserProfile";
+import { RibbonContextProvider } from "../../../Ribbon/RibbonContextProvider";
+import { RibbonHost } from "../../../Ribbon/RibbonHost";
+import { useStackStyles } from "../../../useStackStyles";
+import ModelDrivenGridViewer from "../../../Views/ModelDrivenGridViewer";
+import { PagingProvider } from "../../../Views/PagingContext";
+import { Views } from "../../../Views/ViewRegister";
+import { WizardContext } from "../../../Wizards/WizardContext";
+import { FormRender } from "../../FormRender";
+import { FormHostContext, ModelDrivenForm, useEvaluateFormDefinition } from "../../ModelDrivenEntityViewer";
+import ColumnComponent from "../ColumnComponent";
+import { ControlJsonSchemaObject } from "../ControlJsonSchema";
+import ControlsComponent, { WidgetRegister } from "../ControlsComponent";
+import { ControlsComponentSlim } from "../ControlsComponentSlim";
+import { React9BaseInputTemplate } from "../Widgets/BaseInputTemplate";
 import { getDependencySchema } from "./getDependencySchema";
 import { getJsonSchema } from "./getJsonSchema";
-import { useAppInfo } from "../../../../useAppInfo";
-import { ICommandBarItemProps, Panel, Stack } from "@fluentui/react";
-import { FormRender } from "../../FormRender";
-import ControlsComponent, { BaseInputTemplate, WidgetRegister } from "../ControlsComponent";
-import { RibbonContextProvider } from "../../../Ribbon/RibbonContextProvider";
-import ModelDrivenGridViewer from "../../../Views/ModelDrivenGridViewer";
-import { Views } from "../../../Views/ViewRegister";
-import ColumnComponent from "../ColumnComponent";
-import { Controls } from "../../../Controls/ControlRegister";
-import { useEAVForm } from "../../../../../../forms/src";
-import { RibbonHost } from "../../../Ribbon/RibbonHost";
-import { PagingProvider } from "../../../Views/PagingContext";
-import { useStackStyles } from "../../../useStackStyles";
-import { ControlsComponentSlim } from "../ControlsComponentSlim";
-import { FormHostContext, ModelDrivenForm, useEvaluateFormDefinition } from "../../ModelDrivenEntityViewer";
-import { ModelDrivenApp } from "../../../../ModelDrivenApp";
-import { Form } from "@rjsf/fluent-ui";
-import FieldTemplate from "../Templates/FieldTemplate";
-import validator from '@rjsf/validator-ajv8';
-import { useWizard } from "../../../Wizards/useWizard";
-import { WizardContext } from "../../../Wizards/WizardContext";
+import { SectionComponentProps } from "./SectionComponentProps";
+import { React9FieldTemplate } from "../Templates/React9FieldTemplate";
 
 
 
@@ -408,10 +408,11 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
 export default SectionComponent;
 
 
-export const SectionComponentSlim: React.FC<{
+export const WizardSection: React.FC<{
+    sectionName:string,
     section: AutoFormColumnsDefinition | AutoFormControlsDefinition,
     title?: string
-}> = ({ section }) => {
+}> = ({ section, sectionName }) => {
 
     const styles = useStackStyles();
     console.log("SectionComponentSlim", [section]);
@@ -521,10 +522,10 @@ export const SectionComponentSlim: React.FC<{
         useEffect(() => {
             b(formData[section.logicalName])
 
-        }, [formData, section.logicalName]);
+        }, [formData, sectionName, section.logicalName]);
         console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName,a]);
         return (
-            <Form
+            <Form key={sectionName}
                 uiSchema={section.uiSchema}
                 schema={section.schema}
                 onBlur={(e) => {
@@ -545,9 +546,9 @@ export const SectionComponentSlim: React.FC<{
                
                 idPrefix={'wizard'}
                 formData={a}
-              //  widgets={WidgetRegister} 
-
-                templates={{ BaseInputTemplate: BaseInputTemplate } }
+                widgets={WidgetRegister} 
+                
+                templates={{ BaseInputTemplate: React9BaseInputTemplate, FieldTemplate: React9FieldTemplate, } }
               //  templates={{ FieldTemplate: FieldTemplate }}
                 showErrorList={false}
                 validator={validator}

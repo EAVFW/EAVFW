@@ -1,7 +1,7 @@
 import { FormTabDefinitionWithColumns } from "@eavfw/manifest";
 import { makeStyles, mergeClasses, shorthands, Spinner } from "@fluentui/react-components";
 import { Controls } from "../Controls/ControlRegister";
-import { ColumnComponentSlim } from "../Forms/AutoForm/ColumnComponent";
+import { WizardColumn } from "../Forms/AutoForm/ColumnComponent";
 import { useStackStyles } from "../useStackStyles";
 import { useWizard } from "./useWizard";
 
@@ -30,7 +30,7 @@ const useOverlay = makeStyles({
 });
 
 
-export const WizardTab: React.FC<{ className?: string, columns?: FormTabDefinitionWithColumns["columns"], controlName?: string }> = ({ columns, controlName, className }) => {
+export const WizardTab: React.FC<{ tabName:string, className?: string, columns?: FormTabDefinitionWithColumns["columns"], controlName?: string }> = ({ tabName, columns, controlName, className }) => {
 
     const [{ isTransitioning }] = useWizard();
     const styles = useOverlay();
@@ -55,8 +55,8 @@ export const WizardTab: React.FC<{ className?: string, columns?: FormTabDefiniti
                 <Spinner className={styles.spinner} size="huge" label="working..." />
             </div>}
             {Object.keys(columns).map((columnName, idx) => (
-                <div key={columnName} className={mergeClasses(columnName, stack.item, stack.itemGrow)}>
-                    <ColumnComponentSlim column={columns[columnName]} 
+                <div key={tabName+columnName} className={mergeClasses(columnName, stack.item, stack.itemGrow)}>
+                    <WizardColumn columnName={tabName+columnName} column={columns[columnName]} 
                     />
                 </div>
             ))}

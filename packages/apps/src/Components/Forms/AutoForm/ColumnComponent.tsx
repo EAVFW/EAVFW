@@ -4,7 +4,7 @@ import { Stack } from "@fluentui/react";
 import { AutoFormColumnDefinition, AutoFormSectionsDefinition, EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";
 import { OptionsFactory } from "./OptionsFactory";
-import { SectionComponent, SectionComponentSlim } from "./SectionComponent/SectionComponent";
+import { SectionComponent, WizardSection } from "./SectionComponent/SectionComponent";
 import { FormValidation } from "@rjsf/utils";
 import { makeStyles, mergeClasses } from "@fluentui/react-components";
 import { useStackStyles, useVerticalFill } from "../../useStackStyles";
@@ -92,7 +92,7 @@ export default ColumnComponent;
 
 
 
-export const ColumnComponentSlim: React.FC<{ column: AutoFormColumnDefinition }> = ({ column }) => {
+export const WizardColumn: React.FC<{ column: AutoFormColumnDefinition, columnName: string }> = ({ column, columnName }) => {
 
     const styles = useStackStyles();
    
@@ -100,8 +100,8 @@ export const ColumnComponentSlim: React.FC<{ column: AutoFormColumnDefinition }>
     return (
         <div className={mergeClasses(styles.root, styles.verticalFill)}>
             {Object.keys(column.sections).map((sectionName, idx) => (
-                <div key={sectionName} className={styles.item}>
-                    <SectionComponentSlim section={column.sections[sectionName]} />
+                <div key={columnName+sectionName} className={styles.item}>
+                    <WizardSection sectionName={columnName + sectionName} section={column.sections[sectionName]} />
                 </div>
             ))}
         </div>

@@ -46,7 +46,7 @@ export const WizardTabs: React.FC<{ tabs?: WizardTabsDefinition, className?: str
             <TabList size="large" selectedValue={selectedTab} onTabSelect={onTabSelect} vertical>
                 {tabsRendere()}
             </TabList>
-            <WizardTab className={mergeClasses(stack.itemGrow)} columns={tabmodel.columns} controlName={tabmodel.control} />
+            <WizardTab tabName={selectedTab} className={mergeClasses(stack.itemGrow)} columns={tabmodel.columns} controlName={tabmodel.control} />
         </div>
     )
 }

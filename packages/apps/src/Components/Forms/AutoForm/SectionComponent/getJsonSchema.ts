@@ -65,7 +65,7 @@ export function getJsonSchema(
             "x-widget-props": {
                 placeholder: attribute.readonly ? "beregnes automatisk ved gem" : undefined,
                 disabled: field.disabled,
-
+                rows:field.rows,
                 ...formContext,
             }
         };

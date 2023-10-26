@@ -1,7 +1,7 @@
 import React, { useRef } from "react";
 import { Stack } from "@fluentui/react";
 
-import ColumnComponent, { ColumnComponentSlim } from "./ColumnComponent";
+import ColumnComponent, { WizardColumn } from "./ColumnComponent";
 
 import { EntityDefinition, FormDefinition, FormTabDefinition, FormTabDefinitionWithColumns } from "@eavfw/manifest";
 import { useChangeDetector } from "@eavfw/hooks";

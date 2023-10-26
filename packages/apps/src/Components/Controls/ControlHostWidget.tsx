@@ -7,7 +7,7 @@ import { Controls } from "./ControlRegister";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import ChoicesControl from "./ChoicesControl/ChoicesControl";
 import LookupControl from "./LookupControl/LookupControl";
-import { EAVFWLabel } from "../Forms/AutoForm/Templates/FieldTemplate";
+import { EAVFWLabel } from "../Forms/AutoForm/Templates/EAVFWLabel";
 
  
  

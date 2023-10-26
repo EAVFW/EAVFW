@@ -1,7 +1,7 @@
 
 
 
-import React, { Fragment, PropsWithChildren, useCallback, useContext, useMemo, useRef } from "react";
+import React, { Fragment, PropsWithChildren, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { IChangeEvent, FormProps } from "@rjsf/core";
 import { FieldTemplateProps, UiSchema, FieldValidation, RJSFValidationError } from "@rjsf/utils"
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
@@ -40,12 +40,15 @@ import { OptionsFactory } from "./OptionsFactory";
 import { ControlJsonSchemaObject } from "./ControlJsonSchema";
 import { FormValidation } from "@rjsf/utils";
 import { useModelDrivenApp } from "../../../useModelDrivenApp";
-import FieldTemplate, { EAVFWLabel } from "./Templates/FieldTemplate";
+import { FieldTemplate } from "./Templates/FieldTemplate";
 import { useVisitedContext } from "../../../../../forms/src/EAVForm";
 import { useAppInfo } from "../../../useAppInfo";
 import TextWidget from "./Widgets/TextWidget";
 import CheckboxWidget from "./Widgets/CheckboxWidget";
 
+import { TextField } from '@fluentui/react';
+
+import DateWidget from "./Widgets/DateWidget";
 import validator from '@rjsf/validator-ajv8';
 
 declare module '@rjsf/utils' {
@@ -92,136 +95,23 @@ function createVisitedObject(id: string) {
 }
 
 
-
-export const WidgetRegister: FormProps["widgets"] = { SelectWidget: SelectWidget, CheckboxWidget: CheckboxWidget }
-
-
-import { ChangeEvent, FocusEvent } from 'react';
-import { TextField } from '@fluentui/react';
-import {
-    ariaDescribedByIds,
-    BaseInputTemplateProps,
-    examplesId,
-    labelValue,
-    FormContextType,
-    getInputProps,
-    RJSFSchema,
-    StrictRJSFSchema,
-} from '@rjsf/utils';
-
-
-// Keys of ITextFieldProps from @fluentui/react
-const allowedProps = [
-    'multiline',
-    'resizable',
-    'autoAdjustHeight',
-    'underlined',
-    'borderless',
-    'label',
-    'onRenderLabel',
-    'description',
-    'onRenderDescription',
-    'prefix',
-    'suffix',
-    'onRenderPrefix',
-    'onRenderSuffix',
-    'iconProps',
-    'defaultValue',
-    'value',
-    'disabled',
-    'readOnly',
-    'errorMessage',
-    'onChange',
-    'onNotifyValidationResult',
-    'onGetErrorMessage',
-    'deferredValidationTime',
-    'className',
-    'inputClassName',
-    'ariaLabel',
-    'validateOnFocusIn',
-    'validateOnFocusOut',
-    'validateOnLoad',
-    'theme',
-    'styles',
-    'autoComplete',
-    'mask',
-    'maskChar',
-    'maskFormat',
-    'type',
-    'list',
-];
-
-export function BaseInputTemplate<
-    T = any,
-    S extends StrictRJSFSchema = RJSFSchema,
-    F extends FormContextType = any
->({
-    id,
-    placeholder,
-    required,
-    readonly,
-    disabled,
-    label,
-    hideLabel,
-    value,
-    onChange,
-    onChangeOverride,
-    onBlur,
-    onFocus,
-    autofocus,
-    options,
-    schema,
-    type,
-    rawErrors,
-    multiline, uiSchema
-}: BaseInputTemplateProps<T, S, F>) {
-    console.log("UIPROPS", [uiSchema, options, value]);
-    const inputProps = getInputProps<T, S, F>(schema, type, options);
-    const _onChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
-        onChange(value === '' ? options.emptyValue : value);
-    const _onBlur = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onBlur(id, value);
-    const _onFocus = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onFocus(id, value);
-
-    const uiProps = options ?? {};
-    console.log("UIPROPS", [uiProps, inputProps]);
-    return (
-        <>
-            <TextField
-                id={id}
-                name={id}
-                placeholder={placeholder}
-                //@ts-ignore
-                label={labelValue(label, hideLabel)}
-                autoFocus={autofocus}
-                required={required}
-                disabled={disabled}
-                readOnly={readonly}
-                multiline={multiline}
-                // TODO: once fluent-ui supports the name prop, we can add it back in here.
-                // name={name}
-                {...inputProps}
-                value={value || value === 0 ? value : ''}
-                onChange={(onChangeOverride as any) || _onChange}
-                onBlur={_onBlur}
-                onFocus={_onFocus}
-                errorMessage={(rawErrors || []).join('\n')}
-                list={schema.examples ? examplesId<T>(id) : undefined}
-                //@ts-ignore
-                {...uiProps}
-                aria-describedby={ariaDescribedByIds<T>(id, !!schema.examples)}
-            />
-            {Array.isArray(schema.examples) && (
-                <datalist id={examplesId<T>(id)}>
-                    {(schema.examples as string[])
-                        .concat(schema.default && !schema.examples.includes(schema.default) ? ([schema.default] as string[]) : [])
-                        .map((example: any) => {
-                            return <option key={example} value={example} />;
-                        })}
-                </datalist>
-            )}
-        </>
-    );
+import DateTimeWidget from "./Widgets/DateTimeWidget";
+import { React8BaseInputTemplate, React9BaseInputTemplate } from "./Widgets/BaseInputTemplate";
+import { TextareaWidget } from "./Widgets/TextareaWidget";
+import { EAVFWLabel } from "./Templates/EAVFWLabel";
+import { useEAVForm } from "@eavfw/forms";
+export const WidgetRegister: FormProps["widgets"] = {
+    SelectWidget: SelectWidget,
+    CheckboxWidget: CheckboxWidget,
+    DateTimeWidget,
+    DateWidget,
+    TextareaWidget
 }
+
+
+
+
+
 
 const ControlsComponent =
     <T extends {}>(props1: PropsWithChildren<ControlsComponentProps<T>>) => {
@@ -323,6 +213,13 @@ const ControlsComponent =
 
           //  const formDataInitial = useMemo(() => formData,[]);
 
+            //const [a, b] = useState(formData);
+            //useEffect(() => {
+            //    b(formData)
+
+            //}, [formData, section.logicalName]);
+            const [formdata1] = useEAVForm(x => x.formValues);
+            console.log("uncronlled4", [(formdata1 as any)?.name]);
             return (
                 <div style={{ padding: 20 }} suppressHydrationWarning={true}>
                     <Form
@@ -331,17 +228,17 @@ const ControlsComponent =
                         onChange={onChange}
                         formContext={{
                             ...(formContext ?? {}),
-                            onFormDataChange: (data: any) => onChange({ formData: { ...formData, ...data } }), // onFormDataChange,                            
-                            formData: formData,
+                            onFormDataChange: (data: any) => onChange({ formData: { ...formdata1, ...data } }), // onFormDataChange,                            
+                            formData: formdata1,
                             extraErrors: extraErrors,
                             formErrors: formErrors
                         }}
                         idPrefix={app.currentEntityName}
-                        formData={formData}
+                        formData={formdata1}
                         fields={{ ControlHostWidget: ControlHostWidget }}
                         widgets={WidgetRegister} 
                         uiSchema={uiSChema}
-                        templates={{ FieldTemplate: FieldTemplate, BaseInputTemplate: BaseInputTemplate }}                     
+                        templates={{ FieldTemplate: FieldTemplate, BaseInputTemplate: React9BaseInputTemplate }}                     
                         transformErrors={transformErrors}
                         showErrorList={false}
                         validator={validator}                
