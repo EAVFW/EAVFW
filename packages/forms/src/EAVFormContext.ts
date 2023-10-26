@@ -7,7 +7,8 @@ export const EAVFormContext = createContext<EAVFormContextProps<any>>({
         runValidation: () => false,
         addVisited: (id) => { },
         onChange: () => { },
-        updateState: () => { }
+        updateState: () => { },
+        registerCollector: (a,b) => { }
     },
     state: {
         formDefinition: {} as any,

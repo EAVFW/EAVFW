@@ -97,46 +97,60 @@ export function useEAVForm<TFormValues, TCollected,TState extends EAVFormContext
         etag
     } = useContext<EAVFormContextProps<TFormValues>>(EAVFormContext);
 
+  
+
     const oldValues = useRef(cloneDeep(collector(state as TState)));
-    const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
+   // const [subscriptionid, setsubscriptionid] = useState(new Date().toISOString());
 
     const timeout = typeof (timeoutOrLogin) === "number" ? timeoutOrLogin : 0;
     logid = typeof (timeoutOrLogin) === "string" ? timeoutOrLogin : logid;
     const reftime = useRef(new Date().getTime());
+    const [collected, setCollected] = useState<[TCollected, EAVFormContextActions<TFormValues>, string]>([collector(state as TState), actions, etag]);
 
+     
     useEffect(() => {
+        //@ts-ignore
+        const { remove } = actions.registerCollector<TState, TCollected>(collector, setCollected) ?? {
+            remove: () => { } };
+        return () => remove();
+    }, []);
+
+    //useEffect(() => {
       
-        const currentTime = new Date().getTime();
-        console.log("useEAVForm Trigger: " + logid + " " + etag, [currentTime - timeout, reftime.current, currentTime - timeout > reftime.current]);
-        if (currentTime - timeout > reftime.current) {
+    //    const currentTime = new Date().getTime();
+    //    console.log("useEAVForm Trigger: " + logid + " " + etag, [currentTime - timeout, reftime.current, currentTime - timeout > reftime.current]);
+    //    if (currentTime - timeout > reftime.current) {
 
 
-            const newValues = collector(state as TState);
-            console.debug("useEAVForm oldValues: " + logid, [JSON.stringify(oldValues.current)]);
-            console.debug("useEAVForm newValues: " + logid, [JSON.stringify( newValues)]);
+    //        const newValues = collector(state as TState);
+    //        console.debug("useEAVForm oldValues: " + logid, [JSON.stringify(oldValues.current)]);
+    //        console.debug("useEAVForm newValues: " + logid, [JSON.stringify( newValues)]);
 
-            reftime.current = currentTime;
+    //        reftime.current = currentTime;
 
-            if (!isEqual(oldValues.current, newValues)) {
-                console.log("Updating subscription with new values: " + logid);
-                oldValues.current = cloneDeep(newValues);
+    //        if (!isEqual(oldValues.current, newValues)) {
+    //            console.log("Updating subscription with new values: " + logid);
+    //            oldValues.current = cloneDeep(newValues);
 
-                setsubscriptionid(new Date().toISOString());
+    //           // setsubscriptionid(new Date().toISOString());
+    //            setCollected([
+    //                cloneDeep(newValues), actions, etag]);
               
-            }
-        }
+    //        }
+    //    }
 
-    }, [etag]);
+    //}, [etag]);
 
   
-    const collected = useMemo(() => {
+    //const collected = useMemo(() => {
        
 
-        let collected = collector(state as TState);
-        console.log("useEAVForm collected: " + logid, [logid || new Error(),JSON.stringify( collected)]);
-        return [
-            cloneDeep(collected), actions, etag] as [TCollected, EAVFormContextActions<TFormValues>, string];
-    }, [state,subscriptionid]);
+    //    let collected = collector(state as TState);
+    //    console.log("useEAVForm collected: " + logid, [logid || new Error(), JSON.stringify(collected)]);
+    //    console.log("uncronlled3", [(state.formValues as any)?.name, collected]);
+    //    return [
+    //        cloneDeep(collected), actions, etag] as [TCollected, EAVFormContextActions<TFormValues>, string];
+    //}, [state,subscriptionid]);
      
     
 

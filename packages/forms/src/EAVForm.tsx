@@ -13,7 +13,7 @@ import { EAVFormContextActions, EAVFormOnChangeCallbackContext } from "./EAVForm
 
 import { useBlazor, useUuid } from "@eavfw/hooks";
 import { useEAVForm } from "./useEAVForm";
-import { useAppInfo, useFormChangeHandler, useModelDrivenApp, WarningContext } from "@eavfw/apps";
+import { useAppInfo, useFormChangeHandler, useModelDrivenApp, WarningContextProvider  } from "@eavfw/apps";
 import { DirtyContainer } from "./DirtyContext";
 
 export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = {
@@ -338,9 +338,9 @@ export const EAVFormValidation: React.FC<{ initialVisitedFields?: VisitedFieldEl
     return (
         <VisitedContainer id="root" initialdata={initialVisitedFields}>
             <DirtyContainer id="root">
-                <WarningContext.Provider value={warnings}>
+                <WarningContextProvider value={warnings}>
                     {children}
-                </WarningContext.Provider>
+                </WarningContextProvider>
             </DirtyContainer>
         </VisitedContainer>
     )
@@ -392,7 +392,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     } as TState);
 
     const formId = useUuid(); 
-    
+   
     console.log("EAVForm: ID", [formId, (defaultData as any)?.name, (state?.formValues as any)?.name, initialErrors, state?.formValues, defaultData]);
     const blazor = useBlazor();
    
@@ -501,8 +501,15 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
         }
         return false;
     }
-
+    const collectors = useRef<{[key:string]:any}>({});
     const actions = useRef<EAVFormContextActions<T>>({
+        registerCollector: (collector,setresult) => {
+            let id = uuidv4();
+            collectors.current[id] = (localstate:any,actions:any,etag:any) => setresult([collector(localstate),actions,etag]);
+
+            return { remove: () => delete collectors.current[id] };
+           
+        },
         runValidation: runValidation,
         updateState: (cb: (props: any, ctx:any) => void) => {
             console.groupCollapsed("EAVFW : UpdateState");
@@ -536,7 +543,11 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     }
 
                     console.log("Merged State: ", [state]);
-                    setEtag(global_etag.current = new Date().toISOString());
+                    let newetag = new Date().toISOString();
+                    for (let collector of Object.values(collectors.current)) {
+                        collector(state, actions.current, newetag);
+                    }
+                    setEtag(global_etag.current = newetag);
                 }
             } finally {
                 console.groupEnd();
@@ -601,6 +612,10 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     });
                 }
 
+                 
+                for (let collector of Object.values(collectors.current)) {
+                    collector(state, actions.current, local);
+                }
                 setEtag(local);
 
                 if (onChange)
