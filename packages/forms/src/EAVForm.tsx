@@ -495,7 +495,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
     const actions = useRef<EAVFormContextActions<T>>({
         runValidation: runValidation,
-        updateState: (cb: (props: any, ctx:any) => void) => {
+        updateState: (cb: (props: any, ctx:any) => void): {changedProp: boolean, changedValues: any } | undefined => {
             console.groupCollapsed("EAVFW : UpdateState");
             try {
                 console.time("Callings Calback");
@@ -529,6 +529,11 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                     console.log("Merged State: ", [state]);
                     setEtag(global_etag.current = new Date().toISOString());
                 }
+
+                //Returns values
+                console.groupEnd();
+                return {changedProp, changedValues}
+
             } finally {
                 console.groupEnd();
             }
