@@ -1,4 +1,4 @@
-import { NestedType } from "@eavfw/manifest";
+import { FormDefinition, NestedType } from "@eavfw/manifest";
 import { FormValidation } from "./FormValidation";
 
 
@@ -11,7 +11,7 @@ export type FormRenderProps = {
     forms?: string[],
     formName?: string;
     dismissPanel: (ev: "save" | "cancel") => void,
-    onChange: (data: any) => void
+    onChange: (data: any, ctx?: any) => void
     entityName?: string;
     extraErrors?: FormValidation;
 }

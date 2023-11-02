@@ -1,4 +1,4 @@
-import { AttributeDefinition, getNavigationProperty, isAttributeLookup, ViewDefinition } from "@eavfw/manifest";
+import { AttributeDefinition, getNavigationProperty, isAttributeLookup, isLookup, isPolyLookup, LookupAttributeDefinition, LookupType, ViewDefinition } from "@eavfw/manifest";
 import { IColumn, IDetailsColumnProps, IRenderFunction, mergeStyleSets, Target } from "@fluentui/react";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { IFetchQuery } from "../Views";
@@ -54,6 +54,7 @@ type ColumnFilterAction =
     {
         type: 'initializeColumns',
         view?: ViewDefinition,
+        app: ModelDrivenApp,
         attributes: {
             [key: string]: AttributeDefinition
         },
@@ -133,11 +134,46 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
             }
         }
         case "initializeColumns": {
-            const { view, attributes, locale, dispatch, onHeaderRender } = action
+            const { view, attributes, locale, dispatch, onHeaderRender, app } = action
             const user = useUserProfile();
 
-           
-            const columnKeys = Object.keys(view?.columns ?? {}).filter(c => attributes[c] && !(attributes[c].isPrimaryKey ?? false));
+
+            const columnKeys = Object.keys(view?.columns ?? {}).filter(c => c.indexOf('/') || (attributes[c] && !(attributes[c].isPrimaryKey ?? false)));
+
+
+            function columnDisplayName(column:string) {
+
+                if (column.indexOf('/') !== -1) {
+                    var parts = column.split('/');
+                    var navAttributes = attributes;
+                    var nav = column;
+                    while (parts.length)
+                    {
+                        nav = parts.shift()!;
+                        var lookup = navAttributes[nav];
+                        if (lookup && isAttributeLookup(lookup)) {
+                            var entity = app.getEntityFromKey(lookup.type.referenceType);
+
+                            if (parts.length === 0)
+                                return entity.locale?.[locale ?? "1033"]?.displayName ?? entity.displayName;
+
+
+                            navAttributes = entity.attributes;
+                            nav = Object.entries(navAttributes).filter(a => a[1].isPrimaryField)[0]?.[0];
+                        } else {
+                            break;
+                        }
+                        
+                    }
+                    console.log("View with Parts", [view, column, nav, navAttributes, parts]);
+                    return  navAttributes[nav].locale?.[locale ?? "1033"]?.displayName ?? navAttributes[nav].displayName;
+                }
+                if (!(column in attributes))
+                    throw new Error(`The ${column} does not exists`);
+             
+                return attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName
+            }
+
 
             console.log("VIEWS", [attributes, view, columnKeys])
             const columns: Array<IColumn> = columnKeys
@@ -145,16 +181,16 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
                 .filter(field => (!view?.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, user))
                 .map(column => ({
                     key: column,
-                    name: view?.columns![column]?.displayName ?? attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName,
+                    name: view?.columns![column]?.displayName ?? columnDisplayName(column),
                     minWidth: 32,                    
                     currentWidth: 32,
                     maxWidth: 150,
-                    fieldName: attributes[column].logicalName,
+                    fieldName: attributes[column]?.logicalName,
                     isResizable: true,
                     isCollapsible: true,
                     isSorted: typeof view?.columns![column]?.sorted !== "undefined",
                     isSortedDescending: view?.columns![column]?.sorted === "descending",
-                    data: Object.assign({}, attributes[column], view?.columns?.[column] ?? {}),
+                    data: Object.assign({}, attributes[column.indexOf('/') === -1 ? column : column.split('/')[0]], view?.columns?.[column] ?? {}),
                     iconName: view?.columns![column]?.iconName ?? attributes[column]?.iconName, //columns?.find(x => x.key == column)?.iconName,
                     onColumnClick: (e, c) => dispatch({
                         type: 'openFilter',
@@ -180,8 +216,13 @@ const classNames = mergeStyleSets({
 
     }
 });
-
-
+type AttributeDefinitionEntry = [string, AttributeDefinition];
+type LookupAttributeDefinitionEntry = [string, LookupAttributeDefinition];
+export function isAttributeLookupEntry(entry: AttributeDefinitionEntry): entry is LookupAttributeDefinitionEntry {
+    const [key, attribute] = entry;
+    const type = typeof attribute.type === "string" ? attribute.type : attribute.type?.type; // getAttributeType(attribute);
+    return type === "lookup" || type === "polylookup";
+}
 
 const ColumnFilterProvider = ({
     children,
@@ -220,9 +261,73 @@ const ColumnFilterProvider = ({
 
 
     React.useEffect(() => {
-        const columns = columnFilterState.columns
-        console.log("Recalculating fetch qury:", [filter, columns]);
-        let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
+        const { columns} = columnFilterState
+        console.log("Recalculating fetch qury:", [filter, columns, attributes]);
+
+        function expandPolyLookup(key:string,attr: AttributeDefinition) {
+            let type = attr.type;
+
+       
+
+            if (isPolyLookup(type)) {
+                console.log("Polylookup", [type]);
+
+                let expands = (type.inline ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
+                    .filter(isAttributeLookup)
+                    .map(a => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`));
+                console.log("Polylookup", expands);
+
+
+                return `$expand=${expands.join(',')};`
+            } else if (isAttributeLookup(attr)) {
+
+                let a = [...new Set(columns.filter(f => f.key.split('/')[0]===key && f.key !== key).map(c => c.key.split('/')[1]))]
+                    .map(nav => app.getEntityFromKey(attr.type.referenceType).attributes[nav].schemaName.slice(0,-2));
+
+                if (a.length) {
+                    return `$expand=${a.join(',')};`
+                }
+
+
+            }
+
+            //return [];
+            return '';
+        }
+
+        function selectPolyLookup(key:string, attr: AttributeDefinition) {
+            let type = attr.type;
+            if (isPolyLookup(type)) {
+
+                let selects = Object.values(app.getAttributes(app.getEntityFromKey(type.referenceType).logicalName))
+                    .filter(isAttributeLookup)
+                    .map(a => a.logicalName);
+                return ',' + selects.join(',');
+
+            } else if (isLookup(type) && key.indexOf('/') !== -1) {
+                let nextAttributeLogicalName = key.split('/')[1].toLowerCase();
+                
+                return ',' + nextAttributeLogicalName;
+            }
+
+            if (key.indexOf('/') !== -1) {
+                
+            }
+
+            return '';
+        }
+
+        function getPrimaryField(referenceType: string) {
+            
+            return Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName;
+        }
+
+        
+
+        let expand = columns
+            .map(x => [x.key, x.data] as [string, AttributeDefinition])
+            .filter(isAttributeLookupEntry)
+            .map(([key, a]) => a.type.inline ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}(${expandPolyLookup(key, a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(key,a)})`);
 
         let orderBy = columns.filter(c => c.isSorted)[0];
 
@@ -253,7 +358,7 @@ const ColumnFilterProvider = ({
             localFilter = localFilter?.substr('$filter='.length);
 
         let query: IFetchQuery = ({
-            "$expand": expand,
+            "$expand": expand.join(','),
             "$filter": localFilter,
             "$select": columnAttributes.join(","),
             '$count': true,
@@ -279,7 +384,8 @@ const ColumnFilterProvider = ({
         console.log("Calling reducer from memo");
         columnFilterDispatch({
             type: 'initializeColumns',
-            view: view  ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } },
+            view: view ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } },
+            app:app,
             attributes: attributes,
             locale: locale,
             onHeaderRender: onHeaderRender,

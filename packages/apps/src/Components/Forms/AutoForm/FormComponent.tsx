@@ -1,4 +1,4 @@
-import React, { createContext, useRef, useState } from "react";
+import React, { createContext, useEffect, useRef, useState } from "react";
 import { IPivotProps, Pivot, PivotItem } from "@fluentui/react";
 
 
@@ -9,6 +9,7 @@ import { EntityDefinition, FormDefinition, FormTabDefinition } from "@eavfw/mani
 import { useTabProvider } from "../Tabs/useTabProvider";
 import { OptionsFactory } from "./OptionsFactory";
 import { FormValidation } from "../FormValidation";
+import { ResolveFeature } from "../../../FeatureFlags";
 
 type FormComponentProps<T> = {
     form: FormDefinition;
@@ -62,7 +63,17 @@ const FormComponent = <T,>(props: FormComponentProps<T>) => {
             itemContainer: { flexGrow: 1 },
         };
 
-
+        useEffect(() => {
+            if (form.scripts?.onInit) {
+                Object.getOwnPropertyNames(form.scripts.onInit).forEach(name => {
+                    const onInit = ResolveFeature(form.scripts!.onInit![name]);
+                    if (onInit) {
+                        onInit(form, entity, formData);
+                    }
+                })
+    
+            }
+        },[]);
 
 
         if (form?.type === "QuickCreate") {

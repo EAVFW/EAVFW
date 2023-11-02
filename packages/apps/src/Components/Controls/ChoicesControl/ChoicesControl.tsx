@@ -68,7 +68,7 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
         const [selectedKeys, setselectedKeys] = useState<number[]>([]);
 
         useEffect(() => {
-            if (data) {
+            if (data?.items) {
                 setnewOptions(enumOptions.enum?.map((v, i) => ({
                     key: v as number,
                     text: (enumOptions.enumNames?.[i] ?? v ?? "").toString(),
