@@ -426,8 +426,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
         }
     },[]);
 
-    const runValidation = (complete?: () => void) => {
-        
+    const runValidation = (complete?: () => void, manipulateResult?: (errors: EAVFWErrorDefinition) => EAVFWErrorDefinition) => {        
         if (blazor.isEnabled) {
             //   alert("Starting validation");
             // setLocalErrors(undefined);
@@ -440,7 +439,6 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                 if (blazor.validateFormFunction) {
                     DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition }>(blazor.namespace, blazor.validateFormFunction, formDefinition, formValuesForValidation, true)
                         .then(({ errors: results }) => {
-
                             console.log("Run Validation RESULT", [new Date().getTime() - new Date(local).getTime() + "ms", id, results, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
 
 
@@ -450,6 +448,11 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                                 console.log("Update State", JSON.stringify(formValuesForValidation));
                                 //  mergeAndUpdate(state.formValues, updatedFields);
                                 console.log("Update State Complete", JSON.stringify(formValuesForValidation))
+
+                                // Gives the caller the ability to manipulate the result before it is propegated down to sub components
+                                if(manipulateResult)
+                                    results = manipulateResult(results);
+
                                 state.errors = results;
                                 state.isErrorsUpdated = true;
 
@@ -658,6 +661,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     useEffect(() => {
         const equal = isEqual(state.formValues, defaultData);
         console.log("EAVForm Default Data Reset", [JSON.stringify(state.formValues), JSON.stringify( defaultData), equal]);
+        console.error(state.formValues, defaultData);
         if (!equal) {
             state.formValues = cloneDeep(defaultData) ?? {};
             setEtag(global_etag.current = new Date().toISOString());
