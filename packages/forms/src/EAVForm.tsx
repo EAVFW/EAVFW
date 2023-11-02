@@ -661,7 +661,6 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
     useEffect(() => {
         const equal = isEqual(state.formValues, defaultData);
         console.log("EAVForm Default Data Reset", [JSON.stringify(state.formValues), JSON.stringify( defaultData), equal]);
-        console.error(state.formValues, defaultData);
         if (!equal) {
             state.formValues = cloneDeep(defaultData) ?? {};
             setEtag(global_etag.current = new Date().toISOString());
