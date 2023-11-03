@@ -1,13 +1,8 @@
 import React, { useMemo, useState } from "react";
-
 import {
     Stack,
     IDropdownOption,
-    IPivotProps,
 } from "@fluentui/react";
- 
- 
-import { EntityDefinition, IRecord } from "@eavfw/manifest";
 import { ModelDrivenBodyViewerProps } from "./ModelDrivenBodyViewerProps";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { useRibbon } from "../Ribbon/useRibbon";
@@ -18,13 +13,6 @@ import ModelDrivenGridViewer from "../Views/ModelDrivenGridViewer";
 import ViewSelectorComponent from "./ViewSelectorComponent";
 import { RibbonHost } from "../Ribbon/RibbonHost";
 import { PagingProvider } from "./PagingContext";
-
-
-
-
-
-
-
 
 export function ModelDrivenBodyViewer
     (
@@ -37,7 +25,6 @@ export function ModelDrivenBodyViewer
             showViewSelector = true,
         }: ModelDrivenBodyViewerProps) {
 
-
     const user = useUserProfile();
     const { } = useRibbon();
 
@@ -48,15 +35,12 @@ export function ModelDrivenBodyViewer
 
     const [selectedView, setselectedView] = useState(viewName ?? Object.keys(views)[0]);
     const hasMoreViews = Object.keys(views).length > 1;
-  //  const data = [recordRouteGenerator, entityName, entity, selectedView, locale];
+    //  const data = [recordRouteGenerator, entityName, entity, selectedView, locale];
 
     const app = useModelDrivenApp();
 
-
-
     const BodyViewElement = useMemo(() => {
 
-       
         if (entityName !== undefined && selectedView !== undefined) {
             const view = app.getEntity(entityName).views?.[selectedView];
 
@@ -64,7 +48,7 @@ export function ModelDrivenBodyViewer
                 if (view.type in Views) {
                     const CustomView = Views[view.type];
                     return <CustomView view={view} entity={entity} recordRouteGenerator={recordRouteGenerator}
-                       
+
                         entityName={entityName}
                         viewName={selectedView}
                         locale={locale} />
@@ -86,24 +70,24 @@ export function ModelDrivenBodyViewer
         setselectedView(option?.key as string);
     }
     const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
-    const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [ selectedView]);
+    const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [selectedView]);
     console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
         <PagingProvider initialPageSize={typeof (view?.paging) === "object" ? view.paging.pageSize ?? undefined : undefined} enabled={!(view?.paging === false || (typeof (view?.paging) === "object" && view?.paging?.enabled === false))} >
-        <Stack verticalFill>
-            {showViewSelector && hasMoreViews &&
-                <ViewSelectorComponent
-                    onChangeView={_onChangeView}
-                    selectedView={selectedView}
-                    entity={entity}
-                    styles={{ root: { padding: 0 } }}
-                />
+            <Stack verticalFill>
+                {showViewSelector && hasMoreViews &&
+                    <ViewSelectorComponent
+                        onChangeView={_onChangeView}
+                        selectedView={selectedView}
+                        entity={entity}
+                        styles={{ root: { padding: 0 } }}
+                    />
                 }
-                <Stack.Item grow style={{height:"calc(100% - 32px)"}}>
-                <RibbonHost ribbon={ribboninfo}>
-                    {BodyViewElement}
-                </RibbonHost>
-            </Stack.Item>
+                <Stack.Item grow style={{ height: "calc(100% - 32px)" }}>
+                    <RibbonHost ribbon={ribboninfo}>
+                        {BodyViewElement}
+                    </RibbonHost>
+                </Stack.Item>
             </Stack>
         </PagingProvider>
     )

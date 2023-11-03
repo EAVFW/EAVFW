@@ -93,7 +93,7 @@ import { useLazyMemo } from "../../../../hooks/src";
 import { Controls } from "../Controls/ControlRegister";
 import { IFetchQuery, usePaging } from "./PagingContext";
 import styles from "./ModelDrivenGridViewer.module.scss";
-import ModelDrivenList from "./ModelDrivenList";
+import ModelDrivenList from "./ModelDrivenList/ModelDrivenList";
 import { ModelDrivenApp } from "../../ModelDrivenApp";
 
 //const theme = getTheme();
