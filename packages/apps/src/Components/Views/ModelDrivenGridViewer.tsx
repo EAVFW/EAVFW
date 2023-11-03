@@ -11,8 +11,6 @@ import React, {
 
 import {
     Stack,
-    DetailsList,
-    DetailsListLayoutMode,
     Selection,
     SelectionMode,
     IColumn,
@@ -32,8 +30,6 @@ import {
     mergeStyleSets,
     IDetailsRowStyles,
     IDetailsListProps,
-    getTheme,
-    ConstrainMode,
     Modal,
     IObjectWithKey,
     MessageBar,
@@ -41,19 +37,17 @@ import {
     IDetailsColumnProps,
     useTheme,
     IconButton,
-    DetailsHeader,
 } from "@fluentui/react";
-import { FormValidation, FieldValidation } from "@rjsf/utils";
+import { FormValidation } from "@rjsf/utils";
 
 import Link from "next/link";
 
-import { useBoolean, useId } from "@fluentui/react-hooks";
+import { useBoolean } from "@fluentui/react-hooks";
 
 import {
     AttributeDefinition,
     ChoiceType,
     EntityDefinition,
-    getNavigationProperty,
     IRecord,
     isAttributeLookup,
     isChoice,
@@ -63,8 +57,6 @@ import {
     LookupType,
     NestedType,
     queryEntitySWR,
-    ViewColumnDefinition,
-    ViewDefinition,
 } from "@eavfw/manifest";
 import { FormRenderProps } from "../Forms/FormRenderProps";
 import { useRibbon } from "../Ribbon/useRibbon";
@@ -79,15 +71,11 @@ import { useModelDrivenApp } from "../../useModelDrivenApp";
 import {
     ColumnFilterProvider,
     isAttributeLookupEntry,
-    useColumnFilter,
 } from "../ColumnFilter/ColumnFilterContext";
 import { useSelectionContext } from "../Selection/useSelectionContext";
-import { IColumnData } from "../ColumnFilter/IColumnData";
 import { useUserProfile } from "../Profile/useUserProfile";
-import { RibbonHost } from "../Ribbon/RibbonHost";
 import { ColumnFilterCallout } from "../ColumnFilter/ColumnFilterCallout";
 import { RibbonBar } from "../Ribbon/RibbonBar";
-import { filterRoles } from "../../filterRoles";
 import { useAppInfo } from "../../useAppInfo";
 import { useLazyMemo } from "../../../../hooks/src";
 import { Controls } from "../Controls/ControlRegister";
@@ -122,12 +110,12 @@ export const DefaultDataQuery = (entity: EntityDefinition, newRecord?: boolean, 
     );
 }
 export const DefaultDataCountQuery = (entity: EntityDefinition, newRecord?: boolean, fetchQuery?: IFetchQuery) => {
-   return queryEntitySWR(
+    return queryEntitySWR(
         entity,
         setSkip(setTop(setCount(fetchQuery, true), 0), 0),
         !newRecord && typeof fetchQuery !== "undefined"
     );
-   
+
 }
 
 export type ModelDrivenGridViewerProps = {
@@ -506,14 +494,14 @@ function convertDateTimeFormat(inputDateTime: string): string {
 }
 
 
-const RenderChoiceColumn: React.FC<{ value: any, type: ChoiceType, locale:string }> = ({ value,type,locale }) => {
-    
+const RenderChoiceColumn: React.FC<{ value: any, type: ChoiceType, locale: string }> = ({ value, type, locale }) => {
+
 
     if (value || value === 0) {
         const [key, optionValue] = Object.entries<any>(type.options ?? {})
             .filter(([key, option]) =>
                 (typeof option === "number" ? option : option.value) === value
-        )[0];
+            )[0];
 
         return (
             <>
@@ -526,8 +514,9 @@ const RenderChoiceColumn: React.FC<{ value: any, type: ChoiceType, locale:string
     return null;
 }
 
-const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,entity:EntityDefinition
-    }> = ({
+const ConditionRenderComponent: React.FC<{
+    [key: string]: any, column?: IColumn, entity: EntityDefinition
+}> = ({
     recordRouteGenerator,
     entity,
     item,
@@ -538,115 +527,115 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
     locale,
 }) => {
 
-    if (!column)
-        throw new Error("Column not defined");
+        if (!column)
+            throw new Error("Column not defined");
 
 
-    const attribute = column.data as AttributeDefinition;
-    
+        const attribute = column.data as AttributeDefinition;
 
-    const { onRenderPrimaryField: RenderPrimaryField } =
-        useModelDrivenGridViewerContext();
+
+        const { onRenderPrimaryField: RenderPrimaryField } =
+            useModelDrivenGridViewerContext();
 
         const type = attribute.type as NestedType;
 
-    if (isChoice(type) && item) {
-        return <RenderChoiceColumn value={item[column?.fieldName as string]} type={type} locale={ locale} />
-       
-    } else if (attribute.isPrimaryField) {
-        return (
-            <RenderPrimaryField
-                recordRouteGenerator={recordRouteGenerator}
-                item={item}
-                column={column}
-            />
-        );
-        //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
+        if (isChoice(type) && item) {
+            return <RenderChoiceColumn value={item[column?.fieldName as string]} type={type} locale={locale} />
 
-    } else if (isLookup(type)) {
-       
-        if (column.key.indexOf('/') !== -1) {
+        } else if (attribute.isPrimaryField) {
+            return (
+                <RenderPrimaryField
+                    recordRouteGenerator={recordRouteGenerator}
+                    item={item}
+                    column={column}
+                />
+            );
+            //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
+
+        } else if (isLookup(type)) {
+
+            if (column.key.indexOf('/') !== -1) {
 
 
-            const app = useModelDrivenApp();
-            const [subitem, value, lookup] = traverseRecordPath(app, column, item);
+                const app = useModelDrivenApp();
+                const [subitem, value, lookup] = traverseRecordPath(app, column, item);
 
-            if (isChoice(lookup.type)) {
-                return <RenderChoiceColumn value={value} type={lookup.type} locale={locale} />
-            }
+                if (isChoice(lookup.type)) {
+                    return <RenderChoiceColumn value={value} type={lookup.type} locale={locale} />
+                }
 
-           // console.log("Lookup With Traverse", [column.key, item, subitem, lookup]);
-            return <Link legacyBehavior={true} href={recordRouteGenerator({ id: subitem.id, entityName: subitem?.["$type"] ?? lookup.type.foreignKey?.principalTable! })} >
+                // console.log("Lookup With Traverse", [column.key, item, subitem, lookup]);
+                return <Link legacyBehavior={true} href={recordRouteGenerator({ id: subitem.id, entityName: subitem?.["$type"] ?? lookup.type.foreignKey?.principalTable! })} >
 
-                <a>{value}</a>
-
-            </Link>
-        }
-
-        if (!(attribute.logicalName in item)) {
-            return null;
-        }
-
-        const linkedItem = item[attribute.logicalName.slice(0, -2)];
-
-        if (isPolyLookup(type)) {
-            const app = useModelDrivenApp();
-            const { currentEntityName } = useAppInfo();
-            if (type.inline) {
-                const lookups = Object.entries(app.getAttributes(entity.logicalName)).filter(isAttributeLookupEntry);
-
-                const lookupsFromReferenceTypes = type.referenceTypes.map(referenceType => lookups.filter(a => a[1].type.referenceType === referenceType && a[1].logicalName.slice(0, -2) in item))
-                    .filter(x => x.length > 0)[0][0];
-
-                const referenceItem = item[lookupsFromReferenceTypes[1].logicalName.slice(0, -2)];
-                return <Link legacyBehavior={true} href={recordRouteGenerator({
-                    id: item[attribute.logicalName], //item[lookupsFromReferenceTypes[1].logicalName],
-                    entityName: referenceItem?.["$type"] ?? lookupsFromReferenceTypes[1].type?.foreignKey?.principalTable!
-                })} >
-
-                    <a>{referenceItem[lookupsFromReferenceTypes[1].type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+                    <a>{value}</a>
 
                 </Link>
             }
 
-            const referenceType = Object.values(app.getAttributes(app.getEntityFromKey(type.referenceType).logicalName))
-                .filter(a => a.logicalName in linkedItem)[0] as LookupAttributeDefinition;
+            if (!(attribute.logicalName in item)) {
+                return null;
+            }
 
-            const referenceItem = linkedItem[referenceType.logicalName.slice(0, -2)];
-            // return <div>{linkedItem[referenceType.logicalName]}</div>;
-            
-            return <Link legacyBehavior={true} href={recordRouteGenerator({
-                id: linkedItem[referenceType.logicalName],
-                entityName: referenceItem?.["$type"] ?? referenceType.type?.foreignKey?.principalTable!
-            })} >
+            const linkedItem = item[attribute.logicalName.slice(0, -2)];
 
-                <a>{referenceItem[referenceType.type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+            if (isPolyLookup(type)) {
+                const app = useModelDrivenApp();
+                const { currentEntityName } = useAppInfo();
+                if (type.inline) {
+                    const lookups = Object.entries(app.getAttributes(entity.logicalName)).filter(isAttributeLookupEntry);
+
+                    const lookupsFromReferenceTypes = type.referenceTypes.map(referenceType => lookups.filter(a => a[1].type.referenceType === referenceType && a[1].logicalName.slice(0, -2) in item))
+                        .filter(x => x.length > 0)[0][0];
+
+                    const referenceItem = item[lookupsFromReferenceTypes[1].logicalName.slice(0, -2)];
+                    return <Link legacyBehavior={true} href={recordRouteGenerator({
+                        id: item[attribute.logicalName], //item[lookupsFromReferenceTypes[1].logicalName],
+                        entityName: referenceItem?.["$type"] ?? lookupsFromReferenceTypes[1].type?.foreignKey?.principalTable!
+                    })} >
+
+                        <a>{referenceItem[lookupsFromReferenceTypes[1].type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+
+                    </Link>
+                }
+
+                const referenceType = Object.values(app.getAttributes(app.getEntityFromKey(type.referenceType).logicalName))
+                    .filter(a => a.logicalName in linkedItem)[0] as LookupAttributeDefinition;
+
+                const referenceItem = linkedItem[referenceType.logicalName.slice(0, -2)];
+                // return <div>{linkedItem[referenceType.logicalName]}</div>;
+
+                return <Link legacyBehavior={true} href={recordRouteGenerator({
+                    id: linkedItem[referenceType.logicalName],
+                    entityName: referenceItem?.["$type"] ?? referenceType.type?.foreignKey?.principalTable!
+                })} >
+
+                    <a>{referenceItem[referenceType.type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+
+                </Link>
+            }
+
+            return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
+
+                <a>{item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
 
             </Link>
+
+
+        } else if (column.data.control && column.data.control in Controls) {
+            const CustomControl = Controls[column.data.control] as React.FC<{
+                value: any;
+            }>;
+
+            return <CustomControl value={item[attribute.logicalName]}></CustomControl>;
+        } else if (type.type === "datetime") {
+            let value =
+                item && column && column.fieldName ? item[column.fieldName] : "";
+
+            return <>{convertDateTimeFormat(value)}</>;
         }
-       
-        return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
 
-            <a>{item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
-
-        </Link>
-
-       
-    } else if (column.data.control && column.data.control in Controls) {
-        const CustomControl = Controls[column.data.control] as React.FC<{
-            value: any;
-        }>;
-
-        return <CustomControl value={item[attribute.logicalName]}></CustomControl>;
-    } else if (type.type === "datetime") {
-        let value =
-            item && column && column.fieldName ? item[column.fieldName] : "";
-
-        return <>{convertDateTimeFormat(value)}</>;
-    }
-
-    return <>{getCellText(item, column)}</>;
-};
+        return <>{getCellText(item, column)}</>;
+    };
 
 const DefaultOnBuildFetchQuery = (q: any) => q;
 
@@ -691,7 +680,6 @@ export function ModelDrivenGridViewer({
     filter,
     onChange,
     formData,
-    listComponent,
     showViewSelector = true,
     newRecord,
     showRibbonBar,
@@ -801,12 +789,12 @@ export function ModelDrivenGridViewer({
         entity,
         newRecord,
         fetchQuery,
-        
+
     );
     const { data: count } = onQueryDataCount(
         entity,
         newRecord,
-        fetchQuery     
+        fetchQuery
     );
 
     useEffect(() => {
@@ -925,7 +913,6 @@ export function ModelDrivenGridViewer({
                             selectionMode={SelectionMode.multiple}
                             setKey="multiple"
                             onChange={onChange}
-                            listComponent={listComponent}
                             formData={formData}
                             onRenderItemColumn={(item, index, column) => (
                                 <ConditionRenderComponent
@@ -955,7 +942,6 @@ export function ModelDrivenGridViewer({
                             setKey="none"
                             onChange={onChange}
                             formData={formData}
-                            listComponent={listComponent}
                             onRenderItemColumn={(item, index, column) => (
                                 <ConditionRenderComponent
                                     recordRouteGenerator={recordRouteGenerator}

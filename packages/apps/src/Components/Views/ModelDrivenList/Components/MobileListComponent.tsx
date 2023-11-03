@@ -28,6 +28,8 @@ export const MobileListComponent: React.FC<MobileListComponentProps> = ({
         }
     };
 
+    console.log("Displaying <MobileListComponent />");
+
     return (
         <div className={className}>
             {items.map((item, index) => (

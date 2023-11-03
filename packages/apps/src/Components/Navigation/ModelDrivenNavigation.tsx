@@ -23,13 +23,15 @@ import {
 import Link from "next/link";
 import React, { useEffect, useState } from 'react';
 import styles from "./ModelDrivenNavigation.module.scss";
-import { NextRouter, useRouter, } from 'next/router' 
+import { NextRouter, useRouter, } from 'next/router'
 import { ModelDrivenSitemap } from "../../ModelDrivenSitemap";
 import { ModelDrivenSitemapEntity } from "../../ModelDrivenSitemapEntity";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { ResolveFeature } from "../../FeatureFlags";
+import { isMobileDevice } from '../../../../utils/src/isMobileDevice';
+
 
 
 interface WithRouterProps {
@@ -123,6 +125,20 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
 
     const appName = appInfo.currentAppName;//this.props.router.query.appname;
 
+    const [isMobile, setIsMobile] = useState(isMobileDevice());
+
+    /* Handles when screen-size is modified */
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(isMobileDevice());
+        };
+
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
     useEffect(() => {
         console.groupCollapsed("AreaFilters");
         try {
@@ -168,6 +184,7 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
         router.push(`/apps/${router.query.appname}/areas/${selectedArea}/`);
     }
 
+    if (isMobile) return <></>;
     if (!user)
         return <div>loading</div>
 

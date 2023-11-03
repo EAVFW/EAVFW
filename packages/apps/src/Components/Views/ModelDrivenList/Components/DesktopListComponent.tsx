@@ -59,6 +59,7 @@ export const DesktopListComponent: React.FC<ModelDrivenListProps> = ({ onChange,
 
     const localColumns = useMemo(() => columns?.filter(c => c.data.visible !== false) ?? [], [columns]);
     if (!localColumns?.length) return <div>loading data</div>;
+    console.log("Displaying <DesktopListComponent />");
 
     return (
         <DetailsList
