@@ -1,9 +1,10 @@
-import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty, TypeFormDefinition } from "@eavfw/manifest";
+import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty, TypeFormDefinition, isPolyLookup } from "@eavfw/manifest";
 import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
 import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
 import { RecordUrlProps } from "./RecordUrlProps";
 import cloneDeep from "clone-deep";
+import { isAttributeLookupEntry } from "./Components/ColumnFilter/ColumnFilterContext";
 
 
 export class ModelDrivenApp {
@@ -222,14 +223,18 @@ export class ModelDrivenApp {
                                 if (form.type === "Main") {
                                     if ((formKey === formName || formName === form.name) && this.isMatchingForm(form, tabName, columnName, sectionName)) {
 
-                                        const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];
+                                        const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];                                       
+                                                                         
+                                        const logicalname = attribute.type.inline ? Object.entries(entity.attributes)
+                                            .filter(isAttributeLookupEntry)
+                                            .filter(x => x[1].type.referenceType === this.getEntityKey(entityName))[0][1].logicalName : attribute.logicalName;
 
                                         references.push({
                                             viewName: viewName,
                                             ribbon: cloneDeep(form.ribbon ?? entity?.views?.[viewName]?.ribbon ?? {}),
                                             view: entity?.views?.[viewName],
                                             entityName: entity.logicalName,
-                                            attribute: attribute.logicalName,
+                                            attribute: logicalname,
                                             attributeType: attribute.type?.type,
                                             inlinePolyLookup: attribute.type?.inline,
                                             entity: entity,
