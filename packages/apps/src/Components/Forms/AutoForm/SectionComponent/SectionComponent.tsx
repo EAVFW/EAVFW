@@ -519,7 +519,7 @@ export const WizardSection: React.FC<{
         const [_, dispatch] = useContext(WizardContext)!;
         const [formData, { onChange }] = useEAVForm(x => x.formValues, undefined, "sectioncomponent schema");
         
-        console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName]);
+        console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName, formData]);
         return (
             <Form key={sectionName}
                 uiSchema={section.uiSchema}
@@ -537,11 +537,12 @@ export const WizardSection: React.FC<{
                     
                     onChange((props, ctx) => {
                         props[section.logicalName] = e.formData;
+                      //  dispatch({ action: "setValues", values: props });
                     })
                 }}
                
                 idPrefix={'wizard'}
-                formData={formData}
+                formData={formData[section.logicalName]}
                 widgets={WidgetRegister} 
                 
                 templates={{ BaseInputTemplate: React9BaseInputTemplate, FieldTemplate: React9FieldTemplate, } }

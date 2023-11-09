@@ -152,7 +152,7 @@ export function React9BaseInputTemplate<
 	rawErrors,
 	multiline, uiSchema
 }: BaseInputTemplateProps<T, S, F>) {
-	console.log("UIPROPS", [uiSchema, options, value]);
+//	console.log("UIPROPS", [uiSchema, options, value]);
 	const inputProps = getInputProps<T, S, F>(schema, type, options);
 	
 	const _onBlur = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onBlur(id, value);
@@ -167,7 +167,7 @@ export function React9BaseInputTemplate<
 	};
 
 	const uiProps = options ?? {};
-	console.log("UIPROPS", [uiProps, inputProps]);
+	console.log("UIPROPS", [uiSchema,uiProps, inputProps,value, value || value === 0 ? value : '']);
 	return (
 		<>
 			<Input
