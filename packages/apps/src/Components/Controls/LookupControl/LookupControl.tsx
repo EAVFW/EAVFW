@@ -441,7 +441,10 @@ export function LookupControl<T>({
                     label={attribute.displayName}
                     extraErrors={extraErrors}
                     targetEntityName={selectedEntity}
-                    logicalName={attribute.type.inline ? Object.entries(entityAttributes).filter(isAttributeLookupEntry).filter(x => x[1].type.referenceType === selectedEntity)[0][1].logicalName : attribute.logicalName}
+                    logicalName={attribute.type.inline ?
+                        Object.entries(entityAttributes)
+                            .filter(isAttributeLookupEntry)
+                            .filter(x => x[1].type.referenceType === selectedEntity)[0][1].logicalName : attribute.logicalName}
                     disabled={disabled || readonly}
                 />
             </Stack.Item>
