@@ -31,11 +31,12 @@ export const ModelDrivenList: React.FC<ModelDrivenListProps> = (props: ModelDriv
         const handleResize = () => {
             setIsMobile(isMobileDevice());
         };
-
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
+        if (typeof window !== "undefined" && window) {
+            window.addEventListener('resize', handleResize);
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
     }, []);
 
     return isMobile ? <MobileListComponent {...props} /> : <DesktopListComponent {...props} />;

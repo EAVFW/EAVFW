@@ -10,27 +10,29 @@
  * function is based on educated guesses and may require updates as device patterns change.
  */
 export const isMobileDevice = () => {
-    /* 1. Device Width*/
-    const maxMobileWidth = 768;
-    if (window.innerWidth <= maxMobileWidth) return true;
+    if (typeof window !== "undefined" && window) {
+        /* 1. Device Width*/
+        const maxMobileWidth = 768;
+        if (window.innerWidth <= maxMobileWidth) return true;
 
-    /* 2. User Agent */
-    const mobileDevices = [
-        /Android/i,
-        /webOS/i,
-        /iPhone/i,
-        /iPad/i,
-        /iPod/i,
-        /BlackBerry/i,
-        /Windows Phone/i
-    ];
+        /* 2. User Agent */
+        const mobileDevices = [
+            /Android/i,
+            /webOS/i,
+            /iPhone/i,
+            /iPad/i,
+            /iPod/i,
+            /BlackBerry/i,
+            /Windows Phone/i
+        ];
 
-    for (const device of mobileDevices) {
-        if (navigator.userAgent.match(device)) return true;
+        for (const device of mobileDevices) {
+            if (navigator.userAgent.match(device)) return true;
+        }
+
+        /* 3. Touch Events */
+        if ('ontouchstart' in window) return true;
     }
-
-    /* 3. Touch Events */
-    if ('ontouchstart' in window) return true;
 
     return false;
 }

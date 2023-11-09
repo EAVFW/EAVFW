@@ -132,11 +132,12 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
         const handleResize = () => {
             setIsMobile(isMobileDevice());
         };
-
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
+        if (typeof window !== "undefined" && window) {
+            window.addEventListener('resize', handleResize);
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
     }, []);
 
     useEffect(() => {
