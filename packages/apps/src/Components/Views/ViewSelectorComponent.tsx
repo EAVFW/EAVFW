@@ -12,8 +12,6 @@ import React from "react";
 import { filterRoles } from "../../filterRoles";
 import { useUserProfile } from "../Profile/useUserProfile";
 
-
-
 export type IViewSelectorStyles = {
     root: IStyle;
 };
@@ -29,9 +27,6 @@ export type ViewSelectorComponentProps = {
     ariaLabel?: string;
     styles?: IViewSelectorStyles;
 };
-
-
-
 
 const ViewSelectorComponent: React.VFC<ViewSelectorComponentProps> = (
     props

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
     Stack,
     IDropdownOption,
@@ -9,10 +9,12 @@ import { useRibbon } from "../Ribbon/useRibbon";
 import { filterRoles } from "../../filterRoles";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { Views } from "../Views/ViewRegister";
-import ModelDrivenGridViewer from "../Views/ModelDrivenGridViewer";
+import ModelDrivenGridViewer from "./ModelDrivenGridViewer/ModelDrivenGridViewer";
 import ViewSelectorComponent from "./ViewSelectorComponent";
 import { RibbonHost } from "../Ribbon/RibbonHost";
 import { PagingProvider } from "./PagingContext";
+import { isMobileDevice } from "@eavfw/utils/src/isMobileDevice";
+import { MobileList } from "./Mobile/MobileList";
 
 export function ModelDrivenBodyViewer
     (
@@ -28,6 +30,21 @@ export function ModelDrivenBodyViewer
     const user = useUserProfile();
     const { } = useRibbon();
 
+    const [isMobile, setIsMobile] = useState(isMobileDevice());
+
+    /* Handles when screen-size is modified */
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(isMobileDevice());
+        };
+        if (typeof window !== "undefined" && window) {
+            window.addEventListener('resize', handleResize);
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    }, []);
+
     const views = Object.fromEntries(Object.entries(
         entity.views ?? {}
     ).filter(([viewKey, view]) => filterRoles(view?.roles, user)));
@@ -42,19 +59,39 @@ export function ModelDrivenBodyViewer
     const BodyViewElement = useMemo(() => {
 
         if (entityName !== undefined && selectedView !== undefined) {
+            console.log("#######KBA - entityName: ", entityName, "selectedView: ", selectedView);
             const view = app.getEntity(entityName).views?.[selectedView];
 
             if (view !== undefined && view.type !== undefined) {
+                console.log("#######KBA - view: ", view, "view.type: ", view.type, "Views: ", Views);
                 if (view.type in Views) {
                     const CustomView = Views[view.type];
-                    return <CustomView view={view} entity={entity} recordRouteGenerator={recordRouteGenerator}
-
-                        entityName={entityName}
+                    return <CustomView
+                        view={view}
                         viewName={selectedView}
-                        locale={locale} />
+                        entity={entity}
+                        entityName={entityName}
+                        locale={locale}
+                        recordRouteGenerator={recordRouteGenerator}
+                    />
                 }
             }
         }
+
+        // if (isMobile) {
+        //     return (
+        //         <MobileList
+        //             recordRouteGenerator={recordRouteGenerator}
+        //             key={entityName}
+        //             entityName={entityName}
+        //             entity={entity}
+        //             viewName={selectedView}
+        //             locale={locale}
+
+
+        //         />
+        //     )
+        // }
 
         return <ModelDrivenGridViewer
             recordRouteGenerator={recordRouteGenerator}

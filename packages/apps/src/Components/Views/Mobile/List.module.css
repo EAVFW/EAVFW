@@ -1,0 +1,23 @@
+/* Base styles for list */
+.list {
+    padding-inline-start: '0px';
+}
+
+/* Base styles for list items */
+.listItem {
+    padding-bottom: 1rem;
+    list-style: none;
+    /* Smooth transition for opacity changes */
+    transition: opacity 0.3s ease;
+}
+
+/* Dim all list items when any item within the list is hovered */
+.list:hover .listItem {
+    /* This dims all list items */
+    opacity: 0.5;
+}
+
+.list .listItem:hover {
+    /* This keeps the hovered item fully visible */
+    opacity: 1;
+}

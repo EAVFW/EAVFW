@@ -23,7 +23,7 @@ import { useUserProfile } from "../../../Profile/useUserProfile";
 import { RibbonContextProvider } from "../../../Ribbon/RibbonContextProvider";
 import { RibbonHost } from "../../../Ribbon/RibbonHost";
 import { useStackStyles } from "../../../useStackStyles";
-import ModelDrivenGridViewer from "../../../Views/ModelDrivenGridViewer";
+import ModelDrivenGridViewer from "../../../Views/ModelDrivenGridViewer/ModelDrivenGridViewer";
 import { PagingProvider } from "../../../Views/PagingContext";
 import { Views } from "../../../Views/ViewRegister";
 import { WizardContext } from "../../../Wizards/WizardContext";

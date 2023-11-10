@@ -100,7 +100,7 @@ export class ModelDrivenApp {
         [key: string]: AttributeDefinition
     }, column: string) {
 
-        if (column.indexOf('/') !== -1) {
+        if (typeof column !== "undefined" && column.indexOf('/') !== -1) {
             var parts = column.split('/');
             var navAttributes = attributes;
             var nav = column;
@@ -223,8 +223,8 @@ export class ModelDrivenApp {
                                 if (form.type === "Main") {
                                     if ((formKey === formName || formName === form.name) && this.isMatchingForm(form, tabName, columnName, sectionName)) {
 
-                                        const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];                                       
-                                                                         
+                                        const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];
+
                                         const logicalname = attribute.type.inline ? Object.entries(entity.attributes)
                                             .filter(isAttributeLookupEntry)
                                             .filter(x => x[1].type.referenceType === this.getEntityKey(entityName))[0][1].logicalName : attribute.logicalName;
@@ -238,7 +238,7 @@ export class ModelDrivenApp {
                                             attributeType: attribute.type?.type,
                                             inlinePolyLookup: attribute.type?.inline,
                                             entity: entity,
-                                            filter:   form.filter,
+                                            filter: form.filter,
                                             key: entity.logicalName + attribute.logicalName
                                         });
                                     } else {

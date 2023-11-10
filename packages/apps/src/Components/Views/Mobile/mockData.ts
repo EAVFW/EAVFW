@@ -1,49 +1,4 @@
-import React from 'react';
-import { SelectionMode, IColumn } from "@fluentui/react";
-import { IRecord } from '@eavfw/manifest';
-import { useSelectionContext } from '../../../Selection/useSelectionContext';
-
-export type MobileListComponentProps = {
-    onItemInvoked: (item: IRecord) => void
-    onRenderItemColumn: (item?: any, index?: number, column?: IColumn) => React.ReactNode
-    className?: string
-    selectionMode: SelectionMode
-    items: any[]
-}
-
-export const MobileListComponent: React.FC<MobileListComponentProps> = ({
-    onItemInvoked,
-    onRenderItemColumn,
-    className,
-    selectionMode,
-    items = mockDemoData
-}) => {
-    const { selection } = useSelectionContext();
-
-    const handleItemClick = (item: IRecord) => {
-        // Only invoke the item if selection mode is none, 
-        // otherwise, selection should handle the click
-        if (selectionMode === SelectionMode.none) {
-            onItemInvoked(item);
-        }
-    };
-
-    console.log("Displaying <MobileListComponent />");
-
-    return (
-        <div className={className}>
-            {items.map((item, index) => (
-                <div key={item.key} onClick={() => handleItemClick(item)}>
-                    {onRenderItemColumn(item, index,)}
-                </div>
-            ))}
-        </div>
-    );
-};
-
-export default MobileListComponent;
-
-type DemoType = {
+type LOIMockData = {
     title: string;
     createdById: string;
     createdOn: string;
@@ -62,10 +17,19 @@ type DemoType = {
     chartererPartyId: string;
     vesselId: string;
     voyageId: string;
+    charterparty: {
+        cpname: string;
+    }
+    vessel: {
+        vesselname: string;
+    }
+    voyage: {
+        voyagename: string;
+    }
 
 }
 
-const mockDemoData: DemoType[] = [
+export const loiMockData: LOIMockData[] = [
     {
         title: 'Letter of Indemnity for Voyage 12345',
         createdById: '102',
@@ -85,6 +49,15 @@ const mockDemoData: DemoType[] = [
         chartererPartyId: 'party-505',
         vesselId: 'vessel-606',
         voyageId: 'voyage-707',
+        charterparty: {
+            cpname: "Test"
+        },
+        vessel: {
+            vesselname: "VesselTest",
+        },
+        voyage: {
+            voyagename: "VoyageNameTest",
+        }
     },
     // New mock data entries
     {
@@ -106,6 +79,15 @@ const mockDemoData: DemoType[] = [
         chartererPartyId: 'party-506',
         vesselId: 'vessel-607',
         voyageId: 'voyage-808',
+        charterparty: {
+            cpname: "Test"
+        },
+        vessel: {
+            vesselname: "VesselTest",
+        },
+        voyage: {
+            voyagename: "VoyageNameTest",
+        }
     },
     {
         title: 'Voyage 34567 LOI',
@@ -126,6 +108,15 @@ const mockDemoData: DemoType[] = [
         chartererPartyId: 'party-507',
         vesselId: 'vessel-608',
         voyageId: 'voyage-909',
+        charterparty: {
+            cpname: "Test"
+        },
+        vessel: {
+            vesselname: "VesselTest",
+        },
+        voyage: {
+            voyagename: "VoyageNameTest",
+        }
     },
     {
         title: 'Guarantee Document for Voyage 45678',
@@ -146,6 +137,15 @@ const mockDemoData: DemoType[] = [
         chartererPartyId: 'party-508',
         vesselId: 'vessel-609',
         voyageId: 'voyage-1010',
+        charterparty: {
+            cpname: "Test"
+        },
+        vessel: {
+            vesselname: "VesselTest",
+        },
+        voyage: {
+            voyagename: "VoyageNameTest",
+        }
     },
     {
         title: 'Indemnity for Voyage 56789',
@@ -166,6 +166,15 @@ const mockDemoData: DemoType[] = [
         chartererPartyId: 'party-509',
         vesselId: 'vessel-610',
         voyageId: 'voyage-1111',
+        charterparty: {
+            cpname: "Test"
+        },
+        vessel: {
+            vesselname: "VesselTest",
+        },
+        voyage: {
+            voyagename: "VoyageNameTest",
+        }
     },
     {
         title: 'Voyage 67890 Indemnity Claim',
@@ -186,5 +195,14 @@ const mockDemoData: DemoType[] = [
         chartererPartyId: 'party-510',
         vesselId: 'vessel-611',
         voyageId: 'voyage-1212',
+        charterparty: {
+            cpname: "Test"
+        },
+        vessel: {
+            vesselname: "VesselTest",
+        },
+        voyage: {
+            voyagename: "VoyageNameTest",
+        }
     },
 ];

@@ -1,7 +1,6 @@
 import { IPivotProps } from "@fluentui/react";
 import { EntityDefinition, IRecord } from "@eavfw/manifest";
 
-
 export type ModelDrivenBodyViewerProps = {
     locale: string;
     viewName?: string;

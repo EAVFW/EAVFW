@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import React, { createContext, SetStateAction, useContext, useEffect, useState } from "react";
 import { IRecord } from "@eavfw/manifest";
 import { IObjectWithKey, ScrollablePane, ScrollbarVisibility, Selection, Stack, Sticky, StickyPositionType } from "@fluentui/react";
-import { ModelDrivenGridViewerState } from "../Components/Views/ModelDrivenGridViewer";
+import { ModelDrivenGridViewerState } from "../Components/Views/ModelDrivenGridViewer/ModelDrivenGridViewer";
 import { ModelDrivenGridViewerSelectedContext } from "../Components/Selection/ModelDrivenGridViewerSelectedContext";
 import { RibbonContextProvider } from "../Components/Ribbon/RibbonContextProvider";
 import MessageArea, { MessagesProvider } from "../Components/MessageArea/MessageContext";
