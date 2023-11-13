@@ -125,11 +125,12 @@ export const MobileList: React.FC<MobileListProps> = (
         ]);
 
         if (data)
-            setItems(
-                data.items.map((item) =>
-                    Object.assign(item, { entityName: entity.logicalName })
-                )
-            );
+            setItems(loiMockData);
+        // setItems(
+        //     data.items.map((item) =>
+        //         Object.assign(item, { entityName: entity.logicalName })
+        //     )
+        // );
 
         if (newRecord && defaultValues) {
             setItems(
@@ -139,6 +140,7 @@ export const MobileList: React.FC<MobileListProps> = (
             );
         }
     }, [data, newRecord && defaultValues]);
+
 
     console.log("Displaying <MobileListComponent />", items);
 

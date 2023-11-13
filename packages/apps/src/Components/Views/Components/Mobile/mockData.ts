@@ -54,7 +54,7 @@ export const loiMockData: LOIMockData[] = [
         vesselId: 'bea0bdba-8098-411f-3870-08dbe10d2974',
         voyage: {
             '$type': 'voyage',
-            voyagename: "Voyage #5493"
+            voyagename: "#5493"
         },
         voyageId: '9cd70438-001c-4e3e-2276-08dbe10d2970'
     },
@@ -83,7 +83,7 @@ export const loiMockData: LOIMockData[] = [
         vesselId: "cd01bdbb-9123-412f-4971-29df56a85e24",
         voyage: {
             "$type": "voyage",
-            voyagename: "Voyage #5494"
+            voyagename: "#5494"
         },
         voyageId: "ac17c438-002d-4d3f-3377-49df56a85f25"
     },
@@ -112,7 +112,7 @@ export const loiMockData: LOIMockData[] = [
         vesselId: "de12cdbc-c234-523g-5a82-30ef67b99f35",
         voyage: {
             "$type": "voyage",
-            voyagename: "Voyage #5495"
+            voyagename: "#5495"
         },
         voyageId: "bd28d539-013e-5e4f-4488-50ef67b9a036"
     },
@@ -141,7 +141,7 @@ export const loiMockData: LOIMockData[] = [
         vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
         voyage: {
             "$type": "voyage",
-            voyagename: "Voyage #5496"
+            voyagename: "#5496"
         },
         voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
     },
@@ -170,7 +170,7 @@ export const loiMockData: LOIMockData[] = [
         vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
         voyage: {
             "$type": "voyage",
-            voyagename: "Voyage #5496"
+            voyagename: "#5496"
         },
         voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
     },
@@ -199,7 +199,7 @@ export const loiMockData: LOIMockData[] = [
         vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
         voyage: {
             "$type": "voyage",
-            voyagename: "Voyage #5496"
+            voyagename: "#5496"
         },
         voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
     },
@@ -228,7 +228,7 @@ export const loiMockData: LOIMockData[] = [
         vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
         voyage: {
             "$type": "voyage",
-            voyagename: "Voyage #5496"
+            voyagename: "#5496"
         },
         voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
     }
