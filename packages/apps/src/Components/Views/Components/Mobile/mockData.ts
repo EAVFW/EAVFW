@@ -1,208 +1,236 @@
 type LOIMockData = {
-    title: string;
-    createdById: string;
-    createdOn: string;
-    modifiedById: string;
-    modifiedOn: string;
-    ownerId: string;
-    payloadId: string;
-    rowVersion: number;
-    templateId: string;
-    loiDocumentId: string;
-    status: string;
-    signingRequestId: string;
-    loiDocumentPdfId: string;
-    quickformDefinition: string;
-    chartererId: string;
-    chartererPartyId: string;
-    vesselId: string;
-    voyageId: string;
-    charterparty: {
-        cpname: string;
+    charterer: {
+        name: string;
+        '$type': string;
     }
+    chartererId: string;
+    charterParty: {
+        cpname: string;
+        '$type': string;
+    }
+    charterPartyId: string;
+    createdOn: string;
+    entityName: string;
+    id: string;
+    modifiedOn: string;
+    rowVersion: string;
+    status: number;
+    title: string;
     vessel: {
         vesselname: string;
+        '$type': string;
     }
+    vesselId: string;
     voyage: {
         voyagename: string;
+        '$type': string;
     }
-
+    voyageId: string;
 }
 
 export const loiMockData: LOIMockData[] = [
     {
-        title: 'Letter of Indemnity for Voyage 12345',
-        createdById: '102',
-        createdOn: '2023-01-01T00:00:00Z',
-        modifiedById: '204',
-        modifiedOn: '2023-01-02T00:00:00Z',
-        ownerId: '308',
-        payloadId: 'xyz-123-payload',
-        rowVersion: 1,
-        templateId: 'temp-456',
-        loiDocumentId: 'loi-789-document',
-        status: 'Draft',
-        signingRequestId: 'sign-req-1122',
-        loiDocumentPdfId: 'pdf-333-document',
-        quickformDefinition: 'QFD-001',
-        chartererId: 'charterer-404',
-        chartererPartyId: 'party-505',
-        vesselId: 'vessel-606',
-        voyageId: 'voyage-707',
-        charterparty: {
-            cpname: "Test"
+        charterer: {
+            '$type': 'charterer',
+            name: 'Hafnia'
         },
+        chartererId: '664052de-e775-4c20-46b4-08dbe10d2969',
+        charterParty: {
+            '$type': 'charterparty',
+            cpname: "CP 10.11.2023"
+        },
+        charterPartyId: '643d4560-8bee-451e-cb88-08dbe10d2978',
+        createdOn: '2023-11-09T10:18:05.0442087Z',
+        entityName: 'letterofindemnityrequest',
+        id: "c3391566-e413-411c-854b-08dbe10d297c",
+        modifiedOn: '2023-11-13T15:30:28.1809667Z',
+        rowVersion: "AAAAAAACuFM=",
+        status: 0,
+        title: 'Test-LOI',
         vessel: {
-            vesselname: "VesselTest",
+            '$type': "vessel",
+            vesselname: "Hafnia Larvik"
         },
+        vesselId: 'bea0bdba-8098-411f-3870-08dbe10d2974',
         voyage: {
-            voyagename: "VoyageNameTest",
-        }
-    },
-    // New mock data entries
-    {
-        title: 'Indemnity Letter for Voyage 23456',
-        createdById: '103',
-        createdOn: '2023-02-01T00:00:00Z',
-        modifiedById: '205',
-        modifiedOn: '2023-02-02T00:00:00Z',
-        ownerId: '309',
-        payloadId: 'abc-234-payload',
-        rowVersion: 2,
-        templateId: 'temp-457',
-        loiDocumentId: 'loi-790-document',
-        status: 'Completed',
-        signingRequestId: 'sign-req-1133',
-        loiDocumentPdfId: 'pdf-334-document',
-        quickformDefinition: 'QFD-002',
-        chartererId: 'charterer-405',
-        chartererPartyId: 'party-506',
-        vesselId: 'vessel-607',
-        voyageId: 'voyage-808',
-        charterparty: {
-            cpname: "Test"
+            '$type': 'voyage',
+            voyagename: "Voyage #5493"
         },
-        vessel: {
-            vesselname: "VesselTest",
-        },
-        voyage: {
-            voyagename: "VoyageNameTest",
-        }
+        voyageId: '9cd70438-001c-4e3e-2276-08dbe10d2970'
     },
     {
-        title: 'Voyage 34567 LOI',
-        createdById: '104',
-        createdOn: '2023-03-01T00:00:00Z',
-        modifiedById: '206',
-        modifiedOn: '2023-03-02T00:00:00Z',
-        ownerId: '310',
-        payloadId: 'def-345-payload',
-        rowVersion: 3,
-        templateId: 'temp-458',
-        loiDocumentId: 'loi-791-document',
-        status: 'Under Review',
-        signingRequestId: 'sign-req-1144',
-        loiDocumentPdfId: 'pdf-335-document',
-        quickformDefinition: 'QFD-003',
-        chartererId: 'charterer-406',
-        chartererPartyId: 'party-507',
-        vesselId: 'vessel-608',
-        voyageId: 'voyage-909',
-        charterparty: {
-            cpname: "Test"
+        charterer: {
+            "$type": "charterer",
+            name: "Hafnia"
         },
+        chartererId: "2f0a1bb9-aad2-4e2a-56c3-19df56a85b21",
+        charterParty: {
+            "$type": "charterparty",
+            cpname: "CP 11.11.2023"
+        },
+        charterPartyId: "f4d3bb12-4a22-4e1f-eb33-29df56a85c22",
+        createdOn: "2023-11-10T11:19:06.0553098Z",
+        entityName: "letterofindemnityrequest",
+        id: "d3201767-f514-422c-965c-39df56a85d23",
+        modifiedOn: "2023-11-14T16:31:29.1919778Z",
+        rowVersion: "AAAAAAACuF1=",
+        status: 10,
+        title: "Test-LOI-B",
         vessel: {
-            vesselname: "VesselTest",
+            "$type": "vessel",
+            vesselname: "Hafnia Lillesand"
         },
+        vesselId: "cd01bdbb-9123-412f-4971-29df56a85e24",
         voyage: {
-            voyagename: "VoyageNameTest",
-        }
+            "$type": "voyage",
+            voyagename: "Voyage #5494"
+        },
+        voyageId: "ac17c438-002d-4d3f-3377-49df56a85f25"
     },
     {
-        title: 'Guarantee Document for Voyage 45678',
-        createdById: '105',
-        createdOn: '2023-04-01T00:00:00Z',
-        modifiedById: '207',
-        modifiedOn: '2023-04-02T00:00:00Z',
-        ownerId: '311',
-        payloadId: 'ghi-456-payload',
-        rowVersion: 4,
-        templateId: 'temp-459',
-        loiDocumentId: 'loi-792-document',
-        status: 'Pending',
-        signingRequestId: 'sign-req-1155',
-        loiDocumentPdfId: 'pdf-336-document',
-        quickformDefinition: 'QFD-004',
-        chartererId: 'charterer-407',
-        chartererPartyId: 'party-508',
-        vesselId: 'vessel-609',
-        voyageId: 'voyage-1010',
-        charterparty: {
-            cpname: "Test"
+        charterer: {
+            "$type": "charterer",
+            name: "Hafnia"
         },
+        chartererId: "3g1d2cc0-bbf3-5f3b-67d4-20ef67b96c32",
+        charterParty: {
+            "$type": "charterparty",
+            cpname: "CP 12.11.2023"
+        },
+        charterPartyId: "g5e4cc13-5b33-5f2g-fc44-30ef67b97d33",
+        createdOn: "2023-11-11T12:20:07.0664019Z",
+        entityName: "letterofindemnityrequest",
+        id: "e4312878-g625-533d-a76d-40ef67b98e34",
+        modifiedOn: "2023-11-15T17:32:30.2029889Z",
+        rowVersion: "AAAAAAACuG2=",
+        status: 20,
+        title: "Test-LOI-C",
         vessel: {
-            vesselname: "VesselTest",
+            "$type": "vessel",
+            vesselname: "Hafnia Languedoc"
         },
+        vesselId: "de12cdbc-c234-523g-5a82-30ef67b99f35",
         voyage: {
-            voyagename: "VoyageNameTest",
-        }
+            "$type": "voyage",
+            voyagename: "Voyage #5495"
+        },
+        voyageId: "bd28d539-013e-5e4f-4488-50ef67b9a036"
     },
     {
-        title: 'Indemnity for Voyage 56789',
-        createdById: '106',
-        createdOn: '2023-05-01T00:00:00Z',
-        modifiedById: '208',
-        modifiedOn: '2023-05-02T00:00:00Z',
-        ownerId: '312',
-        payloadId: 'jkl-567-payload',
-        rowVersion: 5,
-        templateId: 'temp-460',
-        loiDocumentId: 'loi-793-document',
-        status: 'Active',
-        signingRequestId: 'sign-req-1166',
-        loiDocumentPdfId: 'pdf-337-document',
-        quickformDefinition: 'QFD-005',
-        chartererId: 'charterer-408',
-        chartererPartyId: 'party-509',
-        vesselId: 'vessel-610',
-        voyageId: 'voyage-1111',
-        charterparty: {
-            cpname: "Test"
+        charterer: {
+            "$type": "charterer",
+            name: "Hafnia"
         },
+        chartererId: "4h2e3dd1-ccd4-6g4c-78e5-21fg78c0ad43",
+        charterParty: {
+            "$type": "charterparty",
+            cpname: "CP 13.11.2023"
+        },
+        charterPartyId: "h6f5dd24-6c44-6e2h-gd55-41fg78c0be44",
+        createdOn: "2023-11-12T13:21:08.0774930Z",
+        entityName: "letterofindemnityrequest",
+        id: "f5423989-h736-644e-b87e-51fg78c0cf45",
+        modifiedOn: "2023-11-16T18:33:31.2140000Z",
+        rowVersion: "AAAAAAACuH3=",
+        status: 30,
+        title: "Test-LOI-D",
         vessel: {
-            vesselname: "VesselTest",
+            "$type": "vessel",
+            "vesselname": "Hafnia Nanjing"
         },
+        vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
         voyage: {
-            voyagename: "VoyageNameTest",
-        }
+            "$type": "voyage",
+            voyagename: "Voyage #5496"
+        },
+        voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
     },
     {
-        title: 'Voyage 67890 Indemnity Claim',
-        createdById: '107',
-        createdOn: '2023-06-01T00:00:00Z',
-        modifiedById: '209',
-        modifiedOn: '2023-06-02T00:00:00Z',
-        ownerId: '313',
-        payloadId: 'mno-678-payload',
-        rowVersion: 6,
-        templateId: 'temp-461',
-        loiDocumentId: 'loi-794-document',
-        status: 'Rejected',
-        signingRequestId: 'sign-req-1177',
-        loiDocumentPdfId: 'pdf-338-document',
-        quickformDefinition: 'QFD-006',
-        chartererId: 'charterer-409',
-        chartererPartyId: 'party-510',
-        vesselId: 'vessel-611',
-        voyageId: 'voyage-1212',
-        charterparty: {
-            cpname: "Test"
+        charterer: {
+            "$type": "charterer",
+            name: "Hafnia"
         },
+        chartererId: "4h2e3dd1-ccd4-6g4c-78e5-21fg78c0ad43",
+        charterParty: {
+            "$type": "charterparty",
+            cpname: "CP 13.11.2023"
+        },
+        charterPartyId: "h6f5dd24-6c44-6e2h-gd55-41fg78c0be44",
+        createdOn: "2023-11-12T13:21:08.0774930Z",
+        entityName: "letterofindemnityrequest",
+        id: "f5423989-h736-644e-b87e-51fg78c0cf45",
+        modifiedOn: "2023-11-16T18:33:31.2140000Z",
+        rowVersion: "AAAAAAACuH3=",
+        status: 40,
+        title: "Test-LOI-D",
         vessel: {
-            vesselname: "VesselTest",
+            "$type": "vessel",
+            "vesselname": "Hafnia Thames"
         },
+        vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
         voyage: {
-            voyagename: "VoyageNameTest",
-        }
+            "$type": "voyage",
+            voyagename: "Voyage #5496"
+        },
+        voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
     },
+    {
+        charterer: {
+            "$type": "charterer",
+            name: "Hafnia"
+        },
+        chartererId: "4h2e3dd1-ccd4-6g4c-78e5-21fg78c0ad43",
+        charterParty: {
+            "$type": "charterparty",
+            cpname: "CP 13.11.2023"
+        },
+        charterPartyId: "h6f5dd24-6c44-6e2h-gd55-41fg78c0be44",
+        createdOn: "2023-11-12T13:21:08.0774930Z",
+        entityName: "letterofindemnityrequest",
+        id: "f5423989-h736-644e-b87e-51fg78c0cf45",
+        modifiedOn: "2023-11-16T18:33:31.2140000Z",
+        rowVersion: "AAAAAAACuH3=",
+        status: 50,
+        title: "Test-LOI-D",
+        vessel: {
+            "$type": "vessel",
+            "vesselname": "Hafnia Pioneer"
+        },
+        vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
+        voyage: {
+            "$type": "voyage",
+            voyagename: "Voyage #5496"
+        },
+        voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
+    },
+    {
+        charterer: {
+            "$type": "charterer",
+            name: "Hafnia"
+        },
+        chartererId: "4h2e3dd1-ccd4-6g4c-78e5-21fg78c0ad43",
+        charterParty: {
+            "$type": "charterparty",
+            cpname: "CP 13.11.2023"
+        },
+        charterPartyId: "h6f5dd24-6c44-6e2h-gd55-41fg78c0be44",
+        createdOn: "2023-11-12T13:21:08.0774930Z",
+        entityName: "letterofindemnityrequest",
+        id: "f5423989-h736-644e-b87e-51fg78c0cf45",
+        modifiedOn: "2023-11-16T18:33:31.2140000Z",
+        rowVersion: "AAAAAAACuH3=",
+        status: 60,
+        title: "Test-LOI-D",
+        vessel: {
+            "$type": "vessel",
+            "vesselname": "Hafnia Guangzhou"
+        },
+        vesselId: "ef23dedd-d345-634h-6b93-41fg78c0dg46",
+        voyage: {
+            "$type": "voyage",
+            voyagename: "Voyage #5496"
+        },
+        voyageId: "ce39e651-024f-6e5g-5599-61fg78c0eh47"
+    }
+
 ];
