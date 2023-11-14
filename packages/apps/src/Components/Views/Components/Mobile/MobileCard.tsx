@@ -1,42 +1,67 @@
 import { Body1, Button, Caption1, Card, CardFooter, CardHeader, Subtitle2, Title3 } from '@fluentui/react-components';
-import { } from "@fluentui/react-icons";
+import React from 'react';
+import { ExtensionMethods } from '@eavfw/utils';
+import { CardObject } from './ComponentResolver';
 
-export const MobileCard: React.FC<{ handleItemClicked: (item: any) => void, item: any, className: string }> = ({ item, handleItemClicked, className }) => {
+export type Action = {
+    label: string;
+    onClick: () => void;
+};
 
-    // First 4 properties are for the header.
+// export type CardObject = {
+//     title: string;
+//     subTitle: string;
+//     headerAction: JSX.Element;
+//     otherAttributes: { [key: string]: any };
+//     otherActions: Action[];
+// }
 
-    // All remaining properties are for the body.
+type MobileCardProps = {
+    item: CardObject
+    className: string
+    headerAction?: JSX.Element;
+    handleItemClicked: (item: any) => void
+}
 
-    // Button elements are for actions (How many should we allow?)
+export const MobileCard: React.FC<MobileCardProps> = (
+    {
+        item,
+        className,
+        headerAction,
+        handleItemClicked
+    }: MobileCardProps
+) => {
 
+
+
+    // ledIndicator(getStatusColor(item.status))
     return (
         <Card style={{ marginBottom: '10px' }} className={className}>
             <CardHeader
                 style={{ padding: '0 5px' }}
                 image={<ShipIcon size={24} fill="currentColor" />}
-                header={
-                    <Title3>
-                        <b>{capitalizeFirstLetter(item?.vessel?.vesselname ?? 'N/A')}</b>
-                    </Title3>
-                }
-                description={
-                    <Subtitle2>Voyage:  {item?.voyage?.voyagename ?? 'N/A'}</Subtitle2>
-                }
-                action={
-                    ledIndicator(getStatusColor(item.status))
-                }
+                header={<Title3><b>{ExtensionMethods.capitalizeFirstLetter(item?.title ?? 'N/A')}</b></Title3>}
+                description={<Subtitle2> {item?.subTitle ?? 'N/A'}</Subtitle2>}
+                action={headerAction}
             />
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '0 5px' }}>
-                <BodyComponent propertyName='Status' value={resolveStatus(item?.status)} />
-                <BodyComponent propertyName='CP' value={item?.charterParty?.cpname ?? 'N/A'} />
-                <BodyComponent propertyName='Broker' value={'test@example.com'} />
-                <BodyComponent propertyName='LOI' value={item?.title ?? 'N/A'} />
+                {
+                    item.otherAttributes &&
+                    Object.entries(item.otherAttributes).map(([key, value], index) => {
+                        return (
+                            <BodyComponent propertyName={key} value={value} key={index} />
+                        );
+                    })
+                }
             </div>
 
             <CardFooter style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 10px' }}>
-                {item.status === 50 && <Button onClick={() => window.alert("Captain has been notified.")}>Send to captain</Button>}
-                <Button onClick={() => handleItemClicked(item)}>View Details</Button>
+                {item.otherActions.map((action, index) => (
+                    <Button key={index} onClick={action.onClick}>
+                        {action.label}
+                    </Button>
+                ))}
             </CardFooter>
         </Card>
     )
@@ -84,8 +109,6 @@ const renderComponent = (propertyName: string, value: any) => {
             return <div>Unsupported type: {type}</div>;
     }
 };
-
-const capitalizeFirstLetter = (string: string): string => string.charAt(0).toUpperCase() + string.slice(1);
 
 const resolveStatus = (status: number) => {
     switch (status) {

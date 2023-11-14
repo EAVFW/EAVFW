@@ -989,7 +989,7 @@ export type ModelDrivenGridViewerContextProps = {
     onRenderPrimaryField: React.FC<DefaultPrimaryFieldRenderProps>;
 }
 
-const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem: any) => {
+export const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem: any) => {
 
 
 

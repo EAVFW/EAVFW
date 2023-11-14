@@ -11,7 +11,7 @@ import { usePaging } from "./../../PagingContext";
 import { DefaultDataCountQuery, DefaultDataQuery, ModelDrivenGridViewerState } from '../../ModelDrivenGridViewer';
 import { useLazyMemo } from '@eavfw/hooks';
 import { ICommandBarItemProps, IObjectWithKey } from '@fluentui/react';
-
+import { ColumnResolver } from './ComponentResolver';
 
 export type MobileListProps = {
     className?: string;
@@ -31,7 +31,6 @@ export type MobileListProps = {
         selection: Selection<Partial<IRecord> & IObjectWithKey>;
     }) => ICommandBarItemProps[];
     rightCommands?: ICommandBarItemProps[];
-
 }
 
 export const MobileList: React.FC<MobileListProps> = (
@@ -125,12 +124,12 @@ export const MobileList: React.FC<MobileListProps> = (
         ]);
 
         if (data)
-            setItems(loiMockData);
-        // setItems(
-        //     data.items.map((item) =>
-        //         Object.assign(item, { entityName: entity.logicalName })
-        //     )
-        // );
+            // setItems(loiMockData);
+            setItems(
+                data.items.map((item) =>
+                    Object.assign(item, { entityName: entity.logicalName })
+                )
+            );
 
         if (newRecord && defaultValues) {
             setItems(
@@ -140,26 +139,29 @@ export const MobileList: React.FC<MobileListProps> = (
             );
         }
     }, [data, newRecord && defaultValues]);
-
+    const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
 
     console.log("Displaying <MobileListComponent />", items);
 
+    const cardObjects = ColumnResolver.convertItemsToCardObjects(items, view.columns!);
+
+    console.log("cardObjects: ", cardObjects);
+
     return (
-        <div className={className} key={"MobileListComponent"}>
-            <ul className={styles.list} >
-                {
-                    typeof items !== "undefined" &&
-                        items.length > 0 ?
-                        items.map((item, index) => (
+        <div className={className} key="MobileListComponent">
+            <ul className={styles.list}>
+                {typeof cardObjects !== "undefined" && cardObjects.length > 0 ?
+                    cardObjects.map((cardObject, index) => (
+                        <li key={`MobileListItem-${index}`}>
                             <MobileCard
                                 className={styles.listItem}
-                                key={"MobileListItem" + index + item.key}
                                 handleItemClicked={_onItemInvoked}
-                                item={item}
+                                item={cardObject}
                             />
-                        ))
-                        :
-                        <p>No items to display.</p>
+                        </li >
+                    ))
+                    :
+                    <li><p>No items to display.</p></li>
                 }
             </ul>
         </div>

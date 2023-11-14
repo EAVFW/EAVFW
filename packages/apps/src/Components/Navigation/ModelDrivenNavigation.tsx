@@ -30,7 +30,7 @@ import { useUserProfile } from "../Profile/useUserProfile";
 import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { ResolveFeature } from "../../FeatureFlags";
-import { isMobileDevice } from "../../../../utils/isMobileDevice";
+import { isMobileDevice } from "@eavfw/utils/src/isMobileDevice";
 
 
 interface WithRouterProps {

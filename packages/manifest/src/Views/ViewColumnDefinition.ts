@@ -1,9 +1,11 @@
 
-
 export type ViewColumnDefinition = {
     roles?: {
-        allowed?: string[]
-    },
-    displayName?:string,
-    [key: string]: any
-}
+        allowed?: string[];
+    };
+    displayName?: string;
+    useAsCardTitle?: boolean;
+    useAsCardSubtitle?: boolean;
+    visible?: boolean;
+    [key: string]: any;
+};
