@@ -11,7 +11,7 @@ import { usePaging } from "./../../PagingContext";
 import { DefaultDataCountQuery, DefaultDataQuery, ModelDrivenGridViewerState } from '../../ModelDrivenGridViewer';
 import { useLazyMemo } from '@eavfw/hooks';
 import { ICommandBarItemProps, IObjectWithKey } from '@fluentui/react';
-import { ColumnResolver } from './ComponentResolver';
+import { ItemToCardResolver } from './ItemToCardResolver';
 
 export type MobileListProps = {
     className?: string;
@@ -24,7 +24,6 @@ export type MobileListProps = {
     formData?: any;
     defaultValues?: Array<any>;
     recordRouteGenerator: (record: IRecord) => string;
-    onItemInvoked: (item: any) => void
     onQueueData?: typeof DefaultDataQuery;
     onQueryDataCount?: typeof DefaultDataCountQuery;
     commands?: (ctx: {
@@ -46,7 +45,6 @@ export const MobileList: React.FC<MobileListProps> = (
         newRecord,
         rightCommands,
         commands,
-        onItemInvoked,
         onQueueData = DefaultDataQuery,
         onQueryDataCount = DefaultDataCountQuery,
         recordRouteGenerator
@@ -142,8 +140,7 @@ export const MobileList: React.FC<MobileListProps> = (
     const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
 
     console.log("Displaying <MobileListComponent />", items);
-
-    const cardObjects = ColumnResolver.convertItemsToCardObjects(items, view.columns!);
+    const cardObjects = ItemToCardResolver.convertItemsToCardObjects(items, view.columns!, app);
 
     console.log("cardObjects: ", cardObjects);
 
