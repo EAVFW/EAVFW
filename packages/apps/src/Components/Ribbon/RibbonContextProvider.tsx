@@ -259,67 +259,68 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
                 events: ribbonEvents,
                 registerButton: (button, deps) => {
 
-                    const [_, { onChange: onFormDataChange }] = useEAVForm(() => ({}));
-                    console.log(button.key, onFormDataChange);
+                   
+                   
 
-                    button.onClick = button.workflow ? useCallback((ev?: any) => {
+                    if (button.workflow) {
+                        const [_, { onChange: onFormDataChange }] = useEAVForm(() => ({}));
+                        console.log(button.key, onFormDataChange);
+                        button.onClick  = useCallback((ev?: any) => {
 
-                        const runner = (async () => {
-                            const actions = button.workflow.actions;
-                            console.log("Execute Workflow", button.workflow);
-                            const starter = Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "undefined" || Object.values(entry.runAfter).length === 0);
+                            const runner = (async () => {
+                                const actions = button.workflow.actions;
+                                console.log("Execute Workflow", button.workflow);
+                                const starter = Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "undefined" || Object.values(entry.runAfter).length === 0);
 
-                            const queue = starter.slice(0, 1);
+                                const queue = starter.slice(0, 1);
 
-                            function handleQueue() {
+                                function handleQueue() {
 
-                                while (queue.length) {
-                                    const [action, entry] = queue.pop() ?? [];
-                                    console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
-                                    const type = entry.type;
-                                    switch (type) {
-                                        case "UpdateRecord":
+                                    while (queue.length) {
+                                        const [action, entry] = queue.pop() ?? [];
+                                        console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
+                                        const type = entry.type;
+                                        switch (type) {
+                                            case "UpdateRecord":
 
-                                            onFormDataChange((props, ctx) => {
-                                                ctx.skipValidation = true;
+                                                onFormDataChange((props, ctx) => {
+                                                    ctx.skipValidation = true;
 
-                                                ctx.onCommit = () => {
-                                                    console.log("Update Record Completed");
+                                                    ctx.onCommit = () => {
+                                                        console.log("Update Record Completed");
 
-                                                    queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
-                                                    handleQueue();
-                                                };
-                                                Object.assign(props, entry.inputs.data)
-                                            }); //TODO wait until change is applied
-
-
+                                                        queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+                                                        handleQueue();
+                                                    };
+                                                    Object.assign(props, entry.inputs.data)
+                                                }); //TODO wait until change is applied
 
 
-                                            break;
 
-                                        case "SaveForm":
 
-                                            ribbonEvents.emit("onSave", ev);
+                                                break;
 
-                                            queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+                                            case "SaveForm":
 
-                                            break;
+                                                ribbonEvents.emit("onSave", ev);
+
+                                                queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+
+                                                break;
+                                        }
+
+                                        console.log("Executed Workflow action", [action, entry]);
+
                                     }
+                                };
+                                handleQueue();
+                            })();
 
-                                    console.log("Executed Workflow action", [action, entry]);
-
-                                }
-                            };
-                            handleQueue();
-                        })();
-
-                    }, [button.workflow]) : button.onClick;
-
+                        }, [button.workflow])
+                    }
+                     
                     useEffect(() => {
-
-
-
-
+                         
                         if (!button.onClick) {
                             button.onClick = (e) => {
                                 console.log("Custom Ribbon: Clicked", [button.key, e]);
