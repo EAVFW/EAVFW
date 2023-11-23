@@ -1,82 +1,89 @@
-import { IRecord } from "@eavfw/manifest";
-import { Action } from "./MobileCard";
-import { useModelDrivenApp } from "../../../../useModelDrivenApp";
+import { IRecord, isChoice } from "@eavfw/manifest";
+import { ModelDrivenApp } from "../../../../ModelDrivenApp";
 import { ExtensionMethods } from "@eavfw/utils";
 import React from "react";
-import { ModelDrivenApp } from "index";
 import { Views } from "../../../Views/ViewRegister";
-import { values } from "@fluentui/react";
+import { ICommandBarItemProps, IIconProps } from "@fluentui/react";
+import { StatusColorComponent } from "./StatusColorComponent";
 
 export type CardObject = {
     record: IRecord;
+    index: number;
     title: string;
     subTitle: string;
     cardIcon: JSX.Element;
     headerAction: JSX.Element;
     otherAttributes: { [key: string]: any };
-    otherActions: Action[];
+    otherActions: OtherAction[];
 };
 
+type OtherAction = {
+    title: string;
+    onClick?: () => void;
+    icon?: IIconProps;
+    visibleOnCard?: string;
+}
+
 export class ItemToCardResolver {
-    public static convertItemsToCardObjects(items: IRecord[], viewColumns: { [key: string]: any }, app: ModelDrivenApp): CardObject[] {
+    public static convertItemsToCardObjects(items: IRecord[], viewColumns: { [key: string]: any }, app: ModelDrivenApp, buttons: ICommandBarItemProps[], selection: any): CardObject[] {
         const cardObjects: CardObject[] = [];
+        const iconElement = ItemToCardResolver.getElementByKey(items, app, Views, 'cardIcon');
 
-
-        let iconElement = React.createElement(React.Fragment, null);
-        var headerActionElement: JSX.Element = React.createElement(React.Fragment, null);
-        var entityName = items.find(i => i.entityName !== null && i.entityName !== undefined)?.entityName;
-        if (typeof entityName !== "undefined" && entityName) {
-            const views = app.getEntity(entityName).views;
-            if (views) {
-                const mobileViewEntry = Object.entries(views).find(([key, value]) => value.type === "mobile");
-                const mobileView = mobileViewEntry && mobileViewEntry[1];
-                console.log("viewsObject: ", views, "mobileView: ", mobileView);
-
-                if (mobileView) {
-                    const iconComponentKey = mobileView.cardIcon && mobileView.cardIcon.toString();
-                    if (iconComponentKey && iconComponentKey in Views) {
-                        iconElement = Views[iconComponentKey]("red");
-                        console.log("iconComponentKey: ", iconComponentKey, "Views[iconComponentKey]: ", Views[iconComponentKey]);
-                    }
-                    const headerActionComponentKey = mobileView.cardHeaderAction && mobileView.cardHeaderAction.toString();
-                    if (headerActionComponentKey && headerActionComponentKey in Views) {
-                        headerActionElement = Views[headerActionComponentKey]();
-                    }
-                }
-            }
-        }
-
+        const otherActions = ItemToCardResolver.resolveOtherActions(items, app, buttons);
 
         // Iterate over items[]
-        for (const item of items) {
+        for (let i: number = 0; i < items.length; i++) {
+            let item = items[i];
             let title = '';
             let subTitle = '';
             const otherAttributes: { [key: string]: any } = {};
-            console.log("viewColumns: ", viewColumns);
+            let statusText = "";
+            let statusViewConfigObject;
 
-            Object.entries(viewColumns).forEach(([columnKey, columnConfig]) => {
-                let value = item[columnKey.toLowerCase()]; // Convert columnKey to lowercase to match columns casing
-                if (columnConfig.visible !== false) {
+            /* Columns represents the collection of properties/attributes for a given entity.
+             * The code below iterates over each column in the entity and looks for definitions in a separate viewColumns object. 
+             * The viewColumn object that holds attributes that decide if the current column in the scope should be displayed on the <MobileCard /> component.
+             */
+            const columns = app.getAttributes(item.entityName!)
+            Object.entries(columns).forEach((column) => {
+
+                const columnKey = column[0];
+                const correspondingViewColumn = viewColumns[columnKey];
+                /* If this condition is true, a mobile view object exists for this column and it's visible property is not set to false, so it should be displayed. */
+                if (correspondingViewColumn && correspondingViewColumn?.visible !== false) {
+                    let value: any;
+                    if (isChoice(column[1].type)) {
+                        // This is ugly. Fix if time allows for it.
+                        const statusValue = item[columnKey.toLowerCase()];
+                        statusViewConfigObject = correspondingViewColumn;
+                        const option = Object.entries(column[1].type.options!)
+                            .find(([, value]) => value === statusValue);
+
+                        value = option ? option[0] : value;
+                        statusText = value;
+                    } else {
+                        value = item[columnKey.toLowerCase()];
+                    }
+
+                    /* This should be updated to use more concise logic like above to resolve type from column */
                     if (ExtensionMethods.isComplexType(value)) {
-                        // console.log("###KBA: Attempting to find primaryField for entity: ", value, "with key: ", columnKey, "and type: ", value.$type);
-                        console.log("View available: ", columnConfig);
                         var attributes = app.getAttributes(value.$type);
-                        // console.log("###KBA: attr: ", attributes);
                         Object.entries(attributes).forEach(([elementKey, elementValue]) => {
                             if (elementValue.isPrimaryField) {
-                                // console.log("###KBA: Found primaryField for entity: ", value, "primaryField: ", elementValue);
                                 value = value[elementValue.logicalName];
-                                // console.log("####KBA: value set to: ", value);
                             }
                         })
                     }
-                    if (columnConfig.useAsCardTitle) {
+                    if (correspondingViewColumn.useAsCardTitle) {
                         title = value;
-                    } else if (columnConfig.useAsCardSubtitle) {
+                    } else if (correspondingViewColumn.useAsCardSubtitle) {
                         subTitle = value;
                     } else {
-                        // If attribute != title, subtitle add to otherAttributes.
-                        otherAttributes[columnKey] = value;
+                        if (correspondingViewColumn.displayName) {
+                            otherAttributes[correspondingViewColumn.displayName] = value;
+                        } else {
+                            otherAttributes[columnKey] = value;
+                        }
                     }
                 }
             });
@@ -85,32 +92,123 @@ export class ItemToCardResolver {
             if (!title || !subTitle) {
                 const stringKeys = Object.keys(item).filter(key => typeof item[key] === 'string' && key !== 'id');
 
-                if (!title && stringKeys.length > 0) {
+                if (!title && stringKeys.length > 0)
                     title = item[stringKeys[0]];
-                }
 
-                if (!subTitle && stringKeys.length > 1) {
+                if (!subTitle && stringKeys.length > 1)
                     subTitle = item[stringKeys[1]];
-                }
             }
+
+            const itemOtherActions = otherActions.filter(oa => filterOtherActions(oa, item)).map((otherAction) => {
+                const itemOtherAction = { ...otherAction }
+                const oldOnClick = otherAction.onClick;
+                itemOtherAction.onClick = () => {
+                    selection.selectToIndex(i, true);
+                    setTimeout(() => {
+                        oldOnClick?.()
+                    })
+                }
+                return itemOtherAction
+            });
+            // const colorDerivedByStatus = statusViewConfigObject.options.
+            // const colorOption = Object.entries(statusViewConfigObject!.options!)
+            //     .find(([, value]) => value === statusValue);
+            console.log("statusViewConfigObject", statusViewConfigObject!.options, statusViewConfigObject!.options[statusText].color);
+            const colorOption = statusViewConfigObject!.options[statusText].color;
+            const statusColor = colorOption ? colorOption : 'grey';
+            const headerActionElement = React.createElement(StatusColorComponent, { color: statusColor });
 
             cardObjects.push({
                 record: item,
+                index: i,
                 title,
                 subTitle,
                 cardIcon: iconElement,
                 headerAction: headerActionElement,
                 otherAttributes,
-                otherActions: [] as Action[],
+                otherActions: itemOtherActions,
             });
         }
 
         return cardObjects;
     }
 
-    public static resolveCardIcon = () => {
+    public static getElementByKey(items: IRecord[], app: ModelDrivenApp, Views: any, elementKey: 'cardIcon' | 'cardHeaderAction') {
+        const entityName = items.find(item => item.entityName != null)?.entityName;
 
+        if (entityName) {
+            const views = app.getEntity(entityName).views;
+            if (views) {
+                const mobileView = Object.values(views).find(view => view.type === "mobile");
+
+                if (mobileView) {
+                    const componentKey = mobileView[elementKey];
+                    if (componentKey && componentKey in Views) {
+                        // console.log("ItemToCardResolver.getElementByKey(): ", Views[componentKey]());
+                        return Views[componentKey]();
+                    }
+                }
+            }
+        }
+
+        return React.createElement(React.Fragment, null);
     }
+
+
+    // public static resolveOtherActions(items: IRecord[], app: ModelDrivenApp) {
+    //     const entityName = items.find(item => item.entityName != null)?.entityName;
+    //     if (entityName) {
+    //         const views = app.getEntity(entityName).views;
+    //         if (views) {
+    //             const mobileView = Object.values(views).find(view => view.type === "mobile");
+
+    //             if (mobileView) {
+    //                 if (mobileView["ribbon"]) {
+    //                     console.log("mobileView[\"ribbon\"]", mobileView["ribbon"]);
+    //                     const elements = Object.entries(mobileView["ribbon"]).map(o => o[0]);
+    //                     for (const element in elements) {
+    //                         console.log("element: ", element);
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
+    public static resolveOtherActions(items: IRecord[], app: ModelDrivenApp, buttons: ICommandBarItemProps[]) {
+        const entityName = items.find(item => item.entityName != null)?.entityName;
+        const ribbons = [];
+        const otherActions: OtherAction[] = [];
+
+        if (entityName) {
+            const views = app.getEntity(entityName).views;
+            if (views) {
+                const mobileView = Object.values(views).find(view => view.type === "mobile");
+
+                if (mobileView && mobileView["ribbon"]) {
+                    const ribbonEntries = Object.entries(mobileView["ribbon"]);
+                    for (const [key, ribbonElement] of ribbonEntries) {
+                        // console.log("found ribbon with key: ", key, "and value: ", ribbonElement);
+
+                        const buttonObject = buttons.find(b => b.key == key);
+                        if (buttonObject) {
+                            const otherActionObject = {
+                                title: buttonObject.title ? buttonObject.title : "",
+                                onClick: buttonObject.onClick,
+                                icon: buttonObject.iconProps,
+                                visibleOnCard: ribbonElement.visibleOnCard
+                            }
+                            // console.log("buttonObject: ", buttonObject, "otherActionObject: ", otherActionObject);
+                            otherActions.push(otherActionObject)
+                        }
+                        ribbons.push(ribbonElement);
+                    }
+                }
+            }
+        }
+
+        return otherActions;
+    }
+
     public static resolveStatus = (status: number) => {
         switch (status) {
             case 0:
@@ -134,3 +232,17 @@ export class ItemToCardResolver {
         }
     };
 }
+function filterOtherActions(oa: OtherAction, item: IRecord): unknown {
+    if (!oa.visibleOnCard) {
+        return true;
+    }
+    if (typeof oa.visibleOnCard === "string") {
+        switch (oa.visibleOnCard) {
+            case "@equals(record().status,50)": return item.status === 50;
+            case "@equals(record().status,30)": return item.status === 30;
+            default: throw new Error("Not implemented, " + oa.visibleOnCard)
+        }
+    }
+    return oa.visibleOnCard;
+}
+

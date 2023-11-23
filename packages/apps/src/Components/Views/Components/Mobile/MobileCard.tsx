@@ -49,12 +49,14 @@ export const MobileCard: React.FC<MobileCardProps> = (
 
             <CardFooter style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 10px' }}>
                 {item.otherActions.map((action, index) => (
-                    <Button key={index} onClick={action.onClick}>
-                        {action.label}
+                    <Button
+                        key={index}
+                        // icon={action.icon ? action.icon.iconName : ''}
+                        onClick={action.onClick}
+                    >
+                        {action.title}
                     </Button>
                 ))}
-                {item.otherAttributes.Status === 50 && <Button onClick={() => window.alert("Captain has been notified.")}>Send to captain</Button>}
-                <Button onClick={() => handleItemClicked(item.record)}>View Details</Button>
             </CardFooter>
         </Card>
     )
