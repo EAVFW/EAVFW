@@ -3,3 +3,5 @@ export * from "./throwIfNotDefined";
 export * from "./stringFormat";
 export * from "./deepDiffMapper";
 export * from "./mergeDeep";
+export * from "./extentionMethods";
+export * from "./isMobileDevice";

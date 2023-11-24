@@ -10,3 +10,4 @@ export * from "./TopBar";
 export * from "./MessageArea";
 export * from "./ProgressBar";
 export * from "./Dialogs";
+import './Views/Components/Mobile/MobileList';
