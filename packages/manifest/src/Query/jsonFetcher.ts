@@ -17,9 +17,13 @@ export const jsonFetcher = async (
         const error = new Error('An error occurred while fetching the data.') as any;
         // Attach extra info to the error object.
         try {
-            error.info = await res.json()
+            error.info = await res.text();
+            try{
+                error.info = JSON.parse(error.info);
+            }catch(errr)
+            {
+            }
         } catch (err) {
-
         }
         error.status = res.status
         throw error
