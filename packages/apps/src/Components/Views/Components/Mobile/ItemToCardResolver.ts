@@ -38,7 +38,7 @@ export class ItemToCardResolver {
             let subTitle = '';
             const otherAttributes: { [key: string]: any } = {};
             let statusText = "";
-            let statusViewConfigObject;
+            let statusViewConfigObject: any;
 
             /* Columns represents the collection of properties/attributes for a given entity.
              * The code below iterates over each column in the entity and looks for definitions in a separate viewColumns object. 
