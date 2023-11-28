@@ -22,5 +22,4 @@ export type ViewDefinition = {
         [column: string]: ViewColumnDefinition;
     };
     cardIcon?: string;
-    cardHeaderAction?: string;
 }

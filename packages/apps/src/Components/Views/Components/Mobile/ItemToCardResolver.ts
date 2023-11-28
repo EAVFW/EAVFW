@@ -27,8 +27,7 @@ type OtherAction = {
 export class ItemToCardResolver {
     public static convertItemsToCardObjects(items: IRecord[], viewColumns: { [key: string]: any }, app: ModelDrivenApp, buttons: ICommandBarItemProps[], selection: any): CardObject[] {
         const cardObjects: CardObject[] = [];
-        const iconElement = ItemToCardResolver.getElementByKey(items, app, Views, 'cardIcon');
-
+        const iconElement = ItemToCardResolver.getElementByKey(items, app, Views);
         const otherActions = ItemToCardResolver.resolveOtherActions(items, app, buttons);
 
         // Iterate over items[]
@@ -133,7 +132,7 @@ export class ItemToCardResolver {
         return cardObjects;
     }
 
-    public static getElementByKey(items: IRecord[], app: ModelDrivenApp, Views: any, elementKey: 'cardIcon' | 'cardHeaderAction') {
+    public static getElementByKey(items: IRecord[], app: ModelDrivenApp, Views: any) {
         const entityName = items.find(item => item.entityName != null)?.entityName;
 
         if (entityName) {
@@ -142,7 +141,7 @@ export class ItemToCardResolver {
                 const mobileView = Object.values(views).find(view => view.type === "mobile");
 
                 if (mobileView) {
-                    const componentKey = mobileView[elementKey];
+                    const componentKey = mobileView['cardIcon'];
                     if (componentKey && componentKey in Views) {
                         // console.log("ItemToCardResolver.getElementByKey(): ", Views[componentKey]());
                         return Views[componentKey]();
