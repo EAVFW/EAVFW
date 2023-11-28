@@ -209,28 +209,6 @@ export class ItemToCardResolver {
         return otherActions;
     }
 
-    public static resolveStatus = (status: number) => {
-        switch (status) {
-            case 0:
-                return 'New';
-            case 10:
-                return 'Sent';
-            case 20:
-                return 'Opened';
-            case 30:
-                return 'Filled';
-            case 40:
-                return 'Approved';
-            case 50:
-                return 'Signed';
-            case 60:
-                return 'Sent to captain';
-            case 400:
-                return 'Archived';
-            default:
-                return 'N/A';
-        }
-    };
 }
 function filterOtherActions(oa: OtherAction, item: IRecord): unknown {
     if (!oa.visibleOnCard) {

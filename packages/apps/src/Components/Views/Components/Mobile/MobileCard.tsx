@@ -106,27 +106,6 @@ const BodyComponent: React.FC<PropertyComponentProps> = ({ propertyName, value }
 // };
 
 
-const getStatusColor = (status: number) => {
-    switch (status) {
-        case 0:
-            return '#F00';
-        case 10:
-            return '#F00';
-        case 20:
-            return '#F00';
-        case 30:
-            return '#FEFF00';
-        case 40:
-            return '#FEFF00';
-        case 50:
-            return '#FEFF00';
-        case 60:
-            return '#0F0';
-        case 400:
-            return '#808080';
-        default: return '#808080'; // Unknown or not set - Grey
-    }
-};
 
 // const LedIcon: React.FC<{ color: string }> = ({ color }) => (
 //     <svg height="24" width="24" style={{ marginBottom: '5px' }}>
