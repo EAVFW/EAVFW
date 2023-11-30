@@ -77,8 +77,7 @@ export function FormLayout(props: PageLayoutProps) {
 
       //  const [isOpen, setIsOpen] = useState(false);
       
-       
-       
+
 
         return (
             <ModelDrivenGridViewerSelectedContext.Provider value={{ setSelection, selection: selection!, selectionDetails }}>

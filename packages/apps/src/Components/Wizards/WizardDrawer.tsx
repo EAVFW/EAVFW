@@ -102,7 +102,7 @@ const Wizard: React.FC = ({ children }) => {
                         if (action.body?.values) {
                             // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
                             onChange(props => {
-                                dispatch({ action: "setValues", values: mergeDeep(props, result.body) });
+                                dispatch({ action: "setValues", values: mergeDeep(props, result.body?.values) });
                             });
                         }
 

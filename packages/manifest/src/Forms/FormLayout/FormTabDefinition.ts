@@ -8,9 +8,9 @@ export type AutoFormHtmlDefinition = {
     html?: string;
 };
 export type AutoFormJsonSchemaDefinition = {
-    uiSchema: any,
+    uiSchema?: any,
     schema?: JSONSchema7;
-    logicalName: string
+    logicalName?: string
 };
 export type AutoFormFormDefinition = {
     form?: string | { entity: string, form: string }

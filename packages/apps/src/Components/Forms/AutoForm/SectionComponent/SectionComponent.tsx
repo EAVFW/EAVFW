@@ -7,8 +7,8 @@ import isEqual from "react-fast-compare";
 
 
 import { useChangeDetector, useLazyMemo } from "@eavfw/hooks";
-import { AutoFormColumnsDefinition, AutoFormControlsDefinition, BaseNestedType, deleteRecordSWR, EntityDefinition, FormDefinition, FormTabDefinitionWithColumns, hasColumns, hasControl, hasFields, hasForm, hasHtml, hasJsonSchema, ViewReference } from "@eavfw/manifest";
-import { capitalize } from "@eavfw/utils";
+import { AutoFormColumnsDefinition, AutoFormControlsDefinition, AutoFormJsonSchemaDefinition, BaseNestedType, deleteRecordSWR, EntityDefinition, FormDefinition, FormTabDefinitionWithColumns, hasColumns, hasControl, hasFields, hasForm, hasHtml, hasJsonSchema, ViewReference } from "@eavfw/manifest";
+import { capitalize, mergeDeep } from "@eavfw/utils";
 import { ICommandBarItemProps, Panel, Stack } from "@fluentui/react";
 import { useBoolean } from "@fluentui/react-hooks";
 import { Form } from "@rjsf/fluent-ui";
@@ -38,6 +38,8 @@ import { getDependencySchema } from "./getDependencySchema";
 import { getJsonSchema } from "./getJsonSchema";
 import { SectionComponentProps } from "./SectionComponentProps";
 import { React9FieldTemplate } from "../Templates/React9FieldTemplate";
+import { useWizard } from "../../../Wizards/useWizard";
+import { ResolveFeature } from "../../../../FeatureFlags";
 
 
 
@@ -408,14 +410,72 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
 export default SectionComponent;
 
 
+const useExpressionEvaluator = (obj1: AutoFormColumnsDefinition | AutoFormControlsDefinition |string) => {
+
+    const [formValues] = useEAVForm(x => x.formValues);
+    const [isLoading, setIsloading] = useState(true);
+    const [section, setSection] = useState(typeof (obj1) === "string" ? { visible: false }: obj1);
+
+    const expressionProvider = ResolveFeature("ExpressionsProviderAsync") as (values: any, expression: string) => Promise<any>;
+
+    useEffect(() => {
+        const queue1 = [] as Array<Promise<any>>;
+
+        if (typeof obj1 === "string") {
+            expressionProvider(formValues, obj1).then(clone => {
+                setIsloading(false);
+                setSection(clone);
+            });
+            return;
+        }
+
+        function traverse<T1>(obj: T1, queue: Array<Promise<any>>) {
+            const clone = {} as T1;
+            for (const key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    const value = obj[key];
+
+                    if (Array.isArray(value)) {
+                        clone[key] = value.map(item => traverse(item, queue)) as typeof value;
+                    }else if (typeof (value) === "object" && value !== null) {
+                        clone[key] = traverse(value, queue);
+                    } else if (typeof (value) === "string" && value.indexOf("@") !== -1) {
+                        queue.push(expressionProvider(formValues, value).then(newvalue => clone[key] = newvalue));
+                    } else {
+                        clone[key] = value;
+                    }
+
+                }
+            }
+            return clone;
+        }
+        const clone = traverse(obj1, queue1);
+        Promise.all(queue1).then(() => {
+            setIsloading(false);
+            setSection(clone);
+        });
+    }, [formValues, JSON.stringify(obj1)]);
+
+
+
+
+
+    return [section, isLoading] as [AutoFormColumnsDefinition | AutoFormControlsDefinition, boolean];
+
+}
+
 export const WizardSection: React.FC<{
-    sectionName:string,
+    sectionName: string,
     section: AutoFormColumnsDefinition | AutoFormControlsDefinition,
     title?: string
-}> = ({ section, sectionName }) => {
+}> = ({ section: sectionIn, sectionName }) => {
 
     const styles = useStackStyles();
-    console.log("SectionComponentSlim", [section]);
+    console.log("SectionComponentSlim", [sectionIn]);
+
+    const [section, isLoading] = useExpressionEvaluator(sectionIn);
+   
+
     if (hasColumns(section)) {
         const columns = section.columns;
         const ui = (
@@ -448,6 +508,21 @@ export const WizardSection: React.FC<{
         }
 
     } else if (hasHtml(section)) {
+        console.log("sectioncomponent html", [section.html]);
+
+        if (isLoading)
+            return null;
+
+        //const [{ expressions }] = useWizard();
+        //if (section.html?.indexOf('@')) {
+
+        //    const expressionProvider = ResolveFeature("ExpressionsProvider");
+
+        //    const { isLoading, evaluated } = expressionProvider(section.html)
+
+        //    return <div dangerouslySetInnerHTML={{ __html: evaluated }}></div>
+
+        //}
         return <div dangerouslySetInnerHTML={{ __html: section.html }}></div>
     } else if (hasForm(section)) {
         const app = useModelDrivenApp();
@@ -515,44 +590,56 @@ export const WizardSection: React.FC<{
             </FormHostContext.Provider>)
 
     } else if (hasJsonSchema(section)) {
+         
+        if (isLoading)
+            return null;
 
-        const [_, dispatch] = useContext(WizardContext)!;
-        const [formData, { onChange }] = useEAVForm(x => x.formValues, undefined, "sectioncomponent schema");
-        
-        console.log("sectioncomponent schema", [section.uiSchema, section.schema, section.logicalName, formData]);
-        return (
-            <Form key={sectionName}
-                uiSchema={section.uiSchema}
-                schema={section.schema}
-                onBlur={(e) => {
-                   
-                    console.log("sectioncomponent schema updating formdata", [e]);
-                    //onChange((props, ctx) => {
-                    //    props[section.logicalName] = a;
-                    //    dispatch({ action: "setValues", values: props});
-                    //})
-                }}
-                onChange={(e) => {
-                    console.log("sectioncomponent schema updating formdata", [e]);
-                    
-                    onChange((props, ctx) => {
-                        props[section.logicalName] = e.formData;
-                      //  dispatch({ action: "setValues", values: props });
-                    })
-                }}
-               
-                idPrefix={'wizard'}
-                formData={formData[section.logicalName]}
-                widgets={WidgetRegister} 
-                
-                templates={{ BaseInputTemplate: React9BaseInputTemplate, FieldTemplate: React9FieldTemplate, } }
-              //  templates={{ FieldTemplate: FieldTemplate }}
-                showErrorList={false}
-                validator={validator}
-
-            ><Fragment /></Form>
-            )
+        return <JsonScheamSection sectionName={sectionName} {...section} />;
+    
     }
     return <ControlsComponentSlim />
-    }
+}
 
+type JsonScheamSectionProps = {
+   
+    sectionName: string
+};
+export const JsonScheamSection: React.FC<JsonScheamSectionProps & Required<AutoFormJsonSchemaDefinition>> = ({ schema, uiSchema, logicalName, sectionName }) => {
+
+
+    const [formData, { onChange }] = useEAVForm(x => x.formValues, undefined, "sectioncomponent schema");
+
+    console.log("sectioncomponent schema", [uiSchema, schema, logicalName, formData]);
+  
+    return (
+        <Form key={sectionName}
+            uiSchema={uiSchema}
+            schema={schema}
+            onBlur={(e) => {
+                console.log("sectioncomponent schema blur formdata", [e]);
+            }}
+            onChange={(e) => {
+             
+
+                onChange((props, ctx) => {
+                    console.log("sectioncomponent schema updating formdata", [props,e]);
+                    if (logicalName)
+                        props[logicalName] = e.formData;
+                    else
+                        mergeDeep(props, e.formData);
+                    //  dispatch({ action: "setValues", values: props });
+                })
+            }}
+
+            idPrefix={'wizard'}
+            formData={logicalName ? formData[logicalName] : formData}
+            widgets={WidgetRegister}
+
+            templates={{ BaseInputTemplate: React9BaseInputTemplate, FieldTemplate: React9FieldTemplate, }}
+            //  templates={{ FieldTemplate: FieldTemplate }}
+            showErrorList={false}
+            validator={validator}
+
+        ><Fragment /></Form>
+    );
+}

@@ -13,6 +13,8 @@ import { WizardContext } from "./WizardContext";
 import { trace, context, diag, DiagConsoleLogger, DiagLogLevel, SpanKind, propagation } from '@opentelemetry/api';
 
 
+
+
 const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
     console.log('WizardReducer: ' + action.action, [state, action]);
     switch (action.action) {
@@ -25,7 +27,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 if (state.spanResolve) {
                     state.spanResolve();
                 }
-                const wizard = action.wizard;
+                const wizard = action.wizard?.[1];
                 if (!wizard)
                     return {
                         expressions: ResolveFeature("WizardExpressionsProvider")({})
@@ -107,13 +109,16 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
 
                 //   const newContext = context.with();  
                 console.log("WizardReducer", [parentContext, activeContext, contextWithSpanSet, span, state.span, trace.getSpan(activeContext), trace.getSpan(activeContext)?.spanContext(), trace.getActiveSpan(), trace.getActiveSpan()?.spanContext()!]);
+                let tabName = Object.keys(wizard?.tabs ?? {})[0];
+                let transitionIn = wizard.tabs[tabName].onTransitionIn;
                 return {
                     ...state,
+                    ...getTransitionProps(transitionIn, action.action, state),
                     tracer: tracer,
                     otelContext: contextWithSpanSet,
-                    wizard: action.wizard?.[1],
+                    wizard: wizard,
                     wizardKey: action.wizard?.[0],
-                    tabName: Object.keys(action.wizard?.[1]?.tabs ?? {})[0],
+                    tabName: tabName
 
                 }
             }
@@ -168,65 +173,13 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 if (nextTab) {
                     let transitionIn = wizard.tabs[nextTab].onTransitionIn;
 
-                  
+                   
 
                     return {
                         ...state,
-                        messages: transitionIn?.message ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next", ... (transitionIn.message as Partial<IWizardMessage>) } } : {},
+                        ...getTransitionProps(transitionIn, action.trigger, state),
                         tabName: nextTab,
-                        isTransitioning: transitionIn ? true : false,
-                        transition: transitionIn ? new Promise(async (resolve, reject) => {
-                            if (transitionIn) {
-
-
-                                let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs`, {
-                                    method: "POST",
-                                    body: JSON.stringify({ trigger: action.trigger, values: state.values }),
-                                    credentials: "include",
-                                    //headers: {
-                                    //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
-                                    //}
-                                });
-
-                                let id = await rsp.json().then(x => x.id);
-
-                                let completed = false;
-
-                                while (!completed) {
-                                    let statusRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}/status`, {
-                                        //headers: {
-                                        //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
-                                        //},
-                                        credentials: "include"
-                                    });
-
-                                    let status = await statusRsp.json();
-                                    completed = status.completed;
-
-                                    await new Promise((resolve) => setTimeout(resolve, 5000));
-                                }
-
-                                let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}`, {
-                                    //headers: {
-                                    //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
-                                    //},
-                                    credentials: "include"
-                                });
-
-                                let result = await stateRsp.json() as WorkflowState;
-                                console.log("jobstate", result);
-
-
-                                if (rsp.ok) {
-                                    resolve(result);
-                                }
-                                else {
-                                    reject();
-                                }
-
-                            }
-
-                        }) : undefined
+                        
 
                     }
                 } else {
@@ -259,4 +212,72 @@ export const WizardReducer: React.FC = ({ children }) => {
         {children}
 
     </WizardContext.Provider>)
+}
+
+function getTransitionProps(transitionIn: { message: IWizardMessage; workflow: string; } | undefined, trigger: string, state: IWizardState) {
+    return {
+        messages: getTransitionMessages(transitionIn),
+        isTransitioning: transitionIn ? true : false,
+        transition: getTransitionWorker(transitionIn, trigger, state)
+    };
+}
+
+function getTransitionWorker(transitionIn: { message: IWizardMessage; workflow: string; } | undefined, trigger:string, state: IWizardState) {
+    return transitionIn ? new Promise(async (resolve, reject) => {
+        if (transitionIn) {
+
+
+            let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs`, {
+                method: "POST",
+                body: JSON.stringify({ trigger: trigger, values: state.values }),
+                credentials: "include",
+                //headers: {
+                //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
+                //}
+            });
+
+            let id = await rsp.json().then(x => x.id);
+
+            let completed = false;
+
+            while (!completed) {
+                let statusRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}/status`, {
+                    //headers: {
+                    //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
+                    //},
+                    credentials: "include"
+                });
+
+                let status = await statusRsp.json();
+                completed = status.completed;
+
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+            }
+
+            let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}`, {
+                //headers: {
+                //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
+                //},
+                credentials: "include"
+            });
+
+            let result = await stateRsp.json() as WorkflowState;
+            console.log("jobstate", result);
+
+
+            if (rsp.ok) {
+                resolve(result);
+            }
+            else {
+                reject();
+            }
+
+        }
+
+    }) : undefined;
+}
+
+function getTransitionMessages(transitionIn: { message: IWizardMessage; workflow: string; } | undefined) {
+    return transitionIn?.message ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next", ...(transitionIn.message as Partial<IWizardMessage>) } } :
+        transitionIn ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next" } } : { };
 }
