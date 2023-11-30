@@ -8,6 +8,7 @@
  * Note: No client-side detection method is 100% accurate. User Agents can be spoofed,
  * devices evolve, and some non-mobile devices support touch events. This utility 
  * function is based on educated guesses and may require updates as device patterns change.
+ * 
  */
 export const isMobileDevice = () => {
     if (typeof window !== "undefined" && window) {
