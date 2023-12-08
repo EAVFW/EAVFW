@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelectionContext } from '../../../Selection/useSelectionContext';
 import styles from './Card.module.css';
-import { useModelDrivenApp } from "../../../../index";
+import { useAppInfo, useModelDrivenApp } from "../../../../index";
 import { MobileCard } from './MobileCard';
 import { EntityDefinition, IRecord } from '@eavfw/manifest';
 import { Selection } from '@fluentui/react';
@@ -45,11 +45,12 @@ export const MobileList: React.FC<MobileListProps> = (
     }
 ) => {
     const { buttons } = useRibbon();
-    const { fetchQuery } = usePaging();
+    const { fetchQuery, setFetchQuery, currentPage, pageSize, enabled:pagingContextEnabled } = usePaging();
     const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
     const [items, setItems] = useState<IRecord[]>(newRecord ? formData[entity.collectionSchemaName.toLowerCase()] ?? [] : []);
     const { selection } = useSelectionContext();
     const app = useModelDrivenApp();
+    const { currentEntityName } = useAppInfo();
     const { data, isLoading } = onQueueData(entity, newRecord, fetchQuery,);
     const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
 
@@ -77,13 +78,27 @@ export const MobileList: React.FC<MobileListProps> = (
 
     useEffect(() => {
         /* Letting selection know which items has been loaded. */
-        selection.setItems(data.items);
-    }, [data])
+        if (data?.items)
+            selection.setItems(data.items);
+    }, [data?.items])
 
     const cardObjects = ItemToCardResolver.convertItemsToCardObjects(items, view.columns!, app, buttons, selection);
 
 
     return (
+        <ColumnFilterProvider
+            view={view}
+            //   filter={filter}
+            attributes={app.getAttributes(currentEntityName)}
+            locale={app.locale}
+         //   onHeaderRender={onHeaderRender}
+            onBuildFetchQuery={q=>q}
+            setFetchQuery={setFetchQuery}
+            currentPage={currentPage}
+            pageSize={pageSize}
+            pagingContextEnabled={pagingContextEnabled}
+            app={app}
+        >
         <div className={className} key="MobileListComponent">
             <ul className={styles.list}>
                 {
@@ -101,9 +116,11 @@ export const MobileList: React.FC<MobileListProps> = (
                         <li><p>No items to display.</p></li>
                 }
             </ul>
-        </div>
+            </div>
+        </ColumnFilterProvider>
     );
 };
 
 import { RegistereView } from '../../ViewRegister';
+import { ColumnFilterProvider } from '../../../ColumnFilter/ColumnFilterContext';
 RegistereView("mobile", MobileList);

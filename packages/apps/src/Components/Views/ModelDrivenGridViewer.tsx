@@ -115,6 +115,7 @@ export type ModelDrivenGridViewerState = {
 };
 
 export const DefaultDataQuery = (entity: EntityDefinition, newRecord?: boolean, fetchQuery?: IFetchQuery) => {
+    console.log("DefaultDataQuery", [!newRecord && typeof fetchQuery !== "undefined", !newRecord, typeof fetchQuery !== "undefined", fetchQuery])
     return queryEntitySWR(
         entity,
         setCount(fetchQuery, false),
