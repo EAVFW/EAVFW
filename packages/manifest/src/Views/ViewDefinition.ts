@@ -9,6 +9,7 @@ export type ViewPagingDefinition = {
 export type ViewDefinition = {
 
     type?: string;
+    mobile?: boolean;
     title?: string;
     roles?: {
         allowed?: string[];

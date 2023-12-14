@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 /**
  * Performs various checks to determine if the current device is a mobile device.
  * The checks are performed in the order of which they are most likely to be accurate.
@@ -36,4 +38,25 @@ export const isMobileDevice = () => {
     }
 
     return false;
+}
+
+//TODO, this should be in a context such its not registering the event listeren everyplace used.
+
+export const useIsMobileDevice = () => {
+    const [isMobile, setIsMobile] = useState(isMobileDevice());
+
+    /* Handles when screen-size is modified */
+    useEffect(() => {
+        const handleResize = () => {
+            setIsMobile(isMobileDevice());
+        };
+        if (typeof window !== "undefined" && window) {
+            window.addEventListener('resize', handleResize);
+            return () => {
+                window.removeEventListener('resize', handleResize);
+            };
+        }
+    }, []);
+
+    return isMobile;
 }

@@ -39,7 +39,7 @@ export function queryEntitySWR<T extends IRecord>(entity: EntityDefinition, quer
             fetcher: jsonFetcher
         }
     )
-    console.log(data, error);
+    console.log("queryEntitySWR: Result",[key,data, error]);
     return {
         data: data as { items: Array<T>, count?: number },
         isLoading: !error && !data,

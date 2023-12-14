@@ -95,6 +95,7 @@ import { IFetchQuery, usePaging } from "./PagingContext";
 import styles from "./ModelDrivenGridViewer.module.scss";
 import ModelDrivenList from "./ModelDrivenList";
 import { ModelDrivenApp } from "../../ModelDrivenApp";
+import { ModelDrivenViewContextProvider } from "./ModelDrivenViewContext";
 
 //const theme = getTheme();
 
@@ -532,10 +533,7 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
     recordRouteGenerator,
     entity,
     item,
-    index,
     column,
-    setItems,
-    items,
     locale,
 }) => {
 
@@ -625,10 +623,10 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
 
             </Link>
         }
-       
+        console.log("ConditionRenderComponent:", [attribute.logicalName, item, type.foreignKey?.principalNameColumn?.toLowerCase()]);
         return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
 
-            <a>{item[attribute.logicalName.slice(0, -2)][type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
+            <a>{item[attribute.logicalName.slice(0, -2)]?.[type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
 
         </Link>
 
@@ -804,6 +802,7 @@ export function ModelDrivenGridViewer({
         fetchQuery,
         
     );
+
     const { data: count } = onQueryDataCount(
         entity,
         newRecord,
@@ -811,7 +810,8 @@ export function ModelDrivenGridViewer({
     );
 
     useEffect(() => {
-        mutate();
+        if (formData?.modifiedon)
+            mutate();
     }, [formData?.modifiedon]);
 
     //Show loading bar based on loading from data.
@@ -897,6 +897,7 @@ export function ModelDrivenGridViewer({
 
     return (
         <Stack verticalFill>
+            <ModelDrivenViewContextProvider mutate={mutate}>
             <ColumnFilterProvider
                 view={viewDefinition}
                 filter={filter}
@@ -980,7 +981,8 @@ export function ModelDrivenGridViewer({
                         />
                     )}
                 </Stack.Item>
-            </ColumnFilterProvider>
+                </ColumnFilterProvider>
+            </ModelDrivenViewContextProvider>
         </Stack>
     );
 }

@@ -5,7 +5,7 @@ import { context, trace } from "@opentelemetry/api";
 import { useContext } from "react";
 import { IWizardState } from "./IWizardState";
 import { WizardContext } from "./WizardContext";
-import { WorkflowState } from "./WorkflowState";
+import { WorkflowState } from "@eavfw/utils";
 
 
 export const useWizardOpener = () => {

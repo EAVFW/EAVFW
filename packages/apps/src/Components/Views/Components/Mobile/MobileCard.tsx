@@ -1,7 +1,8 @@
-import { Body1, Button, Card, CardFooter, CardHeader, Subtitle2, Title3 } from '@fluentui/react-components';
+import { Body1, Button, Card, CardFooter, CardHeader, Checkbox, Subtitle2, Title3, makeStyles } from '@fluentui/react-components';
 import React from 'react';
 import { ExtensionMethods } from '@eavfw/utils';
 import { CardObject } from './ItemToCardResolver';
+import { useSelectionContext } from '../../../Selection';
 // import { Views } from "../../../Views/ViewRegister";
 
 export type Action = {
@@ -14,7 +15,25 @@ type MobileCardProps = {
     className: string
     handleItemClicked: (item: any) => void
 }
-
+const useFloatingItemsStyle = makeStyles({
+    root: {
+        display: 'flex',
+        flexDirection: 'row',
+        flexWrap: 'nowrap',
+        width: 'auto',
+        height: 'auto',
+        boxSizing: 'border-box',
+        '> *': {
+            textOverflow: 'ellipsis',
+        },
+        '> :not(:first-child)': {
+            marginTop: '0px',
+        },
+        '> *:not(.ms-StackItem)': {
+            flexShrink: 1,
+        },
+    },
+});
 export const MobileCard: React.FC<MobileCardProps> = (
     {
         item,
@@ -23,8 +42,25 @@ export const MobileCard: React.FC<MobileCardProps> = (
     }: MobileCardProps
 ) => {
     console.log("item: ", item);
+    const style = useFloatingItemsStyle();
+    const { selection } = useSelectionContext();
+    const [selected1, setSelected1] = React.useState(false);
+    const setCheckboxState = React.useCallback(
+        ({ selected, checked }, setFn) => { setFn(!!(selected || checked)); selection.setIndexSelected(item.index, !!(selected || checked), false); },
+        []
+    );
+    const onSelected1Change = React.useCallback(
+        (_, state) => setCheckboxState(state, setSelected1),
+        [setCheckboxState]
+    );
+   
     return (
-        <Card style={{ marginBottom: '10px' }} className={className}>
+        <Card style={{ marginBottom: '10px' }} className={className} floatingAction={
+            <div className={style.root}>
+                {item.headerAction}
+                <Checkbox onChange={onSelected1Change} checked={selected1} />
+            </div>
+        } selected={selected1}            onSelectionChange={onSelected1Change}>
             <CardHeader
                 style={{ padding: '0 5px' }}
                 // image={<ShipIcon size={24} fill="currentColor" />}
@@ -32,7 +68,7 @@ export const MobileCard: React.FC<MobileCardProps> = (
                 header={<Title3><b>{ExtensionMethods.capitalizeFirstLetter(item?.title ?? 'N/A')}</b></Title3>}
                 description={<Subtitle2> {item?.subTitle ?? 'N/A'}</Subtitle2>}
                 // action={<LedIcon color={getStatusColor(item.otherAttributes.Status)} />}
-                action={item.headerAction}
+               // action={item.headerAction}
             />
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '0 5px' }}>

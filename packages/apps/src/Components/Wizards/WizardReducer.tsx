@@ -4,7 +4,7 @@ import { ResolveFeature } from "./../../FeatureFlags";
 import { IWizardAction } from "./IWizardAction";
 import { IWizardState } from "./IWizardState";
 import { Reducer } from "react";
-import { WorkflowState } from "./WorkflowState";
+import { runWorkflow } from "@eavfw/utils";
 import { mergeDeep } from "@eavfw/utils";
 import { IWizardMessage } from "@eavfw/manifest";
 import { useEAVForm } from "@eavfw/forms";
@@ -226,42 +226,8 @@ function getTransitionWorker(transitionIn: { message: IWizardMessage; workflow: 
     return transitionIn ? new Promise(async (resolve, reject) => {
         if (transitionIn) {
 
-
-            let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs`, {
-                method: "POST",
-                body: JSON.stringify({ trigger: trigger, values: state.values }),
-                credentials: "include",
-                //headers: {
-                //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
-                //}
-            });
-
-            let id = await rsp.json().then(x => x.id);
-
-            let completed = false;
-
-            while (!completed) {
-                let statusRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}/status`, {
-                    //headers: {
-                    //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
-                    //},
-                    credentials: "include"
-                });
-
-                let status = await statusRsp.json();
-                completed = status.completed;
-
-                await new Promise((resolve) => setTimeout(resolve, 5000));
-            }
-
-            let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transitionIn.workflow}/runs/${id}`, {
-                //headers: {
-                //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
-                //},
-                credentials: "include"
-            });
-
-            let result = await stateRsp.json() as WorkflowState;
+            let { result,rsp} = await runWorkflow(transitionIn.workflow, trigger, state.values);
+            
             console.log("jobstate", result);
 
 

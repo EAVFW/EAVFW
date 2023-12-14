@@ -1,6 +1,6 @@
 ﻿import { IWizardMessages, WizardsDefinition } from "@eavfw/manifest";
 import { Span, Tracer } from "@opentelemetry/api";
-import { WorkflowState } from "./WorkflowState";
+import { WorkflowState } from "@eavfw/utils"
 import type { Context } from "@opentelemetry/api"
 
 export type IWizardState = {

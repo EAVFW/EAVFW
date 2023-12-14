@@ -21,7 +21,7 @@ type OtherAction = {
     title: string;
     onClick?: () => void;
     icon?: IIconProps;
-    visibleOnCard?: string;
+    visibleOnCard?: string | boolean;
 }
 
 export class ItemToCardResolver {

@@ -8,8 +8,9 @@ import { Selection } from '@fluentui/react';
 import { usePaging } from "./../../PagingContext";
 import { DefaultDataCountQuery, DefaultDataQuery } from '../../ModelDrivenGridViewer';
 import { ICommandBarItemProps, IObjectWithKey } from '@fluentui/react';
-import { ItemToCardResolver } from './ItemToCardResolver';
+import { CardObject, ItemToCardResolver } from './ItemToCardResolver';
 import { useRibbon } from '../../../Ribbon/useRibbon';
+import { ModelDrivenViewContextProvider } from '../../ModelDrivenViewContext';
 
 //trigger build
 
@@ -51,7 +52,7 @@ export const MobileList: React.FC<MobileListProps> = (
     const { selection } = useSelectionContext();
     const app = useModelDrivenApp();
     const { currentEntityName } = useAppInfo();
-    const { data, isLoading } = onQueueData(entity, newRecord, fetchQuery,);
+    const { data, isLoading, mutate } = onQueueData(entity, newRecord, fetchQuery);
     const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
 
     const _onItemInvoked = (item: IRecord): void => {
@@ -82,14 +83,15 @@ export const MobileList: React.FC<MobileListProps> = (
             selection.setItems(data.items);
     }, [data?.items])
 
-    const cardObjects = ItemToCardResolver.convertItemsToCardObjects(items, view.columns!, app, buttons, selection);
-
+    const cardObjects = useMemo(()=> ItemToCardResolver.convertItemsToCardObjects(items, view.columns!, app, buttons, selection),[items]);
+    const attributes = useMemo(() => app.getAttributes(currentEntityName), [currentEntityName]);
 
     return (
+        <ModelDrivenViewContextProvider mutate={mutate}>
         <ColumnFilterProvider
             view={view}
             //   filter={filter}
-            attributes={app.getAttributes(currentEntityName)}
+            attributes={attributes}
             locale={app.locale}
          //   onHeaderRender={onHeaderRender}
             onBuildFetchQuery={q=>q}
@@ -117,7 +119,8 @@ export const MobileList: React.FC<MobileListProps> = (
                 }
             </ul>
             </div>
-        </ColumnFilterProvider>
+            </ColumnFilterProvider>
+        </ModelDrivenViewContextProvider>
     );
 };
 

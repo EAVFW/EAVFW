@@ -266,7 +266,10 @@ const ColumnFilterProvider = ({
 
 
     React.useEffect(() => {
-        const { columns} = columnFilterState
+        const { columns } = columnFilterState;
+        if (columns?.length <= 0)
+            return;
+
         console.log("Recalculating fetch qury:", [filter, columns, attributes]);
 
         function expandPolyLookup(key:string,attr: AttributeDefinition) {
@@ -390,13 +393,13 @@ const ColumnFilterProvider = ({
         columnFilterDispatch({
             type: 'initializeColumns',
             view: view ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } },
-            app:app,
+            app: app,
             attributes: attributes,
             locale: locale,
             onHeaderRender: onHeaderRender,
             dispatch: columnFilterDispatch
         })
-    }, [view, attributes, locale])
+    }, [view, attributes, locale]);
     
     return <ColumnFilterContext.Provider value={[columnFilterState, columnFilterDispatch ]}>{children}</ColumnFilterContext.Provider>
 }

@@ -30,7 +30,7 @@ import { useUserProfile } from "../Profile/useUserProfile";
 import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { ResolveFeature } from "../../FeatureFlags";
-import { isMobileDevice } from "@eavfw/utils/src/isMobileDevice";
+import { isMobileDevice, useIsMobileDevice } from "@eavfw/utils";
 
 
 interface WithRouterProps {
@@ -124,20 +124,7 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
 
     const appName = appInfo.currentAppName;//this.props.router.query.appname;
 
-    const [isMobile, setIsMobile] = useState(isMobileDevice());
-
-    /* Handles when screen-size is modified */
-    useEffect(() => {
-        const handleResize = () => {
-            setIsMobile(isMobileDevice());
-        };
-        if (typeof window !== "undefined" && window) {
-            window.addEventListener('resize', handleResize);
-            return () => {
-                window.removeEventListener('resize', handleResize);
-            };
-        }
-    }, []);
+    const isMobile = useIsMobileDevice();
 
     useEffect(() => {
         console.groupCollapsed("AreaFilters");

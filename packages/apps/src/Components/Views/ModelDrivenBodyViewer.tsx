@@ -18,6 +18,8 @@ import ModelDrivenGridViewer from "../Views/ModelDrivenGridViewer";
 import ViewSelectorComponent from "./ViewSelectorComponent";
 import { RibbonHost } from "../Ribbon/RibbonHost";
 import { PagingProvider } from "./PagingContext";
+import { useIsMobileDevice } from "@eavfw/utils";
+import { MobileList } from "./Components/Mobile/MobileList";
 
 
 
@@ -51,14 +53,15 @@ export function ModelDrivenBodyViewer
   //  const data = [recordRouteGenerator, entityName, entity, selectedView, locale];
 
     const app = useModelDrivenApp();
-
-
+    const isMobile = useIsMobileDevice();
+    const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
 
     const BodyViewElement = useMemo(() => {
 
+        console.log("BodyViewerElement", [isMobile]);
        
         if (entityName !== undefined && selectedView !== undefined) {
-            const view = app.getEntity(entityName).views?.[selectedView];
+             
 
             if (view !== undefined && view.type !== undefined) {
                 if (view.type in Views) {
@@ -72,6 +75,16 @@ export function ModelDrivenBodyViewer
             }
         }
 
+        //TODO - Move common elements from mobile list and modeldrivengridviewer into shared parent component
+
+        if (isMobile && view.mobile) {
+            return <MobileList entity={entity} recordRouteGenerator={recordRouteGenerator}
+
+                entityName={entityName}
+                viewName={selectedView}
+                locale={locale} />
+        }
+        
         return <ModelDrivenGridViewer
             recordRouteGenerator={recordRouteGenerator}
             key={entityName}
@@ -80,12 +93,12 @@ export function ModelDrivenBodyViewer
             viewName={selectedView}
             locale={locale} />;
 
-    }, [entityName, selectedView]);
+    }, [entityName, selectedView, isMobile, view]);
 
     const _onChangeView = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => {
         setselectedView(option?.key as string);
     }
-    const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
+   
     const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [ selectedView]);
     console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
