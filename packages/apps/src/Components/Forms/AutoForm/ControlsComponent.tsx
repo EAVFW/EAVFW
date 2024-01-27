@@ -5,7 +5,7 @@ import React, { Fragment, PropsWithChildren, useCallback, useContext, useMemo, u
 import { IChangeEvent, FormProps } from "@rjsf/core";
 import { FieldTemplateProps, UiSchema, FieldValidation, RJSFValidationError } from "@rjsf/utils"
 import { JSONSchema7, JSONSchema7Definition } from "json-schema";
-import Form from "@rjsf/fluent-ui";
+import Form from "@rjsf/fluentui-rc";
 import { mergeDeep } from "@eavfw/utils";
 import {
     Callout,
@@ -100,6 +100,7 @@ import { React8BaseInputTemplate, React9BaseInputTemplate } from "./Widgets/Base
 import { TextareaWidget } from "./Widgets/TextareaWidget";
 import { EAVFWLabel } from "./Templates/EAVFWLabel";
 import { useEAVForm } from "@eavfw/forms";
+import ObjectFieldTemplate from "./Templates/ObjectFieldTemplate";
 export const WidgetRegister: FormProps["widgets"] = {
     SelectWidget: SelectWidget,
     CheckboxWidget: CheckboxWidget,
@@ -238,7 +239,7 @@ const ControlsComponent =
                         fields={{ ControlHostWidget: ControlHostWidget }}
                         widgets={WidgetRegister} 
                         uiSchema={uiSChema}
-                        templates={{ FieldTemplate: FieldTemplate, BaseInputTemplate: React9BaseInputTemplate }}                     
+                        templates={{ FieldTemplate: FieldTemplate, BaseInputTemplate: React9BaseInputTemplate, ObjectFieldTemplate: ObjectFieldTemplate }}                     
                         transformErrors={transformErrors}
                         showErrorList={false}
                         validator={validator}                
@@ -329,58 +330,58 @@ const iconButtonStyles: Partial<IButtonStyles> = { root: { marginBottom: -3 } };
 const iconProps = { iconName: 'Info' };
 
 const cancelIcon: IIconProps = { iconName: 'Cancel' };
-export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
-    console.log("customlabel", props);
-    const [isCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
-    const descriptionId = useId('description');
-    const iconButtonId = useId('iconButton');
-    const titleId = useId('title');
-    const _theme = useContext(ThemeContext);
-    const iconCloseButtonStyles = useMemo(() => iconCloseButtonStylesFunc(_theme ?? theme), [theme]);
-    const contentStyles = useMemo(() => contentStylesFunc(_theme ?? theme), [theme]);
-    return (
-        <>
-            <Stack horizontal verticalAlign="center" tokens={stackTokens}>
-                <Label htmlFor={props.id} required={props.required} disabled={props.disabled}
-                >{props.label || props.title}</Label>
-                {props.description && <IconButton
-                    id={iconButtonId}
-                    iconProps={iconProps}
-                    title="Info"
-                    ariaLabel="Info"
-                    onClick={toggleIsCalloutVisible}
-                    styles={iconButtonStyles}
-                />}
-            </Stack>
-            {isCalloutVisible && (
-                <Callout
-                    target={'#' + iconButtonId}
-                    setInitialFocus
-                    onDismiss={toggleIsCalloutVisible}
-                    ariaDescribedBy={descriptionId}
-                    role="alertdialog" className={contentStyles.container}
-                >
-                    <div className={contentStyles.header}>
-                        <span id={titleId}>{props.label}</span>
-                        <IconButton
-                            styles={iconCloseButtonStyles}
-                            iconProps={cancelIcon}
-                            ariaLabel="Close popup modal"
-                            onClick={toggleIsCalloutVisible}
-                        />
-                    </div>
+//export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
+//    console.log("customlabel", props);
+//    const [isCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
+//    const descriptionId = useId('description');
+//    const iconButtonId = useId('iconButton');
+//    const titleId = useId('title');
+//    const _theme = useContext(ThemeContext);
+//    const iconCloseButtonStyles = useMemo(() => iconCloseButtonStylesFunc(_theme ?? theme), [theme]);
+//    const contentStyles = useMemo(() => contentStylesFunc(_theme ?? theme), [theme]);
+//    return (
+//        <>
+//            <Stack horizontal verticalAlign="center" tokens={stackTokens}>
+//                <Label htmlFor={props.id} required={props.required} disabled={props.disabled}
+//                >{props.label || props.title}</Label>
+//                {props.description && <IconButton
+//                    id={iconButtonId}
+//                    iconProps={iconProps}
+//                    title="Info1"
+//                    ariaLabel="Info"
+//                    onClick={toggleIsCalloutVisible}
+//                    styles={iconButtonStyles}
+//                />}
+//            </Stack>
+//            {isCalloutVisible && (
+//                <Callout
+//                    target={'#' + iconButtonId}
+//                    setInitialFocus
+//                    onDismiss={toggleIsCalloutVisible}
+//                    ariaDescribedBy={descriptionId}
+//                    role="alertdialog" className={contentStyles.container}
+//                >
+//                    <div className={contentStyles.header}>
+//                        <span id={titleId}>{props.label}</span>
+//                        <IconButton
+//                            styles={iconCloseButtonStyles}
+//                            iconProps={cancelIcon}
+//                            ariaLabel="Close popup modal"
+//                            onClick={toggleIsCalloutVisible}
+//                        />
+//                    </div>
 
-                    <div className={contentStyles.body}>
-                        <Stack tokens={stackTokens} horizontalAlign="start" styles={labelCalloutStackStyles}>
-                            {props.description && <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": props.description }}></span>}
-                            {/*  <DefaultButton onClick={toggleIsCalloutVisible}>Close</DefaultButton>*/}
-                        </Stack>
-                    </div>
-                </Callout>
-            )}
-        </>
-    );
-};
+//                    <div className={contentStyles.body}>
+//                        <Stack tokens={stackTokens} horizontalAlign="start" styles={labelCalloutStackStyles}>
+//                            {props.description && <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": props.description }}></span>}
+//                            {/*  <DefaultButton onClick={toggleIsCalloutVisible}>Close</DefaultButton>*/}
+//                        </Stack>
+//                    </div>
+//                </Callout>
+//            )}
+//        </>
+//    );
+//};
 
 
 //const CustomLabelWrapper = ({ schema, textProps, formContext }: { schema: any, formContext: any, textProps: ITextFieldProps }) => {

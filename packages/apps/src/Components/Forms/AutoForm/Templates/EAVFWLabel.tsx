@@ -5,7 +5,19 @@ import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, 
 import { useWarnings } from "./WarningContext";
 import { useDescriptionRenderFunc } from "./DescriptionComponentContext";
 
+import { tokens } from '@fluentui/react-theme';
+import { makeStyles } from "@fluentui/react-components";
 
+const useRequiredStyles = makeStyles({
+    required: {
+        color: tokens.colorPaletteRedForeground3,
+        paddingLeft: tokens.spacingHorizontalXS,
+    },
+    label: {
+        marginBottom: '5px',
+        display: "flex"
+    }
+})
 const contentStylesFunc = (theme: ITheme) => mergeStyleSets({
     container: {
         display: 'flex',
@@ -77,7 +89,7 @@ const stackTokens: IStackTokens = {
 };
 const infoIconProps = { iconName: 'Info' };
 const warnIconProps = { iconName: 'Warning' };
-const iconButtonStyles: Partial<IButtonStyles> = { root: { marginBottom: -3 } };
+const iconButtonStyles: Partial<IButtonStyles> = { root: { marginBottom: -3, height:'auto' } };
 
 export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boolean, disabled?: boolean, description?: string }> = ({ id, description, required, label, disabled, ...props }) => {
     const { data: _label, isLoading, error } = useExpressionParser(label);
@@ -96,15 +108,15 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     const iconButtonWarningId = useId('iconButtonWarningId');
     const [isInfoCalloutVisibleOnHover, setIsInfoCalloutVisibleOnHover] = useState(false)
     const [isWarningCalloutVisibleOnHover, setIsWarningCalloutVisibleOnHover] = useState(false)
-
+    const requiredStyles = useRequiredStyles();
     const { renderFunc: DescriptionComponent } = useDescriptionRenderFunc();
 
     return (
-        <>
+        <div className={requiredStyles.label}>
              
-                
-                {_label}
-                {description && <IconButton
+
+            {_label}{required ? <span className={requiredStyles.required}>*</span> : null}
+            {description && <IconButton
                     id={iconButtonId}
                     iconProps={infoIconProps}
                     title="Info"
@@ -185,7 +197,7 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     </div>
                 </Callout>
             )}
-        </>
+        </div>
     );
 
 

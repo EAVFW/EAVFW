@@ -83,7 +83,7 @@ export const MobileList: React.FC<MobileListProps> = (
             selection.setItems(data.items);
     }, [data?.items])
 
-    const cardObjects = useMemo(()=> ItemToCardResolver.convertItemsToCardObjects(items, view.columns!, app, buttons, selection),[items]);
+    const cardObjects = useMemo(() => ItemToCardResolver.convertItemsToCardObjects(items, selectedView, view.columns!, app, buttons, selection),[items]);
     const attributes = useMemo(() => app.getAttributes(currentEntityName), [currentEntityName]);
 
     return (

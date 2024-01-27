@@ -11,7 +11,7 @@ import { AutoFormColumnsDefinition, AutoFormControlsDefinition, AutoFormJsonSche
 import { capitalize, mergeDeep } from "@eavfw/utils";
 import { ICommandBarItemProps, Panel, Stack } from "@fluentui/react";
 import { useBoolean } from "@fluentui/react-hooks";
-import { Form } from "@rjsf/fluent-ui";
+import { Form } from "@rjsf/fluentui-rc";
 import validator from '@rjsf/validator-ajv8';
 import { useEAVForm } from "../../../../../../forms/src";
 import { filterRoles } from "../../../../filterRoles";

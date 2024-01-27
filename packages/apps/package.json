@@ -10,17 +10,17 @@
     "@eavfw/utils": "*"
   },
   "peerDependencies": {
-    "react": "18.2.0",
+    "react": "^18.2.0",
     "json-schema": "^0.4.0",
-    "@fluentui/react": "^8.93.0",
-    "@fluentui/react-hooks": "^8.6.10",
-    "@rjsf/fluent-ui": "^5.13.2",
-    "@rjsf/core": "^5.13.2",
-    "@rjsf/validator-ajv8": "^5.13.2",
-    "@fluentui/react-components": "^9.35.1",
-    "@fluentui/react-portal-compat": "^9.0.101",
+    "@fluentui/react": "^8.115.1",
+    "@fluentui/react-hooks": "^8.6.36",
+    "@rjsf/fluentui-rc": "^5.16.1",
+    "@rjsf/core": "^5.16.1",
+    "@rjsf/validator-ajv8": "^5.16.1",
+    "@fluentui/react-components": "^9.46.1",
+    "@fluentui/react-portal-compat": "^9.0.125",
     "@fluentui/react-message-bar-preview": "^0.2.1",
-    "@fluentui/react-datepicker-compat": "^0.4.0",
+    "@fluentui/react-datepicker-compat": "^0.4.20",
     "@opentelemetry/api": "*"
   },
   "devDependencies": {

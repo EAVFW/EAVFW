@@ -48,7 +48,7 @@ export const FieldTemplate = ({
             className={classNames}
                 style={{ marginBottom: schema.type === "object" ? 0 : 15, display: hidden ? "none" : undefined }}>
 
-                <Field aria-disabled={disabled} required={required} label={displayLabel ? <EAVFWLabel id={id} disabled={disabled} required={required} label={label ?? schema.title} description={rawDescription} /> : undefined}>
+                <Field aria-disabled={disabled}  label={displayLabel ? ({ children: (_:any, p:any) => <EAVFWLabel id={id} disabled={disabled} required={required} label={label ?? schema.title} description={rawDescription} /> }) : undefined}>
                     {children}
                 </Field>
             {/*{rawDescription && <Text>{rawDescription}</Text>}*/}

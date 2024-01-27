@@ -25,10 +25,10 @@ type OtherAction = {
 }
 
 export class ItemToCardResolver {
-    public static convertItemsToCardObjects(items: IRecord[], viewColumns: { [key: string]: any }, app: ModelDrivenApp, buttons: ICommandBarItemProps[], selection: any): CardObject[] {
+    public static convertItemsToCardObjects(items: IRecord[], selectedView:string, viewColumns: { [key: string]: any }, app: ModelDrivenApp, buttons: ICommandBarItemProps[], selection: any): CardObject[] {
         const cardObjects: CardObject[] = [];
         const iconElement = ItemToCardResolver.getElementByKey(items, app, Views);
-        const otherActions = ItemToCardResolver.resolveOtherActions(items, app, buttons);
+        const otherActions = ItemToCardResolver.resolveOtherActions(items, app, buttons, selectedView);
 
         // Iterate over items[]
         for (let i: number = 0; i < items.length; i++) {
@@ -173,7 +173,7 @@ export class ItemToCardResolver {
     //         }
     //     }
     // }
-    public static resolveOtherActions(items: IRecord[], app: ModelDrivenApp, buttons: ICommandBarItemProps[]) {
+    public static resolveOtherActions(items: IRecord[], app: ModelDrivenApp, buttons: ICommandBarItemProps[], selectedView: string) {
         const entityName = items.find(item => item.entityName != null)?.entityName;
         const ribbons = [];
         const otherActions: OtherAction[] = [];
@@ -181,7 +181,7 @@ export class ItemToCardResolver {
         if (entityName) {
             const views = app.getEntity(entityName).views;
             if (views) {
-                const mobileView = Object.values(views).find(view => view.type === "mobile");
+                const mobileView = views[selectedView];// Object.values(views).find(view => view.type === "mobile");
 
                 if (mobileView && mobileView["ribbon"]) {
                     const ribbonEntries = Object.entries(mobileView["ribbon"]);
