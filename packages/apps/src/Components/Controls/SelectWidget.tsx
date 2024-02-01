@@ -1,117 +1,94 @@
-import React, { useState } from "react";
-import { Label, Dropdown, IDropdownOption } from "@fluentui/react";
-import { WidgetProps } from "@rjsf/utils";
+import {
+    ariaDescribedByIds,
+    enumOptionsIndexForValue,
+    enumOptionsValueForIndex,
+    FormContextType,
+    labelValue,
+    RJSFSchema,
+    StrictRJSFSchema,
+    WidgetProps,
+} from '@rjsf/utils';
+import { Dropdown, Field, Option } from '@fluentui/react-components';
+import { OptionOnSelectData } from '@fluentui/react-combobox';
 
+function getValue(data: OptionOnSelectData, multiple: boolean) {
+    if (multiple) {
+        return data.selectedOptions;
+    }
+    return data.selectedOptions[0];
+}
 
-// Keys of IDropdownProps from @fluentui/react
-const allowedProps = [
-    "placeHolder",
-    "options",
-    "onChange",
-    "onChanged",
-    "onRenderLabel",
-    "onRenderPlaceholder",
-    "onRenderPlaceHolder",
-    "onRenderTitle",
-    "onRenderCaretDown",
-    "dropdownWidth",
-    "responsiveMode",
-    "defaultSelectedKeys",
-    "selectedKeys",
-    "multiselectDelimiter",
-    "notifyOnReselect",
-    "isDisabled",
-    "keytipProps",
-    "theme",
-    "styles",
-
-    // ISelectableDroppableTextProps
-    "componentRef",
-    "label",
-    "ariaLabel",
-    "id",
-    "className",
-    "defaultSelectedKey",
-    "selectedKey",
-    "multiSelect",
-    "options",
-    "onRenderContainer",
-    "onRenderList",
-    "onRenderItem",
-    "onRenderOption",
-    "onDismiss",
-    "disabled",
-    "required",
-    "calloutProps",
-    "panelProps",
-    "errorMessage",
-    "placeholder",
-    "openOnKeyboardFocus"
-];
-
-const SelectWidget = ({
-    schema,
+/** The `SelectWidget` is a widget for rendering dropdowns.
+ *  It is typically used with string properties constrained with enum options.
+ *
+ * @param props - The `WidgetProps` for this component
+ */
+export function SelectWidget<T = any, S extends StrictRJSFSchema = RJSFSchema, F extends FormContextType = any>({
     id,
     options,
     label,
+    hideLabel,
+    value,
     required,
     disabled,
     readonly,
-    value,
-    multiple,
-    autofocus,
+    multiple = false,
+    autofocus = false,
+    rawErrors = [],
     onChange,
     onBlur,
     onFocus,
-}: WidgetProps) => {
-    const { enumOptions, enumDisabled } = options;
-     
-    const _onChange = (
-        _ev?: React.FormEvent<HTMLElement>,
-        item?: IDropdownOption
-    ) => {
-        if (!item) {
-            return;
-        }
-        if (multiple) {
-            const valueOrDefault = value || [];
-            if (item.selected) {
-                onChange([...valueOrDefault, item.key]);
-            } else {
-                onChange(valueOrDefault.filter((key: any) => key !== item.key));
-            }
-        } else {
-            onChange(item.key);
-        }
+}: WidgetProps<T, S, F>) {
+    const { enumOptions, enumDisabled, emptyValue: optEmptyVal } = options;
+
+    const selectedIndexes = enumOptionsIndexForValue<S>(value, enumOptions, multiple);
+    let selectedIndexesAsArray: string[] = [];
+
+    if (typeof selectedIndexes === 'string') {
+        selectedIndexesAsArray = [selectedIndexes];
+    } else if (Array.isArray(selectedIndexes)) {
+        selectedIndexesAsArray = selectedIndexes.map((index) => String(index));
+    }
+
+    const dropdownValue = selectedIndexesAsArray
+        .map((index) => (enumOptions ? enumOptions[Number(index)].label : undefined))
+        .join(', ');
+
+    const _onBlur = () => onBlur(id, selectedIndexes);
+    const _onFocus = () => onFocus(id, selectedIndexes);
+    const _onChange = (_: any, data: OptionOnSelectData) => {
+        const newValue = getValue(data, multiple);
+        return onChange(enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal));
     };
-    const _onBlur = (e: any) => onBlur(id, e.target.value);
 
-    const _onFocus = (e: any) => onFocus(id, e.target.value);
-
-    const newOptions = (enumOptions as { value: any, label: any }[]).map(option => ({
-        key: option.value,
-        text: option.label,
-        disabled: (enumDisabled as any[] || []).indexOf(option.value) !== -1
-    }));
-
-    //  const uiProps = options.props || {};
     return (
-        <>
-
-            <Dropdown  {...options}
-                label={label || schema.title}
-                multiSelect={multiple}
-                defaultSelectedKey={value}
-                required={required}
-                options={newOptions}
+        
+            <Dropdown
+                id={id}
+                name={id}
+                multiselect={multiple}
+                className='form-control'
+                value={dropdownValue}
                 disabled={disabled || readonly}
-                onChange={_onChange}
+                autoFocus={autofocus}
                 onBlur={_onBlur}
                 onFocus={_onFocus}
-
-            />
-        </>
+                onOptionSelect={_onChange}
+                selectedOptions={selectedIndexesAsArray}
+                aria-describedby={ariaDescribedByIds<T>(id)}
+            >
+                {Array.isArray(enumOptions) &&
+                    enumOptions.map(({ value, label }, i) => {
+                        const disabled = enumDisabled && enumDisabled.indexOf(value) !== -1;
+                        return (
+                            <Option key={i} value={String(i)} disabled={disabled}>
+                                {label}
+                            </Option>
+                        );
+                    })}
+            </Dropdown>
+        
     );
-};
+}
 
 export default SelectWidget;

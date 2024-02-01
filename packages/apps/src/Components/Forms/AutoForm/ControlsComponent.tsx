@@ -51,10 +51,10 @@ import { TextField } from '@fluentui/react';
 import DateWidget from "./Widgets/DateWidget";
 import validator from '@rjsf/validator-ajv8';
 
-declare module '@rjsf/utils' {
-    interface WidgetProps {
-    }
-}
+//declare module '@rjsf/utils' {
+//    interface WidgetProps {
+//    }
+//}
 
 declare module 'json-schema' {
     export interface JSONSchema7 {
@@ -101,6 +101,7 @@ import { TextareaWidget } from "./Widgets/TextareaWidget";
 import { EAVFWLabel } from "./Templates/EAVFWLabel";
 import { useEAVForm } from "@eavfw/forms";
 import ObjectFieldTemplate from "./Templates/ObjectFieldTemplate";
+
 export const WidgetRegister: FormProps["widgets"] = {
     SelectWidget: SelectWidget,
     CheckboxWidget: CheckboxWidget,
@@ -239,7 +240,12 @@ const ControlsComponent =
                         fields={{ ControlHostWidget: ControlHostWidget }}
                         widgets={WidgetRegister} 
                         uiSchema={uiSChema}
-                        templates={{ FieldTemplate: FieldTemplate, BaseInputTemplate: React9BaseInputTemplate, ObjectFieldTemplate: ObjectFieldTemplate }}                     
+                        templates={{
+                          
+                            FieldTemplate: FieldTemplate,
+                            BaseInputTemplate: React9BaseInputTemplate,
+                            ObjectFieldTemplate: ObjectFieldTemplate
+                        }}                     
                         transformErrors={transformErrors}
                         showErrorList={false}
                         validator={validator}                
