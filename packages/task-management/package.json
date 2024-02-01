@@ -1,0 +1,27 @@
+{
+  "version": "1.0.0",
+  "name": "@eavfw/task-management",
+  "dependencies": {
+
+  },
+  "peerDependencies": {
+     
+  },
+  "devDependencies": {
+    
+  },
+  "license": "MIT",
+  "files": [
+    "src"
+  ],
+  "author": "Poul Kjeldager <poul@kjeldager.com>",
+  "type": "module",
+  "main": "./src/index.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
+  },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  }
+}
