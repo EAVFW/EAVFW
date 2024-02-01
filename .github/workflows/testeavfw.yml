@@ -3,13 +3,21 @@ name: Build and Test EAVFW
 on:
   workflow_call:
     inputs:
+      templateversion:
+        required: false
+        default: '2.1.6-dev.5'
+        type: string
+      react_type_version:
+        required: false
+        default: '17.0.75'
+        type: string
       dotnetversion:
         required: false
         default: '6.0.308'
         type: string
       nodeversion:
         required: false
-        default: '18'
+        default: '20'
         type: string
       
         
@@ -30,7 +38,7 @@ jobs:
           node-version: ${{ inputs.nodeversion }}
           
       - name: install EAVFW template
-        run: (dotnet new --debug:rebuildcache) -and (dotnet new --install EAVFW.Templates) -and (dotnet new --uninstall)
+        run: (dotnet new --debug:rebuildcache) -and (dotnet new --install EAVFW.Templates::${{ inputs.templateversion }}) -and (dotnet new --uninstall)
 
       - name: link
         run: npm install --force --ignore-scripts
@@ -42,7 +50,7 @@ jobs:
         run: mkdir ./../GithubEAVTestDirectory
 
       - name: create test project from template with no extensions
-        run: ( dotnet new --debug:rebuildcache) -and (dotnet new eavfw --namespace "GithubTestOrg" --appName "GithubTestApp" --databaseName "GithubTestDB" --skipGitCommit --allow-scripts yes --dotnetSDK ${{ inputs.dotnetversion }} --skipPortal)
+        run: ( dotnet new --debug:rebuildcache) -and (dotnet new eavfw --namespace "GithubTestOrg" --appName "GithubTestApp" --databaseName "GithubTestDB" --skipGitCommit --allow-scripts yes --dotnetSDK ${{ inputs.dotnetversion }} --reactTypesVersion ${{ inputs.react_type_version }} --skipPortal)
         working-directory: "./../GithubEAVTestDirectory"
 
       - name: create test web portal from template
