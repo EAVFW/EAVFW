@@ -35,7 +35,14 @@ import { useFormHost } from "../../Forms/ModelDrivenEntityViewer";
 import { useAsyncMemo } from "../../../../../hooks/src";
 import { isAttributeLookupEntry } from "../../ColumnFilter/ColumnFilterContext";
 
-
+import {
+    Combobox,
+    makeStyles,
+    Option,
+    shorthands,
+    useId,
+} from "@fluentui/react-components";
+import type { ComboboxProps } from "@fluentui/react-components";
 
 
 const DUMMY_DATA_KEY = "dummy";
@@ -233,6 +240,31 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
         setfreeformvalue(undefined)     //For not letting freeformvalue from searchfilter overwrite picked element
     }, [dummyData]);
 
+    const __onChange: ComboboxProps["onChange"] = (event) => {
+        const value = event.target.value.trim();
+
+        setIsFreeform(true);
+         
+       // ref.current?.focus(true);
+        setfreeformvalue(value);
+        setSearchFilter(`contains(${primaryField}, \'${value}\')`)
+    };
+
+    const onOptionSelect: ComboboxProps["onOptionSelect"] = (event, data) => {
+        const matchingOption = options.find(x => x.key === data.optionValue);
+        console.log("onOptionSelect", [data, matchingOption, options]);
+        onChange(props => {
+            if (matchingOption?.key === "dummy") {
+                delete props[logicalName];
+                props[logicalName.slice(0, -2)] = dummyData
+            } else {
+                props[logicalName] = matchingOption?.data; //The id of selected value, but if key is dummy we picked the placeholder data
+                delete props[logicalName.slice(0, -2)]; //Proper clean up by deleting the object part unless key is dummy placeholder
+            }
+        });
+        
+    };
+
     const resetValue = () => {
         //reset data
         onChange(props => {
@@ -287,6 +319,24 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             </Stack>
         </Modal>
 
+        <Combobox
+            aria-label={label}
+            disabled={disabled}
+            aria-disabled={disabled}
+            id={`${targetEntityName}_${logicalName}_combo`}
+            freeform
+            selectedOptions={selectedKey ? [selectedKey] : []}
+            value={options.find(x => x.key === selectedKey)?.text}
+            onChange={__onChange}
+            onOptionSelect={onOptionSelect}  
+        >
+            {options.map((option) => (
+                <Option key={option.key} value={option.key as string} text={option.text} >
+                    {option.text}
+                </Option>
+            ))}
+        </Combobox>
+        {/*
         <ComboBox
             id={`${targetEntityName}_${logicalName}_combo`} 
             componentRef={ref}
@@ -357,6 +407,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                 </div> : undefined}
             selectedKey={selectedKey}
         />
+        */}
     </>
     )
 }
