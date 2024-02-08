@@ -328,6 +328,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             selectedOptions={selectedKey ? [selectedKey] : []}
             value={options.find(x => x.key === selectedKey)?.text}
             onChange={__onChange}
+            onFocus={() => { if (!shouldLoadRemoteOptions) { setShouldLoadRemoteOptions(true) } } }
             onOptionSelect={onOptionSelect}  
         >
             {options.map((option) => (
