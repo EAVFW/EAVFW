@@ -153,7 +153,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
             return context.with(state.otelContext!, () => {
 
                 const spanContext = trace.getSpan(context.active())?.spanContext()!;
-                console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
+                console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext?.traceId}-${spanContext?.spanId}-0${spanContext?.traceFlags}`]);
 
                 const expressionResults = state.expressions;
                 console.log("useWizardExpressionsProvider movenext", expressionResults);

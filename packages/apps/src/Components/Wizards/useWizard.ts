@@ -28,29 +28,29 @@ export const useWizard = () => {
                 const wizard = state.wizard;
                 const tabName = state.tabName!;
                 const spanContext = trace.getActiveSpan()?.spanContext()!;
-                console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
+               // console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
 
-                setTimeout(async () => {
-                    {
-                        await new Promise<void>((resolve, reject) => { resolve() });
-                        const spanContext = trace.getActiveSpan()?.spanContext()!;
-                        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext?.traceId}-${spanContext?.spanId}-0${spanContext?.traceFlags}`]);
-                    }
-                }, 5000);
-                new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
-                    {
-                        const spanContext = trace.getActiveSpan()?.spanContext()!;
-                        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
-                    }
-                });
+                //setTimeout(async () => {
+                //    {
+                //        await new Promise<void>((resolve, reject) => { resolve() });
+                //        const spanContext = trace.getActiveSpan()?.spanContext()!;
+                //        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext?.traceId}-${spanContext?.spanId}-0${spanContext?.traceFlags}`]);
+                //    }
+                //}, 5000);
+                //new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
+                //    {
+                //        const spanContext = trace.getActiveSpan()?.spanContext()!;
+                //        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
+                //    }
+                //});
 
                 let transition = wizard?.tabs[tabName].onTransitionOut;
                 if (transition) {
 
-                    {
-                        const spanContext = trace.getActiveSpan()?.spanContext()!;
-                        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
-                    }
+                    //{
+                    //    const spanContext = trace.getActiveSpan()?.spanContext()!;
+                    //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
+                    //}
 
                     dispatch({ action: "setTransition", transition: true });
 
@@ -62,10 +62,10 @@ export const useWizard = () => {
                         //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
                         //}
                     });
-                    {
-                        const spanContext = trace.getActiveSpan()?.spanContext()!;
-                        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
-                    }
+                    //{
+                    //    const spanContext = trace.getActiveSpan()?.spanContext()!;
+                    //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
+                    //}
 
                     let id = await rsp.json().then(x => x.id);
 
@@ -82,20 +82,20 @@ export const useWizard = () => {
                         let status = await statusRsp.json();
                         completed = status.completed;
 
-                        {
-                            const spanContext = trace.getActiveSpan()?.spanContext()!;
-                            console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
-                        }
+                        //{
+                        //    const spanContext = trace.getActiveSpan()?.spanContext()!;
+                        //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
+                        //}
 
                         await new Promise((resolve) => setTimeout(resolve, 1000));
 
 
                     }
 
-                    {
-                        const spanContext = trace.getActiveSpan()?.spanContext()!;
-                        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
-                    }
+                    //{
+                    //    const spanContext = trace.getActiveSpan()?.spanContext()!;
+                    //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
+                    //}
 
                     let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transition.workflow}/runs/${id}`, {
                         //headers: {
