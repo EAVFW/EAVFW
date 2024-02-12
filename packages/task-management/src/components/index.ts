@@ -1,1 +1,3 @@
-export * from "./kanban";
+import "./kanban";
+
+import "./kanban-board/KanbanBoard";

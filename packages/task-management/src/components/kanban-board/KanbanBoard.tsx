@@ -1,5 +1,5 @@
 
-import { RegistereControl, useAppInfo, useModelDrivenApp } from "@eavfw/apps";
+import { RegisterControl, useAppInfo, useModelDrivenApp } from "@eavfw/apps";
 import { queryEntitySWR, useJsonFetcher } from "@eavfw/manifest";
 import { Caption1, makeStyles, shorthands, Subtitle1, tokens, Text, mergeClasses } from "@fluentui/react-components";
 import { Card, CardHeader, CardProps } from "@fluentui/react-components";
@@ -256,4 +256,4 @@ export const KanbanBoard: React.FC = () => {
         </div>)
 }
 
-RegistereControl("KanbanBoard", KanbanBoard);
+RegisterControl("KanbanBoard", KanbanBoard);
