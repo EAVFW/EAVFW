@@ -323,6 +323,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             aria-label={label}
             disabled={disabled}
             aria-disabled={disabled}
+            autoComplete="off"
             id={`${targetEntityName}_${logicalName}_combo`}
             freeform
             selectedOptions={selectedKey ? [selectedKey] : []}
