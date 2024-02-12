@@ -256,4 +256,4 @@ export const KanbanBoard: React.FC = () => {
         </div>)
 }
 
-RegistereControl("KanbanBoardV1", KanbanBoard);
+RegistereControl("KanbanBoard", KanbanBoard);
