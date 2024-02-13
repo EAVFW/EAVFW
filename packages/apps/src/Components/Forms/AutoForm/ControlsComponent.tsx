@@ -95,7 +95,7 @@ function createVisitedObject(id: string) {
 }
 
 
-import DateTimeWidget from "./Widgets/DateTimeWidget";
+//import DateTimeWidget from "./Widgets/DateTimeWidget";
 import { React8BaseInputTemplate, React9BaseInputTemplate } from "./Widgets/BaseInputTemplate";
 import { TextareaWidget } from "./Widgets/TextareaWidget";
 import { EAVFWLabel } from "./Templates/EAVFWLabel";
@@ -105,7 +105,7 @@ import ObjectFieldTemplate from "./Templates/ObjectFieldTemplate";
 export const WidgetRegister: FormProps["widgets"] = {
     SelectWidget: SelectWidget,
     CheckboxWidget: CheckboxWidget,
-    DateTimeWidget,
+   // DateTimeWidget,
     DateWidget,
     TextareaWidget
 }
