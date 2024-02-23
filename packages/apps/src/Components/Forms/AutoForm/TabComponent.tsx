@@ -9,10 +9,11 @@ import { OptionsFactory } from "./OptionsFactory";
 import { FormValidation } from "@rjsf/utils";
 import { Controls, ResolveFeature } from "../../..";
 import { makeStyles, shorthands, Spinner } from "@fluentui/react-components";
+import { useSectionStyles } from "../../../Styles/SectionStyles.styles";
 
 
 
-type TabComponentProps<T> = {
+type TabComponentProps<T extends { id?: string, [key: string]: any }> = {
     form: FormDefinition;
     columns?: FormTabDefinitionWithColumns["columns"];
     tabName: string;
@@ -32,7 +33,7 @@ const TabComponent = <T extends { id?: string, [key: string]: any }>(props: TabC
     const { form, columns, tabName, entity, formName, formData, onFormDataChange, locale, factory, entityName, formContext, extraErrors } = props;
     try {
         console.group("Tabcomponent: Tab: " + tabName);
-
+        const styles = useSectionStyles();
         const renderId = useRef(new Date().toISOString());
         renderId.current = new Date().toISOString();
         useChangeDetector(`Tabcomponent: Tab: ${tabName} form`, form, renderId);

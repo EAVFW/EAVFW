@@ -24,7 +24,8 @@ import { MobileList } from "./Components/Mobile/MobileList";
 
 
 
-
+import { useRouter } from "next/router";
+import { useSectionStyles } from "../../Styles/SectionStyles.styles";
 
 
 
@@ -42,6 +43,7 @@ export function ModelDrivenBodyViewer
 
     const user = useUserProfile();
     const { } = useRibbon();
+    const router = useRouter();
 
     const views = Object.fromEntries(Object.entries(
         entity.views ?? {}
@@ -55,6 +57,7 @@ export function ModelDrivenBodyViewer
     const app = useModelDrivenApp();
     const isMobile = useIsMobileDevice();
     const view = useMemo(() => entity.views?.[selectedView] ?? {}, [selectedView]);
+    const styles = useSectionStyles();
 
     const BodyViewElement = useMemo(() => {
 
@@ -96,14 +99,15 @@ export function ModelDrivenBodyViewer
     }, [entityName, selectedView, isMobile, view]);
 
     const _onChangeView = (event: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => {
-        setselectedView(option?.key as string);
+        //setselectedView(option?.key as string);
+        router.push(`/apps/${router.query.appname}/areas/${router.query.area}/entities/${router.query.entityName}/views/${option?.key}/`);
     }
    
     const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [ selectedView]);
     console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
         <PagingProvider initialPageSize={typeof (view?.paging) === "object" ? view.paging.pageSize ?? undefined : undefined} enabled={!(view?.paging === false || (typeof (view?.paging) === "object" && view?.paging?.enabled === false))} >
-        <Stack verticalFill>
+            <Stack verticalFill className={styles.section}>
             {showViewSelector && hasMoreViews &&
                 <ViewSelectorComponent
                     onChangeView={_onChangeView}

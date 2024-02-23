@@ -1,7 +1,7 @@
 
 import { EntityDefinition, ViewDefinition } from "@eavfw/manifest";
 import {
-    Dropdown,
+ //   Dropdown,
     IDropdownOption,
     IDropdownStyleProps,
     IDropdownStyles,
@@ -11,6 +11,7 @@ import {
 import React from "react";
 import { filterRoles } from "../../filterRoles";
 import { useUserProfile } from "../Profile/useUserProfile";
+import { Dropdown, Option, Select } from "@fluentui/react-components";
 
 
 
@@ -36,6 +37,7 @@ export type ViewSelectorComponentProps = {
 const ViewSelectorComponent: React.VFC<ViewSelectorComponentProps> = (
     props
 ) => {
+   
     console.group("ViewSelectorComponent");
     console.log("props:\n", props);
     const {
@@ -51,39 +53,19 @@ const ViewSelectorComponent: React.VFC<ViewSelectorComponentProps> = (
     const views: IDropdownOption[] = Object.entries(
         entity.views ?? {}
     ).filter(([viewKey, view]) => filterRoles(view?.roles, user)).map(([viewKey, view]) => ({ key: viewKey, text: view.title ?? viewKey, data: view }));
-    console.log("views:\n", views);
-
-    const _styles: IStyleFunction<IDropdownStyleProps, IDropdownStyles> = (
-        props
-    ) => ({
-        title: {
-            border: 0,
-            selectors: {
-                ":hover": {
-                    backgroundColor: props.theme?.palette.neutralTertiaryAlt,
-                },
-            },
-        },
-        root: { root: { padding: 20 } },
-        dropdown: { width: 240 },
-        ...styles,
-    });
-
-    console.log(
-        "styles with <neutralTertiaryAlt> set to <#c2bebc>:\n",
-        // @ts-ignore
-        _styles({ theme: { palette: { neutralTertiaryAlt: "#c2bebc" } } })
-    );
-
+     
     console.groupEnd();
     return (
-        <Dropdown
-            ariaLabel={ariaLabel}
-            styles={_styles}
-            onChange={onChangeView}
-            options={views}
-            selectedKey={selectedView}
-        />
+        <Dropdown style={{ margin: "5px 5px 5px 25px", width: 240 }}
+            aria-label={ariaLabel}
+
+            onOptionSelect={(e, v) => { onChangeView(e as any, views.find(x => x.key === v.optionValue)); }}
+            value={views.find(x => selectedView === x.key)?.text}
+            selectedOptions={[selectedView]}
+             
+        >
+            {views.map(v => (<Option key={v.key} value={v.key?.toString()} text={v.text}>{v.text}</Option>))}
+        </Dropdown>
     );
 };
 export default ViewSelectorComponent;

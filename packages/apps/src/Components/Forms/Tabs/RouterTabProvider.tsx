@@ -1,19 +1,19 @@
-import { PivotItem } from '@fluentui/react';
+
 import { useRouter } from 'next/router';
-import { useEffect } from 'react';
+import { PropsWithChildren, useEffect } from 'react';
 import { useState } from 'react';
 import { TabContext } from './TabContext';
 
-export const RouterTabProvider: React.FC = ({ children }) => {
+export const RouterTabProvider: React.FC<PropsWithChildren<{ defaultTabs?: string[] }>> = ({ defaultTabs=[], children }) => {
 
     const router = useRouter();
-
+    const [tabs, setTabs] = useState(defaultTabs);
     const [tabName, setSelectedTab] = useState<string>(router.query.tabName as string);
-    const onTabChange = (e?: PivotItem, ee?: any) => {
+    const onTabChange = (tabName:string) => {
 
-        router!.query.tabName = e?.props.itemKey;
+        router!.query.tabName = tabName;
         router!.replace(router!, undefined, { shallow: true });
-        setSelectedTab(e?.props.itemKey!);
+        setSelectedTab(tabName);
     }
 
     useEffect(() => {
@@ -21,5 +21,5 @@ export const RouterTabProvider: React.FC = ({ children }) => {
             setSelectedTab(router.query.tabName as string)
     }, [tabName, router.query.tabName]);
 
-    return <TabContext.Provider value={{ tabName, onTabChange }}> {children} </TabContext.Provider>
+    return <TabContext.Provider value={{ tabName, onTabChange, tabs,setTabs }}> {children} </TabContext.Provider>
 }

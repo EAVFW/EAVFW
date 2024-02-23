@@ -23,7 +23,7 @@ import {
 import Link from "next/link";
 import React, { useEffect, useState } from 'react';
 import styles from "./ModelDrivenNavigation.module.scss";
-import { NextRouter, useRouter, } from 'next/router' 
+import { NextRouter, useRouter, } from 'next/router'
 import { ModelDrivenSitemap } from "../../ModelDrivenSitemap";
 import { ModelDrivenSitemapEntity } from "../../ModelDrivenSitemapEntity";
 import { useUserProfile } from "../Profile/useUserProfile";
@@ -31,6 +31,7 @@ import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { ResolveFeature } from "../../FeatureFlags";
 import { isMobileDevice, useIsMobileDevice } from "@eavfw/utils";
+import { FluentProvider } from "@fluentui/react-components";
 
 
 interface WithRouterProps {
@@ -176,121 +177,123 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
         return <div>loading</div>
 
     return (
-        <ThemeProvider id="themeNav" theme={props.theme ?? ResolveFeature("defaultTheme")}>
-            <ThemeContext.Consumer>
-                {(theme: Theme | undefined) =>
-                    <Stack verticalFill as="nav" className={`${!minimized ? styles.ModelDrivenNavigationSmall : styles.ModelDrivenNavigation}`}>
-                        <StackItem grow className={`${styles.ModelDrivenItemColumn}`}>
-                            {app.getConfig("SVG_LOGO_PATH") ? <img style={{ overflow: "visible" }} src={app.getConfig("SVG_LOGO_PATH")} /> :
-                                <img style={{ padding: 8, boxSizing: "border-box" }}
-                                    src="/logo.png"
-                                    alt="Logo"
-                                />
-                            }
-                            {selectedArea && <Stack as="ul" className={`${styles.ModelDrivenItemList}`}>
+        <FluentProvider id="themeNavV2" theme={ResolveFeature("defaultV2Theme", false)}>
+            <ThemeProvider style={{ height: "100%" }} id="themeNav" theme={props.theme ?? ResolveFeature("defaultTheme")}>
+                <ThemeContext.Consumer>
+                    {(theme: Theme | undefined) =>
+                        <Stack verticalFill as="nav" className={`${!minimized ? styles.ModelDrivenNavigationSmall : styles.ModelDrivenNavigation}`}>
+                            <StackItem grow className={`${styles.ModelDrivenItemColumn}`}>
+                                {app.getConfig("SVG_LOGO_PATH") ? <img style={{ overflow: "visible" }} src={app.getConfig("SVG_LOGO_PATH")} /> :
+                                    <img style={{ padding: 8, boxSizing: "border-box" }}
+                                        src="/logo.png"
+                                        alt="Logo"
+                                    />
+                                }
+                                {selectedArea && <Stack as="ul" className={`${styles.ModelDrivenItemList}`}>
 
-                                {Object.entries(sitemap.areas[selectedArea])
-                                    .map(([groupKey, groupEntry]) =>
-                                        minimized ? (
-                                            <Stack as="li" key={groupKey}>
-                                                <span className={`${styles.ModelDrivenGroupHeader}`}>{groupKey}</span>
-                                                <Stack as="ul">
-                                                    {Object.entries(groupEntry).filter(filterEntry(user))
-                                                        .sort(([akey, aentry], [bkey, bentry]) => aentry.order - bentry.order)
-                                                        .map(([key, entry]) => (
-                                                            <li className={styles.ModelDrivenGroupItem} key={key + entry.logicalName}>
+                                    {Object.entries(sitemap.areas[selectedArea])
+                                        .map(([groupKey, groupEntry]) =>
+                                            minimized ? (
+                                                <Stack as="li" key={groupKey}>
+                                                    <span className={`${styles.ModelDrivenGroupHeader}`}>{groupKey}</span>
+                                                    <Stack as="ul">
+                                                        {Object.entries(groupEntry).filter(filterEntry(user))
+                                                            .sort(([akey, aentry], [bkey, bentry]) => aentry.order - bentry.order)
+                                                            .map(([key, entry]) => (
+                                                                <li className={styles.ModelDrivenGroupItem} key={key + entry.logicalName}>
+                                                                    <Stack horizontal>
+                                                                        <div
+                                                                            className={`${ModelDrivenGroupItemMarker(theme)} ${entry.logicalName === router.query.entityName && router.query.view === entry.viewName ? 'active' : ''}`}></div>
+                                                                        <Icon iconName="AddInIcon" />
+                                                                        {entry.viewName ?
+                                                                            <Link legacyBehavior
+                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
+                                                                                <FluentLink
+                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>    {entry.title}</FluentLink>
+                                                                            </Link>
+                                                                            :
+                                                                            <Link legacyBehavior
+                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
+                                                                                <FluentLink
+                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>    {entry.title}</FluentLink>
+                                                                            </Link>
+                                                                        }
+                                                                    </Stack>
+                                                                </li>
+                                                            ))}
+                                                    </Stack>
+                                                </Stack>
+                                            )
+                                                :
+                                                <Stack as="li" key={groupKey}>
+                                                    <span className={`${styles.ModelDrivenGroupHeaderSmall}`}>
+                                                        <Persona
+                                                            imageInitials={groupKey.substring(0, 2).toUpperCase()}
+                                                            initialsColor={PersonaInitialsColor.warmGray}
+                                                            size={PersonaSize.size32}
+                                                        />
+                                                    </span>
+                                                    <Stack as="ul" style={{ justifyContent: "center" }}>
+                                                        {Object.entries(sitemap.areas[selectedArea][groupKey]).filter(filterEntry(user)).map(([key, entry]) => (
+                                                            <li className={styles.ModelDrivenGroupItemSmall} key={key + entry.logicalName}>
                                                                 <Stack horizontal>
                                                                     <div
                                                                         className={`${ModelDrivenGroupItemMarker(theme)} ${entry.logicalName === router.query.entityName && router.query.view === entry.viewName ? 'active' : ''}`}></div>
-                                                                    <Icon iconName="AddInIcon" />
                                                                     {entry.viewName ?
-                                                                        <Link legacyBehavior
-                                                                            href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
-                                                                            <FluentLink
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>    {entry.title}</FluentLink>
-                                                                        </Link>
+                                                                        <div>
+                                                                            <Link legacyBehavior
+                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
+                                                                                <FluentLink
+                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
+                                                                                    <Persona
+                                                                                        imageInitials={entry.title.substring(0, 2).toUpperCase()}
+                                                                                        initialsColor={PersonaInitialsColor.blue}
+                                                                                        size={PersonaSize.size32}
+                                                                                    />
+                                                                                </FluentLink>
+                                                                            </Link>
+                                                                        </div>
                                                                         :
-                                                                        <Link legacyBehavior
-                                                                            href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
-                                                                            <FluentLink
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>    {entry.title}</FluentLink>
-                                                                        </Link>
+                                                                        <div>
+                                                                            <Link legacyBehavior
+                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
+                                                                                <FluentLink
+                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
+
+                                                                                    <Persona
+                                                                                        imageInitials={entry.title.substring(0, 2).toUpperCase()}
+                                                                                        initialsColor={PersonaInitialsColor.blue}
+                                                                                        size={PersonaSize.size32}
+                                                                                    />
+                                                                                </FluentLink>
+                                                                            </Link>
+                                                                        </div>
                                                                     }
                                                                 </Stack>
+
                                                             </li>
                                                         ))}
+                                                    </Stack>
                                                 </Stack>
-                                            </Stack>
-                                        )
-                                            :
-                                            <Stack as="li" key={groupKey}>
-                                                <span className={`${styles.ModelDrivenGroupHeaderSmall}`}>
-                                                    <Persona
-                                                        imageInitials={groupKey.substring(0, 2).toUpperCase()}
-                                                        initialsColor={PersonaInitialsColor.warmGray}
-                                                        size={PersonaSize.size32}
-                                                    />
-                                                </span>
-                                                <Stack as="ul" style={{ justifyContent: "center" }}>
-                                                    {Object.entries(sitemap.areas[selectedArea][groupKey]).filter(filterEntry(user)).map(([key, entry]) => (
-                                                        <li className={styles.ModelDrivenGroupItemSmall} key={key + entry.logicalName}>
-                                                            <Stack horizontal>
-                                                                <div
-                                                                    className={`${ModelDrivenGroupItemMarker(theme)} ${entry.logicalName === router.query.entityName && router.query.view === entry.viewName ? 'active' : ''}`}></div>
-                                                                {entry.viewName ?
-                                                                    <div>
-                                                                        <Link legacyBehavior
-                                                                            href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
-                                                                            <FluentLink
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
-                                                                                <Persona
-                                                                                    imageInitials={entry.title.substring(0, 2).toUpperCase()}
-                                                                                    initialsColor={PersonaInitialsColor.blue}
-                                                                                    size={PersonaSize.size32}
-                                                                                />
-                                                                            </FluentLink>
-                                                                        </Link>
-                                                                    </div>
-                                                                    :
-                                                                    <div>
-                                                                        <Link legacyBehavior
-                                                                            href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
-                                                                            <FluentLink
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
-
-                                                                                <Persona
-                                                                                    imageInitials={entry.title.substring(0, 2).toUpperCase()}
-                                                                                    initialsColor={PersonaInitialsColor.blue}
-                                                                                    size={PersonaSize.size32}
-                                                                                />
-                                                                            </FluentLink>
-                                                                        </Link>
-                                                                    </div>
-                                                                }
-                                                            </Stack>
-
-                                                        </li>
-                                                    ))}
-                                                </Stack>
-                                            </Stack>
-                                    )}
-                            </Stack>
-                            }
-                        </StackItem>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            {minimized &&
-                                <Dropdown id="AreaSelector"
-                                    selectedKey={selectedArea} onChange={_areaChanged}
-                                    options={areas}
-                                    styles={dropdownStyles}
-                                />
-                            }
-                            <CommandButton styles={iconStyles} iconProps={minimized ? IconLeft : IconRight}
-                                onClick={() => setMinized(!minimized)} />
-                        </div>
-                    </Stack>
-                }
-            </ThemeContext.Consumer>
-        </ThemeProvider>
+                                        )}
+                                </Stack>
+                                }
+                            </StackItem>
+                            <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                {minimized &&
+                                    <Dropdown id="AreaSelector"
+                                        selectedKey={selectedArea} onChange={_areaChanged}
+                                        options={areas}
+                                        styles={dropdownStyles}
+                                    />
+                                }
+                                <CommandButton styles={iconStyles} iconProps={minimized ? IconLeft : IconRight}
+                                    onClick={() => setMinized(!minimized)} />
+                            </div>
+                        </Stack>
+                    }
+                </ThemeContext.Consumer>
+            </ThemeProvider>
+        </FluentProvider>
     )
 }

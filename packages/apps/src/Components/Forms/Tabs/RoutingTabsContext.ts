@@ -2,5 +2,7 @@ import { IPivotProps } from "@fluentui/react";
 
 export type RoutingTabsContext = {
     tabName: string;
-    onTabChange: IPivotProps["onLinkClick"]
+    tabs: string[];
+    setTabs: (tabs: string[]) => void;
+    onTabChange: (tabName: string) => void;
 }

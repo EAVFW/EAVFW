@@ -1,21 +1,18 @@
-import { IPivotProps, PivotItem } from '@fluentui/react';
-import { useState } from 'react';
+
+import { PropsWithChildren, useState } from 'react';
 import { TabContext } from './TabContext';
 
 
 
 
 
-export const StateTabProvider: React.FC = ({ children }) => {
+export const StateTabProvider: React.FC<PropsWithChildren<{ defaultTabs: string[] }>> = ({ defaultTabs, children }) => {
 
 
 
     const [tabName, setSelectedTab] = useState<string>("");
-    const onTabChange = (e?: PivotItem, ee?: any) => {
-
-        setSelectedTab(e?.props.itemKey!);
-    }
+    const [tabs, setTabs] = useState(defaultTabs);
 
 
-    return <TabContext.Provider value={ { tabName, onTabChange } }> { children } </TabContext.Provider>
+    return <TabContext.Provider value={{ tabName, onTabChange: setSelectedTab, tabs,setTabs }}> {children} </TabContext.Provider>
 }

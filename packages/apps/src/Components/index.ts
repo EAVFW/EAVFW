@@ -11,3 +11,4 @@ export * from "./MessageArea";
 export * from "./ProgressBar";
 export * from "./Dialogs";
 import './Views/Components/Mobile/MobileList';
+export * from "./Workflows/RunWorkflowDialog";

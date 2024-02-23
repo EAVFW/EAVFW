@@ -65,7 +65,7 @@ export function TopBar(props: TopBarProps) {
     const profile = useUserProfile();
     console.log(profile);
 
-    const defaultV2Theme: FluentUI9Theme = ResolveFeature("defaultV2Theme",false);
+    const defaultV2Theme: FluentUI9Theme = ResolveFeature("topBarV2Theme", false) ?? ResolveFeature("defaultV2Theme",false);
     const defaultTheme = ResolveFeature("defaultTheme");
 
     const [isModalOpen, { setTrue: showModal, setFalse: hideModal, toggle }] = useBoolean(false);

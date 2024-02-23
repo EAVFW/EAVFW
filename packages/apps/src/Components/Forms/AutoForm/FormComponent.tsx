@@ -10,8 +10,9 @@ import { useTabProvider } from "../Tabs/useTabProvider";
 import { OptionsFactory } from "./OptionsFactory";
 import { FormValidation } from "@rjsf/utils";
 import { ResolveFeature } from "../../../FeatureFlags";
+import { useSectionStyles } from "../../../Styles/SectionStyles.styles";
 
-type FormComponentProps<T> = {
+type FormComponentProps<T extends { id?: string, [key: string]: any }> = {
     form: FormDefinition;
     tabs: string[];
     getTabName: (tab: FormTabDefinition) => string;
@@ -50,7 +51,7 @@ const FormComponent = <T extends { id?: string, [key: string]: any }>(props: For
         const renderId = useRef(new Date().toISOString());
         renderId.current = new Date().toISOString();
         useChangeDetector("FormComponent: form", form, renderId);
-        useChangeDetector("FormComponent: tabs", tabs, renderId);
+        //useChangeDetector("FormComponent: tabs", tabs, renderId);
         useChangeDetector("FormComponent: getTabName", getTabName, renderId);
         useChangeDetector("FormComponent: entity", entity, renderId);
         useChangeDetector("FormComponent: formName", formName, renderId);
@@ -96,16 +97,35 @@ const FormComponent = <T extends { id?: string, [key: string]: any }>(props: For
         }
 
 
-        const { onTabChange, tabName } = useTabProvider();
+        const { onTabChange, tabName = Object.keys(form?.layout?.tabs ?? {})[0] } = useTabProvider();
 
+        const sectionStyles = useSectionStyles();
+        const tab = form.layout.tabs[tabName];
+        if (!tab)
+            return null;
 
-
+        return (
+            <TabComponent key={tabName}
+                entityName={entity.logicalName}
+                form={form}
+                formData={formData}
+                columns={tab.columns}
+                tabName={tabName}
+                entity={entity}
+                formName={formName}
+                locale={props.locale}
+                onFormDataChange={onFormDataChange}
+                factory={props.factory}
+                formContext={formContext}
+                extraErrors={extraErrors}
+            />
+        )
         const ui = (
-            <Pivot className="form-tabs" onLinkClick={onTabChange} selectedKey={tabName} style={{ height: "100%", display: "flex", flexDirection: "column" }} styles={styles}>
+            <Pivot className="form-tabs" onLinkClick={(item) => onTabChange(item?.props.itemKey!)} selectedKey={tabName} style={{ height: "100%", display: "flex", flexDirection: "column" }} styles={styles}>
                 {tabs.filter(tabName => form.layout.tabs[tabName]).map((tabName, idx) => {
                     const tab = form.layout.tabs[tabName];
                     return (
-                        <PivotItem className="form-tab" style={{ height: "100%" }}
+                        <PivotItem className={`form-tab`} style={{ height: "100 % " }}
                             headerText={getTabName(tab) ?? tabName}
                             key={tabName}
                             itemKey={tabName}

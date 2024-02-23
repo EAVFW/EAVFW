@@ -17,6 +17,10 @@ import FormComponent from "./AutoForm/FormComponent";
 import { useAppInfo } from "../../useAppInfo";
 import { useFormChangeHandlerProvider } from "./useFormChangeHandler";
 import { useRibbon } from "../../Components/Ribbon";
+import { useSectionStyles } from "../../Styles/SectionStyles.styles";
+import { Tab, TabList } from "@fluentui/react-components";
+import { useTabProvider } from "./Tabs";
+import { FormHeader } from "./FormHeader";
 
 
 
@@ -181,18 +185,9 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     console.log("ModelDrivenForm: ID", [compID]);
     const app = useModelDrivenApp();
 
-    const [selectedForm, setselectedForm] = useState(formName ?? Object.keys(entity.forms ?? {})[0]);
+   
 
-
-    //const firstRecordUpdate = useRef(true);
-    //useEffect(() => {
-    //    if (firstRecordUpdate.current) {
-    //        firstRecordUpdate.current = false;
-    //        return;
-    //    }
-    //    console.log("Record is updated");
-    //    console.log(record);
-    //}, [record]);
+   
 
     const [{ record }, { onChange }] = useEAVForm((state) => ({ record: state.formValues }), "ModelDrivenForm FormValues");
     useEffect(() => { console.log("ModelDrivenForm FormValues changed", record) }, [record]);
@@ -206,17 +201,11 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
         return tab.locale?.[locale]?.title ?? tab.title;
     }, [locale]);
 
-    const _onChangeForm = useCallback((
-        event: React.FormEvent<HTMLDivElement>,
-        option?: IDropdownOption,
-        index?: number
-    ) => {
-        setselectedForm(option?.key as string);
-    }, []);
+   
 
+    const tabs = useMemo(() => Object.keys(evaluatedForm?.layout.tabs ?? {}), [evaluatedForm]);
 
-
-    const [tabs, setTabs] = useState(Object.keys(evaluatedForm?.layout.tabs ?? {}));
+   
 
 
 
@@ -229,27 +218,15 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     console.log(descriptions);
 
 
-    const first = useRef(true);
-    useEffect(() => {
-        if (first.current) {
-            first.current = false;
-            return;
-        }
-        const newTabs = Object.keys(evaluatedForm?.layout.tabs ?? {});
-        if (newTabs.length !== tabs.length || tabs.some((value, index) => newTabs[index] !== value)) {
-            setTabs(newTabs);
-        }
-    }, [evaluatedForm]);
+ 
 
-    const forms = entity?.forms ?? {};
+  
 
-    const hasMoreForms = Object.keys(forms).filter(f => forms[f].type === "Main").length > 1;
+   
 
-    const primaryField = useMemo(() => Object.values(app.getAttributes(entityName)).find((a) => a.isPrimaryField)!, [entityName]);
-    const primaryFieldValue = useMemo(() => record[primaryField?.logicalName], [primaryField, entityName]);
-    console.log("EntityName", [record, entityName, primaryField, primaryFieldValue])
+   
 
-    if (!evaluatedForm || !tabs.length || isLoading) {
+    if (!evaluatedForm  || isLoading) {
 
         return <div style={wrapperStyle}>
             <ShimmerElementsGroup
@@ -278,36 +255,22 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
 
 
     return <Stack verticalFill className="model-drive-form">
-         
-            <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
-                <FormHostContext.Provider value={formHostContextValue}>
 
-                    {evaluatedForm?.type !== "QuickCreate" && <Stack.Item styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
-                        <h2>{primaryFieldValue}</h2>
-                        <Stack horizontal style={{ alignItems: "center" }}>
-                            <h3 style={{ height: "28px" }}>{entity.locale?.[locale]?.displayName ?? entity.displayName}</h3>
-                            {hasMoreForms && (
-                                <FormSelectorComponent
-                                    onChangeView={_onChangeForm}
-                                    selectedForm={selectedForm}
-                                    entity={entity}
-                                    styles={{ root: { padding: 0 } }}
-                                />
-                            )}
-                        </Stack>
-                    </Stack.Item>
-                    }
+        <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
+            <FormHostContext.Provider value={formHostContextValue}>
 
-                    <Stack.Item grow styles={{ root: { padding: 0 } }}>
-                        <FormComponent onFormDataChange={_onFormDataChange} {... { tabs, getTabName, entity, formName, locale, factory, extraErrors }}
-                            form={evaluatedForm}
-                            formData={record}
-                            formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: _onFormDataChange }}
+                <FormHeader form={evaluatedForm} record={record} entity={entity} entityName={entityName} locale={locale} formName={formName} getTabName={getTabName} tabs={tabs} />
 
-                        />
-                    </Stack.Item>
-                </FormHostContext.Provider>
-            </RibbonHost>
+                <Stack.Item grow styles={{ root: { padding: 0 } }}>
+                    <FormComponent onFormDataChange={_onFormDataChange} {... { tabs, getTabName, entity, formName, locale, factory, extraErrors }}
+                        form={evaluatedForm}
+                        formData={record}
+                        formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: _onFormDataChange }}
+
+                    />
+                </Stack.Item>
+            </FormHostContext.Provider>
+        </RibbonHost>
 
     </Stack>
 }
@@ -340,8 +303,8 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     const { record: record2, onChangeCallback, extraErrors: extraErrors2 } = useFormChangeHandlerProvider();
     const { record = record2, entityName, formName, entity, onChange = onChangeCallback, related, extraErrors = extraErrors2 } = props;
     const { events } = useRibbon();
-   
-   
+
+
 
     console.log("ModelDrivenEntityViewer:", [record, record?.name, entityName, formName]);
 
@@ -393,7 +356,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                         console.log(`Found ${attribute.logicalName} in formdata that changed from '${oldFormData[attribute.logicalName]}' to '${formdata[attribute.logicalName]}'`);
 
                         oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
-                        if (formdata[attribute.logicalName] === undefined) {                           
+                        if (formdata[attribute.logicalName] === undefined) {
 
                             /**
                              * 
@@ -407,7 +370,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                              *    addressid = undefined
                              * }
                              */
-                           
+
                             delete oldFormData[attribute.logicalName.slice(0, -2)];
                             oldFormData[attribute.logicalName] = null;
                         }
@@ -520,17 +483,17 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
             }
         }
 
-        
+
 
         console.log("FormData Changed", { changes: formdata, new: formdatamerger.current });
 
 
         onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
         setTimeout(() => {
-        if (ctx?.autoSave)
-        {
-            events.emit('onSave');
-        }});
+            if (ctx?.autoSave) {
+                events.emit('onSave');
+            }
+        });
     }, [onFormDataChange2]);
 
     /**

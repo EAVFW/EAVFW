@@ -3,6 +3,7 @@ import { CommandBar, ContextualMenu, DialogType, ICommandBarItemProps, ICommandB
 import React, { useEffect, useState } from "react";
 import { RibbonBarBackButton } from "./RibbonBarBackButton";
 import { useRibbon } from "./useRibbon";
+import { useSectionStyles } from "../../Styles/SectionStyles.styles";
 
 
 
@@ -25,9 +26,10 @@ const leftribbon: IStyleFunction<ICommandBarStyleProps, ICommandBarStyles> = (pr
     },
 });
 
-export const RibbonBar: React.FC<{ hideBack?: boolean }> = ({ hideBack }) => {
+export const RibbonBar: React.FC<{ hideBack?: boolean, className?: string }> = ({ hideBack, className }) => {
 
     const { buttons } = useRibbon();
+    const styles = useSectionStyles();
 
     console.log("RibbonBar", [buttons.map(c => c.key).join(",")]);
 
@@ -40,8 +42,8 @@ export const RibbonBar: React.FC<{ hideBack?: boolean }> = ({ hideBack }) => {
             clearTimeout(t);
         }
     }, [buttons]);
-     
-    return <Stack horizontal id="RibbonBar" styles={RibbonStyles} >
+
+    return <Stack horizontal id="RibbonBar" styles={RibbonStyles} className={className}  >
         {!hideBack && <RibbonBarBackButton />}
         <Stack.Item grow >
             <CommandBar id="RibbonBarCommands"

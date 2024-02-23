@@ -8,6 +8,7 @@ import { SectionComponent, WizardSection } from "./SectionComponent/SectionCompo
 import { FormValidation } from "@rjsf/utils";
 import { makeStyles, mergeClasses } from "@fluentui/react-components";
 import { useStackStyles, useVerticalFill } from "../../useStackStyles";
+import { useSectionStyles } from "../../../Styles/SectionStyles.styles";
 
 
 export type ColumnComponentProps<T> = {
@@ -44,7 +45,7 @@ const ColumnComponent = <T extends { id?: string, [key: string]: any }>(props: C
     } = props;
     try {
         console.group("ColumnComponent: Column: " + columnName);
-
+        const styles = useSectionStyles();
         const renderId = useRef(new Date().toISOString());
         renderId.current = new Date().toISOString();
         useChangeDetector(`ColumnComponent: Tab: ${tabName} Column: ${columnName} form`, form, renderId);
@@ -59,9 +60,9 @@ const ColumnComponent = <T extends { id?: string, [key: string]: any }>(props: C
         useChangeDetector(`ColumnComponent: Tab: ${tabName} Column: ${columnName} factory`, factory, renderId);
 
         const ui = (
-            <Stack verticalFill className="form-column">
+            <Stack verticalFill className={`form-column`}>
                 {Object.keys(sections).map((sectionName, idx) => (
-                    <Stack.Item  grow key={sectionName}>
+                    <Stack.Item grow key={sectionName} className={styles.section}>
                         <SectionComponent<T>
                             form={form}
                             tabName={tabName}

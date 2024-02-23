@@ -17,6 +17,7 @@ import ModelDrivenNavigation from "../Components/Navigation/ModelDrivenNavigatio
 import { RibbonBar } from "../Components/Ribbon/RibbonBar";
 import { WizardDrawer } from "../Components/Wizards/WizardDrawer";
 import { WizardProvider } from "../Components/Wizards/WizardProvider";
+import { useSectionStyles } from "../Styles/SectionStyles.styles";
 
 
 
@@ -76,8 +77,8 @@ export function FormLayout(props: PageLayoutProps) {
         const topBarTheme = ResolveFeature("topBarTheme");
 
       //  const [isOpen, setIsOpen] = useState(false);
-      
 
+        const styles = useSectionStyles();
 
         return (
             <ModelDrivenGridViewerSelectedContext.Provider value={{ setSelection, selection: selection!, selectionDetails }}>
@@ -97,9 +98,11 @@ export function FormLayout(props: PageLayoutProps) {
                                         
                                         <Stack.Item grow>
                                           
-                                            <Stack verticalFill>
-                                                <RibbonBar />
-                                                <MessageArea />
+                                                <Stack verticalFill>
+                                                    <RibbonBar className={styles.section} />
+                                                
+
+                                                    <MessageArea />
                                                 <Stack.Item grow style={{ position: "relative" }}>
 
                                                     <ScrollablePane scrollbarVisibility={ScrollbarVisibility.always} >
