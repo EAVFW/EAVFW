@@ -225,6 +225,9 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
                 type: 'setCurrentColumnFilter',
                 filter: data
             });
+            columnFilterDispatch({
+                type: 'closeFilter'
+            })
         }
     }
 
