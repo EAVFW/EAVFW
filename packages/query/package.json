@@ -1,0 +1,29 @@
+{
+  "name": "@eavfw/query",
+  "description": "Query API for EAV backend for RSC",
+  "version": "0.0.0",
+  "dependencies": {
+    
+  },
+  "peerDependencies": {
+    "next": "14.1.1"
+  },
+  "devDependencies": {
+  
+  },
+  "license": "MIT",
+  "files": [
+    "src"
+  ],
+  "author": "Poul Kjeldager <poul@kjeldager.com>",
+  "type": "module",
+  "main": "./src/index.ts",
+  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
+  "config": {
+    "force": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
+  }
+}
