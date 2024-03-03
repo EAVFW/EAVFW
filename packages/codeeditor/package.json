@@ -2,14 +2,15 @@
   "version": "1.0.0",
   "name": "@eavfw/codeeditor",
   "dependencies": {
-    "@monaco-editor/react": "4.4.6",
-    "monaco-editor": "0.36.1"
+    "@monaco-editor/react": "4.6.0",
+    "monaco-editor": "0.46.0"
   },
   "peerDependencies": {
-    "pako": "2.0.4"
+    "pako": "2.1.0",
+    "@types/pako": "2.0.3"
   },
   "devDependencies": {
-    "@types/pako": "2.0.0"
+   
   },
   "license": "MIT",
   "files": [
