@@ -3,7 +3,7 @@
   "description": "EAVFW Forms",
   "version": "0.0.38",
   "peerDependencies": {
-    "react": "18.2.0",
+    "react": "^18.2.0",
     "pako": "2.1.0",
     "@types/pako": "2.0.3"
   },
