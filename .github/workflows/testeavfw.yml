@@ -5,11 +5,15 @@ on:
     inputs:
       templateversion:
         required: false
-        default: '2.1.6-dev.5'
+        default: '2.1.8'
         type: string
       react_type_version:
         required: false
-        default: '17.0.75'
+        default: '18.2.0'
+        type: string
+      react_dom_type_version:
+        required: false
+        default: '18.2.0'
         type: string
       dotnetversion:
         required: false
@@ -50,7 +54,7 @@ jobs:
         run: mkdir ./../GithubEAVTestDirectory
 
       - name: create test project from template with no extensions
-        run: ( dotnet new --debug:rebuildcache) -and (dotnet new eavfw --namespace "GithubTestOrg" --appName "GithubTestApp" --databaseName "GithubTestDB" --skipGitCommit --allow-scripts yes --dotnetSDK ${{ inputs.dotnetversion }} --reactTypesVersion ${{ inputs.react_type_version }} --skipPortal)
+        run: ( dotnet new --debug:rebuildcache) -and (dotnet new eavfw --namespace "GithubTestOrg" --appName "GithubTestApp" --databaseName "GithubTestDB" --skipGitCommit --allow-scripts yes --dotnetSDK ${{ inputs.dotnetversion }} --reactTypesVersion ${{ inputs.react_type_version }} --reactDomTypesVersion ${{ inputs.react_dom_type_version }} --skipPortal)
         working-directory: "./../GithubEAVTestDirectory"
 
       - name: create test web portal from template
