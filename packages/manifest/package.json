@@ -1,9 +1,8 @@
 {
   "name": "@eavfw/manifest",
   "description": "Manifest Type Definitions",
-  "version": "0.0.38",
-  "dependencies": {
-  },
+  "version": "1.5.0-vnext.9",
+  "dependencies": {},
   "peerDependencies": {
     "swr": "^2.2.5",
     "react": "^18.2.0"
@@ -19,7 +18,9 @@
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
-  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  },
   "config": {
     "force": true
   }

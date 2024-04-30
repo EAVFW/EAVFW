@@ -2,10 +2,10 @@
 
 import { AppNavigationContextProps } from "@eavfw/apps";
 import { AppNavigationContext } from "./AppNavigationContext";
+import { PropsWithChildren } from "react";
 
-export const AppNavigationContextProvider: React.FC<{ navModel: AppNavigationContextProps }> = ({ children, navModel }) => {
+export const AppNavigationContextProvider: React.FC<PropsWithChildren<{ navModel: AppNavigationContextProps }>> = ({ children, navModel }) => {
 
-     
     return (
 
         <AppNavigationContext.Provider value={navModel}>
@@ -14,4 +14,3 @@ export const AppNavigationContextProvider: React.FC<{ navModel: AppNavigationCon
 
     )
 }
-

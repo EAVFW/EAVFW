@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/expressions",
   "description": "EAVFW expressions",
-  "version": "0.0.38",
+  "version": "1.1.1-vnext.1",
   "peerDependencies": {
     "react": "^18.2.0"
   },
@@ -15,7 +15,9 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts",
-  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  },
   "config": {
     "force": true
   }

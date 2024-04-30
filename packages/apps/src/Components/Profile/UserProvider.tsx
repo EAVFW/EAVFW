@@ -3,7 +3,7 @@ import { NotAuthorizedProfile, UserProfile } from "./UserProfile";
 import useSWR from "swr";
 import { getRecordSWR, jsonFetcher } from "@eavfw/manifest";
 import { UserContext } from "./UserContext";
-import { useEffect } from "react";
+import { PropsWithChildren, useEffect } from "react";
 
 const DefaultLoader = () => <div>loading...</div>;
 const notAuthorizedUser: NotAuthorizedProfile = { isAuthenticated: false };
@@ -11,7 +11,7 @@ function getProfile(entityKey?: string) {
 
     const app = useModelDrivenApp();
 
-    const { data, error } =  useSWR<UserProfile>(`${process.env.NEXT_PUBLIC_BASE_URL}.auth/me`,
+    const { data, error } = useSWR<UserProfile>(`${process.env.NEXT_PUBLIC_BASE_URL}.auth/me`,
         {
             revalidateOnFocus: false,
             revalidateOnMount: true,
@@ -34,13 +34,13 @@ function getProfile(entityKey?: string) {
 
 
     return {
-        record: data ? data : notAuthorizedUser ,
+        record: data ? data : notAuthorizedUser,
         isLoading: !error && !data && (entityKey && !userInfo),
         isError: error
     }
 }
 
-export const UserProvider: React.FC<{ authorize?: boolean, onLoaded?: (profile: UserProfile) => void, onRenderLoading?: React.FC, loadUserInfoEntityKey?: string }> = ({ onLoaded, loadUserInfoEntityKey, children, authorize, onRenderLoading: Loader = DefaultLoader }) => {
+export const UserProvider: React.FC<PropsWithChildren<{ authorize?: boolean, onLoaded?: (profile: UserProfile) => void, onRenderLoading?: React.FC, loadUserInfoEntityKey?: string }>> = ({ onLoaded, loadUserInfoEntityKey, children, authorize, onRenderLoading: Loader = DefaultLoader }) => {
 
     const { record, isLoading, isError } = getProfile(loadUserInfoEntityKey);
 

@@ -1,5 +1,5 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.1-vnext.3",
   "name": "@eavfw/codeeditor",
   "dependencies": {
     "@monaco-editor/react": "4.6.0",
@@ -9,9 +9,7 @@
     "pako": "2.1.0",
     "@types/pako": "2.0.3"
   },
-  "devDependencies": {
-   
-  },
+  "devDependencies": {},
   "license": "MIT",
   "files": [
     "src"

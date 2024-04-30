@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { PropsWithChildren, createContext, useCallback, useContext, useMemo, useState } from "react";
 
 
 export type IFetchQuery = {
@@ -10,23 +10,23 @@ export type IFetchQuery = {
     '$orderby'?: string;
     '$expand'?: string;
 };
-function notsupported(q: IFetchQuery) :void {
-      throw new Error("Fetch Query not enabled"); 
+function notsupported(q: IFetchQuery): void {
+    throw new Error("Fetch Query not enabled");
 }
 const PagingContext = createContext({
     enabled: false,
     setTotalRecords: (n: number) => { },
     fetchQuery: undefined as (IFetchQuery | undefined),
-    setFetchQuery: notsupported ,
+    setFetchQuery: notsupported,
     firstItemNumber: 0, lastItemNumber: undefined as number | undefined, totalRecords: undefined as number | undefined, currentPage: 0, pageSize: 0, moveNext: () => { }, movePrevious: () => { }, moveToFirst: () => { }
 });
 export type PagingProviderProps = {
     initialPageSize?: number,
     enabled?: boolean
 }
-export const PagingProvider: React.FC<PagingProviderProps> = ({ children, initialPageSize = 100, enabled = true }) => {
+export const PagingProvider: React.FC<PropsWithChildren<PagingProviderProps>> = ({ children, initialPageSize = 100, enabled = true }) => {
 
-  
+
     const [lastItemNumber, setLastItemNumber] = useState<number>();
     const [totalRecords, setTotalRecords] = useState<number>();
     const [currentPage, setCurrentPage] = useState<number>(0);
@@ -37,7 +37,7 @@ export const PagingProvider: React.FC<PagingProviderProps> = ({ children, initia
     const movePrevious = useCallback(() => { setCurrentPage(currentPage - 1); }, [currentPage]);
 
     const [fetchQuery, setFetchQuery] = useState<IFetchQuery>();
-    
+
 
 
     return (

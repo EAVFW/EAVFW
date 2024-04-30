@@ -34,6 +34,12 @@ const useFloatingItemsStyle = makeStyles({
         },
     },
 });
+
+interface CheckboxState {
+    selected: boolean;
+    checked: boolean;
+}
+
 export const MobileCard: React.FC<MobileCardProps> = (
     {
         item,
@@ -46,29 +52,32 @@ export const MobileCard: React.FC<MobileCardProps> = (
     const { selection } = useSelectionContext();
     const [selected1, setSelected1] = React.useState(false);
     const setCheckboxState = React.useCallback(
-        ({ selected, checked }, setFn) => { setFn(!!(selected || checked)); selection.setIndexSelected(item.index, !!(selected || checked), false); },
+        ({ selected, checked }: CheckboxState, setFn: (value: boolean) => void) => {
+            setFn(!!(selected || checked));
+            selection.setIndexSelected(item.index, !!(selected || checked), false);
+        },
         []
     );
     const onSelected1Change = React.useCallback(
-        (_, state) => setCheckboxState(state, setSelected1),
+        (_: any, state: any) => setCheckboxState(state, setSelected1),
         [setCheckboxState]
     );
-   
+
     return (
         <Card style={{ marginBottom: '10px' }} className={className} floatingAction={
             <div className={style.root}>
                 {item.headerAction}
                 <Checkbox onChange={onSelected1Change} checked={selected1} />
             </div>
-        } selected={selected1}            onSelectionChange={onSelected1Change}>
+        } selected={selected1} onSelectionChange={onSelected1Change}>
             <CardHeader
                 style={{ padding: '0 5px' }}
                 // image={<ShipIcon size={24} fill="currentColor" />}
                 image={item.cardIcon}
                 header={<Title3><b>{ExtensionMethods.capitalizeFirstLetter(item?.title ?? 'N/A')}</b></Title3>}
                 description={<Subtitle2> {item?.subTitle ?? 'N/A'}</Subtitle2>}
-                // action={<LedIcon color={getStatusColor(item.otherAttributes.Status)} />}
-               // action={item.headerAction}
+            // action={<LedIcon color={getStatusColor(item.otherAttributes.Status)} />}
+            // action={item.headerAction}
             />
 
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '0 5px' }}>

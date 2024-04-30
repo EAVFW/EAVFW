@@ -1,6 +1,6 @@
 import { EntityDefinition, FormDefinition, LookupType } from "@eavfw/manifest";
 import { DefaultButton, MessageBar, MessageBarType, PrimaryButton, Stack, Sticky, StickyPositionType } from "@fluentui/react";
-import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { capitalize } from "@eavfw/utils";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { FormRenderProps } from "./FormRenderProps";
@@ -19,7 +19,7 @@ export function FormRender<T>(props: FormRenderProps) {
     const entityName = props.entityName ?? (props.type as LookupType).foreignKey?.principalTable!;
     const entity = app.getEntity(entityName);
     const forms = entity.forms!;
-  
+
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
     const saveBtnText = forms?.[formName]?.buttons?.save?.text      //gets text for naming of save btn in modal if it is defined
     const cancelBtnText = forms?.[formName]?.buttons?.cancel?.text  //gets text for naming of cancel btn in modal if it is defined
@@ -28,16 +28,15 @@ export function FormRender<T>(props: FormRenderProps) {
     const [record, setRecord] = useState(props.record ?? {});
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
     const [preSaveValidators, setPreSaveValidators] = useState<PreSaveValidator[]>([]);
-    const {addMessage, removeMessage} = useMessageContext();
+    const { addMessage, removeMessage } = useMessageContext();
     const [errorMsg, setErrorMsg] = useState<string | undefined>(undefined);
-    
+
     const _onSave = () => {
-        
+
         console.log("Closing Modal", record);
         var results = preSaveValidators.map((c) => c(record, entity))
-        if (results.every(r => r.success === true))
-        {
-            onChange(record, {autoSave: preSaveValidators.length > 0});
+        if (results.every(r => r.success === true)) {
+            onChange(record, { autoSave: preSaveValidators.length > 0 });
             setErrorMsg(undefined);
             dismissPanel.call(undefined, "save");
         }
@@ -58,11 +57,11 @@ export function FormRender<T>(props: FormRenderProps) {
             Object.getOwnPropertyNames(form.scripts.preSave).forEach(name => {
                 const preSave = ResolveFeature(form.scripts!.preSave![name]) as PreSaveValidator;
                 if (preSave) {
-                    setPreSaveValidators([...preSaveValidators,preSave]);
+                    setPreSaveValidators([...preSaveValidators, preSave]);
                 }
             })
         }
-    },[]);
+    }, []);
 
     useEffect(() => {
         console.log("FormRender, Record Updated:", props.record)
@@ -71,7 +70,7 @@ export function FormRender<T>(props: FormRenderProps) {
             setRecord(props.record);
     }, [props.record]);
 
-    const StickyFooter = React.useCallback(({ children }) => (props.stickyFooter ?? true) ? <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky> : <>{children}</>, [props.stickyFooter]);
+    const StickyFooter: React.FC<PropsWithChildren> = React.useCallback(({ children }) => (props.stickyFooter ?? true) ? <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky> : <>{children}</>, [props.stickyFooter]);
 
     const RenderFooterContent = React.useCallback(
         () => (
@@ -89,7 +88,7 @@ export function FormRender<T>(props: FormRenderProps) {
         [dismissPanel, record],
     );
 
-    const _onChange = useCallback(data => {
+    const _onChange = useCallback((data: any) => {
         console.log("FormRender, Data changed Modal", data);
         // record.current = data;
         setRecord(data);

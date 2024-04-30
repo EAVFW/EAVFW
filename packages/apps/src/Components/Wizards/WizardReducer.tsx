@@ -1,5 +1,5 @@
 
-import { createContext, useEffect, useReducer } from "react";
+import { PropsWithChildren, createContext, useEffect, useReducer } from "react";
 import { ResolveFeature } from "./../../FeatureFlags";
 import { IWizardAction } from "./IWizardAction";
 import { IWizardState } from "./IWizardState";
@@ -44,7 +44,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                     state.spanResolve = resolve;
                     state.spanReject = reject;
                 });
- 
+
                 const parentContext = context.active();
                 const span = tracer.startSpan('eavfw-wizard-start', undefined, parentContext);
                 const contextWithSpanSet = trace.setSpan(parentContext, span);
@@ -73,7 +73,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 //}
                 //monitorMe();
 
-               // console.log('WizardReducer', [JSON.stringify(rootSpan.spanContext()), trace.getSpan(context.active())?.spanContext()])
+                // console.log('WizardReducer', [JSON.stringify(rootSpan.spanContext()), trace.getSpan(context.active())?.spanContext()])
 
                 // const activeContext = context.active();
 
@@ -98,7 +98,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 //);
 
                 // Set the created span as active in the deserialized context.
-               // trace.setSpan(activeContext, rootSpan);
+                // trace.setSpan(activeContext, rootSpan);
 
                 // Use the tracer to create a new span  
                 // const span = tracer.startSpan('eavfw-wizard-start', {}, context.active());
@@ -167,19 +167,19 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 let nextTab = keys[keys.indexOf(selectedTab) + 1];
 
 
-               
+
 
 
                 if (nextTab) {
                     let transitionIn = wizard.tabs[nextTab].onTransitionIn;
 
-                   
+
 
                     return {
                         ...state,
                         ...getTransitionProps(transitionIn, action.trigger, state),
                         tabName: nextTab,
-                        
+
 
                     }
                 } else {
@@ -189,14 +189,14 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 }
 
 
-                 
+
             });
 
 
     }
 }
 
-export const WizardReducer: React.FC = ({ children }) => {
+export const WizardReducer: React.FC<PropsWithChildren> = ({ children }) => {
 
     const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
 
@@ -222,12 +222,12 @@ function getTransitionProps(transitionIn: { message: IWizardMessage; workflow: s
     };
 }
 
-function getTransitionWorker(transitionIn: { message: IWizardMessage; workflow: string; } | undefined, trigger:string, state: IWizardState) {
+function getTransitionWorker(transitionIn: { message: IWizardMessage; workflow: string; } | undefined, trigger: string, state: IWizardState) {
     return transitionIn ? new Promise(async (resolve, reject) => {
         if (transitionIn) {
 
-            let { result,rsp} = await runWorkflow(transitionIn.workflow, trigger, state.values);
-            
+            let { result, rsp } = await runWorkflow(transitionIn.workflow, trigger, state.values);
+
             console.log("jobstate", result);
 
 
@@ -245,5 +245,5 @@ function getTransitionWorker(transitionIn: { message: IWizardMessage; workflow: 
 
 function getTransitionMessages(transitionIn: { message: IWizardMessage; workflow: string; } | undefined) {
     return transitionIn?.message ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next", ...(transitionIn.message as Partial<IWizardMessage>) } } :
-        transitionIn ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next" } } : { };
+        transitionIn ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next" } } : {};
 }

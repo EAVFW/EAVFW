@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/hooks",
   "description": "EAVFW React Hooks",
-  "version": "0.0.38",
+  "version": "1.0.5-vnext.1",
   "peerDependencies": {
     "react": "^18.2.0"
   },
@@ -16,7 +16,9 @@
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
-  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  },
   "config": {
     "force": true
   }

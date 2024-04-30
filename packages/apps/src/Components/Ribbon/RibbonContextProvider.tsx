@@ -2,7 +2,7 @@
 import { ContextualMenu, DefaultButton, Dialog, DialogFooter, DialogType, ICommandBarItemProps, PrimaryButton } from "@fluentui/react";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { useRouter } from "next/router";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { RibbonState } from "./RibbonState";
 import { useRibbon } from "./useRibbon";
 import mitt, { MittEmitter } from "next/dist/shared/lib/mitt";
@@ -32,7 +32,7 @@ function uuidv4() {
     );
 }
 
-export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }> = ({ children, defaultRibbons = {} }) => {
+export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?: RibbonViewInfo }>> = ({ children, defaultRibbons = {} }) => {
 
     const app = useModelDrivenApp();
     const router = useRouter();
@@ -65,12 +65,12 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
     const updateRibbonState = useCallback((state: Partial<RibbonState>) => {
         stateRef.current = { ...stateRef.current, ...state };
         console.log("updateRibbonState", stateRef.current);
-            try {
-                throw new Error("updateRibbonState");
-            } catch (err) {
-                console.log("updateRibbonState",err);
-            }
-            setRibbonState2(stateRef.current)
+        try {
+            throw new Error("updateRibbonState");
+        } catch (err) {
+            console.log("updateRibbonState", err);
+        }
+        setRibbonState2(stateRef.current)
     }, []);
 
 
@@ -139,7 +139,7 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
         //                setOldUrl(new URL(window.location.href));
 
         //  router.
-        
+
         const warningText =
             'Du har data der ikke er gemt, er du sikker på du vil forlade siden?';
         const handleWindowClose = (e: BeforeUnloadEvent) => {
@@ -227,129 +227,129 @@ export const RibbonContextProvider: React.FC<{ defaultRibbons?: RibbonViewInfo }
 
                         }
 
-                        
+
                         ribbonEvents.on("saveComplete", onComplete);
                         ribbonEvents.emit("onSave", e);
                     }
                 } text="Gem og forsæt" />
                 <DefaultButton onClick={() => { confirmedRef.current = true; updateRibbonState({ canSave: false }); toggleHideDialog(); router.push(pastUrl!); setPastUrl(undefined); }} text="Forlad side" />
             </DialogFooter>
-            </Dialog>
-            <RibbonContext.Provider value={({
-                ...ribbonState,
-                defaultRibbons,
-                buttons: ribbonButtons,
-                saveCompleted: (data: any) => {
-                    ribbonEvents.emit("saveComplete", data);
-                },
-                updateState: updateRibbonState,
-                addButton: _addButton,
-                //        (command) => updateRibbonState({
-                //    buttons: ribbonState.buttons.filter(k => k.key !== command.key
-                //    ).concat([command])
-                //}),
-                removeButton: _removeButton,
-                //    (key) => {
-                //    console.log("removing " + key, {
-                //        before: ribbonState.buttons,
-                //        after: ribbonState.buttons.filter(b => b.key !== key)
-                //    });
-                //    updateRibbonState({ buttons: ribbonState.buttons.filter(b => b.key !== key) });
-                //},
-                events: ribbonEvents,
-                registerButton: (button, deps) => {
-
-                   
-                   
-
-                    if (button.workflow) {
-                        const [_, { onChange: onFormDataChange }] = useEAVForm(() => ({}));
-                        console.log(button.key, onFormDataChange);
-                        button.onClick  = useCallback((ev?: any) => {
-
-                            const runner = (async () => {
-                                const actions = button.workflow.actions;
-                                console.log("Execute Workflow", button.workflow);
-                                const starter = Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "undefined" || Object.values(entry.runAfter).length === 0);
-
-                                const queue = starter.slice(0, 1);
-
-                                function handleQueue() {
-
-                                    while (queue.length) {
-                                        const [action, entry] = queue.pop() ?? [];
-                                        console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
-                                        const type = entry.type;
-                                        switch (type) {
-                                            case "UpdateRecord":
-
-                                                onFormDataChange((props, ctx) => {
-                                                    ctx.skipValidation = true;
-
-                                                    ctx.onCommit = () => {
-                                                        console.log("Update Record Completed");
-
-                                                        queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
-                                                        handleQueue();
-                                                    };
-                                                    Object.assign(props, entry.inputs.data)
-                                                }); //TODO wait until change is applied
+        </Dialog>
+        <RibbonContext.Provider value={({
+            ...ribbonState,
+            defaultRibbons,
+            buttons: ribbonButtons,
+            saveCompleted: (data: any) => {
+                ribbonEvents.emit("saveComplete", data);
+            },
+            updateState: updateRibbonState,
+            addButton: _addButton,
+            //        (command) => updateRibbonState({
+            //    buttons: ribbonState.buttons.filter(k => k.key !== command.key
+            //    ).concat([command])
+            //}),
+            removeButton: _removeButton,
+            //    (key) => {
+            //    console.log("removing " + key, {
+            //        before: ribbonState.buttons,
+            //        after: ribbonState.buttons.filter(b => b.key !== key)
+            //    });
+            //    updateRibbonState({ buttons: ribbonState.buttons.filter(b => b.key !== key) });
+            //},
+            events: ribbonEvents,
+            registerButton: (button, deps) => {
 
 
 
 
-                                                break;
+                if (button.workflow) {
+                    const [_, { onChange: onFormDataChange }] = useEAVForm(() => ({}));
+                    console.log(button.key, onFormDataChange);
+                    button.onClick = useCallback((ev?: any) => {
 
-                                            case "SaveForm":
+                        const runner = (async () => {
+                            const actions = button.workflow.actions;
+                            console.log("Execute Workflow", button.workflow);
+                            const starter = Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "undefined" || Object.values(entry.runAfter).length === 0);
 
-                                                ribbonEvents.emit("onSave", ev);
+                            const queue = starter.slice(0, 1);
 
-                                                queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+                            function handleQueue() {
 
-                                                break;
-                                        }
+                                while (queue.length) {
+                                    const [action, entry] = queue.pop() ?? [];
+                                    console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
+                                    const type = entry.type;
+                                    switch (type) {
+                                        case "UpdateRecord":
 
-                                        console.log("Executed Workflow action", [action, entry]);
+                                            onFormDataChange((props, ctx) => {
+                                                ctx.skipValidation = true;
 
+                                                ctx.onCommit = () => {
+                                                    console.log("Update Record Completed");
+
+                                                    queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+                                                    handleQueue();
+                                                };
+                                                Object.assign(props, entry.inputs.data)
+                                            }); //TODO wait until change is applied
+
+
+
+
+                                            break;
+
+                                        case "SaveForm":
+
+                                            ribbonEvents.emit("onSave", ev);
+
+                                            queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
+
+                                            break;
                                     }
-                                };
-                                handleQueue();
-                            })();
 
-                        }, [button.workflow])
-                    }
-                     
-                    useEffect(() => {
-                         
-                        if (!button.onClick) {
-                            button.onClick = (e) => {
-                                console.log("Custom Ribbon: Clicked", [button.key, e]);
+                                    console.log("Executed Workflow action", [action, entry]);
 
-                                e?.preventDefault();
-                                e?.stopPropagation();
-                                ribbonEvents.emit(button.key, e);
-                            }
-                        }
+                                }
+                            };
+                            handleQueue();
+                        })();
 
-                        console.log("useEffect: Ribbon Button", [button, button.visible !== false]);
-
-                        if (button.visible !== false)
-                            _addButton(button);
-
-                        return () => {
-                            console.log("useEffect: Ribbon Button dispose", button);
-                            _removeButton(button.key);
-                        }
-                    }, deps ?? []);
-
-
+                    }, [button.workflow])
                 }
-            })
-            }> {children}
-                </RibbonContext.Provider>
-                </>
+
+                useEffect(() => {
+
+                    if (!button.onClick) {
+                        button.onClick = (e) => {
+                            console.log("Custom Ribbon: Clicked", [button.key, e]);
+
+                            e?.preventDefault();
+                            e?.stopPropagation();
+                            ribbonEvents.emit(button.key, e);
+                        }
+                    }
+
+                    console.log("useEffect: Ribbon Button", [button, button.visible !== false]);
+
+                    if (button.visible !== false)
+                        _addButton(button);
+
+                    return () => {
+                        console.log("useEffect: Ribbon Button dispose", button);
+                        _removeButton(button.key);
+                    }
+                }, deps ?? []);
+
+
+            }
+        })
+        }> {children}
+        </RibbonContext.Provider>
+    </>
 }
 
 
 
-    
+

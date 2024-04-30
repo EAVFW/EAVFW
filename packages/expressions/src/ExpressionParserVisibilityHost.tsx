@@ -1,21 +1,21 @@
-import { useEffect, useMemo } from "react";
+import { PropsWithChildren, useEffect, useMemo } from "react";
 import { useExpressionParserLoadingContext } from "./ExpressionParserAttributeContext";
 import { useExpressionParser } from "./useExpressionParser";
 import { useUuid } from "@eavfw/hooks";
 
-export const ExpressionParserVisibilityHost: React.FC<{
+export const ExpressionParserVisibilityHost: React.FC<PropsWithChildren<{
     onVisibilityCalculated?: (visiblity: boolean) => void,
     visible?: string | boolean, attributeKey?: string
-}> = ({ children, visible, attributeKey, onVisibilityCalculated}) => {
+}>> = ({ children, visible, attributeKey, onVisibilityCalculated }) => {
 
     const { data, isLoading, error } = useExpressionParser<boolean>(typeof visible === "string" ? visible : undefined);
-     
+
 
     const showShow = useMemo(() => {
         if (typeof visible === "boolean" && visible === false) {
             console.debug("ExpressionParserVisibilityHost " + attributeKey + ": Hiding as visibility is false")
 
-            
+
             return false;
         }
 
@@ -27,7 +27,7 @@ export const ExpressionParserVisibilityHost: React.FC<{
 
         if (typeof data === "boolean" && data === false) {
             console.debug("ExpressionParserVisibilityHost " + attributeKey + ": Hiding as visibility is calculated to false", [visible, data])
-            
+
             return false;
         }
 
@@ -43,12 +43,12 @@ export const ExpressionParserVisibilityHost: React.FC<{
         else
             console.debug("ExpressionParserVisibilityHost " + attributeKey + ": Showing as visibility is calculated", [visible, data]);
 
-       
+
 
         return true;
     }, [visible, data, isLoading, error]);
 
- 
+
 
     useEffect(() => {
         if (onVisibilityCalculated && typeof showShow === "boolean")
@@ -58,6 +58,6 @@ export const ExpressionParserVisibilityHost: React.FC<{
 
     if (showShow)
         return <>{children}</>
-     
+
     return null;
 }

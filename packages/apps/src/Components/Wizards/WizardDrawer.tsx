@@ -14,7 +14,7 @@ import {
 
 import { Dismiss24Regular } from "@fluentui/react-icons";
 
-import React, { useContext, useEffect, useState } from "react";
+import React, { PropsWithChildren, useContext, useEffect, useState } from "react";
 import { ResolveFeature } from "../../FeatureFlags";
 import { useStackStyles } from "../useStackStyles";
 import { useWizard, useWizardOpener } from "./useWizard";
@@ -25,7 +25,7 @@ import { WizardTabs } from "./WizardTabs";
 import { WizardToaster } from "./WizardToaster";
 
 
-const Wizard: React.FC = ({ children }) => {
+const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
 
     //const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
 

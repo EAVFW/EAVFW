@@ -27,15 +27,15 @@ export const FieldTemplate = ({
     required, label, schema, disabled,
     formContext,
 }: FieldTemplateProps) => {
-    console.log("Field Template:", [id, displayLabel,rawErrors, rawHelp, rawDescription, classNames, hidden, description]);
+    console.log("Field Template:", [id, displayLabel, rawErrors, rawHelp, rawDescription, classNames, hidden, description]);
 
 
     const parentwarnings = useWarnings();
     const warnings = useMemo(() => {
 
 
-        const resultWarnings = schema.type === "object" ? parentwarnings.map(p => ({ warning: p.warning, logicalName:id+"_"+ p.logicalName })) : parentwarnings.filter(w => id == w.logicalName);
-        console.log("Filtering Warnings:", [id, schema.type,schema, parentwarnings, resultWarnings]);
+        const resultWarnings = schema.type === "object" ? parentwarnings.map(p => ({ warning: p.warning, logicalName: id + "_" + p.logicalName })) : parentwarnings.filter(w => id == w.logicalName);
+        console.log("Filtering Warnings:", [id, schema.type, schema, parentwarnings, resultWarnings]);
         return resultWarnings;
     }, [parentwarnings]);
 
@@ -45,15 +45,19 @@ export const FieldTemplate = ({
     return (
         <WarningContextProvider value={warnings}>
             <div
-            className={classNames}
+                className={classNames}
                 style={{ marginBottom: schema.type === "object" ? 0 : 15, display: hidden ? "none" : undefined }}>
 
-                <Field aria-disabled={disabled}  label={displayLabel ? ({ children: (_:any, p:any) => <EAVFWLabel id={id} disabled={disabled} required={required} label={label ?? schema.title} description={rawDescription} /> }) : undefined}>
+                <Field
+                    aria-disabled={disabled}
+                    //@ts-ignore 
+                    label={displayLabel ? ({ children: (_: any, p: any) => <EAVFWLabel id={id} disabled={disabled} required={required} label={label ?? schema.title} description={rawDescription} /> }) : undefined}
+                >
                     {children}
                 </Field>
-            {/*{rawDescription && <Text>{rawDescription}</Text>}*/}
-            {rawErrors.length > 0 && <List items={rawErrors} />}
-            {rawHelp && <Text id={id}>{rawHelp}</Text>}
+                {/*{rawDescription && <Text>{rawDescription}</Text>}*/}
+                {rawErrors.length > 0 && <List items={rawErrors} />}
+                {rawHelp && <Text id={id}>{rawHelp}</Text>}
             </div>
         </WarningContextProvider>
     );

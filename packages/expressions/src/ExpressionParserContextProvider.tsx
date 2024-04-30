@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ExpressionParserContext } from "./ExpressionParserContext";
 import { EnabledBlazorContextType, useBlazor, useDebouncer } from "@eavfw/hooks";
 
@@ -33,7 +33,7 @@ if (typeof global.window !== "undefined") {
 }
 
 
-export const ExpressionParserContextProvider: React.FC = ({ children }) => {
+export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     const _variables = useRef({});
     const _expresssions = useRef({});
@@ -70,16 +70,16 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
             //
             oncallback(result, error);
 
-            
+
             _results.current[id].data = result;
             _results.current[id].isLoading = false;
             _results.current[id].error = error;
 
-             window.clearTimeout(t.current);
-        t.current = window.setTimeout(() => {
-            set_resultetag(new Date().getTime());
-        },400);
-          
+            window.clearTimeout(t.current);
+            t.current = window.setTimeout(() => {
+                set_resultetag(new Date().getTime());
+            }, 400);
+
         };
 
         setExpressions(_expresssions.current = {
@@ -97,12 +97,12 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
         //    }
         //});    
     }, []);
-   
-    
+
+
 
     const allEvaluated = useMemo(() => Object.values(_results.current).filter((x: any) => x.isLoading === true).length === 0, [_resultetag]);
 
-    const _removeExpresssion = useCallback((id) => {
+    const _removeExpresssion = useCallback((id: any) => {
         let expr = { ..._expresssions.current } as any;
         delete expr[id];
         setExpressions(_expresssions.current = expr)
@@ -116,8 +116,8 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
     const _d = useDebouncer(() => {
 
         if (blazor.isEnabled && setVariablesFunction && blazor.isInitialized && !isVariablesUpToDate) {
-             
-               const localtime= _ti.current = new Date().getTime();
+
+            const localtime = _ti.current = new Date().getTime();
             console.log(`ExpressionParser Variables Updating (${setVariablesFunction}): `, _variables.current);
             DotNet.invokeMethodAsync(blazor.namespace, setVariablesFunction, _variables.current)
                 .then(() => {
@@ -130,7 +130,7 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
                     console.error("ExpressionParser Variables Update error: ", [err, _variables.current]);
                 }).finally(() => {
                     console.log("ExpressionParser Variables Updated in " + (new Date().getTime() - localtime), _variables.current);
-                    
+
                     //   alert("variables set in " + (new Date().getTime() - time));
                 });
         }
@@ -141,7 +141,7 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
     const _dd = useDebouncer(() => {
 
         if (blazor.isEnabled && setVariablesFunction && blazor.isInitialized) {
-            
+
             const localtime = _tii.current = new Date().getTime();
             console.log("ExpressionParser Expressions Updating: ", _expresssions.current);
             DotNet.invokeMethodAsync(blazor.namespace, "SetExpresssions", _expresssions.current)
@@ -156,13 +156,13 @@ export const ExpressionParserContextProvider: React.FC = ({ children }) => {
                     console.log("ExpressionParser Expressions Updated in " + (new Date().getTime() - localtime), _expresssions.current);
                     //   alert("variables set in " + (new Date().getTime() - time));
 
-                  
+
                 });
         }
     }, 250, [expressions, blazor.isInitialized]) as any;
 
     useEffect(() => { _dd(); }, [expressions, blazor.isInitialized]);
- 
+
 
     return <ExpressionParserContext.Provider value={{
         isInitialized: isParserContextExpressionsInitialized && isParserContextVariablesInitialized,

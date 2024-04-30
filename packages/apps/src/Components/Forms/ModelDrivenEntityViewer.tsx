@@ -185,9 +185,9 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     console.log("ModelDrivenForm: ID", [compID]);
     const app = useModelDrivenApp();
 
-   
 
-   
+
+
 
     const [{ record }, { onChange }] = useEAVForm((state) => ({ record: state.formValues }), "ModelDrivenForm FormValues");
     useEffect(() => { console.log("ModelDrivenForm FormValues changed", record) }, [record]);
@@ -195,17 +195,17 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     const { evaluatedForm, isLoadingForm } = useEvaluateFormDefinition(form, record, formName, entityName);
     const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
 
-    const _onFormDataChange = useCallback((newformdata) => { onChange(form => { Object.assign(form, newformdata); }) }, [onChange]);
+    const _onFormDataChange = useCallback((newformdata: any) => { onChange(form => { Object.assign(form, newformdata); }) }, [onChange]);
     const getTabName = useCallback((tab: FormTabDefinition) => {
         console.log(tab);
         return tab.locale?.[locale]?.title ?? tab.title;
     }, [locale]);
 
-   
+
 
     const tabs = useMemo(() => Object.keys(evaluatedForm?.layout.tabs ?? {}), [evaluatedForm]);
 
-   
+
 
 
 
@@ -218,15 +218,15 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     console.log(descriptions);
 
 
- 
 
-  
 
-   
 
-   
 
-    if (!evaluatedForm  || isLoading) {
+
+
+
+
+    if (!evaluatedForm || isLoading) {
 
         return <div style={wrapperStyle}>
             <ShimmerElementsGroup

@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/apps",
   "description": "Model Driven Apps",
-  "version": "0.0.0",
+  "version": "1.4.0-vnext.26",
   "dependencies": {
     "@eavfw/expressions": "*",
     "@eavfw/forms": "*",
@@ -21,7 +21,7 @@
     "@fluentui/react-portal-compat": "^9.0.131",
     "@fluentui/react-message-bar-preview": "^0.2.1",
     "@fluentui/react-datepicker-compat": "^0.4.25",
-    "@fluentui/react-migration-v0-v9":"^9.1.18",
+    "@fluentui/react-migration-v0-v9": "^9.1.18",
     "@opentelemetry/api": "*"
   },
   "devDependencies": {
@@ -34,7 +34,9 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "type": "module",
   "main": "./src/index.ts",
-  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  },
   "config": {
     "force": true
   },

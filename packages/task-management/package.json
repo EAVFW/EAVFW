@@ -1,15 +1,9 @@
 {
-  "version": "1.0.0",
+  "version": "1.0.0-vnext.1",
   "name": "@eavfw/task-management",
-  "dependencies": {
-
-  },
-  "peerDependencies": {
-     
-  },
-  "devDependencies": {
-    
-  },
+  "dependencies": {},
+  "peerDependencies": {},
+  "devDependencies": {},
   "license": "MIT",
   "files": [
     "src"

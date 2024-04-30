@@ -1,7 +1,7 @@
 {
   "name": "@eavfw/forms",
   "description": "EAVFW Forms",
-  "version": "0.0.38",
+  "version": "1.2.0-vnext.7",
   "peerDependencies": {
     "react": "^18.2.0",
     "pako": "2.1.0",
@@ -25,7 +25,9 @@
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
-  "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
+  "scripts": {
+    "release": "semantic-release -e semantic-release-monorepo"
+  },
   "config": {
     "force": true
   }
