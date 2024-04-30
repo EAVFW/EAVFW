@@ -1,8 +1,8 @@
 import { useRouter } from "next/router";
-import React, { useMemo } from "react";
+import React, { PropsWithChildren, useMemo } from "react";
 import { AppInfoProvider, AppNavigationContextProps, AppNavigationContextProvider } from "@eavfw/apps";
 
-export const RouterBasedAppContextProvider: React.FC = ({ children }) => {
+export const RouterBasedAppContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
      const router = useRouter();
 
