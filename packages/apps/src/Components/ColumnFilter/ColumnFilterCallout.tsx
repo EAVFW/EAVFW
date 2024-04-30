@@ -66,7 +66,7 @@ function composeOdataFilterExpression(filterValue: string | number | boolean | u
  */
 function composeOdataFilterPart(filterValue: string | undefined, filterOption: ColumnOptions, column: IColumn): string | undefined {
     if (typeof (column.data?.type) != "object") return composeOdataFilterExpression(filterValue, filterOption, column.fieldName);
-    
+
     const columnType = column.data?.type as NestedType
     switch (columnType.type?.toLowerCase()) {
         case "text":
@@ -86,7 +86,7 @@ function composeOdataFilterPart(filterValue: string | undefined, filterOption: C
             return composeOdataFilterExpression(filterValue, filterOption, columnKey)
         }
         case "lookup": {
-           
+
             const lookup = columnType as LookupType;
             console.log("composeOdataFilterPart", [columnType, lookup.foreignKey]);
             if (lookup.foreignKey == null) return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
@@ -105,8 +105,8 @@ function composeOdataFilterPart(filterValue: string | undefined, filterOption: C
  */
 export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
 
-    const [{ currentColumn, menuTarget,  isCalloutVisible }, columnFilterDispatch ] = useColumnFilter()
-    
+    const [{ currentColumn, menuTarget, isCalloutVisible }, columnFilterDispatch] = useColumnFilter()
+
     const [filterValue, setFilterText] = useState<string>();
     const app = useModelDrivenApp();
 
@@ -170,10 +170,10 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             case "decimal":
             case "choice":
             case "choices":
-          
+
             case "boolean":
                 return [
-                    ColumnOptions.Equals, 
+                    ColumnOptions.Equals,
                     ColumnOptions.Null,
                     ColumnOptions.NotNull
                 ]
@@ -182,7 +182,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             case "lookup":
             default:
                 return [
-                    ColumnOptions.Equals, 
+                    ColumnOptions.Equals,
                     ColumnOptions.Contains,
                     ColumnOptions.Null,
                     ColumnOptions.NotNull
@@ -218,7 +218,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
 
         if (isFilterValueValid && currentColumn !== undefined) {
             console.log("Current column", currentColumn)
-            const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn); 
+            const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn);
             const data: IColumnData = { filterText: filterValue, odataFilter: odataFilterText, filterOption: filterOption }
             console.log("Applying Filter Values", data);
             columnFilterDispatch({
@@ -297,7 +297,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             case "boolean": {
                 return <Toggle
                     defaultValue={filterValue}
-                    onChange={(ev,checked) => setFilterTextHandle(ev,`${checked}`)}
+                    onChange={(ev, checked) => setFilterTextHandle(ev, `${checked}`)}
                 />
             }
             case "string":
@@ -328,75 +328,77 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
     };
 
     let padding = 8;
-    return <>
-        {
-            isCalloutVisible && (
-                <Callout
-                    gapSpace={0}
-                    target={menuTarget}
-                    onDismiss={() => columnFilterDispatch({ type: 'closeFilter' })}
-                    setInitialFocus
-                >
-                    <Stack
-                        verticalFill
-                        horizontalAlign={"space-between"}
-                        verticalAlign={"space-between"}
+    return (
+        <>
+            {
+                isCalloutVisible && (
+                    <Callout
+                        gapSpace={0}
+                        target={menuTarget}
+                        onDismiss={() => columnFilterDispatch({ type: 'closeFilter' })}
+                        setInitialFocus
                     >
-                        <Stack.Item styles={({ root: { padding: padding } })}>
-                            <Stack horizontal
-                                horizontalAlign={"space-between"}
-                                verticalAlign={"space-between"}
-                            >
-                                <Stack.Item>
-                                    <h3>Filter</h3>
-                                </Stack.Item>
-                                <Stack.Item>
-                                    <IconButton iconProps={cancelIcon} title="Dismiss" ariaLabel="Dismiss"
-                                        onClick={() => columnFilterDispatch({ type: 'closeFilter' })} />
-                                </Stack.Item>
-                            </Stack>
-                        </Stack.Item>
-                        <Stack horizontal
+                        <Stack
+                            verticalFill
                             horizontalAlign={"space-between"}
                             verticalAlign={"space-between"}
                         >
                             <Stack.Item styles={({ root: { padding: padding } })}>
-                                <DefaultButton text={aToz} onClick={() => {
-                                    sortCurrentColumn(ColumnOrder.Up)
-                                }} />
+                                <Stack horizontal
+                                    horizontalAlign={"space-between"}
+                                    verticalAlign={"space-between"}
+                                >
+                                    <Stack.Item>
+                                        <h3>Filter</h3>
+                                    </Stack.Item>
+                                    <Stack.Item>
+                                        <IconButton iconProps={cancelIcon} title="Dismiss" ariaLabel="Dismiss"
+                                            onClick={() => columnFilterDispatch({ type: 'closeFilter' })} />
+                                    </Stack.Item>
+                                </Stack>
                             </Stack.Item>
+                            <Stack horizontal
+                                horizontalAlign={"space-between"}
+                                verticalAlign={"space-between"}
+                            >
+                                <Stack.Item styles={({ root: { padding: padding } })}>
+                                    <DefaultButton text={aToz} onClick={() => {
+                                        sortCurrentColumn(ColumnOrder.Up)
+                                    }} />
+                                </Stack.Item>
+
+                                <Stack.Item styles={({ root: { padding: padding } })}>
+                                    <DefaultButton text={zToa} onClick={() => {
+                                        sortCurrentColumn(ColumnOrder.Down)
+                                    }} />
+                                </Stack.Item>
+                            </Stack>
+
+                            {<Stack.Item styles={({ root: { padding: padding } })}>
+                                <Dropdown
+                                    options={filterOptions}
+                                    selectedKey={filterOption}
+                                    onChange={setFilterOptionHandle}
+                                />
+                            </Stack.Item>}
 
                             <Stack.Item styles={({ root: { padding: padding } })}>
-                                <DefaultButton text={zToa} onClick={() => {
-                                    sortCurrentColumn(ColumnOrder.Down)
-                                }} />
+                                {currentFilterOption?.inputType === ColumnFilterInputType.Single && currentColumnInput()}
                             </Stack.Item>
+
+                            <Stack horizontal={true}>
+                                <Stack.Item styles={({ root: { padding: padding } })}>
+                                    <PrimaryButton text={applyLabel} onClick={applyColumnFilter} />
+                                </Stack.Item>
+                                <Stack.Item styles={({ root: { padding: padding } })}>
+                                    <DefaultButton text={clearLabel} onClick={clearColumnFilter} />
+                                </Stack.Item>
+                            </Stack>
+
                         </Stack>
-
-                        {<Stack.Item styles={({ root: { padding: padding } })}>
-                            <Dropdown
-                                options={filterOptions}
-                                selectedKey={filterOption}
-                                onChange={setFilterOptionHandle}
-                            />
-                        </Stack.Item>}
-
-                        <Stack.Item styles={({ root: { padding: padding } })}>
-                            {currentFilterOption?.inputType === ColumnFilterInputType.Single && currentColumnInput()}
-                        </Stack.Item>
-
-                        <Stack horizontal={true}>
-                            <Stack.Item styles={({ root: { padding: padding } })}>
-                                <PrimaryButton text={applyLabel} onClick={applyColumnFilter} />
-                            </Stack.Item>
-                            <Stack.Item styles={({ root: { padding: padding } })}>
-                                <DefaultButton text={clearLabel} onClick={clearColumnFilter} />
-                            </Stack.Item>
-                        </Stack>
-
-                    </Stack>
-                </Callout>
-            )
-        }
-    </>
+                    </Callout>
+                )
+            }
+        </>
+    )
 }

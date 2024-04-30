@@ -3,8 +3,8 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "devDependencies": {
     "@types/node": "17.0.5",
-    "@types/react": "17.0.75",
-    "@types/react-dom": "17.0.25",
+    "@types/react": "18.2.0",
+    "@types/react-dom": "18.2.0",
     "typescript": "5.4.2",
     "concurrently": "7.0.0",
     "multi-semantic-release": "^3.0.1",
@@ -24,7 +24,6 @@
     "link-codeeditor": "npm --workspace packages/codeeditor link",
     "link-task-management": "npm --workspace packages/task-management link",
     "link-query": "npm --workspace packages/query link",
-
     "publish": "npm-run-all --sequential --continue-on-error publish-*",
     "publish-apps": "npm --workspace packages/apps publish --access public",
     "publish-manifest": "npm --workspace packages/manifest publish --access public",
@@ -36,7 +35,6 @@
     "publish-codeeditor": "npm --workspace packages/codeeditor publish --access public",
     "publish-task-management": "npm --workspace packages/task-management publish --access public",
     "publish-query": "npm --workspace packages/query publish --access public",
-
     "release": "npm-run-all --continue-on-error release-*",
     "release-apps": "npm run release --workspace packages/apps",
     "release-manifest": "npm run release --workspace packages/manifest",
