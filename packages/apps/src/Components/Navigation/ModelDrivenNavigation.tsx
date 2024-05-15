@@ -25,7 +25,7 @@ import React, { useEffect, useState } from 'react';
 import styles from "./ModelDrivenNavigation.module.scss";
 import { NextRouter, useRouter, } from 'next/router'
 import { ModelDrivenSitemap } from "../../ModelDrivenSitemap";
-import { ModelDrivenSitemapEntity } from "../../ModelDrivenSitemapEntity";
+import { ModelDrivenSitemapEntry } from "../../ModelDrivenSitemapEntry";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
@@ -101,7 +101,7 @@ const IconRight: IIconProps = {
 };
 
 function filterEntry(user: any) {
-    return ([key, entry]: [string, ModelDrivenSitemapEntity]) => {
+    return ([key, entry]: [string, ModelDrivenSitemapEntry]) => {
         console.log("filter entry");
         console.log([entry, user]);
 
