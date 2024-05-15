@@ -79,6 +79,7 @@ export type EntityDefinition = {
     displayName: string;
     schemaName: string;
     logicalName: string;
+    control?: string;
     locale?: { [locale: string]: LocaleDefinition };
     sitemap?: MultipleSiteMapDefinitions | SiteMapDefinition;
     attributes: { [attribute: string]: AttributeDefinition };

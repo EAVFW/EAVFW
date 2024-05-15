@@ -8,6 +8,6 @@ export type ManifestDefinition = {
     variables: any;
     apps: any;
     entities: { [entity: string]: EntityDefinition };
-    dashboards: { [dashboard: string]: EntityDefinition }
+    dashboards?: { [dashboard: string]: EntityDefinition }
     errorMessages?: { [locale: string]: { [code: string]: string } }
 };
