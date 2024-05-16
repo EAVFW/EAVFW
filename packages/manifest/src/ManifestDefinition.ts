@@ -1,6 +1,6 @@
 
 import { LocalizationDefinition } from "./Localization"
-import { EntityDefinition } from "./Entities";
+import { DashboardDefinition, EntityDefinition } from "./Entities";
 
 export type ManifestDefinition = {
     localization?: { [locale: string]: LocalizationDefinition };
@@ -8,6 +8,6 @@ export type ManifestDefinition = {
     variables: any;
     apps: any;
     entities: { [entity: string]: EntityDefinition };
-    dashboards?: { [dashboard: string]: EntityDefinition }
-    errorMessages?: { [locale: string]: { [code: string]: string } }
+    dashboards?: { [dashboard: string]: DashboardDefinition };
+    errorMessages?: { [locale: string]: { [code: string]: string } };
 };
