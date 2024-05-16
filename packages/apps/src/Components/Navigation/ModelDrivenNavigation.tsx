@@ -23,20 +23,15 @@ import {
 import Link from "next/link";
 import React, { useEffect, useState } from 'react';
 import styles from "./ModelDrivenNavigation.module.scss";
-import { NextRouter, useRouter, } from 'next/router'
+import { useRouter, } from 'next/router'
 import { ModelDrivenSitemap } from "../../ModelDrivenSitemap";
 import { ModelDrivenSitemapEntry } from "../../ModelDrivenSitemapEntry";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { ResolveFeature } from "../../FeatureFlags";
-import { isMobileDevice, useIsMobileDevice } from "@eavfw/utils";
+import { useIsMobileDevice } from "@eavfw/utils";
 import { FluentProvider } from "@fluentui/react-components";
-
-
-interface WithRouterProps {
-    router: NextRouter
-}
 
 export interface ModelDrivenNavigationProps /*extends WithRouterProps, WithAppProps, WithUserProps*/ {
     sitemap: ModelDrivenSitemap
@@ -110,6 +105,20 @@ function filterEntry(user: any) {
 
         return entry.roles.allowed?.filter(r => user.role.filter((rr: string) => r === rr).length > 0)?.length ?? 0 > 0;
     };
+}
+
+function generateLink(entry: ModelDrivenSitemapEntry, selectedArea: string, appName: string) {
+    console.log("Generating link");
+    if (entry.type && entry.type === "dashboard") {
+        console.log("Generating link: dashboard");
+        return `/apps/${appName}/areas/${selectedArea}/dashboards/${entry.control}`;
+    }
+    if (entry.viewName) {
+        return `/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`;
+    } else {
+        return `/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`;
+    }
+
 }
 
 export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps) {
@@ -207,15 +216,15 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
                                                                         <Icon iconName="AddInIcon" />
                                                                         {entry.viewName ?
                                                                             <Link legacyBehavior
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
+                                                                                href={generateLink(entry, selectedArea, appName)}>
                                                                                 <FluentLink
-                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>    {entry.title}</FluentLink>
+                                                                                    href={generateLink(entry, selectedArea, appName)}>    {entry.title}</FluentLink>
                                                                             </Link>
                                                                             :
                                                                             <Link legacyBehavior
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
+                                                                                href={generateLink(entry, selectedArea, appName)}>
                                                                                 <FluentLink
-                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>    {entry.title}</FluentLink>
+                                                                                    href={generateLink(entry, selectedArea, appName)}>    {entry.title}</FluentLink>
                                                                             </Link>
                                                                         }
                                                                     </Stack>
@@ -242,9 +251,9 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
                                                                     {entry.viewName ?
                                                                         <div>
                                                                             <Link legacyBehavior
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
+                                                                                href={generateLink(entry, selectedArea, appName)}>
                                                                                 <FluentLink
-                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`}>
+                                                                                    href={generateLink(entry, selectedArea, appName)}>
                                                                                     <Persona
                                                                                         imageInitials={entry.title.substring(0, 2).toUpperCase()}
                                                                                         initialsColor={PersonaInitialsColor.blue}
@@ -256,9 +265,9 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
                                                                         :
                                                                         <div>
                                                                             <Link legacyBehavior
-                                                                                href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
+                                                                                href={generateLink(entry, selectedArea, appName)}>
                                                                                 <FluentLink
-                                                                                    href={`/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`}>
+                                                                                    href={generateLink(entry, selectedArea, appName)}>
 
                                                                                     <Persona
                                                                                         imageInitials={entry.title.substring(0, 2).toUpperCase()}

@@ -65,27 +65,27 @@ function processItems(items: { [key: string]: EntityDefinition | DashboardDefini
 
     //     processSiteMaps(item.sitemap, areas, item, key, itemType);
     // }
-    for (const entityKey of Object.keys(items)) {
+    for (const key of Object.keys(items)) {
 
-        if (isEntityDefinition(entityKey) && entityKey.attributes) {
-            Object.values(entityKey.attributes).forEach(normalizeType);
+        if (isEntityDefinition(key) && key.attributes) {
+            Object.values(key.attributes).forEach(normalizeType);
         }
 
-        const entity = items[entityKey];
-        entityMap[entityKey] = entity.logicalName;
+        const entity = items[key];
+        entityMap[key] = entity.logicalName;
         entityCollectionSchemaNameMap[entity.collectionSchemaName] = entity.logicalName;
 
         let sitemaps = entity.sitemap;
         if (typeof sitemaps === "object") {
-            if (isSingleSiteMapDefinition(sitemaps)) sitemaps = { [`${entityKey}dummy`]: sitemaps };
+            if (isSingleSiteMapDefinition(sitemaps)) sitemaps = { [`${key}dummy`]: sitemaps };
 
-            for (const sitemapKey1 of Object.keys(sitemaps)) {
-                const sitemap = sitemaps[sitemapKey1];
+            for (const sitemapKey of Object.keys(sitemaps)) {
+                const sitemap = sitemaps[sitemapKey];
 
                 if (sitemap !== undefined && areas[sitemap.area] === undefined) areas[sitemap.area] = {};
                 areas[sitemap.area][sitemap.group] = areas[sitemap.area][sitemap.group] ?? {};
-                areas[sitemap.area][sitemap.group][sitemapKey1] = {
-                    ... (areas[sitemap.area][sitemap.group][sitemapKey1]
+                areas[sitemap.area][sitemap.group][sitemapKey] = {
+                    ... (areas[sitemap.area][sitemap.group][sitemapKey]
                         ?? { ...entity, title: entity.locale?.["1030"]?.pluralName ?? entity.pluralName, order: 0 }), ...{
 
                             ...sitemap,
@@ -127,7 +127,6 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
     processItems(manifest.entities, areas, entityMap, entityCollectionSchemaNameMap, 'entity');
 
     const areaSorted = sortAreas(areas);
-    console.log("AREAS", areaSorted);
 
     return {
         localization: manifest.localization,
