@@ -40,9 +40,9 @@ function sortAreas(areas: AreasType) {
 }
 
 function isEntityDefinition(item: any): item is EntityDefinition {
-    if (typeof item !== 'object' || item === null) {
+    if (typeof item !== 'object' || item === null)
         return false;
-    }
+
     return 'logicalName' in item && typeof item.logicalName === 'string' &&
         'collectionSchemaName' in item && typeof item.collectionSchemaName === 'string' &&
         'attributes' in item && typeof item.attributes === 'object';
@@ -51,22 +51,22 @@ function isEntityDefinition(item: any): item is EntityDefinition {
 function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType } }): void {
     if (typeof attribute.type !== "string")
         attribute.type.type = attribute.type.type.toLowerCase() as PrimitiveType;
-    else attribute.type = attribute.type.toLowerCase() as PrimitiveType;
+    else
+        attribute.type = attribute.type.toLowerCase() as PrimitiveType;
 }
 
 function processItems(items: { [key: string]: EntityDefinition | DashboardDefinition }, areas: any, entityMap: { [key: string]: string }, entityCollectionSchemaNameMap: { [key: string]: string }, itemType: string) {
 
     for (const key of Object.keys(items)) {
 
-        if (isEntityDefinition(key) && key.attributes) {
+        if (itemType === "entity" && isEntityDefinition(key) && key.attributes)
             Object.values(key.attributes).forEach(normalizeType);
-        }
 
-        const entity = items[key];
-        entityMap[key] = entity.logicalName ?? key.toLowerCase().replace(/\s/g, "");
-        entityCollectionSchemaNameMap[entity.collectionSchemaName] = entity.logicalName?? key.toLowerCase().replace(/\s/g, "");
+        const item = items[key];
+        entityMap[key] = item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
+        entityCollectionSchemaNameMap[item.collectionSchemaName] = item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
 
-        let sitemaps = entity.sitemap;
+        let sitemaps = item.sitemap;
         if (typeof sitemaps === "object") {
             if (isSingleSiteMapDefinition(sitemaps)) sitemaps = { [`${key}dummy`]: sitemaps };
 
@@ -78,12 +78,13 @@ function processItems(items: { [key: string]: EntityDefinition | DashboardDefini
                 areas[sitemap.area][sitemap.group][sitemapKey] = {
                     ... (areas[sitemap.area][sitemap.group][sitemapKey]
                         ?? {
-                            ...entity, logicalName: entity.logicalName ?? key.toLowerCase().replace(/\s/g, ""),
-                        title: entity.locale?.["1030"]?.pluralName ?? entity.pluralName, order: 0
+                        ...item,
+                        logicalName: item.logicalName ?? key.toLowerCase().replace(/\s/g, ""),
+                        title: item.locale?.["1030"]?.pluralName ?? item.pluralName, order: 0
                     }),
                     ...{
                         ...sitemap,
-                        title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? entity.locale?.["1030"]?.pluralName ?? entity.pluralName,
+                        title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? item.locale?.["1030"]?.pluralName ?? item.pluralName,
                     }
                 };
             }
@@ -91,45 +92,19 @@ function processItems(items: { [key: string]: EntityDefinition | DashboardDefini
     }
 }
 
-function processSiteMaps(sitemaps: any, areas: any, item: EntityDefinition | DashboardDefinition, itemKey: string, itemType: string) {
-    if (typeof sitemaps === 'object' && !isSingleSiteMapDefinition(sitemaps)) {
-        sitemaps = { [`${itemKey}Dummy`]: sitemaps };
-    }
-    for (const sitemapKey in sitemaps) {
-        const sitemap = sitemaps[sitemapKey];
-        const { area, group } = sitemap;
-        areas[area] = areas[area] || {};
-        areas[area][group] = areas[area][group] || {};
-        areas[area][group][sitemapKey] = areas[area][group][sitemapKey] || { ...item, title: item.locale?.["1030"]?.pluralName ?? item.pluralName, order: 0 };
-        areas[area][group][sitemapKey] = {
-            ...areas[area][group][sitemapKey],
-            ...sitemap,
-            title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? item.locale?.["1030"].pluralName ?? item.pluralName
-        };
-    }
-}
-
-
 export function generateAppContext(manifest: ManifestDefinition): ModelDrivenAppModel {
     const areas: AreasType = {};
     const entityMap: { [entityKey: string]: string } = {};
     const entityCollectionSchemaNameMap: { [entityKey: string]: string } = {};
 
-    if (manifest.dashboards) {
+    if (manifest.dashboards)
         processItems(manifest.dashboards, areas, entityMap, entityCollectionSchemaNameMap, 'dashboard');
-    }
+
     processItems(manifest.entities, areas, entityMap, entityCollectionSchemaNameMap, 'entity');
 
     const areaSorted = sortAreas(areas);
-
-
     const entities = Object.assign({}, ...Object.values(manifest.entities).map(o => ({ [o.logicalName]: o })));
     const dashboards = manifest.dashboards ? Object.assign({}, ...Object.entries(manifest.dashboards).map(([key, value]) => ({ [key.toLowerCase().replace(/\s/g, "")]: { ...value, key: key.toLowerCase().replace(/\s/g, "") } }))) : {};
-
-    console.log("manifest", manifest);
-    console.log("manifest_entities", entities);
-    console.log("manifest_dashboards", dashboards);
-    console.log("manifest_sitemap", areaSorted);
 
     return {
         localization: manifest.localization,

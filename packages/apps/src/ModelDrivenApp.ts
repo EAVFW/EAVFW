@@ -76,10 +76,7 @@ export class ModelDrivenApp {
     }
 
     getDashboard(dashboardName: string) {
-        if (this._data.dashboards) {
-            return this._data.dashboards[dashboardName];
-        }
-        return undefined;
+        return this._data.dashboards?.[dashboardName];
     }
 
     getAttributes(entityName: string) {
