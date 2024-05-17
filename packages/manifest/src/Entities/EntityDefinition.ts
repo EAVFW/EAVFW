@@ -94,6 +94,7 @@ export type EntityDefinition = {
 };
 
 export type DashboardDefinition = {
+    key: string;
     pluralName: string;
     control?: string;
     locale?: { [locale: string]: LocaleDefinition };

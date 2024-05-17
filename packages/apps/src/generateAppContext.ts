@@ -55,16 +55,7 @@ function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType 
 }
 
 function processItems(items: { [key: string]: EntityDefinition | DashboardDefinition }, areas: any, entityMap: { [key: string]: string }, entityCollectionSchemaNameMap: { [key: string]: string }, itemType: string) {
-    // for (const key in items) {
-    //     const item = items[key];
-    //     if (isEntityDefinition(item) && item.attributes) {
-    //         Object.values(item.attributes).forEach(normalizeType);
-    //     }
-    //     entityMap[key] = item.logicalName;
-    //     entityCollectionSchemaNameMap[item.collectionSchemaName] = item.logicalName;
 
-    //     processSiteMaps(item.sitemap, areas, item, key, itemType);
-    // }
     for (const key of Object.keys(items)) {
 
         if (isEntityDefinition(key) && key.attributes) {
@@ -72,8 +63,8 @@ function processItems(items: { [key: string]: EntityDefinition | DashboardDefini
         }
 
         const entity = items[key];
-        entityMap[key] = entity.logicalName;
-        entityCollectionSchemaNameMap[entity.collectionSchemaName] = entity.logicalName;
+        entityMap[key] = entity.logicalName ?? key.toLowerCase().replace(/\s/g, "");
+        entityCollectionSchemaNameMap[entity.collectionSchemaName] = entity.logicalName?? key.toLowerCase().replace(/\s/g, "");
 
         let sitemaps = entity.sitemap;
         if (typeof sitemaps === "object") {
@@ -86,11 +77,14 @@ function processItems(items: { [key: string]: EntityDefinition | DashboardDefini
                 areas[sitemap.area][sitemap.group] = areas[sitemap.area][sitemap.group] ?? {};
                 areas[sitemap.area][sitemap.group][sitemapKey] = {
                     ... (areas[sitemap.area][sitemap.group][sitemapKey]
-                        ?? { ...entity, title: entity.locale?.["1030"]?.pluralName ?? entity.pluralName, order: 0 }), ...{
-
-                            ...sitemap,
-                            title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? entity.locale?.["1030"]?.pluralName ?? entity.pluralName
-                        }
+                        ?? {
+                            ...entity, logicalName: entity.logicalName ?? key.toLowerCase().replace(/\s/g, ""),
+                        title: entity.locale?.["1030"]?.pluralName ?? entity.pluralName, order: 0
+                    }),
+                    ...{
+                        ...sitemap,
+                        title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? entity.locale?.["1030"]?.pluralName ?? entity.pluralName,
+                    }
                 };
             }
         }
@@ -128,13 +122,22 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
 
     const areaSorted = sortAreas(areas);
 
+
+    const entities = Object.assign({}, ...Object.values(manifest.entities).map(o => ({ [o.logicalName]: o })));
+    const dashboards = manifest.dashboards ? Object.assign({}, ...Object.entries(manifest.dashboards).map(([key, value]) => ({ [key.toLowerCase().replace(/\s/g, "")]: { ...value, key: key.toLowerCase().replace(/\s/g, "") } }))) : {};
+
+    console.log("manifest", manifest);
+    console.log("manifest_entities", entities);
+    console.log("manifest_dashboards", dashboards);
+    console.log("manifest_sitemap", areaSorted);
+
     return {
         localization: manifest.localization,
         errorMessages: manifest.errorMessages,
         config: manifest.config,
         title: Object.keys(manifest.apps)[0],
-        dashboards: manifest.dashboards ? Object.assign({}, ...Object.values(manifest.dashboards).map(o => ({ [o.logicalName]: o }))) : {},
-        entities: Object.assign({}, ...Object.values(manifest.entities).map(o => ({ [o.logicalName]: o }))),
+        dashboards: dashboards,
+        entities: entities,
         entityMap: entityMap,
         entityCollectionSchemaNameMap: entityCollectionSchemaNameMap,
         apps: manifest.apps,

@@ -97,8 +97,6 @@ const IconRight: IIconProps = {
 
 function filterEntry(user: any) {
     return ([key, entry]: [string, ModelDrivenSitemapEntry]) => {
-        console.log("filter entry");
-        console.log([entry, user]);
 
         if (!entry.roles)
             return true;
@@ -108,17 +106,15 @@ function filterEntry(user: any) {
 }
 
 function generateLink(entry: ModelDrivenSitemapEntry, selectedArea: string, appName: string) {
-    console.log("Generating link");
     if (entry.type && entry.type === "dashboard") {
-        console.log("Generating link: dashboard");
-        return `/apps/${appName}/areas/${selectedArea}/dashboards/${entry.control}`;
+        console.log("entry", entry);
+        return `/apps/${appName}/areas/${selectedArea}/dashboards/${entry.logicalName}`;
     }
     if (entry.viewName) {
         return `/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`;
     } else {
         return `/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`;
     }
-
 }
 
 export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps) {
@@ -140,9 +136,6 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
         console.groupCollapsed("AreaFilters");
         try {
             const areas = Object.keys(sitemap.areas).filter(area => {
-                console.log("area to filter");
-                console.log(sitemap.areas[area]);
-                console.log(user);
 
                 if (!user)
                     return true;
@@ -153,7 +146,6 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
                     for (let e of Object.keys(group)) {
                         let roles = group[e].roles;
 
-                        console.log(roles);
                         if (roles) {
                             noRoleInfoDefined = false;
                             if (roles?.allowed?.filter(role => user.role.filter((r: string) => role === r).length > 0)?.length ?? 0 > 0) {
@@ -174,10 +166,8 @@ export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps)
     }, [user])
 
     const _areaChanged = (value: React.FormEvent<HTMLDivElement>, option?: IDropdownOption, index?: number) => {
-        console.log(arguments);
         const selectedArea = option?.key as string;
         setselectedArea(selectedArea);
-        // this.setState({ selectedArea: option?.key as string });
         router.push(`/apps/${router.query.appname}/areas/${selectedArea}/`);
     }
 
