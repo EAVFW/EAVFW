@@ -1,4 +1,4 @@
-import { ModelDrivenSitemapEntry as ModelDrivenSitemapEntry } from "./ModelDrivenSitemapEntry";
+import { ModelDrivenSitemapEntry } from "./ModelDrivenSitemapEntry";
 
 export interface ModelDrivenSitemap {
     areas: {
