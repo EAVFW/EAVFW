@@ -15,12 +15,12 @@ export type WizardTrigger = {
     form?: string | WizardFormTrigger
 }
 export type WizardTriggers = {
-    [key: string]:WizardTrigger
+    [key: string]: WizardTrigger
 
 }
 export type IWizardMessageToast = {
     timeout?: number
-    }
+}
 export type IWizardMessage = {
     intent?: 'info' | 'success' | 'warning' | 'error';
     title: string;
@@ -50,7 +50,7 @@ export type WizardTab = {
             title: string;
         };
     };
-    columns: FormTabDefinitionWithColumns["columns"]; 
+    columns: FormTabDefinitionWithColumns["columns"];
     onTransitionOut?: {
         workflow: string
     },
@@ -63,13 +63,13 @@ export type WizardTab = {
 }
 export type WizardTabsDefinition = {
     [key: string]: WizardTab;
-    }
+}
 export type WizardsDefinition = {
     triggers: WizardTriggers;
     tabs: WizardTabsDefinition;
     title: string;
 }
-export type WizardsCollection= {
+export type WizardsCollection = {
     [key: string]: WizardsDefinition
 }
 
@@ -79,6 +79,7 @@ export type EntityDefinition = {
     displayName: string;
     schemaName: string;
     logicalName: string;
+    control?: string;
     locale?: { [locale: string]: LocaleDefinition };
     sitemap?: MultipleSiteMapDefinitions | SiteMapDefinition;
     attributes: { [attribute: string]: AttributeDefinition };
@@ -89,5 +90,14 @@ export type EntityDefinition = {
     views?: EntityViewsDefinition,
     validation?: { [validationKey: string]: ValidationDefinitionV1 | ValidationDefinitionV2 }
     wizards?: WizardsCollection
+    [x: string]: any
+};
+
+export type DashboardDefinition = {
+    key: string;
+    pluralName: string;
+    control?: string;
+    locale?: { [locale: string]: LocaleDefinition };
+    sitemap?: MultipleSiteMapDefinitions | SiteMapDefinition;
     [x: string]: any
 };

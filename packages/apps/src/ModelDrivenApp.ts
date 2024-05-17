@@ -37,8 +37,6 @@ export class ModelDrivenApp {
         }
     }
 
-
-
     getConfig(key: string) {
         return this._data.config?.[key];
     }
@@ -75,6 +73,10 @@ export class ModelDrivenApp {
         if (!entityName)
             throw new Error("entityName not provided");
         return this._data.entities[entityName.toLowerCase().replace(/\s/g, "")];
+    }
+
+    getDashboard(dashboardName: string) {
+        return this._data.dashboards?.[dashboardName];
     }
 
     getAttributes(entityName: string) {
@@ -223,8 +225,8 @@ export class ModelDrivenApp {
                                 if (form.type === "Main") {
                                     if ((formKey === formName || formName === form.name) && this.isMatchingForm(form, tabName, columnName, sectionName)) {
 
-                                        const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];                                       
-                                                                         
+                                        const viewName = form.view ?? Object.keys(entity?.views ?? {})[0];
+
                                         const logicalname = attribute.type.inline ? Object.entries(entity.attributes)
                                             .filter(isAttributeLookupEntry)
                                             .filter(x => x[1].type.referenceType === this.getEntityKey(entityName))[0][1].logicalName : attribute.logicalName;
@@ -238,7 +240,7 @@ export class ModelDrivenApp {
                                             attributeType: attribute.type?.type,
                                             inlinePolyLookup: attribute.type?.inline,
                                             entity: entity,
-                                            filter:   form.filter,
+                                            filter: form.filter,
                                             key: entity.logicalName + attribute.logicalName
                                         });
                                     } else {

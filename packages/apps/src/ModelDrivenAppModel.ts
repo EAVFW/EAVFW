@@ -6,6 +6,7 @@ export interface ModelDrivenAppModel {
     sitemap: ModelDrivenSitemap;
     title: string;
     entities: ManifestDefinition["entities"];
+    dashboards?: ManifestDefinition["dashboards"];
     entityMap: { [key: string]: string };
     entityCollectionSchemaNameMap: { [key: string]: string };
     apps: { [key: string]: any };

@@ -1,18 +1,10 @@
-import { ModelDrivenSitemapEntity } from "./ModelDrivenSitemapEntity";
+import { ModelDrivenSitemapEntry } from "./ModelDrivenSitemapEntry";
 
 export interface ModelDrivenSitemap {
-    dashboards: {
-        [area: string]: {
-            [dashboard: string]: {
-                url: string
-            }
-        }
-    },
     areas: {
         [key: string]: {
             [key: string]: {
-
-                [key: string]: ModelDrivenSitemapEntity
+                [key: string]: ModelDrivenSitemapEntry
             };
         };
     };
