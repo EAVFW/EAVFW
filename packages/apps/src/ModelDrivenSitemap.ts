@@ -2,7 +2,7 @@ import { ModelDrivenSitemapEntry } from "./ModelDrivenSitemapEntry";
 
 export interface ModelDrivenSitemap {
     // dashboards is deprecated and should be removed
-    dashboards?: {},
+    dashboards: {},
     
     areas: {
         [key: string]: {

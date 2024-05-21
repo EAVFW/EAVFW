@@ -132,6 +132,6 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
         entityMap: entityMap,
         entityCollectionSchemaNameMap: entityCollectionSchemaNameMap,
         apps: manifest.apps,
-        sitemap: { areas: areaSorted }
+        sitemap: { areas: areaSorted, dashboards: {} },
     };
 }
