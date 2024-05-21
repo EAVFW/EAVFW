@@ -25,7 +25,7 @@ jobs:
         node-version: '20'
 
     - name: Add plugin for conventional commits
-      run: npm install conventional-changelog-conventionalcommits --force
+      run: npm install conventional-changelog-conventionalcommits@7.0.2 --force
       working-directory: ./.github/workflows
 
     - name: NPM Install
