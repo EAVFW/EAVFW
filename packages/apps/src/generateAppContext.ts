@@ -55,6 +55,44 @@ function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType 
         attribute.type = attribute.type.toLowerCase() as PrimitiveType;
 }
 
+function getTitle(item: EntityDefinition | DashboardDefinition, sitemap: any): string {
+    return sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? item.locale?.["1030"]?.displayName ?? item.locale?.["1030"]?.pluralName ?? item.pluralName;
+}
+
+
+function getLogicalName(item: EntityDefinition | DashboardDefinition, key: string): string {
+    return item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
+}
+
+function processSitemap(key: string, item: EntityDefinition | DashboardDefinition, sitemaps: any, areas: any, itemType: string) {
+
+    if (typeof sitemaps === "object") {
+        if (isSingleSiteMapDefinition(sitemaps)) sitemaps = { [`${key}dummy`]: sitemaps };
+
+        for (const sitemapKey of Object.keys(sitemaps)) {
+            const sitemap = sitemaps[sitemapKey];
+
+            if (sitemap !== undefined && areas[sitemap.area] === undefined) areas[sitemap.area] = {};
+            areas[sitemap.area][sitemap.group] = areas[sitemap.area][sitemap.group] ?? {};
+            areas[sitemap.area][sitemap.group][sitemapKey] = {
+                ... (areas[sitemap.area][sitemap.group][sitemapKey]
+                    ?? {
+                    ...item,
+                    logicalName: getLogicalName(item, key),
+                    title: item.locale?.["1030"]?.pluralName ?? item.pluralName,
+                    order: 0
+                }),
+                ...{
+                    ...sitemap,
+                    title: getTitle(item, sitemap),
+                    type: itemType,
+                }
+            };
+        }
+    }
+}
+
+
 function processItems(items: { [key: string]: EntityDefinition | DashboardDefinition }, areas: any, entityMap: { [key: string]: string }, entityCollectionSchemaNameMap: { [key: string]: string }, itemType: string) {
 
     for (const key of Object.keys(items)) {
@@ -63,33 +101,10 @@ function processItems(items: { [key: string]: EntityDefinition | DashboardDefini
         if (itemType === "entity" && isEntityDefinition(key) && item.attributes)
             Object.values((item as EntityDefinition).attributes).forEach(normalizeType);
 
-        entityMap[key] = item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
-        entityCollectionSchemaNameMap[item.collectionSchemaName] = item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
+        entityMap[key] = getLogicalName(item, key);
+        entityCollectionSchemaNameMap[item.collectionSchemaName] = getLogicalName(item, key);
 
-        let sitemaps = item.sitemap;
-        if (typeof sitemaps === "object") {
-            if (isSingleSiteMapDefinition(sitemaps)) sitemaps = { [`${key}dummy`]: sitemaps };
-
-            for (const sitemapKey of Object.keys(sitemaps)) {
-                const sitemap = sitemaps[sitemapKey];
-
-                if (sitemap !== undefined && areas[sitemap.area] === undefined) areas[sitemap.area] = {};
-                areas[sitemap.area][sitemap.group] = areas[sitemap.area][sitemap.group] ?? {};
-                areas[sitemap.area][sitemap.group][sitemapKey] = {
-                    ... (areas[sitemap.area][sitemap.group][sitemapKey]
-                        ?? {
-                        ...item,
-                        logicalName: item.logicalName ?? key.toLowerCase().replace(/\s/g, ""),
-                        title: item.locale?.["1030"]?.pluralName ?? item.pluralName, order: 0
-                    }),
-                    ...{
-                        ...sitemap,
-                        title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? item.locale?.["1030"]?.pluralName ?? item.pluralName,
-                        type: itemType,
-                    }
-                };
-            }
-        }
+        processSitemap(key, item, item.sitemap, areas, itemType);
     }
 }
 
