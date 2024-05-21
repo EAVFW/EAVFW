@@ -105,17 +105,18 @@ function filterEntry(user: any) {
     };
 }
 
-function generateLink(entry: ModelDrivenSitemapEntry, selectedArea: string, appName: string) {
-    if (entry.type && entry.type === "dashboard") {
-        console.log("entry", entry);
-        return `/apps/${appName}/areas/${selectedArea}/dashboards/${entry.logicalName}`;
-    }
-    if (entry.viewName) {
-        return `/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}/views/${entry.viewName}`;
+function generateLink(entry: ModelDrivenSitemapEntry, selectedArea: string, appName: string): string {
+    let basePath = `/apps/${appName}/areas/${selectedArea}`;
+    
+    if (entry.type === "dashboard") {
+        return `${basePath}/dashboards/${entry.logicalName}`;
+    } else if (entry.viewName) {
+        return `${basePath}/entities/${entry.logicalName}/views/${entry.viewName}`;
     } else {
-        return `/apps/${appName}/areas/${selectedArea}/entities/${entry.logicalName}`;
+        return `${basePath}/entities/${entry.logicalName}`;
     }
 }
+
 
 export default function ModelDrivenNavigation(props: ModelDrivenNavigationProps) {
 

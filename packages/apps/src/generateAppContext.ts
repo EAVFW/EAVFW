@@ -58,11 +58,11 @@ function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType 
 function processItems(items: { [key: string]: EntityDefinition | DashboardDefinition }, areas: any, entityMap: { [key: string]: string }, entityCollectionSchemaNameMap: { [key: string]: string }, itemType: string) {
 
     for (const key of Object.keys(items)) {
-
-        if (itemType === "entity" && isEntityDefinition(key) && key.attributes)
-            Object.values(key.attributes).forEach(normalizeType);
-
         const item = items[key];
+
+        if (itemType === "entity" && isEntityDefinition(key) && item.attributes)
+            Object.values((item as EntityDefinition).attributes).forEach(normalizeType);
+
         entityMap[key] = item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
         entityCollectionSchemaNameMap[item.collectionSchemaName] = item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
 
@@ -85,6 +85,7 @@ function processItems(items: { [key: string]: EntityDefinition | DashboardDefini
                     ...{
                         ...sitemap,
                         title: sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? item.locale?.["1030"]?.pluralName ?? item.pluralName,
+                        type: itemType,
                     }
                 };
             }
