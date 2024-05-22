@@ -122,6 +122,15 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
     const entityMap: { [entityKey: string]: string } = {};
     const entityCollectionSchemaNameMap: { [entityKey: string]: string } = {};
 
+    //Fix all lowercase types on load
+    for (const entityKey of Object.keys(manifest.entities)) {
+        for (const attribute of Object.values(manifest.entities[entityKey].attributes)) {
+            if (typeof attribute.type !== "string")
+                attribute.type.type = attribute.type.type.toLowerCase() as PrimitiveType;
+            else attribute.type = attribute.type.toLowerCase() as PrimitiveType;
+        }
+    }
+
     if (manifest.dashboards)
         processItems(manifest.dashboards, areas, entityMap, entityCollectionSchemaNameMap, 'dashboard');
 
@@ -131,7 +140,7 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
     const entities = Object.assign({}, ...Object.values(manifest.entities).map(o => ({ [o.logicalName]: o })));
     const dashboards = manifest.dashboards ? Object.assign({}, ...Object.entries(manifest.dashboards).map(([key, value]) => ({ [key.toLowerCase().replace(/\s/g, "")]: { ...value, key: key.toLowerCase().replace(/\s/g, "") } }))) : {};
 
-    return {
+    const appcontext= {
         localization: manifest.localization,
         errorMessages: manifest.errorMessages,
         config: manifest.config,
@@ -143,4 +152,6 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
         apps: manifest.apps,
         sitemap: { areas: areaSorted, dashboards: {} },
     };
+    
+    return appcontext;
 }
