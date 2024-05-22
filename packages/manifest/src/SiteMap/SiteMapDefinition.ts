@@ -1,4 +1,4 @@
-import { LocaleDefinition } from "../Localization";
+import { DashboardLocaleDefinition, EntityLocaleDefinition } from "../Localization";
 
 export type SiteMapDefinition = {
     app: string;
@@ -7,8 +7,7 @@ export type SiteMapDefinition = {
     title?: string;
     dashboards?: any;
     order?: number;
-    locale?: { [locale: string]: LocaleDefinition };
-
+    locale?: { [locale: string]: DashboardLocaleDefinition | EntityLocaleDefinition };
 };
 
 

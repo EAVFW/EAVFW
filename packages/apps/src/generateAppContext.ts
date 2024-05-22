@@ -1,5 +1,5 @@
-import { DashboardDefinition, EntityDefinition, isSingleSiteMapDefinition, ManifestDefinition, PrimitiveType, SiteMapDefinition } from "@eavfw/manifest";
-import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
+import { DashboardDefinition, EntityDefinition, isSingleSiteMapDefinition, ManifestDefinition, PrimitiveType, SiteMapDefinition, EntityLocaleDefinition } from "@eavfw/manifest";
+import { ModelDrivenAppModel } from "./Model/ModelDrivenAppModel";
 
 type AreasType = {
     [area: string]: {
@@ -56,7 +56,11 @@ function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType 
 }
 
 function getTitle(item: EntityDefinition | DashboardDefinition, sitemap: any): string {
-    return sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? item.locale?.["1030"]?.displayName ?? item.locale?.["1030"]?.pluralName ?? item.pluralName;
+    const title = sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? item.locale?.["1030"]?.displayName;
+    if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
+        return (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
+    }
+    return title ?? item.displayName ?? item.pluralName;
 }
 
 
@@ -74,12 +78,17 @@ function processSitemap(key: string, item: EntityDefinition | DashboardDefinitio
 
             if (sitemap !== undefined && areas[sitemap.area] === undefined) areas[sitemap.area] = {};
             areas[sitemap.area][sitemap.group] = areas[sitemap.area][sitemap.group] ?? {};
+            let title = item.locale?.["1030"]?.displayName;
+            if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
+                title = (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
+            }
+
             areas[sitemap.area][sitemap.group][sitemapKey] = {
                 ... (areas[sitemap.area][sitemap.group][sitemapKey]
                     ?? {
                     ...item,
                     logicalName: getLogicalName(item, key),
-                    title: item.locale?.["1030"]?.pluralName ?? item.pluralName,
+                    title: title ?? item.pluralName ?? item.displayName,
                     order: 0
                 }),
                 ...{

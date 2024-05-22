@@ -1,5 +1,5 @@
-import { FormDefinition, FormTabDefinitionBase, FormTabDefinitionWithColumns } from "../Forms";
-import { LocaleDefinition } from "../Localization";
+import { DashboardLocaleDefinition, EntityLocaleDefinition } from "../Localization/LocaleDefinition";
+import { FormDefinition, FormTabDefinitionWithColumns } from "../Forms";
 import { MultipleSiteMapDefinitions, SiteMapDefinition } from "../SiteMap";
 import { ValidationDefinitionV1, ValidationDefinitionV2 } from "../Validation";
 import { AttributeDefinition } from "./Attributes";
@@ -80,7 +80,7 @@ export type EntityDefinition = {
     schemaName: string;
     logicalName: string;
     control?: string;
-    locale?: { [locale: string]: LocaleDefinition };
+    locale?: { [locale: string]: EntityLocaleDefinition };
     sitemap?: MultipleSiteMapDefinitions | SiteMapDefinition;
     attributes: { [attribute: string]: AttributeDefinition };
     TPT?: string,
@@ -94,10 +94,9 @@ export type EntityDefinition = {
 };
 
 export type DashboardDefinition = {
-    key: string;
-    pluralName: string;
+    key?: string;
     control?: string;
-    locale?: { [locale: string]: LocaleDefinition };
+    locale?: { [locale: string]: DashboardLocaleDefinition };
     sitemap?: MultipleSiteMapDefinitions | SiteMapDefinition;
     [x: string]: any
 };

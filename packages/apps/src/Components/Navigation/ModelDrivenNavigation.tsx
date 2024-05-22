@@ -24,8 +24,8 @@ import Link from "next/link";
 import React, { useEffect, useState } from 'react';
 import styles from "./ModelDrivenNavigation.module.scss";
 import { useRouter, } from 'next/router'
-import { ModelDrivenSitemap } from "../../ModelDrivenSitemap";
-import { ModelDrivenSitemapEntry } from "../../ModelDrivenSitemapEntry";
+import { ModelDrivenSitemap } from "../../Model/ModelDrivenSitemap";
+import { ModelDrivenSitemapEntry } from "../../Model/ModelDrivenSitemapEntry";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";

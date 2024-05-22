@@ -1,7 +1,10 @@
-
-
-export type LocaleDefinition = {
+type BaseLocaleDefinition = {
     displayName: string;
-    pluralName: string;
     description?: string;
 };
+
+export type EntityLocaleDefinition = BaseLocaleDefinition & {
+    pluralName: string;
+};
+
+export type DashboardLocaleDefinition = BaseLocaleDefinition;

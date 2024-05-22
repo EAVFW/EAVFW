@@ -1,8 +1,8 @@
 import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty, TypeFormDefinition, isPolyLookup } from "@eavfw/manifest";
 import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
-import { ModelDrivenAppModel } from "./ModelDrivenAppModel";
-import { RecordUrlProps } from "./RecordUrlProps";
+import { ModelDrivenAppModel } from "./Model/ModelDrivenAppModel";
+import { RecordUrlProps } from "./Model/RecordUrlProps";
 import cloneDeep from "clone-deep";
 import { isAttributeLookupEntry } from "./Components/ColumnFilter/ColumnFilterContext";
 

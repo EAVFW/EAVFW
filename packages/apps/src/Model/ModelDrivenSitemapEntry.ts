@@ -11,7 +11,8 @@ export interface ModelDrivenSitemapEntry {
     }
     locale?: {
         [key: string]: {
-            pluralName: string;
+            displayName?: string;
+            pluralName?: string;
         };
     };
     order: number;

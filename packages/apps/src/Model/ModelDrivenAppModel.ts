@@ -1,6 +1,6 @@
 import { ModelDrivenSitemap } from "./ModelDrivenSitemap";
 import { ManifestDefinition } from "@eavfw/manifest";
-import { FormsConfig } from "./FormsConfig";
+import { FormsConfig } from "../FormsConfig";
 
 export interface ModelDrivenAppModel {
     sitemap: ModelDrivenSitemap;
