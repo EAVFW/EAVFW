@@ -1,5 +1,6 @@
 import { makeStyles, shorthands } from "@griffel/react";
 import { Task } from "./Task";
+import { on } from "events";
 
 export const useBoardColumnStyles = makeStyles({
     kanbanBlock: {
@@ -7,8 +8,12 @@ export const useBoardColumnStyles = makeStyles({
         width: '30.5%',
         minWidth: '14rem',
         minHeight: '4.5rem',
-        ...shorthands.borderRadius('0.3rem'),
-        backgroundColor: 'turquoise',
+        ...shorthands.borderRadius("4px"),
+        boxShadow: "rgba(0, 0, 0, 0.12) 0px 0px 2px, rgba(0, 0, 0, 0.14) 0px 2px 4px;",
+        '@media (max-width: 600px)': {
+            width: '100%',
+        }
+        // backgroundColor: 'turquoise',
     },
 });
 
@@ -19,11 +24,16 @@ type BoardColumnProps = {
     drag: any;
     title: string;
     tasks: Array<any>;
+    onItemClicked?: (id: string) => void;
 }
 
-export const BoardColumn: React.FC<BoardColumnProps> = ({ stateid, title, onDrop, allowDrop, drag, tasks }) => {
+export const BoardColumn: React.FC<BoardColumnProps> = ({ stateid, title, onDrop, allowDrop, drag, tasks, onItemClicked }) => {
 
     const styles = useBoardColumnStyles();
+
+    const handleOnItemClicked = (id: string) => {
+        onItemClicked ? onItemClicked(id) : () => window?.alert(`item clicked ${id} but no function is defined to handle it`);
+    };
 
     return (
         <div
@@ -32,7 +42,7 @@ export const BoardColumn: React.FC<BoardColumnProps> = ({ stateid, title, onDrop
             onDrop={onDrop}
             onDragOver={allowDrop}
         >
-            <strong>{title}</strong>
+            <h2><strong>{title}</strong></h2>
             {
                 tasks?.map(task => (
                     <div
@@ -40,7 +50,7 @@ export const BoardColumn: React.FC<BoardColumnProps> = ({ stateid, title, onDrop
                         id={task.id}
                         draggable="true"
                         onDragStart={drag}
-                        onClick={() => window?.alert(`not implemented yet at ${task.id}`)}
+                        onClick={handleOnItemClicked.bind(null, task.id)}
                     >
                         <Task title={task.name} description={task.description} />
                     </div>

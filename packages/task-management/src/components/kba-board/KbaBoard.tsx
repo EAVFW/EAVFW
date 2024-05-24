@@ -7,6 +7,7 @@ import { queryEntitySWR, useJsonFetcher } from "@eavfw/manifest";
 import { DragEvent } from "react";
 import { makeStyles } from "@griffel/react";
 
+
 export const useKanbanBoardStyles = makeStyles({
     kanbanContainer: {
         display: 'flex',
@@ -24,20 +25,29 @@ export const useKanbanBoardStyles = makeStyles({
         '> *:not(.ms-StackItem)': {
             flexShrink: 1,
         },
+        '@media (max-width: 600px)': {
+            width: '100%',
+        }
     },
     kanbanBoard: {
         display: "flex",
         flexDirection: "row",
         justifyContent: "space-between",
+        minHeight: "40vh",
+        '@media (max-width: 600px)': {
+            flexDirection: 'column',
+            width: '100%',
+        }
     }
 });
 
 
 type KbaBoardProps = {
     boardId: string;
+    onItemClicked?: (id: string) => void;
 };
 
-export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId }) => {
+export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId,onItemClicked }) => {
     const style = useKanbanBoardStyles();
     const dataHelper = new EAVDataHelper(useAppInfo(), useModelDrivenApp());
     const [baseUrl] = useJsonFetcher();
@@ -75,6 +85,7 @@ export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId }) => {
                         allowDrop={allowDrop}
                         onDrop={drop}
                         drag={drag}
+                        onItemClicked={onItemClicked}
                     />
                 ))}
 
