@@ -313,7 +313,7 @@ const ColumnFilterProvider = ({
                 return ',' + selects.join(',');
 
             } else if (isLookup(type) && key.indexOf('/') !== -1) {
-                let nextAttributeLogicalName = key.split('/')[1].toLowerCase();
+                let nextAttributeLogicalName = key.split('/')[1].toLowerCase().replace(/\W+/g, "");
                 
                 return ',' + nextAttributeLogicalName;
             }
