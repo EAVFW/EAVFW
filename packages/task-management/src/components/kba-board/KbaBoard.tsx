@@ -58,7 +58,8 @@ export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId, onItemClicked }) =>
         {
             "$filter": `boardid eq ${boardId}`,
             "$select": "id,task",
-            "$expand": "task($expand=quotationtaskrelations($expand(quotation)); $select=name,id,description,stateid"
+            "$expand": "task($expand=quotationtaskrelations($expand=quotation($expand=quotationpayloads,quotationform($expand=quickformdefinition($select=data)))); $select=name,id,description,stateid)"
+            // "task($expand=quotationtaskrelations($expand=quotation($select=id,name));$select=name,id,description,stateid)"
         }
     );
     const boardColumns = queryEntitySWR(app.getEntityFromKey("Board Column"),
