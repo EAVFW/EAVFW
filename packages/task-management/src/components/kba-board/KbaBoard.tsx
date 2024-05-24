@@ -47,14 +47,27 @@ type KbaBoardProps = {
     onItemClicked?: (id: string) => void;
 };
 
-export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId,onItemClicked }) => {
+export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId, onItemClicked }) => {
     const style = useKanbanBoardStyles();
     const dataHelper = new EAVDataHelper(useAppInfo(), useModelDrivenApp());
     const [baseUrl] = useJsonFetcher();
     const app = useModelDrivenApp();
 
-    const boardTasks = queryEntitySWR(app.getEntityFromKey("Board Task"), { "$filter": `boardid eq ${boardId}`, "$select": "id,task", "$expand": "task($select=name,id,description,stateid)" });
-    const boardColumns = queryEntitySWR(app.getEntityFromKey("Board Column"), { "$filter": `boardid eq ${boardId}`, "$select": "taskstate,id", "$expand": "taskstate($select=name,id)" });
+
+    const boardTasks = queryEntitySWR(app.getEntityFromKey("Board Task"),
+        {
+            "$filter": `boardid eq ${boardId}`,
+            "$select": "id,task",
+            "$expand": "task($expand=quotationtaskrelations($expand(quotation)); $select=name,id,description,stateid"
+        }
+    );
+    const boardColumns = queryEntitySWR(app.getEntityFromKey("Board Column"),
+        {
+            "$filter": `boardid eq ${boardId}`,
+            "$select": "taskstate,id",
+            "$expand": "taskstate($select=name,id)"
+        }
+    );
 
     const drag = useCallback((ev: DragEvent<HTMLDivElement>) => {
         //@ts-ignore

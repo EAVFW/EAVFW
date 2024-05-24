@@ -5,7 +5,7 @@ import { on } from "events";
 export const useBoardColumnStyles = makeStyles({
     kanbanBlock: {
         ...shorthands.padding('0.6rem'),
-        width: '30.5%',
+        width: '33%',
         minWidth: '14rem',
         minHeight: '4.5rem',
         ...shorthands.borderRadius("4px"),
