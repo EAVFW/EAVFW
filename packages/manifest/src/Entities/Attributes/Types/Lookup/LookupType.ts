@@ -16,6 +16,7 @@ export type LookupType =
         referenceType: string;
         referenceTypes?: Array<string>;
         inline?: boolean;
+        split?: boolean;
         forms?: {
             [formKey: string]: TypeFormDefinition | TypeFormModalDefinition;
         };

@@ -15,5 +15,6 @@ export type AttributeDefinition = {
     default?: string | number | boolean;
     readonly?: boolean;
     validation?: { [validationKey: string]: ValidationDefinitionV1 | ValidationDefinitionV2 }
+    metadataOnly?: boolean;
     [x: string]: any
 };

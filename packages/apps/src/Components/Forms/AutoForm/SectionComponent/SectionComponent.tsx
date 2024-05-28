@@ -142,6 +142,12 @@ const useSchema = (entityName: string, entity: EntityDefinition, columns: any, t
     return schema;
 }
 
+function buildLookupFilter(entityName: string, id: string, gridprops: ViewReference) {
+    if (gridprops.polylookup === "split")
+        return `$filter=${gridprops.entityName}${entityName}references/any(ref: ref/${entityName}id eq ${id})` + (gridprops.filter ? ' and ' + gridprops.filter : '');
+
+    return `$filter=${gridprops.attributeType === 'lookup' || gridprops.inlinePolyLookup ? gridprops.attribute : `${trimId(gridprops.attribute)}/${padId(entityName)}`} eq ${id}` + (gridprops.filter ? ' and ' + gridprops.filter : '')
+}
 export function SectionComponent<T extends { id?: string, [key: string]: any }>(
     props: SectionComponentProps<T>
 ) {
@@ -331,7 +337,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                         {...gridprops}
                                         locale={locale}
                                         onChange={onFormDataChange}
-                                        filter={`$filter=${gridprops.attributeType === 'lookup' || gridprops.inlinePolyLookup ? gridprops.attribute : `${trimId(gridprops.attribute)}/${padId(entityName)}`} eq ${formData.id}` + (gridprops.filter ? ' and ' + gridprops.filter : '')}
+                                        filter={buildLookupFilter(entityName, formData.id!, gridprops)}
                                         formData={formData}
                                         newRecord={formData.id ? false : true}
                                         defaultValues={formData[gridprops.entity.collectionSchemaName.toLowerCase()]}
@@ -372,8 +378,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                                             gridprops.entity.logicalName,
                                                             undefined,
                                                             {
-                                                                [gridprops.attribute]:
-                                                                    formData?.id,
+                                                                [gridprops.attribute]: gridprops.polylookup === "split" ? `${entityName}:${formData?.id}` :  formData?.id,
                                                             }
                                                         ));
                                                     }
