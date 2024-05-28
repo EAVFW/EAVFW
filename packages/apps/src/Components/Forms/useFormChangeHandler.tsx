@@ -100,7 +100,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         }
 
 
-        let expand = Object.values(attributes).filter(a => isLookup(a.type) && !a.type.inline).map(a => getNavigationProperty(a)).concat(localExpands).join(',');
+        let expand = Object.values(attributes).filter(a => isLookup(a.type) && !(a.type.inline || a.type.split)).map(a => getNavigationProperty(a)).concat(localExpands).join(',');
         if (formQuery?.["$expand"]) {
             expand = expand + ',' + formQuery["$expand"]
         }
@@ -135,7 +135,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                 deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
                     changed, changedValues]);
 
-                console.log("onChangeCallback", [changed, changedValues]);
+                console.log("onChangeCallback", [changed, changedValues, changedRecord.current]);
                 updateRibbonState({ canSave: changed });
                 if (ctx?.onCommit) {
                     console.log("RUNNING COMMIT HANDLE");
@@ -150,6 +150,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
     useEffect(() => {
         const entitySaveMessageKey = 'entitySaved';
         const onSaveCallBack = async () => {
+            console.log("onChangeCallback", [changedRecord.current]);
             showIndeterminateProgressIndicator();
             updateRibbonState({canSave: false, skipRedirect: false});
 

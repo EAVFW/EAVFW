@@ -12,6 +12,7 @@ export type ViewReference = {
     attribute: string;
     attributeType?: "polylookup" | "lookup";
     inlinePolyLookup?: boolean;
+    polylookup?: "inline"|"split";
     filter?: string,
     view?: ViewDefinition
 }

@@ -239,6 +239,7 @@ export class ModelDrivenApp {
                                             attribute: logicalname,
                                             attributeType: attribute.type?.type,
                                             inlinePolyLookup: attribute.type?.inline,
+                                            polylookup: attribute.type?.split ? "split" : attribute.type?.inline ?  "inline": undefined,
                                             entity: entity,
                                             filter: form.filter,
                                             key: entity.logicalName + attribute.logicalName

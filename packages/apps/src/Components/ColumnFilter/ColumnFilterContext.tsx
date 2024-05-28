@@ -1,4 +1,4 @@
-import { AttributeDefinition, getNavigationProperty, isAttributeLookup, isLookup, isPolyLookup, LookupAttributeDefinition, LookupType, ViewDefinition } from "@eavfw/manifest";
+import { AttributeDefinition, getNavigationProperty, isAttributeLookup, isLookup, isPolyLookup, LookupAttributeDefinition, LookupType, NestedType, PolyLookupType, ViewDefinition } from "@eavfw/manifest";
 import { IColumn, IDetailsColumnProps, IRenderFunction, mergeStyleSets, Target } from "@fluentui/react";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { IFetchQuery } from "../Views";
@@ -222,7 +222,11 @@ type AttributeDefinitionEntry = [string, AttributeDefinition];
 type LookupAttributeDefinitionEntry = [string, LookupAttributeDefinition];
 export function isAttributeLookupEntry(entry: AttributeDefinitionEntry): entry is LookupAttributeDefinitionEntry {
     const [key, attribute] = entry;
-    const type = typeof attribute.type === "string" ? attribute.type : attribute.type?.type; // getAttributeType(attribute);
+
+    //if (attribute.metadataOnly)
+    //    return false;
+
+    const type = typeof attribute.type === "string" ? attribute.type : attribute.type?.type; 
     return type === "lookup" || type === "polylookup";
 }
 
@@ -279,6 +283,7 @@ const ColumnFilterProvider = ({
 
             if (isPolyLookup(type)) {
                 console.log("Polylookup", [type]);
+ 
 
                 let expands = (type.inline ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
                     .filter(isAttributeLookup)
@@ -306,6 +311,10 @@ const ColumnFilterProvider = ({
         function selectPolyLookup(key:string, attr: AttributeDefinition) {
             let type = attr.type;
             if (isPolyLookup(type)) {
+
+                //if (type.split) {
+                //    return '';
+                //}
 
                 let selects = Object.values(app.getAttributes(app.getEntityFromKey(type.referenceType).logicalName))
                     .filter(isAttributeLookup)
