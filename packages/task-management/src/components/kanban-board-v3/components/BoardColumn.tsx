@@ -1,6 +1,5 @@
 import { makeStyles, shorthands } from "@griffel/react";
 import { Task } from "./Task";
-import { on } from "events";
 
 export const useBoardColumnStyles = makeStyles({
     kanbanBlock: {
@@ -13,7 +12,6 @@ export const useBoardColumnStyles = makeStyles({
         '@media (max-width: 600px)': {
             width: '100%',
         }
-        // backgroundColor: 'turquoise',
     },
 });
 

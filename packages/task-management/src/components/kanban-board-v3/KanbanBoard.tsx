@@ -1,12 +1,8 @@
-import React from "react";
-import { useCallback } from "react";
-import { RegistereControl, useAppInfo, useModelDrivenApp } from "@eavfw/apps";
-import { BoardColumn } from "./components/BoardColumn";
-import { EAVDataHelper } from "./data/EAVDataHelper";
+import React, { useCallback, DragEvent } from "react";
+import { ModelDrivenApp, RegistereControl, useModelDrivenApp } from "@eavfw/apps";
+import { BoardColumn } from "./components";
 import { queryEntitySWR, useJsonFetcher } from "@eavfw/manifest";
-import { DragEvent } from "react";
 import { makeStyles } from "@griffel/react";
-
 
 export const useKanbanBoardStyles = makeStyles({
     kanbanContainer: {
@@ -41,25 +37,30 @@ export const useKanbanBoardStyles = makeStyles({
     }
 });
 
+async function dropTask(taskid: string, stateid: string, baseUrl: string, app: ModelDrivenApp) {
+    return fetch(`${baseUrl}/entities/${app.getEntityFromKey("Task").collectionSchemaName}/records/${taskid}`, {
+        method: "PATCH", credentials: "include",
+        body: JSON.stringify({
+            stateid: stateid,
+        })
+    });
+}
 
-type KbaBoardProps = {
+type KanbanBoardV3Props = {
     boardId: string;
     onItemClicked?: (id: string) => void;
 };
 
-export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId, onItemClicked }) => {
+export const KanbanBoardV3: React.FC<KanbanBoardV3Props> = ({ boardId, onItemClicked }) => {
     const style = useKanbanBoardStyles();
-    const dataHelper = new EAVDataHelper(useAppInfo(), useModelDrivenApp());
     const [baseUrl] = useJsonFetcher();
     const app = useModelDrivenApp();
-
 
     const boardTasks = queryEntitySWR(app.getEntityFromKey("Board Task"),
         {
             "$filter": `boardid eq ${boardId}`,
             "$select": "id,task",
-            "$expand": "task($expand=quotationtaskrelations($expand=quotation($expand=quotationpayloads,quotationform($expand=quickformdefinition($select=data)))); $select=name,id,description,stateid)"
-            // "task($expand=quotationtaskrelations($expand=quotation($select=id,name));$select=name,id,description,stateid)"
+            "$expand": "task($select=name,id,description,stateid)"
         }
     );
     const boardColumns = queryEntitySWR(app.getEntityFromKey("Board Column"),
@@ -84,7 +85,7 @@ export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId, onItemClicked }) =>
         const stateid = ev.currentTarget.id;
         ev.currentTarget.appendChild(document.getElementById(taskid)!);
 
-        dataHelper.dropTask(taskid, stateid, baseUrl).then(() => {/* console.log("dropped ", [taskid, ev.currentTarget, stateid]);*/ });
+        dropTask(taskid, stateid, baseUrl, app).then(() => {/* console.log("dropped ", [taskid, ev.currentTarget, stateid]);*/ });
     }, []);
 
     return (
@@ -108,4 +109,4 @@ export const KbaBoard: React.FC<KbaBoardProps> = ({ boardId, onItemClicked }) =>
     );
 };
 
-RegistereControl("KbaBoard", KbaBoard);
+RegistereControl("KanbanBoardV3", KanbanBoardV3);
