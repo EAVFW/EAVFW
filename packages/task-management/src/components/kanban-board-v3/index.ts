@@ -1,1 +1,1 @@
-export * from "./KanbanBoard";
+export * from "./KanbanBoardV3";
