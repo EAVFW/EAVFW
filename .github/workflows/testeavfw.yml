@@ -58,7 +58,7 @@ jobs:
         working-directory: "./../GithubEAVTestDirectory"
 
       - name: create test web portal from template
-        run: npm run eavfw-nextjs
+        run: dotnet new eavfw-nextjs --namespace "GithubTestOrg" --appName "GithubTestApp" --skipGitCommit --allow-scripts yes 
         working-directory: "./../GithubEAVTestDirectory"
  
       - name: Install NPM
