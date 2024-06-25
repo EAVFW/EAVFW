@@ -5,13 +5,14 @@ import { getRecordSWR, jsonFetcher } from "@eavfw/manifest";
 import { UserContext } from "./UserContext";
 import { PropsWithChildren, useEffect } from "react";
 
+const baseDelayMs = 50;
 const DefaultLoader = () => <div>loading...</div>;
 const notAuthorizedUser: NotAuthorizedProfile = { isAuthenticated: false };
 function getProfile(entityKey?: string) {
 
     const app = useModelDrivenApp();
 
-    const { data, error } = useSWR<UserProfile>(`${process.env.NEXT_PUBLIC_BASE_URL}.auth/me`,
+    const { data, error } = useSWR<UserProfile>(`${process.env.NEXT_PUBLIC_BASE_URL??''}.auth/me`,
         {
             revalidateOnFocus: false,
             revalidateOnMount: true,
@@ -19,7 +20,16 @@ function getProfile(entityKey?: string) {
             refreshWhenOffline: false,
             refreshWhenHidden: false,
             refreshInterval: 0,
-            fetcher: jsonFetcher
+            fetcher: jsonFetcher,
+            onErrorRetry: (error, key, config, revalidate, { retryCount }) => {
+                // Never retry on 404.
+                
+                if (error.status === 401) return
+                 
+
+                // Retry after 5 seconds.
+                setTimeout(() => revalidate({ retryCount }), baseDelayMs * 2 ** retryCount)
+            }
         }
     )
 
@@ -42,7 +52,9 @@ function getProfile(entityKey?: string) {
 
 export const UserProvider: React.FC<PropsWithChildren<{ authorize?: boolean, onLoaded?: (profile: UserProfile) => void, onRenderLoading?: React.FC, loadUserInfoEntityKey?: string }>> = ({ onLoaded, loadUserInfoEntityKey, children, authorize, onRenderLoading: Loader = DefaultLoader }) => {
 
-    const { record, isLoading, isError } = getProfile(loadUserInfoEntityKey);
+    const { record, isLoading, isError } = authorize ?
+        getProfile(loadUserInfoEntityKey) :
+        { record: notAuthorizedUser, isLoading: false, isError: false };
 
     console.log("UserProvider PreAuthorize", [authorize, record]);
 
