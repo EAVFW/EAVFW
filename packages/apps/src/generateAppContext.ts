@@ -1,10 +1,10 @@
-import { DashboardDefinition, EntityDefinition, isSingleSiteMapDefinition, ManifestDefinition, PrimitiveType, SiteMapDefinition, EntityLocaleDefinition } from "@eavfw/manifest";
+import { DashboardDefinition, EntityDefinition, isSingleSiteMapDefinition, ManifestDefinition, PrimitiveType, SiteMapDefinition, EntityLocaleDefinition, MultipleSiteMapDefinitions, ManifestAppsDefinition } from "@eavfw/manifest";
 import { ModelDrivenAppModel } from "./Model/ModelDrivenAppModel";
 
 type AreasType = {
     [area: string]: {
         [group: string]: {
-            [key: string]: (EntityDefinition & Required<SiteMapDefinition>)
+            [key: string]: Required<SiteMapDefinition>
         }
     }
 
@@ -68,23 +68,40 @@ function getLogicalName(item: EntityDefinition | DashboardDefinition, key: strin
     return item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
 }
 
-function processSitemap(key: string, item: EntityDefinition | DashboardDefinition, sitemaps: any, areas: any, itemType: string) {
+function processSitemap(apps: ManifestAppsDefinition,
+    key: string,
+    item: EntityDefinition | DashboardDefinition,
+    sitemaps: MultipleSiteMapDefinitions | SiteMapDefinition | undefined,
+    areas: AreasType, itemType: string,locale:string) {
 
     if (typeof sitemaps === "object") {
-        if (isSingleSiteMapDefinition(sitemaps)) sitemaps = { [`${key}dummy`]: sitemaps };
+        if (isSingleSiteMapDefinition(sitemaps))
+            sitemaps = { [`${key}dummy`]: sitemaps };
 
         for (const sitemapKey of Object.keys(sitemaps)) {
             const sitemap = sitemaps[sitemapKey];
+            const app = apps[sitemap.app];
 
-            if (sitemap !== undefined && areas[sitemap.area] === undefined) areas[sitemap.area] = {};
-            areas[sitemap.area][sitemap.group] = areas[sitemap.area][sitemap.group] ?? {};
+
+
+            if (sitemap !== undefined && areas[sitemap.area] === undefined)
+                areas[sitemap.area] = {};
+
+
+            const groupTitle = app?.sitemap?.groups?.[sitemap.group]?.locale?.[locale]?.title ?? app?.sitemap?.groups?.[sitemap.group].title ?? sitemap.group;
+
+
+
+            areas[sitemap.area][groupTitle] = areas[sitemap.area][groupTitle] ?? {};
+
+
             let title = item.locale?.["1030"]?.displayName;
             if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
                 title = (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
             }
 
-            areas[sitemap.area][sitemap.group][sitemapKey] = {
-                ... (areas[sitemap.area][sitemap.group][sitemapKey]
+            const sitemapEntry = {
+                ... (areas[sitemap.area][groupTitle][sitemapKey]
                     ?? {
                     ...item,
                     logicalName: getLogicalName(item, key),
@@ -94,53 +111,59 @@ function processSitemap(key: string, item: EntityDefinition | DashboardDefinitio
                 ...{
                     ...sitemap,
                     title: getTitle(item, sitemap),
-                    type: itemType,
+                    type: itemType
+                    
                 }
             };
+
+            areas[sitemap.area][groupTitle][sitemapKey] = sitemapEntry;
         }
     }
 }
 
 
-function processItems(items: { [key: string]: EntityDefinition | DashboardDefinition }, areas: any, entityMap: { [key: string]: string }, entityCollectionSchemaNameMap: { [key: string]: string }, itemType: string) {
+function processItems(
+    apps: ManifestAppsDefinition,
+    items: { [key: string]: EntityDefinition | DashboardDefinition },
+    areas: AreasType,
+    entityMap: { [key: string]: string },
+    entityCollectionSchemaNameMap: { [key: string]: string },
+    itemType: string,
+    locale: string) {
 
     for (const key of Object.keys(items)) {
         const item = items[key];
 
-        if (itemType === "entity" && isEntityDefinition(key) && item.attributes)
+
+
+        if (itemType === "entity" && isEntityDefinition(item) && item.attributes)
             Object.values((item as EntityDefinition).attributes).forEach(normalizeType);
 
         entityMap[key] = getLogicalName(item, key);
         entityCollectionSchemaNameMap[item.collectionSchemaName] = getLogicalName(item, key);
 
-        processSitemap(key, item, item.sitemap, areas, itemType);
+
+        processSitemap(apps, key, item, item.sitemap, areas, itemType,locale);
+
+
     }
 }
 
-export function generateAppContext(manifest: ManifestDefinition): ModelDrivenAppModel {
+export function generateAppContext(manifest: ManifestDefinition, locale: string): ModelDrivenAppModel {
     const areas: AreasType = {};
     const entityMap: { [entityKey: string]: string } = {};
     const entityCollectionSchemaNameMap: { [entityKey: string]: string } = {};
 
-    //Fix all lowercase types on load
-    for (const entityKey of Object.keys(manifest.entities)) {
-        for (const attribute of Object.values(manifest.entities[entityKey].attributes)) {
-            if (typeof attribute.type !== "string")
-                attribute.type.type = attribute.type.type.toLowerCase() as PrimitiveType;
-            else attribute.type = attribute.type.toLowerCase() as PrimitiveType;
-        }
-    }
-
     if (manifest.dashboards)
-        processItems(manifest.dashboards, areas, entityMap, entityCollectionSchemaNameMap, 'dashboard');
+        processItems(manifest.apps, manifest.dashboards, areas, entityMap, entityCollectionSchemaNameMap, 'dashboard', locale);
 
-    processItems(manifest.entities, areas, entityMap, entityCollectionSchemaNameMap, 'entity');
+    processItems(manifest.apps, manifest.entities, areas, entityMap, entityCollectionSchemaNameMap, 'entity', locale);
 
     const areaSorted = sortAreas(areas);
     const entities = Object.assign({}, ...Object.values(manifest.entities).map(o => ({ [o.logicalName]: o })));
     const dashboards = manifest.dashboards ? Object.assign({}, ...Object.entries(manifest.dashboards).map(([key, value]) => ({ [key.toLowerCase().replace(/\s/g, "")]: { ...value, key: key.toLowerCase().replace(/\s/g, "") } }))) : {};
 
-    const appcontext= {
+    const appcontext = {
         localization: manifest.localization,
         errorMessages: manifest.errorMessages,
         config: manifest.config,
@@ -152,6 +175,6 @@ export function generateAppContext(manifest: ManifestDefinition): ModelDrivenApp
         apps: manifest.apps,
         sitemap: { areas: areaSorted, dashboards: {} },
     };
-    
+
     return appcontext;
 }

@@ -5,21 +5,30 @@ import { ModelDrivenAppModel } from "./Model/ModelDrivenAppModel";
 import { RecordUrlProps } from "./Model/RecordUrlProps";
 import cloneDeep from "clone-deep";
 import { isAttributeLookupEntry } from "./Components/ColumnFilter/ColumnFilterContext";
+import { Dispatch } from "react";
+
+let id = 0;
 
 
 export class ModelDrivenApp {
+    _id = id++;
     _data!: ModelDrivenAppModel;
     _isInitialized = false;
+    //dispatcher!: Dispatch<EAVAppReducerAction>;
 
+   
     // prettier-ignore
     get sitemap() {
         return this._data.sitemap;
     }
 
-    // prettier-ignore
-    get locale() {
-        return "1030";
-    }
+    
+    public locale: string;
+
+
+       
+
+    
 
     // prettier-ignore
     get canSave() {
@@ -31,9 +40,11 @@ export class ModelDrivenApp {
     //    return { appName: this.currentAppName, areaName: this.currentAreaName };
     //}
 
-    constructor(manifest?: ManifestDefinition) {
+    constructor(manifest?: ManifestDefinition, locale = "1030") {
+        console.log("EAVAPP - Creating ModelDrivenApp", [id, this._id]);
+        this.locale = locale;
         if (manifest) {
-            this._data = generateAppContext(manifest);
+            this._data = generateAppContext(manifest,locale);
         }
     }
 
@@ -175,6 +186,12 @@ export class ModelDrivenApp {
     getEntityFromCollectionSchemaName(key: string) {
         return this.getEntity(this._data.entityCollectionSchemaNameMap[key]);
     }
+    getEntityKeyFromCollectionSchemaName(key: string) {
+        return this._data.entityCollectionSchemaNameMap[key];
+    }
+    getLookupAttributes(entityKey: string) {
+        let attributes = this.getAttributes(entityKey);
+    }
     getExpandQueryParam(entityDefinition: EntityDefinition, expandall = false, includeHierachi = false) {
 
 
@@ -190,7 +207,12 @@ export class ModelDrivenApp {
             return expand
         }
 
-        let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=${Object.values(this.getAttributes(this.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
+        let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=id,${Object.values(this.getAttributes(this.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
+        return expand;
+    }
+    getSelectQueryParamForExpand(entityDefinition: EntityDefinition) {
+        let attributes = this.getAttributes(entityDefinition.logicalName);
+        let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)},${getNavigationProperty(a)}id`).join(',');
         return expand;
     }
 
