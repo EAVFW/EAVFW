@@ -23,59 +23,83 @@ import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenViewContext } from "../Views";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { createRef, useEffect, useState } from "react";
-import { WorkflowState } from "@eavfw/utils";
+import { WorkflowState, runWorkflow } from "@eavfw/utils";
 import { useFormChangeHandlerProvider } from "../Forms";
+import { useSelectionContext } from "../Selection";
+import { JSONSchema7 } from "json-schema";
+
 export type WorkFlowDialogProps = {
     ribbonkey: string,
     text?: string,
     title?: string,
     iconProps?: { iconName?: string }
-    workflow: string;
+    workflow?: string;
+
+    disabledHook?: () => boolean;
 
 }
-export const WorkFlowDialog = ({ ribbonkey, ...props }: WorkFlowDialogProps) => {
+type workflowmetadata = {
+    schema: JSONSchema7,
+    uiSchema:any
+}
+export const WorkFlowDialog = ({ ribbonkey, workflow, disabledHook = () => false, ...props }: WorkFlowDialogProps) => {
+
+    if (!workflow) throw new Error("Workflow is required");
+   
+
 
     const { registerButton, events } = useRibbon();
+    const app = useModelDrivenApp();
     const { currentEntityName, currentRecordId } = useAppInfo();
+    const currentEntityCollectionSchemaName = app.getEntity(currentEntityName).collectionSchemaName;
+   
 
     const { mutate:mutateView } = useModelDrivenViewContext();
     const { mutate: mutateForm } = useFormChangeHandlerProvider();
     const mutate = () => { mutateView(); mutateForm(); }
-    const app = useModelDrivenApp();
+   
     const [hideDialog, { toggle: toggleHideDialog }] = useBoolean(true);
     const [isLoading, { toggle: startLoading }] = useBoolean(false);
     const [isValid, setIsValid] = useState(false);
-    const { data, error } = useSWRFetch(`/workflows/${props.workflow}/metadata`, !hideDialog);
+    const { data: rjsfProps, error, isLoading: isLoadingMetadata } = useSWRFetch<workflowmetadata>(`/workflows/${workflow}/metadata`, !hideDialog);
 
     const [payload, setPayload] = useState({} as any);
+
+    const { selection, selectionDetails } = useSelectionContext();
+
+    const disabled = disabledHook();
+
 
     registerButton({
         key: ribbonkey,
         text: props.text ?? "Sync RankedIn",
         iconProps: props.iconProps ?? { iconName: 'Send' },
         title: props.title ?? props.text ?? "Sync RankedIn",
-        disabled: false,
-        onClick: () => {
-
-
-            toggleHideDialog();
-
-           
-          
-
+        disabled: disabled ,
+        onClick: () => {           
+            toggleHideDialog(); 
         }
-    });
+    }, [disabled]);
+
+    useEffect(() => {
+
+        if (rjsfProps && selection.count === 1) {
+            const props = rjsfProps?.schema?.properties ?? {};
+            setPayload(Object.fromEntries(Object.entries({ ...selection.getSelection()[0] }).filter(([p, v]) => p in props)));
+        }
+
+    }, [rjsfProps, selection.count])
 
     const onSubmit = () => {
 
     }
 
     const formRef = createRef<DefaultForm>();
-    useEffect(() => {
-        console.log("Form Is Valid?", [!!formRef.current && formRef.current.validateForm()]);
-            setIsValid(!!formRef.current && formRef.current.validateForm());
+    //useEffect(() => {
+    //    console.log("Form Is Valid?", [!!formRef.current && formRef.current.validateForm()]);
+    //        setIsValid(!!formRef.current && formRef.current.validateForm());
 
-    }, [payload, hideDialog, formRef.current, data])
+    //}, [payload, hideDialog, formRef.current, rjsfProps])
 
 
     return (
@@ -84,7 +108,7 @@ export const WorkFlowDialog = ({ ribbonkey, ...props }: WorkFlowDialogProps) => 
                 <DialogBody>
                     <DialogTitle>{props.title}</DialogTitle>
                     <DialogContent>
-                        {data && <Form ref={formRef} formData={payload} onChange={(d, i) => setPayload(d.formData)} idPrefix="workflow" widgets={WidgetRegister} validator={validator} templates={{ BaseInputTemplate: React9BaseInputTemplate, FieldTemplate: React9FieldTemplate, }} {...data} ><></></Form>}
+                        {rjsfProps && <Form ref={formRef} formData={payload} onChange={(d, i) => { setPayload(d.formData); setIsValid(!!formRef.current && formRef.current.validateForm()); }} idPrefix="workflow" widgets={WidgetRegister} validator={validator} templates={{ BaseInputTemplate: React9BaseInputTemplate, FieldTemplate: React9FieldTemplate, }} {...rjsfProps} ><></></Form>}
                     </DialogContent>
                     <DialogActions fluid>
                         <Button
@@ -92,37 +116,14 @@ export const WorkFlowDialog = ({ ribbonkey, ...props }: WorkFlowDialogProps) => 
                             disabled={!isValid || isLoading}
                             onClick={async () => {
                                 startLoading();
-                                let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${app.getEntity(currentEntityName).collectionSchemaName}/records/${currentRecordId}/workflows/${props.workflow}/runs`, {
-                                    method: "POST",
-                                    body: JSON.stringify(payload),
-                                    credentials: "include"
-                                });
-                                let id = await rsp.json().then(x => x.id);
 
-                                let completed = false;
-
-                                while (!completed) {
-                                    let statusRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${props.workflow}/runs/${id}/status`, {
-                                        credentials: "include"
-                                    });
-
-                                    let status = await statusRsp.json();
-                                    completed = status.completed;
-
-                                   
-                                    await new Promise((resolve) => setTimeout(resolve, 1000));
-
-
-                                }
-
-                                let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${props.workflow}/runs/${id}`, {
-                                    //headers: {
-                                    //    'traceparent': `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`
-                                    //},
-                                    credentials: "include"
-                                });
-
-                                let result = await stateRsp.json() as WorkflowState;
+                                let { result, rsp } = await runWorkflow(workflow, "Manual",
+                                    {
+                                        ...payload,
+                                        selection: selection.getSelection().map(x => ({ id: x.id, ["$type"]: x.entityName }))
+                                    },
+                                    { currentEntityCollectionSchemaName, currentRecordId });
+                                 
 
                                 if (result.status.toLowerCase() === "failed") {
 
@@ -133,7 +134,7 @@ export const WorkFlowDialog = ({ ribbonkey, ...props }: WorkFlowDialogProps) => 
                                 mutate();
                                 toggleHideDialog();
                             }}>
-                            {isLoading || error ? <Spinner size="small"  /> : 'Start'}
+                            {isLoading || error || isLoadingMetadata ? <Spinner size="small"  /> : 'Start'}
                         </Button>
                     </DialogActions>
                 </DialogBody>
@@ -145,7 +146,7 @@ export const WorkFlowDialog = ({ ribbonkey, ...props }: WorkFlowDialogProps) => 
 const defaultProps = {
     text: "Run Workflow", title: "Run Workflow", iconProps: { iconName: "Send" }
 };
-export const RegisterWorkflowRibbonButton = (ribbonkey: string, propsDefaults: Omit<WorkFlowDialogProps, "ribbonkey">) => RegistereRibbonButton(ribbonkey, ({ key, ...props }) => {
+export const RegisterWorkflowRibbonButton = (ribbonkey: string, propsDefaults: Omit<WorkFlowDialogProps, "ribbonkey">={}) => RegistereRibbonButton(ribbonkey, ({ key, ...props }) => {
 
     const appliedProps = { ...defaultProps, ...propsDefaults, ...props };
     return <WorkFlowDialog key={key} ribbonkey={key} {...appliedProps} />
