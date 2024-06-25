@@ -13,19 +13,29 @@ export interface PreSaveValidatorResult { success: boolean, msg?: string };
 
 const buttonStyles = { root: { marginRight: 8 } };
 
+/**
+ * 
+ * FormRender - Renders a form for a given entity. 
+ * Using a ref to store record data to avoid re-rendering the form when the record changes.
+ * 
+ * Use a new key for the component if a complete re-render is needed when outer record data is changed.
+ * 
+ * @param props
+ * @returns
+ */
 export function FormRender<T>(props: FormRenderProps) {
-    const { dismissPanel, onChange, extraErrors } = props;
+    const { dismissPanel, onChange, extraErrors, hideFooter } = props;
     const app = useModelDrivenApp();
     const entityName = props.entityName ?? (props.type as LookupType).foreignKey?.principalTable!;
     const entity = app.getEntity(entityName);
     const forms = entity.forms!;
 
     const formName = props.formName ?? (props.forms ?? Object.keys(forms).filter(k => forms[k].type === "Modal"))[0]
-    const saveBtnText = forms?.[formName]?.buttons?.save?.text      //gets text for naming of save btn in modal if it is defined
-    const cancelBtnText = forms?.[formName]?.buttons?.cancel?.text  //gets text for naming of cancel btn in modal if it is defined
+    const saveBtnText = props.saveBtnText?? forms?.[formName]?.buttons?.save?.text      //gets text for naming of save btn in modal if it is defined
+    const cancelBtnText = props.cancelBtnText ?? forms?.[formName]?.buttons?.cancel?.text  //gets text for naming of cancel btn in modal if it is defined
 
-    //  const record = useRef(props.record ?? {});
-    const [record, setRecord] = useState(props.record ?? {});
+    const record = useRef(props.record ?? {});
+    //const [record, setRecord] = useState({ ...props.record ?? {} });
     const related = useMemo(() => app.getRelated(entity.logicalName), [entity.logicalName]);
     const [preSaveValidators, setPreSaveValidators] = useState<PreSaveValidator[]>([]);
     const { addMessage, removeMessage } = useMessageContext();
@@ -33,10 +43,10 @@ export function FormRender<T>(props: FormRenderProps) {
 
     const _onSave = () => {
 
-        console.log("Closing Modal", record);
-        var results = preSaveValidators.map((c) => c(record, entity))
+        console.log("Closing Modal", record.current);
+        var results = preSaveValidators.map((c) => c(record.current, entity))
         if (results.every(r => r.success === true)) {
-            onChange(record, { autoSave: preSaveValidators.length > 0 });
+            onChange(record.current, { autoSave: preSaveValidators.length > 0 });
             setErrorMsg(undefined);
             dismissPanel.call(undefined, "save");
         }
@@ -63,12 +73,12 @@ export function FormRender<T>(props: FormRenderProps) {
         }
     }, []);
 
-    useEffect(() => {
-        console.log("FormRender, Record Updated:", props.record)
-        //  record.current = props.record;
-        if (props.record)
-            setRecord(props.record);
-    }, [props.record]);
+    //useEffect(() => {
+    //    console.log("FormRender, Record Updated:", props.record)
+    //    //  record.current = props.record;
+    //    if (props.record)
+    //        setRecord(props.record);
+    //}, [props.record]);
 
     const StickyFooter: React.FC<PropsWithChildren> = React.useCallback(({ children }) => (props.stickyFooter ?? true) ? <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky> : <>{children}</>, [props.stickyFooter]);
 
@@ -90,8 +100,9 @@ export function FormRender<T>(props: FormRenderProps) {
 
     const _onChange = useCallback((data: any) => {
         console.log("FormRender, Data changed Modal", data);
-        // record.current = data;
-        setRecord(data);
+         record.current = data;
+       // setRecord(data);
+        onChange(data);
     }, []);
 
     //useEffect(() => {
@@ -101,9 +112,9 @@ export function FormRender<T>(props: FormRenderProps) {
 
     return <>
         <Stack.Item grow style={{ height: 'calc(100% - 80px)' }}>
-            <ModelDrivenEntityViewer key={`${entityName}${formName}`} related={related} onChange={_onChange} record={record} formName={formName}
+            <ModelDrivenEntityViewer key={`${entityName}${formName}`} related={related} onChange={_onChange} record={record.current} formName={formName}
                 entityName={entityName} entity={entity} locale={app.locale} extraErrors={extraErrors} />
-            <RenderFooterContent />
+            {!hideFooter && <RenderFooterContent />}
         </Stack.Item>
     </>
 }
