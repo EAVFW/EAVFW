@@ -11,6 +11,7 @@ export const useKanbanBoardStyles = makeStyles({
         flexWrap: 'nowrap',
         width: 'auto',
         height: 'auto',
+        flexGrow:'1',
         boxSizing: 'border-box',
         '> *': {
             textOverflow: 'ellipsis',
@@ -27,8 +28,9 @@ export const useKanbanBoardStyles = makeStyles({
     },
     kanbanBoard: {
         display: "flex",
+        flexGrow: '1',
         flexDirection: "row",
-        justifyContent: "space-between",
+        gap: "10px",
         minHeight: "40vh",
         '@media (max-width: 600px)': {
             flexDirection: 'column',

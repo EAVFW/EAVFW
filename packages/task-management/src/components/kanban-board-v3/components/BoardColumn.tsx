@@ -13,6 +13,9 @@ export const useBoardColumnStyles = makeStyles({
             width: '100%',
         }
     },
+    taskContainer: {
+        cursor:'pointer'
+    }
 });
 
 type BoardColumnProps = {
@@ -23,6 +26,19 @@ type BoardColumnProps = {
     title: string;
     tasks: Array<any>;
     onItemClicked?: (id: string) => void;
+}
+
+export const BoardTask = ({ task, handleOnItemClicked,drag }: { task: any, handleOnItemClicked :any,drag:any}) => {
+    const styles = useBoardColumnStyles();
+    return (<div className={styles.taskContainer}
+        key={task.id}
+        id={task.id}
+        draggable="true"
+        onDragStart={drag}
+        onClick={handleOnItemClicked}
+    >
+        <Task title={task.name} description={task.description} />
+    </div>)
 }
 
 export const BoardColumn: React.FC<BoardColumnProps> = ({ stateid, title, onDrop, allowDrop, drag, tasks, onItemClicked }) => {
@@ -42,17 +58,7 @@ export const BoardColumn: React.FC<BoardColumnProps> = ({ stateid, title, onDrop
         >
             <h2><strong>{title}</strong></h2>
             {
-                tasks?.map(task => (
-                    <div
-                        key={task.id}
-                        id={task.id}
-                        draggable="true"
-                        onDragStart={drag}
-                        onClick={handleOnItemClicked.bind(null, task.id)}
-                    >
-                        <Task title={task.name} description={task.description} />
-                    </div>
-                ))
+                tasks?.map(task => <BoardTask task={ task} key={task.id} drag={drag} handleOnItemClicked={handleOnItemClicked.bind(null, task.id) } />)
             }
         </div>
     );
