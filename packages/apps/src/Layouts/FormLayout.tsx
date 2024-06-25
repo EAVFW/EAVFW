@@ -25,7 +25,7 @@ import { useSectionStyles } from "../Styles/SectionStyles.styles";
 
 
 const FormLayoutContext = createContext({
-    
+
     mutator: { mutate: () => { } },
     setMutator: (a: SetStateAction<{ mutate: () => void }>) => { }
 });
@@ -76,7 +76,7 @@ export function FormLayout(props: PageLayoutProps) {
         const [mutater, setMutator] = useState({ mutate: () => { } });
         const topBarTheme = ResolveFeature("topBarTheme");
 
-      //  const [isOpen, setIsOpen] = useState(false);
+        //  const [isOpen, setIsOpen] = useState(false);
 
         const styles = useSectionStyles();
 
@@ -84,41 +84,41 @@ export function FormLayout(props: PageLayoutProps) {
             <ModelDrivenGridViewerSelectedContext.Provider value={{ setSelection, selection: selection!, selectionDetails }}>
                 <FormLayoutContext.Provider value={{ mutator: mutater, setMutator: setMutator }}>
                     <WizardProvider>
-                    <RibbonContextProvider>
-                        <Stack verticalFill>
+                        <RibbonContextProvider>
+                            <Stack verticalFill>
 
-                            <MessagesProvider>
-                                <ProgressBarProvider>
-                                    <TopBar theme={topBarTheme} title={props.title} search={true} />
+                                <MessagesProvider>
+                                    <ProgressBarProvider>
+                                        <TopBar theme={topBarTheme} title={props.title} search={true} />
 
-                                    <Stack grow styles={PageStackStyles} style={{ overflow: "hidden" }} horizontal verticalFill>
-                                        <ModelDrivenNavigation sitemap={props.sitemap} theme={topBarTheme} />
-                                        
+                                        <Stack grow styles={PageStackStyles} style={{ overflow: "hidden" }} horizontal verticalFill>
+                                            <ModelDrivenNavigation sitemap={props.sitemap} theme={topBarTheme} />
+
                                             <WizardDrawer />
-                                        
-                                        <Stack.Item grow>
-                                          
+
+                                            <Stack.Item grow>
+
                                                 <Stack verticalFill>
                                                     <RibbonBar className={styles.section} />
-                                                
+
 
                                                     <MessageArea />
-                                                <Stack.Item grow style={{ position: "relative" }}>
+                                                    <Stack.Item grow style={{ position: "relative" }}>
 
-                                                    <ScrollablePane scrollbarVisibility={ScrollbarVisibility.always} >
-                                                        <Sticky stickyPosition={StickyPositionType.Header} ><ProgressBar /></Sticky>
-                                                        {props.children}
-                                                    </ScrollablePane>
-                                                </Stack.Item>
-                                            </Stack>
+                                                        <ScrollablePane scrollbarVisibility={ScrollbarVisibility.always} >
+                                                            <Sticky stickyPosition={StickyPositionType.Header} ><ProgressBar /></Sticky>
+                                                            {props.children}
+                                                        </ScrollablePane>
+                                                    </Stack.Item>
+                                                </Stack>
 
-                                        </Stack.Item>
-                                    </Stack>
-                                </ProgressBarProvider>
-                            </MessagesProvider>
+                                            </Stack.Item>
+                                        </Stack>
+                                    </ProgressBarProvider>
+                                </MessagesProvider>
 
 
-                        </Stack>
+                            </Stack>
                         </RibbonContextProvider>
                     </WizardProvider>
                 </FormLayoutContext.Provider>
