@@ -6,11 +6,11 @@ import { TabContext } from './TabContext';
 
 
 
-export const StateTabProvider: React.FC<PropsWithChildren<{ defaultTabs: string[] }>> = ({ defaultTabs, children }) => {
+export const StateTabProvider: React.FC<PropsWithChildren<{ defaultTabs?: string[], defaultTab?:string }>> = ({ defaultTab="TAB_General", defaultTabs=[], children }) => {
 
 
 
-    const [tabName, setSelectedTab] = useState<string>("");
+    const [tabName, setSelectedTab] = useState<string>(defaultTab);
     const [tabs, setTabs] = useState(defaultTabs);
 
 
