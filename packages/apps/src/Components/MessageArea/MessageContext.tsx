@@ -1,4 +1,4 @@
-import { useModelDrivenApp } from "@eavfw/apps";
+import { ModelDrivenApp, useModelDrivenApp } from "@eavfw/apps";
 import { MessageBar, MessageBarType } from "@fluentui/react";
 import React, {useContext, useState} from "react";
 
@@ -58,22 +58,22 @@ function useMessageContext() {
 }
 
 
-export function successMessageFactory(factoryProps: { key: string, removeMessage: (key: string) => void }) {
+export function successMessageFactory(factoryProps: { key: string, removeMessage: (key: string) => void }, app?: ModelDrivenApp) {
     return (props?: any) => {
-        const app = useModelDrivenApp();
+        const _app = app?? useModelDrivenApp();
         return <MessageBar messageBarType={MessageBarType.success} {...props}
             onDismiss={() => factoryProps.removeMessage(factoryProps.key)}>
-            {app.getLocalization('entitySaved') ?? <>Entity have been saved!</>}
+            {_app.getLocalization('entitySaved') ?? <>Entity have been saved!</>}
         </MessageBar>
     }
 }
 
-export function errorMessageFactory(factoryProps: { key: string, removeMessage: (key: string) => void, messages?: string[] }) {
+export function errorMessageFactory(factoryProps: { key: string, removeMessage: (key: string) => void, messages?: string[] }, app?: ModelDrivenApp) {
     return (props?: any) => {
-        const app = useModelDrivenApp();
+        const _app = app?? useModelDrivenApp();
         return <MessageBar messageBarType={MessageBarType.error} {...props}
             onDismiss={() => factoryProps.removeMessage(factoryProps.key)}>
-            {app.getLocalization('entitySavedErr') ?? <>An error happened!</>}
+            {_app.getLocalization('entitySavedErr') ?? <>An error happened!</>}
             {factoryProps.messages?.join("\n")}
         </MessageBar>
     }
