@@ -282,10 +282,11 @@ const ColumnFilterProvider = ({
        
 
             if (isPolyLookup(type)) {
+
                 console.log("Polylookup", [type]);
  
 
-                let expands = (type.inline ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
+                let expands = (type.inline || type.split ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
                     .filter(isAttributeLookup)
                     .map(a => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`));
                 console.log("Polylookup", expands);
@@ -344,7 +345,7 @@ const ColumnFilterProvider = ({
         let expand = columns
             .map(x => [x.key, x.data] as [string, AttributeDefinition])
             .filter(isAttributeLookupEntry)
-            .map(([key, a]) => a.type.inline ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}(${expandPolyLookup(key, a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(key,a)})`);
+            .map(([key, a]) => a.type.inline||a.type.split ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}(${expandPolyLookup(key, a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(key,a)})`);
 
         let orderBy = columns.filter(c => c.isSorted)[0];
 

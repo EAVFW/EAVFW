@@ -434,16 +434,34 @@ export function LookupControl<T>({
 
 
     const app = useModelDrivenApp();
+    
     const entityAttributes = app.getAttributes(entityName);
 
     const attribute = entityAttributes[attributeName];
     const logicalName = attribute.logicalName;
-    const [{ selectedValue, value, id, formvalues }, { onChange: eavOnChange }] = useEAVForm(state => ({
-        selectedValue: state.formValues[logicalName.slice(0, -2)],
-        value: state.formValues[logicalName],
-        id: state.formValues["id"],
-        formvalues: state.formValues
-    }), "LookupControl" + attributeName);
+    const [{ selectedValue, value, id, formvalues }, { onChange: eavOnChange }] = useEAVForm(state => {
+
+        let isSplit = isPolyLookup(attribute.type) && attribute.type.split;
+        let selectedValue = isPolyLookup(attribute.type) && attribute.type.split ?
+            attribute.type.referenceTypes
+                .map(referenceType => state.formValues[`${entityName}${app.getEntityFromKey(referenceType).logicalName}references`])
+                .flat()[0] : state.formValues[logicalName.slice(0, -2)];
+
+        if (isSplit && selectedValue)
+            selectedValue = selectedValue[Object.entries(app.getEntity(selectedValue["$type"]).attributes)
+                .filter(isAttributeLookupEntry)
+                .find(([_, x]) => isLookup(x.type) && x.type.referenceType !== entityName)
+                ?.[1].logicalName.slice(0,-2)!];
+            
+
+        return {
+            selectedValue: selectedValue,               
+            value: isPolyLookup(attribute.type) && attribute.type.split ?
+                attribute.type.referenceTypes.map(referenceType => state.formValues[`${entityName}${app.getEntityFromKey(referenceType).logicalName}references`]?.map((x: IRecord) => x.id)).flat()[0] ?? state.formValues[logicalName]?.split(':')[1] : state.formValues[logicalName],
+            id: state.formValues["id"],
+            formvalues: state.formValues
+        }
+    }, "LookupControl" + attributeName);
 
 
 
@@ -459,8 +477,18 @@ export function LookupControl<T>({
 
     if (isPolyLookup(attribute.type)) {
         const type = attribute.type;
+        
+        const options = attribute.type.referenceTypes.map(c => ({ key: c, text: c, data: c }));
 
         const defaultEntity = () => {
+            if (type.split && selectedValue)
+                return app.getEntityKey(selectedValue["$type"]);
+
+            if (type.split) {
+                return app.getEntityKey(formvalues[logicalName].split(':')[0]);
+           //     return app.getEntityKey(type.referenceTypes.map(x => app.getEntityFromKey(x))
+           //         .find(x => Object.values(x.attributes).some(a => a.logicalName.slice(0, -2) === value.split(':')[0]))?.logicalName!);
+            }
 
             if (type.inline) {
                 const referencetype = Object.entries(entityAttributes).filter(isAttributeLookupEntry).filter(x => x[0] != attributeName && value && formvalues[x[1].logicalName] === value)?.[0]?.[1]?.type?.referenceType;
@@ -474,12 +502,15 @@ export function LookupControl<T>({
         }
 
         const [selectedEntity, setSelectedEntity] = useState(defaultEntity);
-
-        console.log("Poly Lookup", [value]);
+      
+       
+        console.log("Poly Lookup", [formvalues[attribute.logicalName], value, selectedValue, selectedEntity, options, entityName,
+            type.referenceTypes.map(x => app.getEntityFromKey(x))
+                ]);
 
         return <Stack horizontal tokens={{ childrenGap:10 }}>
 
-            <Dropdown styles={{ root: { width:150 } }} selectedKey={selectedEntity} onChange={(x, o) => setSelectedEntity(o?.data)} options={attribute.type.referenceTypes.map(c => ({ key: c, text: c, data: c }))} ></Dropdown>
+            <Dropdown styles={{ root: { width: 150 } }} selectedKey={selectedEntity} onChange={(x, o) => setSelectedEntity(o?.data)} options={options} ></Dropdown>
             <Stack.Item grow>
                 <LookupCoreControl
                     key={selectedEntity}
@@ -507,7 +538,7 @@ export function LookupControl<T>({
 
     const targetEntityName = column.entityName ?? (isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute"));
 
-    console.log("Lookup Control", [attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData]);
+    console.log("Lookup Control", [entityName,attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData]);
 
     //  
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
