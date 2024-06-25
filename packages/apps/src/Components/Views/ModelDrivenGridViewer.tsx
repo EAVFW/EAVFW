@@ -382,7 +382,7 @@ const LookupControlRender: React.FC<LookupControlRenderProps> = ({
                         key: entitySaveMessageKey,
                         removeMessage: removeMessage,
                         messages: errors,
-                    })
+                    },app)
                 );
             }
 
