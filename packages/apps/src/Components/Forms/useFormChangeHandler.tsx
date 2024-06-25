@@ -1,4 +1,4 @@
-import {EntityDefinition, getNavigationProperty, getRecordSWR, IRecord, isLookup} from "@eavfw/manifest";
+import {AttributeDefinition, EntityDefinition, getNavigationProperty, getRecordSWR, IRecord, isLookup, isPolyLookup} from "@eavfw/manifest";
 import {useRouter} from "next/router";
 import {createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState} from "react";
 import {cleanDiff, deepDiffMapper} from "@eavfw/utils";
@@ -100,7 +100,28 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         }
 
 
-        let expand = Object.values(attributes).filter(a => isLookup(a.type) && !(a.type.inline || a.type.split)).map(a => getNavigationProperty(a)).concat(localExpands).join(',');
+        function expandLookup(a: AttributeDefinition) {
+            
+            let type = a.type;
+           
+            if (isPolyLookup(type)) {
+                if (type.split) {
+
+                    return type.referenceTypes.map(k => {
+                        let referenceSchemaName = `${entity.schemaName}${app.getEntityFromKey(k).schemaName}References`;
+                        let reference = app.getEntityFromCollectionSchemaName(referenceSchemaName);
+                        return `${referenceSchemaName}($select=${app.getSelectQueryParamForExpand(reference)};$expand=${app.getExpandQueryParam(reference) })`
+                    })
+
+                }
+            }
+            return [getNavigationProperty(a)];
+        }
+        let expand = Object.values(attributes)
+            .filter(a => isLookup(a.type) && !(a.type.inline))
+            .map(expandLookup)
+            .flat()
+            .concat(localExpands).join(',');
         if (formQuery?.["$expand"]) {
             expand = expand + ',' + formQuery["$expand"]
         }
@@ -186,7 +207,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                 addMessage(entitySaveMessageKey, successMessageFactory({
                     key: entitySaveMessageKey,
                     removeMessage: removeMessage
-                }));
+                }, app));
 
 
                 return 1;
@@ -199,7 +220,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             addMessage(entitySaveMessageKey, errorMessageFactory({
                 key: entitySaveMessageKey,
                 removeMessage: removeMessage, messages: errors
-            }));
+            },app));
              
             saveCompleted({entityName: entity.logicalName});
 
