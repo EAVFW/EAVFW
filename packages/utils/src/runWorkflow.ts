@@ -25,9 +25,13 @@ export type WorkflowState = {
     };
 };
 
-export const runWorkflow = async (workflowNameOrId:string, trigger:string, values :any) => {
+export const runWorkflow = async (workflowNameOrId: string, trigger: string, values: any, options?: { currentEntityCollectionSchemaName?:string, currentRecordId?:string }) => {
 
-    let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${workflowNameOrId}/runs`, {
+    const endpoint = options?.currentEntityCollectionSchemaName ?
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${options?.currentEntityCollectionSchemaName}/records/${options?.currentRecordId}/workflows/${workflowNameOrId}/runs` :
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${workflowNameOrId}/runs`;
+
+    let rsp = await fetch(endpoint, {
         method: "POST",
         body: JSON.stringify({ trigger: trigger, values: values }),
         credentials: "include",
