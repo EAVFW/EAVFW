@@ -5,7 +5,7 @@ on:
     inputs:
       templateversion:
         required: false
-        default: '2.1.9'
+        default: ''
         type: string
       react_type_version:
         required: false
@@ -17,7 +17,7 @@ on:
         type: string
       dotnetversion:
         required: false
-        default: '6.0.308'
+        default: '8.0.301'
         type: string
       nodeversion:
         required: false
@@ -42,7 +42,7 @@ jobs:
           node-version: ${{ inputs.nodeversion }}
           
       - name: install EAVFW template
-        run: (dotnet new --debug:rebuildcache) -and (dotnet new --install EAVFW.Templates::${{ inputs.templateversion }}) -and (dotnet new --uninstall)
+        run: (dotnet new --debug:rebuildcache) -and (dotnet new --install EAVFW.Templates${{ inputs.templateversion }}) -and (dotnet new --uninstall)
 
       - name: link
         run: npm install --force --ignore-scripts
