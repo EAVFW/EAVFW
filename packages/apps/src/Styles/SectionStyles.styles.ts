@@ -13,6 +13,9 @@ export const useSectionStyles = makeStyles({
 
     sectionSlim: {
         maxWidth: "430px",
+    },
+    fullWidth: {
+        width:"100%"
     }
 
 })

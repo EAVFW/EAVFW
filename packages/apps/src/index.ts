@@ -15,3 +15,4 @@ export * from "./Validation";
 export * from "./Layouts";
 export * from "./filterRoles"
 export * from "./StateBasedAppContextProvider";
+export * from "./Styles"
