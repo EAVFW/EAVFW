@@ -37,7 +37,7 @@ export const RibbonHost: React.FC<PropsWithChildren<{ ribbon: { [key: string]: P
                 registerButton({
                     key: ribbonKey,
                     ...props
-                });
+                },[props]);
             }
         }
         console.log("Render Ribbon V2:", [contexts, elements, children]);
