@@ -10,6 +10,7 @@
     "@eavfw/utils": "*"
   },
   "peerDependencies": {
+    "next": "^14.2.3",
     "react": "^18.2.0",
     "json-schema": "^0.4.0",
     "@fluentui/react": "^8.118.7",
