@@ -1,4 +1,8 @@
+import { Stack } from "@fluentui/react";
+import { Fragment } from "react";
 
 export function EmptyLayout(props: any) {
-    return (<div>{props.children}</div>)
+    return (
+        <Fragment>{props.children}</Fragment>
+    )
 }
