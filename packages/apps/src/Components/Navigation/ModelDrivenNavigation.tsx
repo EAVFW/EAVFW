@@ -41,7 +41,6 @@ import {
     NavDrawerBody,
     NavDrawerFooter,
     NavDrawerHeader,
-    NavDrawerHeaderNav,
     NavDrawerProps,
     NavItem,
     NavSectionHeader,
@@ -277,11 +276,12 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
                     defaultSelectedValue={`${router.query.entityName ?? router.query.dashboard}-${router.query.view}`}
                     className={styles.nav}
                     open={isModelDrivenNavigationOpen}
+                    size="small"
                     type="inline"
                 >
 
                     <NavDrawerHeader>
-                        <NavDrawerHeaderNav>
+                       
 
                             {model.getConfig("SVG_LOGO_PATH") ? <img style={{ overflow: "visible" }} src={model.getConfig("SVG_LOGO_PATH")} /> :
                                 <img style={{ padding: 8, boxSizing: "border-box" }}
@@ -289,7 +289,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
                                     alt="Logo"
                                 />
                             }
-                        </NavDrawerHeaderNav>
+                       
                     </NavDrawerHeader>
                     <NavDrawerBody>
 
