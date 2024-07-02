@@ -2,8 +2,8 @@
   "version": "1.0.1-vnext.3",
   "name": "@eavfw/codeeditor",
   "dependencies": {
-    "@monaco-editor/react": "4.6.0",
-    "monaco-editor": "0.46.0"
+    "@monaco-editor/react": "^4.6.0",
+    "monaco-editor": "^0.46.0"
   },
   "peerDependencies": {
     "pako": "2.1.0",
