@@ -8,6 +8,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { useAppInfo } from "../../useAppInfo";
 
+declare global {
+    interface Window {  __env: { [key: string]: string } }
+}
+
 export const FormHeader = ({ form, record, entity, entityName, locale, formName, getTabName,tabs }: {tabs:string[], getTabName: (tab: FormTabDefinition) => string, form: FormDefinition, record: any, entity: EntityDefinition, entityName: string, locale: string, formName: string }) => {
 
     const app = useModelDrivenApp();
