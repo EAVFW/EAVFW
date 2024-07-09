@@ -133,6 +133,8 @@ export const WorkFlowDialog = ({ ribbonkey, workflow, disabledHook = () => false
 
                                 mutate();
                                 toggleHideDialog();
+                                //TODO - mutate is not implemented properly, dirty fix now
+                                location.reload();
                             }}>
                             {isLoading || error || isLoadingMetadata ? <Spinner size="small"  /> : 'Start'}
                         </Button>
