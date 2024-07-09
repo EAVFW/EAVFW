@@ -4,7 +4,7 @@ import { FieldProps } from "@rjsf/utils";
 import { JSONSchema7 } from "json-schema";
 import { RegistereControl, useModelDrivenApp } from '@eavfw/apps';
 import Editor, { DiffEditor, useMonaco, loader, EditorProps, OnMount, OnChange } from "@monaco-editor/react";
-import type { editor } from 'monaco-editor/esm/vs/editor/editor.api';
+import type { editor } from 'monaco-editor';
 import { useDebouncer } from "@eavfw/hooks";
 import { gzip, ungzip } from "pako";
 import { useEAVForm } from "@eavfw/forms";

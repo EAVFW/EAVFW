@@ -6,10 +6,12 @@ import { useSectionStyles } from "../../Styles/SectionStyles.styles";
 import { IDropdownOption, Stack } from "@fluentui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
+import { useAppInfo } from "../../useAppInfo";
 
 export const FormHeader = ({ form, record, entity, entityName, locale, formName, getTabName,tabs }: {tabs:string[], getTabName: (tab: FormTabDefinition) => string, form: FormDefinition, record: any, entity: EntityDefinition, entityName: string, locale: string, formName: string }) => {
 
     const app = useModelDrivenApp();
+    const { currentRecordId } = useAppInfo();
     const { onTabChange, tabName = Object.keys(form?.layout?.tabs ?? {})[0] } = useTabProvider();
     const styles = useSectionStyles();
     const forms = entity?.forms ?? {};
@@ -40,7 +42,7 @@ export const FormHeader = ({ form, record, entity, entityName, locale, formName,
     ) => {
         setselectedForm(option?.key as string);
     }, []);
-
+    const DisableTabsOnNewFeatureFlag = window?.__env?.["DisableTabsOnNewFeatureFlag"] !== 'true' && typeof currentRecordId === "undefined";
     return (<>
         { form?.type !== "QuickCreate" && <Stack.Item className={styles.section} styles={{ root: { marginLeft: 15, paddingTop: 8 } }}>
             <h2>{primaryFieldValue}</h2>
@@ -59,7 +61,7 @@ export const FormHeader = ({ form, record, entity, entityName, locale, formName,
                 {tabs.filter(tabName => form.layout.tabs[tabName]).map(tabName => {
                     const tab = form.layout.tabs[tabName];
                     return (
-                        <Tab id={tabName} value={tabName} key={tabName} >
+                        <Tab id={tabName} value={tabName} key={tabName} disabled={DisableTabsOnNewFeatureFlag} title={DisableTabsOnNewFeatureFlag?'Enabled on save':tabName } >
                             {getTabName(tab) ?? tabName}
                         </Tab>
                     )
