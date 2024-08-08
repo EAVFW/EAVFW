@@ -274,6 +274,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
             <PortalCompatProvider>
                 <NavDrawer
                     defaultSelectedValue={`${router.query.entityName ?? router.query.dashboard}-${router.query.view}`}
+                    selectedValue={`${router.query.entityName ?? router.query.dashboard}-${router.query.view}`}
                     className={styles.nav}
                     open={isModelDrivenNavigationOpen}
                     size="small"
