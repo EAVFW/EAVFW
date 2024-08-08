@@ -167,15 +167,16 @@ const useStyles = makeStyles({
         minWidth: "150px"
     },
     nav: {
-
+        backgroundColor:  tokens.colorNeutralBackground1,
     },
     navText: {
         fontWeight: "inherit",
     },
     navItem: {
+        backgroundColor: tokens.colorNeutralBackground1,
         color: tokens.colorBrandForegroundLink,
         ':hover': {
-            backgroundColor: `color-mix(in srgb, ${tokens.colorNeutralBackground4}, black 10%);`
+            backgroundColor: `color-mix(in srgb, ${tokens.colorNeutralBackground1}, black 10%);`
 
         }
     }
@@ -272,7 +273,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
     return (
         <FluentProvider id="themeNavV2" theme={ResolveFeature("topBarV2Theme", false)} className={styles.root}>
             <PortalCompatProvider>
-                <NavDrawer
+                <NavDrawer 
                     defaultSelectedValue={`${router.query.entityName ?? router.query.dashboard}-${router.query.view}`}
                     selectedValue={`${router.query.entityName ?? router.query.dashboard}-${router.query.view}`}
                     className={styles.nav}
@@ -322,7 +323,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
                     </NavDrawerBody>
 
                     <NavDrawerFooter>
-                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <div style={{ width:"100%", display: "flex", alignItems: "center", justifyContent: "center" }}>
                             {isModelDrivenNavigationOpen && selectedArea && Object.entries(areas).length > 1 &&
                                 <Dropdown className={styles.dropdown} appearance="filled-lighter" value={selectedArea} id="AreaSelector"
                                     onOptionSelect={_areaChanged}
