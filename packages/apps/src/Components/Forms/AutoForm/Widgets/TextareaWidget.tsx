@@ -48,7 +48,7 @@ export function TextareaWidget<
 	const uiProps = options ?? {};
 	console.log("UIPROPS", [uiProps, inputProps]);
 	return (
-		<Textarea
+		<Textarea style={{ "flexGrow":1}}
 			id={id}
 			name={id}
 			placeholder={placeholder}

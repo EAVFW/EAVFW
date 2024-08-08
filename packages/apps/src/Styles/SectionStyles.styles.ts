@@ -10,7 +10,20 @@ export const useSectionStyles = makeStyles({
         ...shorthands.border("1px", "solid", tokens.colorTransparentStroke),
         boxShadow: "rgba(0, 0, 0, 0.12) 0px 0px 2px, rgba(0, 0, 0, 0.14) 0px 2px 4px;"
     },
-
+    flex: {
+        display: "flex",
+        flexDirection: "column"
+    },
+    grow: {
+        flexGrow: 1,
+       
+    },
+    element: {
+     //   padding: "20px",
+    },
+    rowElement: {
+       
+    },
     sectionSlim: {
         maxWidth: "430px",
     },

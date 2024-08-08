@@ -186,6 +186,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const columns = form.columns;
         const tab = form.layout.tabs[tabName] as FormTabDefinitionWithColumns;
         const section = findEntry(tab.columns, columnName, sectionName);
+        console.log("SectionComponent", [tab,section]);
 
         if (hasColumns(section)) {
             const columns = section.columns;
@@ -324,7 +325,7 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     columnName={columnName}
                     onFormDataChange={onFormDataChange}
                     schema={schema}
-                    formContext={formContext}
+                    formContext={{ ...formContext, section }}
                     extraErrors={extraErrors}
                 />}
                 {views
@@ -583,10 +584,7 @@ export const WizardSection: React.FC<{
                 <ControlsComponent entityName={currentEntityName}
                     factory={undefined}
                     locale={app.locale}
-                    formData={formData}
-
-
-
+                    formData={formData} 
                     onFormDataChange={onChange}
                     schema={schema}
                     formContext={{}}

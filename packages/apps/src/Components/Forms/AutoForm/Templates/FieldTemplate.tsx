@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useMemo, useState } from "react";
-import { FieldTemplateProps } from "@rjsf/utils";
+import React, { CSSProperties, createContext, useContext, useMemo, useState } from "react";
+import { FieldTemplateProps, getUiOptions } from "@rjsf/utils";
 import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, IStackStyles, IStackTokens, ITheme, Label, mergeStyleSets, Stack, Text, ThemeContext } from "@fluentui/react";
 import { List } from "@fluentui/react";
 import { useExpressionParser } from "@eavfw/expressions";
@@ -9,7 +9,8 @@ import { useBoolean, useId } from "@fluentui/react-hooks";
 import { warn } from "console";
 import { useWarnings, WarningContextProvider } from "./WarningContext";
 import { EAVFWLabel } from "./EAVFWLabel";
-import { Field } from "@fluentui/react-components";
+import { Field, mergeClasses } from "@fluentui/react-components";
+import { useSectionStyles } from "../../../../Styles";
 
 
 
@@ -25,11 +26,11 @@ export const FieldTemplate = ({
     description,
     displayLabel,
     required, label, schema, disabled,
-    formContext,
+    formContext, uiSchema, ... rest
 }: FieldTemplateProps) => {
-    console.log("Field Template:", [id, displayLabel, rawErrors, rawHelp, rawDescription, classNames, hidden, description]);
+    console.log("Field Template:", [id, uiSchema, getUiOptions(uiSchema), displayLabel, rawErrors, rawHelp, rawDescription, classNames, hidden, description, rest]);
 
-
+    const styles = useSectionStyles();
     const parentwarnings = useWarnings();
     const warnings = useMemo(() => {
 
@@ -39,16 +40,18 @@ export const FieldTemplate = ({
         return resultWarnings;
     }, [parentwarnings]);
 
-
+    const uiOptions = getUiOptions(uiSchema);
+    const templateStyles: { container?: CSSProperties, field?: CSSProperties } = typeof uiOptions.styles === "object" ? uiOptions?.styles ?? {} : {};
+    
     // TODO: do this better by not returning the form-group class from master.
-    classNames = "ms-Grid-col ms-sm12 " + classNames?.replace("form-group", "");
+  //  classNames = "ms-Grid-col ms-sm12 " + classNames?.replace("form-group", "");
     return (
         <WarningContextProvider value={warnings}>
             <div
-                className={classNames}
-                style={{ marginBottom: schema.type === "object" ? 0 : 15, display: hidden ? "none" : undefined }}>
+                className={mergeClasses('control-field-template', id, schema.type as string, styles.fullWidth)}
+                style={{ marginBottom: schema.type === "object" ? 0 : 15, display: hidden ? "none" : undefined, ...(uiOptions.style ?? {}), ...(templateStyles?.container ?? {}) }}>
 
-                <Field
+                <Field className={mergeClasses("control-field", styles.flex)} style={{ ...(templateStyles?.field ?? {}) }}  
                     aria-disabled={disabled}
                     //@ts-ignore 
                     label={displayLabel ? ({ children: (_: any, p: any) => <EAVFWLabel id={id} disabled={disabled} required={required} label={label ?? schema.title} description={rawDescription} /> }) : undefined}

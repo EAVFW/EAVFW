@@ -43,6 +43,7 @@ export default function ObjectFieldTemplate<
         registry,
         uiOptions
     );
+    console.log("objectfieldtemplate", [uiOptions]);
     // Button templates are not overridden in the uiSchema
     const {
         ButtonTemplates: { AddButton },
@@ -68,14 +69,14 @@ export default function ObjectFieldTemplate<
                     registry={registry}
                 />
             )}
-            <Flex fill column >
+            <Flex className="object-field-container" fill column >
                 {properties.map((element, index) =>
                     // Remove the <Grid> if the inner element is hidden as the <Grid>
                     // itself would otherwise still take up space.
                     element.hidden ? (
                         element.content
                     ) : (
-                        <Flex column fill key={index}>
+                        <Flex className="object-field-element" column fill key={index}>
                             {element.content}
                         </Flex>
                     )

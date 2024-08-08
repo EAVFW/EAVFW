@@ -23,6 +23,7 @@ export function getJsonSchema(
                 readOnly:  field.readonly,
                 "x-field": "ControlHostWidget",
                 "x-widget-props": {
+                    styles: field.styles,
                     ...formContext,
                 },
                 "x-control": typeof (field.control) === "object" ? field.control.type : field.control,
@@ -65,7 +66,8 @@ export function getJsonSchema(
             "x-widget-props": {
                 placeholder: attribute.readonly ? "beregnes automatisk ved gem" : undefined,
                 disabled: field.disabled,
-                rows:field.rows,
+                rows: field.rows,
+                styles: field.styles,
                 ...formContext,
             }
         };
@@ -134,7 +136,8 @@ export function getJsonSchema(
                         ...defaultProps["x-widget-props"],
                         resizable: false,
                         styles: {
-                            ...(defaultProps["x-widget-props"]?.["styles"] ?? {}), field: { ...(defaultProps["x-widget-props"]?.["styles"]?.["field"] ?? {}), height: 200, }
+                            ...(defaultProps["x-widget-props"]?.["styles"] ?? {}),
+                            field: { ...(defaultProps["x-widget-props"]?.["styles"]?.["field"] ?? {}), height: 200, }
                         },
                     },
                 };

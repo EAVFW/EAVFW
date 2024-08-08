@@ -101,6 +101,8 @@ import { TextareaWidget } from "./Widgets/TextareaWidget";
 import { EAVFWLabel } from "./Templates/EAVFWLabel";
 import { useEAVForm } from "@eavfw/forms";
 import ObjectFieldTemplate from "./Templates/ObjectFieldTemplate";
+import { useSectionStyles } from "../../../Styles";
+import { mergeClasses } from "@fluentui/react-components";
 
 export const WidgetRegister: FormProps["widgets"] = {
     SelectWidget: SelectWidget,
@@ -127,6 +129,7 @@ const ControlsComponent =
             console.group("ControlsComponent: ");
 
             const app = useAppInfo();
+            const styles = useSectionStyles();
 
             const renderId = useRef(new Date().toISOString());
             renderId.current = new Date().toISOString();
@@ -223,8 +226,8 @@ const ControlsComponent =
             //const [formdata1] = useEAVForm(x => x.formValues);
           //  console.log("uncronlled4", [(formdata1 as any)?.name]);
             return (
-                <div style={{ padding: 20 }} suppressHydrationWarning={true}>
-                    <Form
+
+                <Form tagName="div" className={mergeClasses('controls', sectionName, styles.element, styles.flex, styles.grow)}
                         onBlur={addVisited}
                         schema={schema as JSONSchema7}
                         onChange={onChange}
@@ -250,7 +253,7 @@ const ControlsComponent =
                         showErrorList={false}
                         validator={validator}                
                         extraErrors={formErrors} // Even though we have to manually access and add the error for custom widget ourself through formContext, we have to set the error here too, to make thure the errors is added to the overview.
-                    ><Fragment /></Form></div>
+                    ><Fragment /></Form>
             );
         } finally {
             console.groupEnd();
@@ -264,7 +267,7 @@ function hasCustomControl(obj: JSONSchema7Definition, type: "x-widget" | "x-fiel
 }
 
 const readonlyStylesFunction: (outerProps: any, props: ITextFieldStyleProps) => Partial<ITextFieldStyles> = (outerProps, props) => {
-
+    console.log("RenderStyles", [outerProps, props]);
     return {
         fieldGroup: {
             backgroundColor: props.disabled || outerProps.readOnly ? props.theme.palette.neutralLight : props.theme.palette.neutralLighterAlt,
@@ -428,8 +431,9 @@ const _onRenderCaretDown = (formContext: any, schema: any, props?: IDropdownProp
         {originalRender?.(props)}</>;
 };
 function mapUISchema(props: any, formContext: any) {
-
+    console.log("MAP UISCHEMA", [props, formContext]);
     if (typeof props === "object") {
+       
         const entries = Object.keys(props).map((k) => [k, {
             
             //"ui:disabled": props[k]?.["x-widget-props"]?.disabled,
@@ -437,7 +441,8 @@ function mapUISchema(props: any, formContext: any) {
             "ui:field": getControl(props[k], "field"),             
             "ui:options": {
                 ...props[k]["x-widget-props"] ?? {},
-                styles: readonlyStylesFunction.bind(null, props[k]),  //props[k].readOnly ? readonlyStylesFunction : props[k]["x-widget-props"]?.["styles"],
+
+               // styles: readonlyStylesFunction.bind(null, props[k]),  //props[k].readOnly ? readonlyStylesFunction : props[k]["x-widget-props"]?.["styles"],
                 onRenderCaretDown: _onRenderCaretDown.bind(null, formContext, props[k]),
 
                 //Hack to render labels correct for booleans, due to react json form will set renderLabel=false for booleans
@@ -469,7 +474,9 @@ function getUiSchema(
 ): UiSchema {
     //  console.log("jsonSchema",jsonSchema);
     const props = jsonSchema.properties;
-    const deps = mergeDeep({},
+    const deps = mergeDeep({
+        "ui:options": { styles: formContext.section.styles }
+    },
         ...Object.values(jsonSchema.dependencies ?? {})
             .map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext))).flat(), mapUISchema(props, formContext));
     return deps;

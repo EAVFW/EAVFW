@@ -62,7 +62,7 @@ const ColumnComponent = <T extends { id?: string, [key: string]: any }>(props: C
         const ui = (
             <Stack verticalFill className={`form-column`}>
                 {Object.keys(sections).map((sectionName, idx) => (
-                    <Stack.Item grow key={sectionName} className={styles.section}>
+                    <Stack.Item grow key={sectionName} className={`section ${sectionName} ${mergeClasses(styles.section, styles.flex)}`}>
                         <SectionComponent<T>
                             form={form}
                             tabName={tabName}

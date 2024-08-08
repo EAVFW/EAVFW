@@ -85,7 +85,7 @@ export const MonacoEditorControl: React.VFC<MonacoEditorControlProps> = ({ entit
         }, [monaco]);
         // Only set `editorState` if a value was found on the `formData`, this allows us to use placeholder text.
         return (
-            <div style={{ height, width }} ref={div}>
+            <div className="eavfw-codeeditor" style={{ height: "100%" }} ref={div}>
                 <Editor
                     options={{
                         automaticLayout: true,
