@@ -97,7 +97,7 @@ const FormComponent = <T extends { id?: string, [key: string]: any }>(props: For
         }
 
 
-        const { onTabChange, tabName = Object.keys(form?.layout?.tabs ?? {})[0] } = useTabProvider();
+        const { onTabChange, tabName = tabs[0] } = useTabProvider();
 
         const sectionStyles = useSectionStyles();
         const tab = form.layout.tabs[tabName];

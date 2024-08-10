@@ -47,6 +47,7 @@ export type FormTabDefinitionBase = {
     };
     columns?: Required<AutoFormColumnsDefinition>["columns"],
     control?: string;
+    visibleOnCreate?: boolean;
 };
 export type FormTabDefinition = RequireAtLeastOne<FormTabDefinitionBase, 'columns' | 'control'>
 export type FormTabDefinitionWithColumns = WithRequiredProperty<Omit<FormTabDefinitionBase, 'control'>,'columns'>

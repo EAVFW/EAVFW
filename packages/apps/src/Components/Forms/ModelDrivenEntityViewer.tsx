@@ -184,7 +184,7 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
     const compID = useUuid();
     console.log("ModelDrivenForm: ID", [compID]);
     const app = useModelDrivenApp();
-
+    const { currentRecordId } = useAppInfo();
 
 
 
@@ -203,7 +203,7 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
 
 
 
-    const tabs = useMemo(() => Object.keys(evaluatedForm?.layout.tabs ?? {}), [evaluatedForm]);
+    const tabs = useMemo(() => Object.keys(evaluatedForm?.layout.tabs ?? {}).filter(tab => !(typeof currentRecordId === "undefined" && evaluatedForm?.layout?.tabs?.[tab].visibleOnCreate === false)), [evaluatedForm, currentRecordId]);
 
 
 
