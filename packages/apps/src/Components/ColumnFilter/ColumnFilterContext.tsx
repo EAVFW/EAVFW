@@ -295,8 +295,16 @@ const ColumnFilterProvider = ({
                 return `$expand=${expands.join(',')};`
             } else if (isAttributeLookup(attr)) {
 
-                let a = [...new Set(columns.filter(f => f.key.split('/')[0]===key && f.key !== key).map(c => c.key.split('/')[1]))]
-                    .map(nav => app.getEntityFromKey(attr.type.referenceType).attributes[nav].schemaName.slice(0,-2));
+                let a = [...new Set(columns.filter(f => f.key.split('/')[0] === key && f.key !== key).map(c => c.key.split('/')[1]))]
+                    .map(nav => {
+                        let columnNavigation = app.getEntityFromKey(attr.type.referenceType).attributes[nav];
+                        if (isAttributeLookup(columnNavigation)) {
+                            return columnNavigation.schemaName.slice(0, -2);
+                        }
+
+                        return;
+
+                    }).filter(x => x);
 
                 if (a.length) {
                     return `$expand=${a.join(',')};`
@@ -309,7 +317,8 @@ const ColumnFilterProvider = ({
             return '';
         }
 
-        function selectPolyLookup(key:string, attr: AttributeDefinition) {
+        function selectPolyLookup(key: string, attr: AttributeDefinition) {
+            console.log("selectPolyLookup", [key, attr]);
             let type = attr.type;
             if (isPolyLookup(type)) {
 
@@ -345,6 +354,11 @@ const ColumnFilterProvider = ({
         let expand = columns
             .map(x => [x.key, x.data] as [string, AttributeDefinition])
             .filter(isAttributeLookupEntry)
+            //.filter(([key, attr]) => {
+            //    console.log("Filtering Columns", [key, attr, key.split('/')[0] === key || isAttributeLookup(app.getEntityFromKey(attr.type.referenceType).attributes[key.split('/')[1]])])
+            //    return key.split('/')[0] === key || isAttributeLookup(app.getEntityFromKey(attr.type.referenceType).attributes[key.split('/')[1]]);
+            //})
+
             .map(([key, a]) => a.type.inline||a.type.split ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}(${expandPolyLookup(key, a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(key,a)})`);
 
         let orderBy = columns.filter(c => c.isSorted)[0];

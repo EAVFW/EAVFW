@@ -475,7 +475,7 @@ function getUiSchema(
     //  console.log("jsonSchema",jsonSchema);
     const props = jsonSchema.properties;
     const deps = mergeDeep({
-        "ui:options": { styles: formContext.section.styles }
+        "ui:options": { styles: formContext.section?.styles }
     },
         ...Object.values(jsonSchema.dependencies ?? {})
             .map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext))).flat(), mapUISchema(props, formContext));

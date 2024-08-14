@@ -192,9 +192,9 @@ export class ModelDrivenApp {
     getLookupAttributes(entityKey: string) {
         let attributes = this.getAttributes(entityKey);
     }
-    getExpandQueryParam(entityDefinition: EntityDefinition, expandall = false, includeHierachi = false) {
+    getExpandQueryParam(entityDefinition: EntityDefinition, expandall = false, includeHierachi = false, isReferenceLoopup?: EntityDefinition) {
 
-
+        console.log("getExpandQueryParam", [entityDefinition, isReferenceLoopup])
 
         let attributes = this.getAttributes(entityDefinition.logicalName);
 
@@ -207,7 +207,10 @@ export class ModelDrivenApp {
             return expand
         }
 
-        let expand = Object.values(attributes).filter(isAttributeLookup).map((a) => `${getNavigationProperty(a)}($select=id,${Object.values(this.getAttributes(this.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
+        let expand = Object.values(attributes)
+            .filter(isAttributeLookup)
+            .filter((a) => typeof isReferenceLoopup === "undefined" || a.type.referenceType !== this.getEntityKey(isReferenceLoopup.logicalName) )
+            .map((a) => `${getNavigationProperty(a)}($select=id,${Object.values(this.getAttributes(this.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`).join(',');
         return expand;
     }
     getSelectQueryParamForExpand(entityDefinition: EntityDefinition) {

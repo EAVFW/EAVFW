@@ -110,7 +110,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                     return type.referenceTypes.map(k => {
                         let referenceSchemaName = `${entity.schemaName}${app.getEntityFromKey(k).schemaName}References`;
                         let reference = app.getEntityFromCollectionSchemaName(referenceSchemaName);
-                        return `${referenceSchemaName}($select=${app.getSelectQueryParamForExpand(reference)};$expand=${app.getExpandQueryParam(reference) })`
+                        return `${referenceSchemaName}($select=id,${app.getSelectQueryParamForExpand(reference)};$expand=${app.getExpandQueryParam(reference, false, false, entity) })`
                     })
 
                 }
