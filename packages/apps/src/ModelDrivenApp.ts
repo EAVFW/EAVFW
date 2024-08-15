@@ -1,4 +1,4 @@
-import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty, TypeFormDefinition, isPolyLookup } from "@eavfw/manifest";
+import { AttributeDefinition, LookupAttributeDefinition, ManifestDefinition, FormColumnDefinition, ViewReference, EntityDefinition, isAttributeLookup, getNavigationProperty, TypeFormDefinition, isPolyLookup, WizardsDefinition, WizardTrigger } from "@eavfw/manifest";
 import { FormsConfig } from "./FormsConfig";
 import { generateAppContext } from "./generateAppContext";
 import { ModelDrivenAppModel } from "./Model/ModelDrivenAppModel";
@@ -6,6 +6,7 @@ import { RecordUrlProps } from "./Model/RecordUrlProps";
 import cloneDeep from "clone-deep";
 import { isAttributeLookupEntry } from "./Components/ColumnFilter/ColumnFilterContext";
 import { Dispatch } from "react";
+import { RibbonViewItemInfo } from "@eavfw/manifest/src/Ribbon/RibbonViewItemInfo";
 
 let id = 0;
 
@@ -298,6 +299,17 @@ export class ModelDrivenApp {
     getWizardsTriggeredByNew(appname: string, area: string, entityname: string) {
         let wizards = Object.entries(this._data.entities[entityname].wizards ?? {})
             .filter(([key, wizard]) => Object.values(wizard.triggers ?? {}).some(x => x.ribbon && x.ribbon == "NEW"));
+
+        return wizards;
+    }
+    getWizardsTriggeredByRibbons(appname: string, area: string, entityname: string) {
+        let wizards = Object.entries(this._data.entities[entityname].wizards ?? {})
+            .filter(([key, wizard]) => Object.values(wizard.triggers ?? {}).some(x => x.ribbon && typeof x.ribbon === "object"))
+            .map(([key, wizard]) => [
+                key,
+                wizard,
+                Object.entries(wizard.triggers ?? {}).filter(([triggerkey, x]) => x.ribbon && typeof x.ribbon === "object") as [string, WizardTrigger][]
+            ] as [string, WizardsDefinition, [string, WizardTrigger][]])
 
         return wizards;
     }

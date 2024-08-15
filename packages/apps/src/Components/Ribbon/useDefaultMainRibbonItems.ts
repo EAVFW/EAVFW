@@ -1,7 +1,7 @@
 
 import { isLookup, RibbonViewInfo, deleteRecordSWR } from "@eavfw/manifest";
 import { ICommandBarItemProps } from "@fluentui/react";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAppInfo } from "../../useAppInfo";
 import { useModelDrivenApp } from "../../useModelDrivenApp";
 import { useSelectionContext } from "../Selection/useSelectionContext";
@@ -9,6 +9,7 @@ import { useRibbon} from "./useRibbon"
 import { capitalize} from "@eavfw/utils";
 import { useFormLayoutContext } from "../..";
 import { useWizard, useWizardOpener } from "../Wizards/useWizard";
+import { RibbonViewItemInfo } from "@eavfw/manifest/src/Ribbon/RibbonViewItemInfo";
 
 function uuidv4() {
     //@ts-ignore
@@ -17,17 +18,50 @@ function uuidv4() {
     );
 }
 
-export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushRoute: (url: URL) => void, withSave=true) => {
-
-    const { addButton, removeButton, canSave, events } = useRibbon();
+const useWizardRibbonButtons = () => {
     const app = useModelDrivenApp();
     const appInfo = useAppInfo();
+    const wizards = useMemo(() => app.getWizardsTriggeredByRibbons(appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName),
+        [appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName]);
 
-    const { selection, selectionDetails } = useSelectionContext();
+    const { addButton, removeButton, canSave, events } = useRibbon();
     const { openWizard } = useWizardOpener();
+    useEffect(() => {
+        const keys : string[] = [];
+        for (let [key, wizard, triggers] of wizards) {
+            for (let [triggerKey, trigger] of triggers) {
 
-    // const router = useRouter();
+                if (trigger.visibleForForms === false && appInfo.currentRecordId)
+                    continue;
 
+                addButton({
+                    ...trigger.ribbon as RibbonViewItemInfo,
+                    key: key,
+                    text: capitalize(app.getLocalization(triggerKey) ?? triggerKey),
+                    
+                    
+                    onClick: (e, i) => {
+                        openWizard([key, wizard]);
+                    }
+                });
+                keys.push(key);
+            }
+        }
+
+        return () => {
+            for (let key of keys) {
+               
+                    removeButton(key);
+                
+            }
+        }
+    }, [wizards, appInfo.currentRecordId]);
+}
+const useNewRibbonButton = (ribbonInfo: RibbonViewInfo, pushRoute: (url: URL) => void) => {
+    const app = useModelDrivenApp();
+    const appInfo = useAppInfo();
+    const { addButton, removeButton, canSave, events } = useRibbon();
+    const { openWizard } = useWizardOpener();
     useEffect(() => {
         let items: ICommandBarItemProps[] = [];
 
@@ -69,7 +103,12 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
 
     }, [ribbonInfo.new?.visible, appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName]);
 
-    
+
+}
+
+const useSaveRibbonButton = (withSave: boolean) => {
+    const app = useModelDrivenApp();
+    const { addButton, removeButton, canSave, events } = useRibbon();
     useEffect(() => {
         if (withSave) {
             addButton(
@@ -109,7 +148,11 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
 
 
     }, [canSave]);
-
+}
+const useDeleteRibbonButton = (ribbonInfo: RibbonViewInfo) => {
+    const app = useModelDrivenApp();
+    const { addButton, removeButton, canSave, events } = useRibbon();
+    const { selection, selectionDetails } = useSelectionContext();
     useEffect(() => {
         console.log("ribbonInfo", ribbonInfo);
         if (ribbonInfo.delete?.visible !== false) {
@@ -143,4 +186,14 @@ export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushR
 
     }, [ribbonInfo.delete?.visible, ribbonInfo.delete?.disabled, selection, selectionDetails]);
 
+}
+export const useDefaultMainRibbonItems = (ribbonInfo: RibbonViewInfo = {}, pushRoute: (url: URL) => void, withSave=true) => {
+     
+    useNewRibbonButton(ribbonInfo, pushRoute);
+    
+    useSaveRibbonButton(withSave)
+
+    useDeleteRibbonButton(ribbonInfo);
+
+    useWizardRibbonButtons();
 }

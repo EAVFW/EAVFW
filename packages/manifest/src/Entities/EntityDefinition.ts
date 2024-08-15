@@ -4,13 +4,15 @@ import { MultipleSiteMapDefinitions, SiteMapDefinition } from "../SiteMap";
 import { ValidationDefinitionV1, ValidationDefinitionV2 } from "../Validation";
 import { AttributeDefinition } from "./Attributes";
 import { EntityViewsDefinition } from "./EntityViewsDefinition";
+import { RibbonViewItemInfo } from "../Ribbon/RibbonViewItemInfo";
 
 export type WizardFormTrigger = {
     name: string
 
 }
 export type WizardTrigger = {
-    ribbon?: "NEW" | string;
+    visibleForForms?: boolean;
+    ribbon?: "NEW" | string | RibbonViewItemInfo;
     /* Either the string is a form on current entity, or an object with addition information */
     form?: string | WizardFormTrigger
 }
