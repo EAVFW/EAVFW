@@ -1,11 +1,17 @@
-export function cleanDiff(updatedValues: object , isArray:boolean=false): [boolean, any] {
+
+let n = 0;
+
+export function cleanDiff(updatedValues: object, isArray: boolean = false): [boolean, any] {
+    let id = n++;
+    console.time("cleandiff" + id);
     try {
-        console.group("cleanDiff");
+       
+        console.groupCollapsed("cleanDiff");
         let a = isArray?[]: { } as any;
         let changed = false;
-        console.log("cleanDiff: Start: ", updatedValues);
+      //  console.log("cleanDiff: Start: ", updatedValues);
         for (let [key, value] of Object.entries(updatedValues)) {
-            console.log("cleanDiff: entry: ", [changed, "__type" in value, key, value]);
+          //  console.log("cleanDiff: entry: ", [changed, "__type" in value, key, value]);
             if ("__type" in value) {
                 if (value.__type === "updated" || value.__type === "created") {
                     a[key] = value.data;
@@ -29,9 +35,13 @@ export function cleanDiff(updatedValues: object , isArray:boolean=false): [boole
 
             }
         }
-        console.log("CleanDiff: End: ", [updatedValues, a, changed ? a : undefined]);
+        //console.log("CleanDiff: End: ", [updatedValues, a, changed ? a : undefined]);
         return [changed, changed ? a : undefined]
     } finally {
         console.groupEnd();
+       
+        console.timeEnd("cleandiff" + id);
     }
+    
+  
 }

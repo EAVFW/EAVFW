@@ -75,11 +75,24 @@ function composeOdataFilterPart(filterValue: string | undefined, filterOption: C
         case "integer":
         case "decimal":
         case "choice": return composeOdataFilterExpression(filterValue === undefined ? undefined : +filterValue, filterOption, column.fieldName)
-        case "lookup": {
-            const lookup = columnType as LookupType
+        case "polylookup": {
+            const lookup = columnType as LookupType;
+            console.log("composeOdataFilterPart", [columnType, lookup.foreignKey]);
+
             if (lookup.foreignKey == null) return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
 
-            const columnKey = `${lookup.foreignKey.name}/${lookup.foreignKey.principalNameColumn}`
+            const columnKey = `${lookup.foreignKey.name}`;
+
+            return composeOdataFilterExpression(filterValue, filterOption, columnKey)
+        }
+        case "lookup": {
+           
+            const lookup = columnType as LookupType;
+            console.log("composeOdataFilterPart", [columnType, lookup.foreignKey]);
+            if (lookup.foreignKey == null) return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
+
+            const columnKey = `${lookup.foreignKey.name}/${lookup.foreignKey.principalNameColumn}`;
+
             return composeOdataFilterExpression(filterValue, filterOption, columnKey)
         }
     }
@@ -205,7 +218,7 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
 
         if (isFilterValueValid && currentColumn !== undefined) {
             console.log("Current column", currentColumn)
-            const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn);
+            const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn); 
             const data: IColumnData = { filterText: filterValue, odataFilter: odataFilterText, filterOption: filterOption }
             console.log("Applying Filter Values", data);
             columnFilterDispatch({

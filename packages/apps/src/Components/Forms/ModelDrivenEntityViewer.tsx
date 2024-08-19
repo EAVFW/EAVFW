@@ -16,6 +16,7 @@ import { FormSelectorComponent } from "./FormSelectorComponent";
 import FormComponent from "./AutoForm/FormComponent";
 import { useAppInfo } from "../../useAppInfo";
 import { useFormChangeHandlerProvider } from "./useFormChangeHandler";
+import { useRibbon } from "../../Components/Ribbon";
 
 
 
@@ -338,6 +339,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
     const { record: record2, onChangeCallback, extraErrors: extraErrors2 } = useFormChangeHandlerProvider();
     const { record = record2, entityName, formName, entity, onChange = onChangeCallback, related, extraErrors = extraErrors2 } = props;
+    const { events } = useRibbon();
    
    
 
@@ -362,14 +364,6 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     //  const [etag, setEtag] = useState(new Date().toISOString());
 
     //  const outerRecord = useObservable(record, info.currentRecordId, info.currentEntityName);
-    /**
-     * When recordid or entityname changes, reset to other record.
-     **/
-    useEffect(() => {
-        console.log("Changing form record state from outside", [record, record?.name, info.currentRecordId, info.currentEntityName]);
-        formDataRef.current = record;
-        //  setEtag(new Date().toISOString());
-    }, [record]);
 
     const groups = useMemo(() => createRadioGroups(form, entity), [form, entity]);
 
@@ -399,8 +393,24 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                         console.log(`Found ${attribute.logicalName} in formdata that changed from '${oldFormData[attribute.logicalName]}' to '${formdata[attribute.logicalName]}'`);
 
                         oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
-                        if (formdata[attribute.logicalName] === undefined)
-                            delete oldFormData[attribute.logicalName];
+                        if (formdata[attribute.logicalName] === undefined) {                           
+
+                            /**
+                             * 
+                             * If the old data prioer to changing contains
+                             * {
+                             *    addresssid = 5,
+                             *    addresss = {... id=5}
+                             * }
+                             * and current data
+                             * {
+                             *    addressid = undefined
+                             * }
+                             */
+                           
+                            delete oldFormData[attribute.logicalName.slice(0, -2)];
+                            oldFormData[attribute.logicalName] = null;
+                        }
                         changed = true;
 
                         let partOfGroup = groups.filter(g => g.filter(gg => gg[2].logicalName === attribute.logicalName).length > 0)[0];
@@ -510,12 +520,26 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
             }
         }
 
+        
+
         console.log("FormData Changed", { changes: formdata, new: formdatamerger.current });
 
 
-        return onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
+        onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
+        setTimeout(() => {
+        if (ctx?.autoSave)
+        {
+            events.emit('onSave');
+        }});
     }, [onFormDataChange2]);
 
+    /**
+     * When recordid or entityname changes, reset to other record.
+     **/
+    useEffect(() => {
+        console.log("Changing form record state from outside", [record, record?.name, info.currentRecordId, info.currentEntityName]);
+        onFormDataChange(record)
+    }, [record]);
 
     return (
         <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>

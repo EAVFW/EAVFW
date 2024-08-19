@@ -5,9 +5,15 @@ import { useExpressionParserContext } from "./useExpressionParserContext";
 
  
 
-
-
- 
+// Enum used to set the exprssion order. 
+// ordered is used when the expression should be ordered between other ordered expressions
+// First is used when it should be placed unordered before the ordered expression.
+// Last is used when it should be placed unordered after the ordered expression.
+export enum ExpressionOrder {
+    first = "first",
+    ordered = "ordered",
+    last = "last",
+} 
 
 export type useExpressionParserValue<T> = {
     data: T | string | undefined;
@@ -15,7 +21,7 @@ export type useExpressionParserValue<T> = {
     error?: string;
 }
 
-export function useExpressionParser<T = string>(expression?: string) {
+export function useExpressionParser<T = string>(expression?: string, expressionOrder?: ExpressionOrder) {
 
     const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
     const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
@@ -46,7 +52,8 @@ export function useExpressionParser<T = string>(expression?: string) {
                 attributeKey,
                 entityKey,
                 arrayIdx
-            }
+            },
+            expressionOrder: expressionOrder
         };
 
 
@@ -65,9 +72,12 @@ export function useExpressionParser<T = string>(expression?: string) {
                 }
               
                 if (oldvalue.current !== result) {
-                    setEvaluated({ data: result, isLoading: false });
-               //     setExpressionResult(id, result, undefined);
-                    oldvalue.current = result;
+                    //Using an timeout to make sure the render loop is completed beforethe value is changes. If not the value can change back after the new value is placed
+                    setTimeout(() => {
+                        setEvaluated({ data: result, isLoading: false });
+                        //     setExpressionResult(id, result, undefined);
+                        oldvalue.current = result;                                 
+                    }, 0);                 
                 }
 
 

@@ -21,7 +21,7 @@
     "link-nextjs": "npm --workspace packages/nextjs link",
     "link-codeeditor": "npm --workspace packages/codeeditor link",
 
-    "publish": "npm-run-all --continue-on-error publish-*",
+    "publish": "npm-run-all --sequential --continue-on-error publish-*",
     "publish-apps": "npm --workspace packages/apps publish --access public",
     "publish-manifest": "npm --workspace packages/manifest publish --access public",
     "publish-expressions": "npm --workspace packages/expressions publish --access public",
