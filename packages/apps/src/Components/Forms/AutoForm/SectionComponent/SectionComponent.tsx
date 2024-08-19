@@ -62,6 +62,10 @@ function padId(str: string) {
 
 
 function throwError(err: Error) {
+    if (process.env.NODE_ENV === "production") {
+        console.error(err);
+        return;
+    }
     throw err;
 }
 
@@ -102,7 +106,7 @@ const useSchema = (entityName: string, entity: EntityDefinition, columns: any, t
                 key: field,
                 attributeName: field,
                 fieldName: field,
-                attribute: entity.attributes[field] ?? (entity.TPT && app.getEntity(entity.TPT)?.attributes[field]), //?? throwError(new Error(`The attribute for ${field} was not defined on ${entity.schemaName}`)),
+                attribute: entity.attributes[field] ?? (entity.TPT && app.getEntity(entity.TPT)?.attributes[field]) ?? throwError(new Error(`The attribute for ${field} was not defined on ${entity.schemaName}`)),
                 field: columns[field]
             }));
 
@@ -422,7 +426,7 @@ const useExpressionEvaluator = (obj1: AutoFormColumnsDefinition | AutoFormContro
     const [isLoading, setIsloading] = useState(true);
     const [section, setSection] = useState(typeof (obj1) === "string" ? { visible: false }: obj1);
 
-    const expressionProvider = ResolveFeature("ExpressionsProviderAsync") as (values: any, expression: string) => Promise<any>;
+    const expressionProvider = ResolveFeature("ExpressionsProviderAsync",false) as (values: any, expression: string) => Promise<any>;
 
     useEffect(() => {
         const queue1 = [] as Array<Promise<any>>;

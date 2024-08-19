@@ -20,7 +20,7 @@ export function getJsonSchema(
         if (field.schema) {
             return {
                 ...field.schema,
-                readOnly:  field.readonly,
+                readOnly: field.readonly,
                 "x-field": "ControlHostWidget",
                 "x-widget-props": {
                     styles: field.styles,
@@ -34,7 +34,7 @@ export function getJsonSchema(
         const descriptionInfo = descriptions?.filter((d: any) => d.name === attribute?.logicalName && d.locale == locale)?.[0];
         const description = descriptionInfo?.description ?? attribute?.locale?.[locale]?.description ?? attribute?.description;
 
-       
+
         const attributeType = attribute.type;
         const type =
             typeof attributeType === "string"
@@ -180,6 +180,7 @@ export function getJsonSchema(
                     "x-field": field.visible === false ? "hidden" : "ControlHostWidget",
                 };
         }
+     
     } finally {
         console.groupEnd();
     }

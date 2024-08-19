@@ -10,6 +10,7 @@ export type ManifestAppSitemapDefinition = {
     groups?: {
         [key: string]: {
             title: string,
+            order?: number,
             locale?: { [locale: string]: {title:string } };
         }
     }

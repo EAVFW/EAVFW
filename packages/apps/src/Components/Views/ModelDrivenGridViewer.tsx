@@ -898,7 +898,8 @@ export function ModelDrivenGridViewer({
     return (
         <Stack verticalFill>
             <ModelDrivenViewContextProvider mutate={mutate}>
-            <ColumnFilterProvider
+                <ColumnFilterProvider
+                    currentEntityName={entity.logicalName}
                 view={viewDefinition}
                 filter={filter}
                 attributes={attributes}

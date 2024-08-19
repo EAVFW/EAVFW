@@ -88,7 +88,8 @@ export const MobileList: React.FC<MobileListProps> = (
 
     return (
         <ModelDrivenViewContextProvider mutate={mutate}>
-        <ColumnFilterProvider
+            <ColumnFilterProvider
+                currentEntityName={currentEntityName}
             view={view}
             //   filter={filter}
             attributes={attributes}

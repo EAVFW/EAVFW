@@ -55,12 +55,20 @@ function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType 
         attribute.type = attribute.type.toLowerCase() as PrimitiveType;
 }
 
-function getTitle(item: EntityDefinition | DashboardDefinition, sitemap: any): string {
-    const title = sitemap.title ?? sitemap.locale?.["1030"].displayName ?? sitemap.locale?.["1030"]?.pluralName ?? item.locale?.["1030"]?.displayName;
-    if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
-        return (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
-    }
-    return title ?? item.displayName ?? item.pluralName;
+function getTitle(item: EntityDefinition | DashboardDefinition, sitemap: any, locale: string): string {
+
+    let selectedLocale = item.locale?.[locale];
+
+    let title = selectedLocale && "pluralName" in selectedLocale ? selectedLocale.pluralName :
+        (selectedLocale?.displayName ?? item.pluralName ?? item.displayName)
+
+    return title;
+
+    //const title = sitemap.title ?? sitemap.locale?.[locale].displayName ?? sitemap.locale?.[locale]?.pluralName ?? item.locale?.[locale]?.displayName;
+    //if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
+    //    return (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
+    //}
+    //return title ?? item.displayName ?? item.pluralName;
 }
 
 
@@ -78,27 +86,32 @@ function processSitemap(apps: ManifestAppsDefinition,
         if (isSingleSiteMapDefinition(sitemaps))
             sitemaps = { [`${key}dummy`]: sitemaps };
 
-        for (const sitemapKey of Object.keys(sitemaps)) {
+        const test = sitemaps;
+        console.log("sitemaps", test);
+        for (const sitemapKey of Object.keys(sitemaps).sort((sitemapKeyA, sitemapKeyB) => (test[sitemapKeyA].order ?? Infinity) - (test[sitemapKeyB].order ?? Infinity))) {
             const sitemap = sitemaps[sitemapKey];
             const app = apps[sitemap.app];
-
+           
 
 
             if (sitemap !== undefined && areas[sitemap.area] === undefined)
                 areas[sitemap.area] = {};
 
 
-            const groupTitle = app?.sitemap?.groups?.[sitemap.group]?.locale?.[locale]?.title ?? app?.sitemap?.groups?.[sitemap.group].title ?? sitemap.group;
+            const groupTitle = app?.sitemap?.groups?.[sitemap.group]?.locale?.[locale]?.title ?? app?.sitemap?.groups?.[sitemap.group]?.title ?? sitemap.group;
 
 
 
             areas[sitemap.area][groupTitle] = areas[sitemap.area][groupTitle] ?? {};
 
+            let selectedLocale = item.locale?.[locale];
 
-            let title = item.locale?.["1030"]?.displayName;
-            if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
-                title = (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
-            }
+            let title = selectedLocale && "pluralName" in selectedLocale ? selectedLocale.pluralName :
+                (selectedLocale?.displayName ?? item.pluralName ?? item.displayName)
+
+           // if (title === undefined && selectedLocale && (item.locale[locale] as EntityLocaleDefinition).pluralName !== 'undefined') {
+           //     title = (item.locale[locale] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
+           // }
 
             const sitemapEntry = {
                 ... (areas[sitemap.area][groupTitle][sitemapKey]
@@ -110,7 +123,7 @@ function processSitemap(apps: ManifestAppsDefinition,
                 }),
                 ...{
                     ...sitemap,
-                    title: getTitle(item, sitemap),
+                    title: getTitle(item, sitemap,locale),
                     type: itemType
                     
                 }
@@ -131,7 +144,14 @@ function processItems(
     itemType: string,
     locale: string) {
 
-    for (const key of Object.keys(items)) {
+    function getOrder(sitemap: SiteMapDefinition | MultipleSiteMapDefinitions | undefined): number {
+        let order = sitemap?.order;
+        if(typeof order === "number")
+            return order;
+        return Infinity;
+    }
+    
+    for (const key of Object.keys(items).sort((a, b) => getOrder(items[a].sitemap) - getOrder(items[b].sitemap))) {
         const item = items[key];
 
 

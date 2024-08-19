@@ -9,6 +9,7 @@ import cloneDeep from "clone-deep";
 import { ColumnOrder } from "./ColumnOrder";
 import { ModelDrivenApp } from "../../ModelDrivenApp";
 import { UserProfile } from "../Profile";
+import { useAppInfo } from "../../useAppInfo";
 
 interface IColumnFilterProps {
     children: any
@@ -25,6 +26,7 @@ interface IColumnFilterProps {
     filter?: string
     pagingContextEnabled: boolean
     app: ModelDrivenApp
+    currentEntityName: string
 }
 
 
@@ -242,7 +244,8 @@ const ColumnFilterProvider = ({
     filter,
     pagingContextEnabled,
     onBuildFetchQuery,
-    app
+    app,
+    currentEntityName
 }: IColumnFilterProps) => {
     const user = useUserProfile();
     const [columnFilterState, columnFilterDispatch] = React.useReducer(columnFilterReducer, {
@@ -250,13 +253,22 @@ const ColumnFilterProvider = ({
         columns: [],
         user
     })
-    
+
+   
 
     const columnAttributes = React.useMemo(() => {
+
+        function mapselect(attr: AttributeDefinition) {
+            if (isLookup(attr.type) && attr.type.split) {
+                return attr.type.referenceTypes?.map(referenceType => `${currentEntityName}${app.getEntityFromKey(referenceType).logicalName}references`).join(',');
+            }
+            return attr.logicalName;
+        }
+
         const columns =
             Object.keys(view?.columns ?? {})
                 .filter(c => attributes[c] && (!attributes[c].isPrimaryKey))
-                .map(c => attributes[c].logicalName);
+                .map(c => mapselect(attributes[c]));
 
         if (columns.length === 0) return [];
 
@@ -286,7 +298,7 @@ const ColumnFilterProvider = ({
                 console.log("Polylookup", [type]);
  
 
-                let expands = (type.inline || type.split ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
+                let expands = (type.inline ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
                     .filter(isAttributeLookup)
                     .map(a => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`));
                 console.log("Polylookup", expands);
@@ -349,17 +361,23 @@ const ColumnFilterProvider = ({
             return Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName;
         }
 
-        
+
+        function createExpandForLookups([key,a]:[string, LookupAttributeDefinition]) {
+
+            if (a.type.split)
+                return a.type.referenceTypes?.map(referenceType => `${currentEntityName}${app.getEntityFromKey(referenceType).logicalName}references`);
+
+
+            if (a.type.inline)
+                return `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}`;
+
+            return `${getNavigationProperty(a)}(${expandPolyLookup(key, a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(key, a)})`;;
+        }
 
         let expand = columns
             .map(x => [x.key, x.data] as [string, AttributeDefinition])
             .filter(isAttributeLookupEntry)
-            //.filter(([key, attr]) => {
-            //    console.log("Filtering Columns", [key, attr, key.split('/')[0] === key || isAttributeLookup(app.getEntityFromKey(attr.type.referenceType).attributes[key.split('/')[1]])])
-            //    return key.split('/')[0] === key || isAttributeLookup(app.getEntityFromKey(attr.type.referenceType).attributes[key.split('/')[1]]);
-            //})
-
-            .map(([key, a]) => a.type.inline||a.type.split ? `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}` : `${getNavigationProperty(a)}(${expandPolyLookup(key, a)}$select=${getPrimaryField(a.type.referenceType)}${selectPolyLookup(key,a)})`);
+            .map(createExpandForLookups);
 
         let orderBy = columns.filter(c => c.isSorted)[0];
 
