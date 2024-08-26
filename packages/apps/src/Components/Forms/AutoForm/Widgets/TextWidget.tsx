@@ -69,9 +69,14 @@ const TextWidget = ({
 
     const _onBlur = useCallback(({ target: { value } }: React.FocusEvent<HTMLInputElement>) =>
         onBlur(id, value), [onblur]);
-    const _onFocus = useCallback(({
-        target: { value },
-    }: React.FocusEvent<HTMLInputElement>) => onFocus(id, value), [onFocus]);
+
+    const _onFocus = useCallback((event: React.FocusEvent<HTMLInputElement>) => {
+        onFocus(id, event.target.value);
+
+        if (process.env.DISABLE_SCROLL === "true") {
+            event.target.addEventListener("wheel", function (e) { e.preventDefault() }, { passive: false });
+        }
+    }, [onFocus]);
 
     const uiProps = usePick(options.props ?? {}, allowedProps);
     const inputType = schema.type === 'string' ? 'text' : `${schema.type}`
@@ -90,7 +95,7 @@ const TextWidget = ({
             // name={name}
             type={inputType as string}
             defaultValue={value || value === 0 ? value : ""}
-           // value={value || value === 0 ? value : ""}
+            // value={value || value === 0 ? value : ""}
             onChange={_onChange as any}
             onBlur={_onBlur}
             onFocus={_onFocus}
