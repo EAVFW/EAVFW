@@ -141,7 +141,7 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
             const columnKeys = Object.keys(view?.columns ?? {}).filter(c => c.indexOf('/') || (attributes[c] && !(attributes[c].isPrimaryKey ?? false)));
 
 
-            function columnDisplayName(column:string) {
+            function columnDisplayName(column: string) {
 
                 if (column.indexOf('/') !== -1) {
                     var parts = column.split('/');
@@ -171,7 +171,7 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
                 if (!(column in attributes))
                     throw new Error(`The ${column} does not exists`);
              
-                return attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName
+                return attributes[column]?.locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName
             }
 
 
