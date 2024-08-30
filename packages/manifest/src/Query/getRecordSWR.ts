@@ -3,7 +3,7 @@ import useSWR, { mutate  } from "swr";
 import { IRecord } from "../Types";
 import { useJsonFetcher } from "./jsonFetcher";
 
-export function getRecordSWR(entityName: string, recordId: string, query: string = "", ready = true, initialData: any = undefined) {
+export function getRecordSWR(entityName: string, recordId: string, query: string = "", ready = true, initialData: any = undefined, refreshInterval=0) {
 
     const [baseUrl, jsonFetcher] = useJsonFetcher();
 
@@ -18,7 +18,7 @@ export function getRecordSWR(entityName: string, recordId: string, query: string
             revalidateOnReconnect: false,
             refreshWhenOffline: false,
             refreshWhenHidden: false,
-            refreshInterval: 0,
+            refreshInterval: refreshInterval,
             fetcher: jsonFetcher
         }
     )
