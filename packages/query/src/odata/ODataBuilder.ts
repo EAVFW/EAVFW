@@ -11,10 +11,21 @@ export class ODataBuilder<T>{
         '$orderby'?: { [key: string]: "desc" | "asc" },
         '$expand'?: { [key: string]: ODataBuilder<any> }
         '$filter'?: string
+        '$top'?: number
+        '$count'?: true
     };
 
-    public filter(filter: string) {
-        this._odata['$filter'] = filter;
+    public filter(...filter: Array<string | undefined>) {
+        this._odata['$filter'] = filter.filter(x => x).join(' and ');
+        return this;
+    }
+
+    public take(top: number) {
+        this._odata['$top'] = top;
+        return this;
+    }
+    public count() {
+        this._odata['$count'] = true;
         return this;
     }
 
@@ -59,7 +70,39 @@ export class ODataBuilder<T>{
 
     public build(seperator: '&' | ';' = '&'): string {
 
-        return Object.entries(this._odata).map(([k, v]) =>
-            `${k}=${typeof (v) === "string" ? v : Object.entries(v).map(([prop, propvalue]) => propvalue instanceof ODataBuilder ? `${prop}(${propvalue.build(';')})` : k === "$orderby" ? `${prop} ${propvalue}` : prop).join(',')}`).join(seperator);
+
+        const parts = [];
+        for (let k of Object.keys(this._odata) as Array<keyof typeof this._odata>) {
+
+            const v = this._odata[k];
+
+            switch (k) {
+                case "$filter":
+                case "$count":
+                case "$top":
+                    parts.push(`${k}=${v}`);
+                    break;
+                case "$orderby":
+
+                    parts.push(`${k}=${Object.entries(v as (Required<typeof this._odata>)[typeof k]).map(([prop, propvalue]) => `${prop} ${propvalue}`).join(',')}`);
+
+                    break;
+                case "$expand":
+
+                    parts.push(`${k}=${Object.entries(v as (Required<typeof this._odata>)[typeof k]).map(([prop, propvalue]) => `${prop}(${propvalue.build(';')})`).join(',')}`);
+                    break;
+                case "$select":
+                    parts.push(`${k}=${Object.entries(v as (Required<typeof this._odata>)[typeof k]).map(([prop, propvalue]) => `${prop}`).join(',')}`);
+                    break;
+
+            }
+
+
+        }
+        return parts.join(seperator);
+
+        //return Object.entries(this._odata).map(([k, v]) =>
+        //    `${k}=${typeof (v) === "string" ? v
+        //        : Object.entries(v).map(([prop, propvalue]) => propvalue instanceof ODataBuilder ? `${prop}(${propvalue.build(';')})` : k === "$orderby" ? `${prop} ${propvalue}` : prop).join(',')}`).join(seperator);
     }
 }
