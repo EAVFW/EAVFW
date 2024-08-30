@@ -3,6 +3,8 @@ import useSWR, { mutate  } from "swr";
 import { IRecord } from "../Types";
 import { useJsonFetcher } from "./jsonFetcher";
 
+
+
 export function getRecordSWR(entityName: string, recordId: string, query: string = "", ready = true, initialData: any = undefined, refreshInterval=0) {
 
     const [baseUrl, jsonFetcher] = useJsonFetcher();
