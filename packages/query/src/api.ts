@@ -82,7 +82,7 @@ export const queryRecords = async<T>(url: string, query: ODataBuilder<T>, cache:
         });
     if (!a.ok) {
 
-        throw new Error(`Failedt to query.[${a.status}]\n${+ await a.text()}`);
+        throw new Error(`Failedt to query.[${a.status}]\n${await a.text()}`);
     }
 
     let b = await a.json();
@@ -108,7 +108,7 @@ export const queryRecord = async<T>(url: string, query: ODataBuilder<T>, cache: 
         });
     if (!a.ok) {
 
-        throw new Error(`Failedt to query.[${a.status}]\n${+ await a.text()}`);
+        throw new Error(`Failedt to query.[${a.status}]\n${await a.text()}`);
     }
 
     let b = await a.json();

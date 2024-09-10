@@ -292,7 +292,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
     const [freeformvalue, setfreeformvalue] = useState<string>();
 
-    console.log("Lookup Control:", [label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
+    console.log("Lookup Control:", [options.find(x => x.key === selectedKey)?.text,label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
     return (<>
         <Modal isOpen={modalOpen} onDismiss={_hideModal} isBlocking={true} styles={{ scrollableContent: { overflowY: "hidden", maxHeight: "100%" } }}>
@@ -318,7 +318,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                     onChange={_onModalSubmit} extraErrors={extraErrors} />
             </Stack>
         </Modal>
-
         <Combobox
             aria-label={label}
             disabled={disabled}
@@ -457,7 +456,8 @@ export function LookupControl<T>({
         return {
             selectedValue: selectedValue,               
             value: isPolyLookup(attribute.type) && attribute.type.split ?
-                attribute.type.referenceTypes.map(referenceType => state.formValues[`${entityName}${app.getEntityFromKey(referenceType).logicalName}references`]?.map((x: IRecord) => x.id)).flat()[0] ?? state.formValues[logicalName]?.split(':')[1] : state.formValues[logicalName],
+                attribute.type.referenceTypes
+                    .map(referenceType => state.formValues[`${entityName}${app.getEntityFromKey(referenceType).logicalName}references`]?.map((x: IRecord) => x[app.getEntityFromKey(referenceType).logicalName+"id"])).flat()[0] ?? state.formValues[logicalName]?.split(':')[1] : state.formValues[logicalName],
             id: state.formValues["id"],
             formvalues: state.formValues
         }
@@ -484,7 +484,7 @@ export function LookupControl<T>({
             if (type.split && selectedValue)
                 return app.getEntityKey(selectedValue["$type"]);
 
-            if (type.split) {
+            if (type.split && formvalues[logicalName]) {
                 return app.getEntityKey(formvalues[logicalName].split(':')[0]);
            //     return app.getEntityKey(type.referenceTypes.map(x => app.getEntityFromKey(x))
            //         .find(x => Object.values(x.attributes).some(a => a.logicalName.slice(0, -2) === value.split(':')[0]))?.logicalName!);
@@ -515,7 +515,28 @@ export function LookupControl<T>({
                 <LookupCoreControl
                     key={selectedEntity}
                     selectedValue={selectedValue}
-                    onChange={eavOnChange}
+                    onChange={(cb) => {
+                        eavOnChange((props, ctx) => {
+                            cb(props, ctx);
+                            const value = props[attribute.logicalName];
+                            if (isPolyLookup(attribute.type) && attribute.type.split && typeof value === "string" && !value.startsWith(selectedEntity)) {
+
+                                let referenceTypeLogicalName = app.getEntityFromKey(selectedEntity).logicalName;
+
+                               // props[attribute.logicalName] = `${referenceTypeLogicalName}:${props[attribute.logicalName]}`
+
+                                props[`${entityName}${referenceTypeLogicalName}references`] = [
+                                    {
+                                        "$type": referenceTypeLogicalName,
+                                        ... (props[`${entityName}${referenceTypeLogicalName}references`]?.[0] ?? {}),
+                                        [referenceTypeLogicalName+'id']: props[attribute.logicalName]
+                                    }
+                                ];
+                                delete props[attribute.logicalName];
+
+                            }
+                        });
+                    }}
                     value={value}
                     type={attribute.type}
                     //  forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
