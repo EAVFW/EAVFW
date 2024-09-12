@@ -5,6 +5,10 @@ type ArrayElement<ArrayType> =
     ArrayType extends readonly (infer ElementType)[] ? ElementType : any;
 
 type KeysMatching<T, V> = { [K in keyof T]-?: T[K] extends V ? K : never }[keyof T];
+
+function trimEmptyParenthesis(str: string) {
+    return str.replace(/\(\)/g, '');
+}
 export class ODataBuilder<T>{
     private _odata = {} as {
         '$select'?: { [key: string]: any },
@@ -49,13 +53,13 @@ export class ODataBuilder<T>{
 
         return this;
     }
-    public expand<T1 extends keyof T, T2 extends T[T1]>(prop: T1, expander: (a: ODataBuilder<T2>) => ODataBuilder<T2>) {
+    public expand<T1 extends keyof T, T2 extends T[T1]>(prop: T1, expander?: (a: ODataBuilder<T2>) => ODataBuilder<T2>) {
         if (!('$expand' in this._odata)) {
             this._odata["$expand"] = {};
         }
 
-        this._odata["$expand"]![prop as string] = expander(new ODataBuilder<T2>());
-
+        this._odata["$expand"]![prop as string] = expander ? expander(new ODataBuilder<T2>()) : new ODataBuilder<T2>();
+        this.select(prop);
         return this;
     }
     public expandCollection<T1 extends KeysMatching<T, Array<any>>, T2 extends ArrayElement<T[T1]>>(prop: T1, expander: (a: ODataBuilder<T2>) => ODataBuilder<T2>) {
@@ -64,7 +68,7 @@ export class ODataBuilder<T>{
         }
 
         this._odata["$expand"]![prop as string] = expander(new ODataBuilder<ArrayElement<T2>>());
-
+        this.select(prop);
         return this;
     }
 
@@ -89,7 +93,7 @@ export class ODataBuilder<T>{
                     break;
                 case "$expand":
 
-                    parts.push(`${k}=${Object.entries(v as (Required<typeof this._odata>)[typeof k]).map(([prop, propvalue]) => `${prop}(${propvalue.build(';')})`).join(',')}`);
+                    parts.push(`${k}=${Object.entries(v as (Required<typeof this._odata>)[typeof k]).map(([prop, propvalue]) => trimEmptyParenthesis(`${prop}(${propvalue.build(';')})`)).join(',')}`);
                     break;
                 case "$select":
                     parts.push(`${k}=${Object.entries(v as (Required<typeof this._odata>)[typeof k]).map(([prop, propvalue]) => `${prop}`).join(',')}`);
