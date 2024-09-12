@@ -24,6 +24,7 @@
     "link-codeeditor": "npm --workspace packages/codeeditor link",
     "link-task-management": "npm --workspace packages/task-management link",
     "link-query": "npm --workspace packages/query link",
+    "link-richtexteditor": "npm --workspace packages/rich-text-editor link",
     "publish": "npm-run-all --sequential --continue-on-error publish-*",
     "publish-apps": "npm --workspace packages/apps publish --access public",
     "publish-manifest": "npm --workspace packages/manifest publish --access public",
@@ -35,6 +36,7 @@
     "publish-codeeditor": "npm --workspace packages/codeeditor publish --access public",
     "publish-task-management": "npm --workspace packages/task-management publish --access public",
     "publish-query": "npm --workspace packages/query publish --access public",
+    "publish-richtexteditor": "npm --workspace packages/rich-text-editor publish --access public",
     "release": "npm-run-all --continue-on-error release-*",
     "release-apps": "npm run release --workspace packages/apps",
     "release-manifest": "npm run release --workspace packages/manifest",
@@ -45,7 +47,8 @@
     "release-nextjs": "npm run release --workspace packages/nextjs",
     "release-codeeditor": "npm run release --workspace packages/codeeditor",
     "release-task-management": "npm run release --workspace packages/task-management",
-    "release-query": "npm run release --workspace packages/query"
+    "release-query": "npm run release --workspace packages/query",
+    "release-richtexteditor": "npm run release --workspace packages/rich-text-editor"
   },
   "config": {
     "force": true
