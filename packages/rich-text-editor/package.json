@@ -2,7 +2,7 @@
   "name": "@eavfw/rich-text-editor",
   "description": "RichTextEditor",
   "version": "1.0.0",
-  "author": "Poul Kjeldager S�rensen <poul@kjeldager.com> (eavfw.com)",
+  "author": "Poul Kjeldager Sørensen <poul@kjeldager.com> (eavfw.com)",
   "license": "MIT",
   "files": [
     "src"
@@ -14,15 +14,15 @@
   "main": "./src/index.ts",
   "scripts": { "release": "semantic-release -e semantic-release-monorepo" },
   "dependencies": {
-
+    "react-draft-wysiwyg": "^1.15.0",
+    "draftjs-to-html": "^0.9.1",
+    "draft-js": "^0.11.7",
+    "@types/react-draft-wysiwyg": "^1.13.4",
+    "@types/draftjs-to-html": "^0.8.1",
+    "striptags": "^3.2.0"
   },
   "devDependencies": {
-    "react-draft-wysiwyg": "1.15.0",
-    "draftjs-to-html": "0.9.1",
-    "draft-js": "0.11.7",
-    "@types/react-draft-wysiwyg": "1.13.4",
-    "@types/draftjs-to-html": "0.8.1",
-    "striptags": "3.2.0"
+    
   },
   "peerDependencies": {},
   "repository": {
