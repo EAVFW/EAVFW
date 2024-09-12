@@ -2,7 +2,7 @@
   "name": "@eavfw/rich-text-editor",
   "description": "RichTextEditor",
   "version": "1.0.0",
-  "author": "Poul Kjeldager Sørensen <poul@kjeldager.com> (eavfw.com)",
+  "author": "Poul Kjeldager Sï¿½rensen <poul@kjeldager.com> (eavfw.com)",
   "license": "MIT",
   "files": [
     "src"
@@ -24,6 +24,9 @@
     "@types/draftjs-to-html": "0.8.1",
     "striptags": "3.2.0"
   },
-  "peerDependencies": {}
-  
+  "peerDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EAVFW/EAVFW.git"
+  }
 }
