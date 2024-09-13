@@ -1,22 +1,28 @@
 //import { ContextualMenu, Dialog, DialogFooter, DialogType } from "@fluentui/react";
-import { Button, ButtonProps, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, DialogTrigger } from "@fluentui/react-components";
+import { Button, ButtonProps, Dialog, DialogActions, DialogBody, DialogContent, DialogSurface, DialogTitle, DialogTrigger, Spinner } from "@fluentui/react-components";
 import { useBoolean, useId } from "@fluentui/react-hooks";
 import { MouseEventHandler, PropsWithChildren, useMemo } from "react";
 
+export type SimpleDialogPrimaryButtonProps = ButtonProps & {
+   // onOkClick?: MouseEventHandler<HTMLButtonElement>;
+   // children?: string;
+    spinning?: boolean;
+    
+}
 export type SimpleDialogProps = {
     hideDialog: boolean
     toggleHideDialog: () => void;
     maxWidth?: number | string;
     minWidth?: number | string;
     title?: string;
-    onOkClick?: MouseEventHandler<HTMLButtonElement>;
-    onOkText?: string;
     onCancelText?: string;
+    primaryButton?: SimpleDialogPrimaryButtonProps
 }
 
 
 
-export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ title = "Import", maxWidth = 450, hideDialog, toggleHideDialog, children, minWidth = "60vw", onOkClick, onOkText="Ok", onCancelText="Cancel" }) => {
+export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ title = "Import", maxWidth = 450,
+    hideDialog, toggleHideDialog, children, minWidth = "60vw", primaryButton: { spinning = false, ...primaryButton } = {}, onCancelText = "Cancel" }) => {
 
    // const [isDraggable, { toggle: toggleIsDraggable }] = useBoolean(true);
     //const labelId: string = useId('Custom_Import_Label');
@@ -66,8 +72,8 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({ t
                         {children}
                     </DialogContent>
                     <DialogActions>
-                        <Button appearance="secondary" onClick={toggleHideDialog}>{onCancelText}</Button>
-                        <Button appearance="primary" onClick={onOkClick} >{onOkText}</Button>
+                        <Button appearance="secondary" onClick={toggleHideDialog} disabled={spinning}>{onCancelText}</Button>
+                        <Button appearance="primary" {...primaryButton} >{spinning && < Spinner style={{ marginRight: "1rem" }} />}{primaryButton.children}</Button>
                     </DialogActions>
                 </DialogBody>
             </DialogSurface>
