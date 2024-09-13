@@ -1,20 +1,23 @@
 {
   "compilerOptions": {
-    "target": "ES2015",
-    "lib": [ "DOM", "DOM.Iterable", "ESNext" ],
+    "target": "es2015",
+    "lib": [ "dom", "dom.iterable", "esnext" ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "ESNext",
-    "moduleResolution": "Node",
+    "module": "esnext",
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "baseUrl": "./src",
-    "rootDirs": [ "src", "framework" ]
+    "paths": {
+    },
+    "rootDirs": [ "src" ],
+    "experimentalDecorators": true
   },
   "exclude": [ "node_modules" ],
   "include": [ "**/*.ts", "**/*.tsx" ]
