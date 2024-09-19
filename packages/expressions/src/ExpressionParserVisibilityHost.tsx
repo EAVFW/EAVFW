@@ -1,6 +1,6 @@
 import { PropsWithChildren, useEffect, useMemo } from "react";
 import { useExpressionParserLoadingContext } from "./ExpressionParserAttributeContext";
-import { useExpressionParser } from "./useExpressionParser";
+import { ExpressionOrder, useExpressionParser } from "./useExpressionParser";
 import { useUuid } from "@eavfw/hooks";
 
 export const ExpressionParserVisibilityHost: React.FC<PropsWithChildren<{
@@ -8,8 +8,9 @@ export const ExpressionParserVisibilityHost: React.FC<PropsWithChildren<{
     visible?: string | boolean, attributeKey?: string
 }>> = ({ children, visible, attributeKey, onVisibilityCalculated }) => {
 
-    const { data, isLoading, error } = useExpressionParser<boolean>(typeof visible === "string" ? visible : undefined);
-
+    
+    const { data, isLoading, error } = useExpressionParser<boolean>(typeof visible === "string" ? visible : undefined, ExpressionOrder.last);
+     
 
     const showShow = useMemo(() => {
         if (typeof visible === "boolean" && visible === false) {

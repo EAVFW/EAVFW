@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
+import { EAVFWErrorDefinition } from "@eavfw/manifest";
 import { EAVFormContextState } from "./EAVFormContextState";
 
 
@@ -16,8 +17,8 @@ export type EAVFormCollectorRegistration = {
     
 }
 export type EAVFormContextActions<T, TState extends EAVFormContextState<T>> = {
-    runValidation: (onComplete?: () => void) => void;
-    updateState: (cb: (state: TState, ctx: { replaceState: boolean }) => void) => void;
+    runValidation: (onComplete?: () => void, manipulateResult?: (errors: EAVFWErrorDefinition) => EAVFWErrorDefinition) => void;
+    updateState: <TState extends EAVFormContextState<T>>(cb: (state: TState, ctx: { replaceState: boolean }) => void) => { changedProp: boolean, changedValues: any } | undefined | void;
     onChange: EAVFOrmOnChangeHandler<T>;
     addVisited: (id: string) => void;
 

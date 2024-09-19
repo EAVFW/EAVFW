@@ -2,7 +2,7 @@ import React, { CSSProperties, createContext, useContext, useMemo, useState } fr
 import { FieldTemplateProps, getUiOptions } from "@rjsf/utils";
 import { Callout, FontWeights, getTheme, IButtonStyles, IconButton, IIconProps, IStackStyles, IStackTokens, ITheme, Label, mergeStyleSets, Stack, Text, ThemeContext } from "@fluentui/react";
 import { List } from "@fluentui/react";
-import { useExpressionParser } from "@eavfw/expressions";
+import { ExpressionOrder, useExpressionParser } from "@eavfw/expressions";
 import { JSONSchema7 } from "json-schema";
 
 import { useBoolean, useId } from "@fluentui/react-hooks";
