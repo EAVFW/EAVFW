@@ -143,12 +143,12 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const hasFilterChangedFirst = useRef(false);
 
 
-    console.log("lookupcontrol", [selectedValue, targetEntity, primaryField, logicalName])
+    console.log("lookupcontrol", [selectedValue, targetEntity, primaryField, logicalName, filter])
     const initialOptions = useMemo(() => (typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? DUMMY_DATA_KEY, text: selectedValue[primaryField] }] : []), [selectedValue]);
 
     const [shouldLoadRemoteOptions, setShouldLoadRemoteOptions] = useState(false);
     const [searchfilter, setSearchFilter] = useState<string>()
-    const query = useMemo(() => ({ "$select": `id,${primaryField}`, "$top": 10, ...returnQueryFilter(searchfilter, filter) }), [filter, searchfilter]);
+    const query = useMemo(() => ({ "$select": `id,${primaryField}`, "$top": 10, ...returnQueryFilter(searchfilter, filter) }), [filter, searchfilter,]);
     const { data: remoteItems = { items: [] as Array<IRecord> }, isLoading: isLoadingRemoteData } = queryEntitySWR(targetEntity, query, shouldLoadRemoteOptions || typeof (searchfilter) === "string");
 
     const loadRemoteValue = useMemo(() => !!value && typeof (selectedValue) === "undefined" && (!shouldLoadRemoteOptions || !isLoadingRemoteData) && remoteItems?.items.filter(x => x.id === value).length === 0, [selectedValue, isLoadingRemoteData, remoteItems?.items]);
@@ -468,12 +468,25 @@ export function LookupControl<T>({
     const { formDefinition } = useFormHost();
     const column = formDefinition?.columns[fieldName];
 
+   
+    const attributeType = attribute.type;
 
-
-
-    if (!(isLookup(attribute.type)))
+    if (!(isLookup(attributeType)))
         return <div>...</div>;
 
+    const filter = useMemo(() => {
+        // The filter can use clientside replacement of values using combination of liqued and odata language
+        // {{record/practiceid}} - record will be the formvalues
+
+        //Replace all {{record/..}} with formvalues
+        let filter = column?.filter ?? attributeType.filter;
+        if (filter) {
+            Object.entries<any>(formvalues).forEach(([key, value]) => {
+                filter = filter!.replace(`{{record/${key}}}`, value?.toString());
+            });
+        }
+        return filter; 
+    }, [column?.filter ?? attributeType.filter, formvalues]);
 
     if (isPolyLookup(attribute.type)) {
         const type = attribute.type;
@@ -540,7 +553,7 @@ export function LookupControl<T>({
                     value={value}
                     type={attribute.type}
                     //  forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
-                    filter={column?.filter ?? attribute.type.filter}
+                    filter={filter}
                     allowCreate={column?.disableCreate !== true}
                     searchForLabel={column?.searchForLabel}
                     label={attribute.displayName}
@@ -559,22 +572,20 @@ export function LookupControl<T>({
 
     const targetEntityName = column.entityName ?? (isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute"));
 
-    console.log("Lookup Control", [entityName,attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData]);
+    console.log("Lookup Control", [entityName, attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData, filter]);
 
     //  
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
 
-    console.log("filtering :", [column?.filter ?? attribute.type.filter]);
-
-
+    
 
     return <LookupCoreControl
         selectedValue={selectedValue}
         onChange={eavOnChange}
         value={value}
-        type={attribute.type}
+        type={attributeType}
         forms={Object.keys(forms).filter(k => forms[k].type === "Modal")}
-        filter={column?.filter ?? attribute.type.filter}
+        filter={filter}
         allowCreate={column?.disableCreate !== true}
         searchForLabel={column?.searchForLabel}
         label={attribute.displayName}
