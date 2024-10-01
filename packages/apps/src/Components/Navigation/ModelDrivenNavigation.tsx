@@ -263,7 +263,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
         }
     }
 
-
+    console.log("EAVAPP nav", [model, areas,groups]);
 
     if (isMobile) return <></>;
     if (!user)

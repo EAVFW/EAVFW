@@ -57,18 +57,18 @@ function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType 
 
 function getTitle(item: EntityDefinition | DashboardDefinition, sitemap: any, locale: string): string {
 
-    let selectedLocale = item.locale?.[locale];
+    //let selectedLocale = item.locale?.[locale];
 
-    let title = selectedLocale && "pluralName" in selectedLocale ? selectedLocale.pluralName :
-        (selectedLocale?.displayName ?? item.pluralName ?? item.displayName)
+    //let title = selectedLocale && "pluralName" in selectedLocale ? selectedLocale.pluralName :
+    //    (selectedLocale?.displayName ?? item.pluralName ?? item.displayName)
 
-    return title;
+    //return title;
 
-    //const title = sitemap.title ?? sitemap.locale?.[locale].displayName ?? sitemap.locale?.[locale]?.pluralName ?? item.locale?.[locale]?.displayName;
-    //if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
-    //    return (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
-    //}
-    //return title ?? item.displayName ?? item.pluralName;
+    const title = sitemap.title ?? sitemap.locale?.[locale].pluralName ?? sitemap.locale?.[locale]?.displayName ?? (item.locale?.[locale] as EntityLocaleDefinition)?.pluralName;
+    if (title === undefined && item.locale?.["1030"] && (item.locale["1030"] as EntityLocaleDefinition).pluralName !== 'undefined') {
+        return (item.locale["1030"] as EntityLocaleDefinition).pluralName ?? item.displayName ?? item.pluralName;
+    }
+    return title ?? item.pluralName ?? item.displayName;
 }
 
 
@@ -128,7 +128,7 @@ function processSitemap(apps: ManifestAppsDefinition,
                     
                 }
             };
-
+            console.log("sitemapEntry", [sitemapEntry, sitemap,locale, item.locale, selectedLocale, sitemapEntry.title, title ?? item.pluralName ?? item.displayName, getTitle(item, sitemap, locale)]);
             areas[sitemap.area][groupTitle][sitemapKey] = sitemapEntry;
         }
     }
