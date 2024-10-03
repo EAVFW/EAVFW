@@ -296,6 +296,8 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
 
+    const [isComboboxOpen, setIsComboboxOpen] = useState(false);
+
     console.log("Lookup Control:", [options.find(x => x.key === selectedKey)?.text,label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
     return (<>
@@ -334,6 +336,8 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             onChange={__onChange}
             onFocus={() => { if (!shouldLoadRemoteOptions) { setShouldLoadRemoteOptions(true) } }}
             onOptionSelect={onOptionSelect}
+            open={isComboboxOpen}
+            onOpenChange={(event, data) => setIsComboboxOpen(data.open)}
         >
             {options.map((option) => (
                 <Option key={option.key} value={option.key as string} text={option.text} >
@@ -348,7 +352,10 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             })}>
                 <Stack style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
                     <CommandButton id={`${targetEntityName}_${logicalName}_new`} text={localization.new} styles={commandback} iconProps={emojiIcon}
-                    //                        onClick={(e) => _showModal()}
+                        onClick={(e) => {
+                            setIsComboboxOpen(false);
+                            _showModal()
+                        }}
                     />
                     <CommandButton text={localization.clear} styles={commandback} iconProps={emojiIconClear}
                         onClick={resetValue}
