@@ -217,6 +217,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     }, []);
 
+    const [freeformvalue, setfreeformvalue] = useState<string>();
 
     /**
      * The callback for dropdown onchange event
@@ -253,16 +254,20 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const onOptionSelect: ComboboxProps["onOptionSelect"] = (event, data) => {
         const matchingOption = options.find(x => x.key === data.optionValue);
         console.log("onOptionSelect", [data, matchingOption, options]);
-        onChange(props => {
-            if (matchingOption?.key === "dummy") {
-                delete props[logicalName];
-                props[logicalName.slice(0, -2)] = dummyData
-            } else {
-                props[logicalName] = matchingOption?.data; //The id of selected value, but if key is dummy we picked the placeholder data
-                delete props[logicalName.slice(0, -2)]; //Proper clean up by deleting the object part unless key is dummy placeholder
-            }
-        });
-        
+
+        if (!matchingOption) {
+            resetValue();
+        } else {
+            onChange(props => {
+                if (matchingOption?.key === "dummy") {
+                    delete props[logicalName];
+                    props[logicalName.slice(0, -2)] = dummyData
+                } else {
+                    props[logicalName] = matchingOption?.data; //The id of selected value, but if key is dummy we picked the placeholder data
+                    delete props[logicalName.slice(0, -2)]; //Proper clean up by deleting the object part unless key is dummy placeholder
+                }
+            });
+        }
     };
 
     const resetValue = () => {
@@ -271,8 +276,8 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             delete props[logicalName];
             props[logicalName.slice(0, -2)] = undefined
         });
-
         //reset text and lookup value
+        setfreeformvalue("");
         setSelectedKey(null)
     }
 
@@ -290,7 +295,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const placeHolder = `${app.getLocalization('searchFor') ?? 'Search for'} ${searchForLabel ?? targetEntity.locale?.[app.locale]?.displayName ?? targetEntity.displayName}`;
     const noResultText = app.getLocalization('noResults') ?? 'No results...';
     const loadingText = app.getLocalization('loading') ?? 'Loading...';
-    const [freeformvalue, setfreeformvalue] = useState<string>();
 
     console.log("Lookup Control:", [options.find(x => x.key === selectedKey)?.text,label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
@@ -326,20 +330,36 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             id={`${targetEntityName}_${logicalName}_combo`}
             freeform
             selectedOptions={selectedKey ? [selectedKey] : []}
-            value={options.find(x => x.key === selectedKey)?.text}
+            value={freeformvalue || options.find(x => x.key === selectedKey)?.text || ""}
             onChange={__onChange}
-            onFocus={() => { if (!shouldLoadRemoteOptions) { setShouldLoadRemoteOptions(true) } } }
-            onOptionSelect={onOptionSelect}  
+            onFocus={() => { if (!shouldLoadRemoteOptions) { setShouldLoadRemoteOptions(true) } }}
+            onOptionSelect={onOptionSelect}
         >
             {options.map((option) => (
                 <Option key={option.key} value={option.key as string} text={option.text} >
                     {option.text}
                 </Option>
             ))}
+            <div style={({
+                backgroundColor: theme?.palette.white,
+                boxSizing: "border-box",
+                width: "100%",
+                borderTop: "1px solid rgb(0 0 0 / 13%)"
+            })}>
+                <Stack style={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+                    <CommandButton id={`${targetEntityName}_${logicalName}_new`} text={localization.new} styles={commandback} iconProps={emojiIcon}
+                    //                        onClick={(e) => _showModal()}
+                    />
+                    <CommandButton text={localization.clear} styles={commandback} iconProps={emojiIconClear}
+                        onClick={resetValue}
+                    />
+                </Stack>
+            </div>
+
         </Combobox>
         {/*
         <ComboBox
-            id={`${targetEntityName}_${logicalName}_combo`} 
+            id={`${targetEntityName}_${logicalName}_combo`}
             componentRef={ref}
             disabled={disabled}
 
