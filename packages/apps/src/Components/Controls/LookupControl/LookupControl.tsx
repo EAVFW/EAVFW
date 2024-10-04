@@ -367,6 +367,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             onOptionSelect={onOptionSelect}
             open={isComboboxOpen}
             onOpenChange={(event, data) => setIsComboboxOpen(data.open)}
+            clearable
         >
             {options.map((option) => (
                 <Option key={option.key} value={option.key as string} text={option.text} >
