@@ -21,6 +21,8 @@ import {
     useTheme
 } from "@fluentui/react";
 
+import { Dialog,DialogSurface } from "@fluentui/react-components";
+
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { EntityDefinition, getRecordSWR, IRecord, isLookup, isPolyLookup, LookupType, NestedType, queryEntity, queryEntitySWR, TypeFormModalDefinition } from "@eavfw/manifest";
@@ -300,7 +302,34 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     console.log("Lookup Control:", [options.find(x => x.key === selectedKey)?.text,label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, selectedValue, selectedKey, loadRemoteValue,
         !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0]);
+    
     return (<>
+        <Dialog
+            open={modalOpen}
+            onOpenChange={(event, data) => {
+                setmodalOpen(data.open);
+            }}
+            modalType="alert"   // to prevent closing dialog on focus change
+        >
+            <DialogSurface aria-orientation="vertical" style={{ minWidth: "60vw", maxWidth: "90vw" }}>
+                <CommandBar id="ModalRibbonBarCommands"
+                    items={[]}
+                    farItems={[{
+                        key: 'close',
+                        //  text: 'Info',
+                        // This needs an ariaLabel since it's icon-only
+                        ariaLabel: 'Info',
+                        iconOnly: true,
+                        iconProps: { iconName: 'Cancel' },
+                        onClick: _hideModal,
+                    }]}
+                    ariaLabel="Use left and right arrow keys to navigate between commands"
+                />
+                <FormRender entityName={targetEntityName} forms={forms} type={type} dismissPanel={_hideModal} record={dummyData}
+                    onChange={_onModalSubmit} extraErrors={extraErrors} />
+            </DialogSurface>
+        </Dialog>
+        {/*
         <Modal isOpen={modalOpen} onDismiss={_hideModal} isBlocking={true} styles={{ scrollableContent: { overflowY: "hidden", maxHeight: "100%" } }}>
             <Stack verticalFill styles={{ root: { minWidth: "60vw", maxWidth: "90vw" } }}>
                 <Stack horizontal>
@@ -323,7 +352,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                 <FormRender entityName={targetEntityName} forms={forms} type={type} dismissPanel={_hideModal} record={dummyData}
                     onChange={_onModalSubmit} extraErrors={extraErrors} />
             </Stack>
-        </Modal>
+        </Modal>*/}
         <Combobox
             aria-label={label}
             disabled={disabled}
