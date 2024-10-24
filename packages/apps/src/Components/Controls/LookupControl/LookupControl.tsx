@@ -103,7 +103,6 @@ function returnQueryFilter(searchfilter: string | undefined, filter: string | un
         return { '$filter': '' };     //neither defined
 }
 
-let a = 0;  //for tracking components in logging
 
 export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     extraErrors,
@@ -131,7 +130,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const _hideModal = () => setmodalOpen(false);
     const _showModal = () => setmodalOpen(true);
 
-    const id = useMemo(() => a++, []);   //for tracking components in logging
+    
 
     const localization = {
         new: capitalize(app.getLocalization("new") ?? "New"),
@@ -265,7 +264,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     const onOptionSelect: ComboboxProps["onOptionSelect"] = (event, data) => {
         const matchingOption = options.find(x => x.key === data.optionValue);
-        console.log("Lookup Control: " + id + ": onOptionSelect", [data, matchingOption, options]);
+     
 
         if (!matchingOption) {
             resetValue();
@@ -298,8 +297,7 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     const [isComboboxOpen, setIsComboboxOpen] = useState(false);
 
-    console.log("Lookup Control: " + id, [options.find(x => x.key === selectedKey)?.text,label, disabled, isLoading, remoteItems, initialOptions, remoteOptions, options, filter, value, "selectedV: ", selectedValue, selectedKey, loadRemoteValue,
-        !!value, typeof (selectedValue) === "undefined", !isLoadingRemoteData, remoteItems?.items.filter(x => x.id === value).length === 0, freeformvalue, selectedKey, options.find(x => x.key === selectedKey)?.text] );
+       
     
     return (<>
         <Dialog
