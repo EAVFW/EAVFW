@@ -17,6 +17,7 @@
     "@fluentui/react-hooks": "^8.8.6",
     "@rjsf/fluentui-rc": "^5.18.4",
     "@rjsf/core": "^5.18.4",
+    "@rjsf/utils": "^5.18.4",
     "@rjsf/validator-ajv8": "^5.18.4",
     "@fluentui/react-components": "^9.54.0",
     "@fluentui/react-portal-compat": "^9.0.148",

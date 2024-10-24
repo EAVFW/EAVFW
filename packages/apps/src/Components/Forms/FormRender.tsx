@@ -84,7 +84,7 @@ export function FormRender<T>(props: FormRenderProps) {
 
     const RenderFooterContent = React.useCallback(
         () => (
-            <Stack horizontal horizontalAlign="end" styles={{ root: { margin: 24 } }}>
+            <Stack horizontal horizontalAlign="end" style={{margin: 24 }}>
                 {errorMsg && <MessageBar messageBarType={MessageBarType.error}>{errorMsg}</MessageBar>}
                 <PrimaryButton onClick={_onSave} styles={buttonStyles}>
                     {saveBtnText ?? (capitalize(app.getLocalization("save") ?? 'Save'))}
