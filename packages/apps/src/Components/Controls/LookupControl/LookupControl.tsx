@@ -642,7 +642,6 @@ export function LookupControl<T>({
 
     const targetEntityName = column.entityName ?? (isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute"));
 
-    console.log("Lookup Control: outer" + id, [entityName, attributeName, attribute, fieldName, targetEntityName, formDefinition, attribute?.type, column, logicalName, selectedValue, value, formData, filter]);
 
     //  
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
