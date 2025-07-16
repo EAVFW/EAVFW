@@ -5,7 +5,7 @@
   },
   "peerDependencies": {
     "@monaco-editor/react": ">=4.6.0",
-    "monaco-editor": ">=0.46.0",
+    "monaco-editor": ">=0.50.0",
     "pako": ">=2.1.0",
     "@types/pako": ">=2.0.3"
   },

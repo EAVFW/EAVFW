@@ -3,14 +3,14 @@
   "author": "Poul Kjeldager <poul@kjeldager.com>",
   "devDependencies": {
     "@types/node": "17.0.5",
-    "@types/react": "18.2.0",
+    "@types/react": "18.2.8",
     "@types/react-dom": "18.2.0",
-    "typescript": "5.4.2",
     "concurrently": "7.0.0",
     "multi-semantic-release": "^3.0.1",
     "npm-run-all": "^4.1.5",
     "semantic-release": "^19.0.5",
-    "semantic-release-monorepo": "7.0.5"
+    "semantic-release-monorepo": "7.0.5",
+    "typescript": "5.4.2"
   },
   "scripts": {
     "link": "concurrently  \"npm:link-*\"",
@@ -63,5 +63,8 @@
     "type": "git",
     "url": "git+https://github.com/EAVFW/EAVFW.git"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "monaco-editor": "^0.50.0"
+  }
 }
