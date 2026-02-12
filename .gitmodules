@@ -1,0 +1,6 @@
+[submodule "external/eavfw-templates"]
+	path = external/eavfw-templates
+	url = https://github.com/EAVFW/EAVFW.Templates.git
+[submodule "external/eavframework"]
+	path = external/eavframework
+	url = https://github.com/EAVFW/EAVFramework.git
