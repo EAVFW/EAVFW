@@ -4,7 +4,7 @@
   "build": {
     "dockerfile": "Dockerfile",
     "args": {
-      "BASE_IMAGE_TAG": "latest",
+      "BASE_IMAGE_TAG": "vnext",
       "TZ": "${localEnv:TZ:UTC}",
       "CLAUDE_CODE_VERSION": "latest",
       "GIT_DELTA_VERSION": "0.18.2",
