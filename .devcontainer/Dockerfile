@@ -21,7 +21,12 @@ RUN chmod +x /usr/local/bin/init-firewall.sh && \
   chmod 0440 /etc/sudoers.d/node-firewall
 
 # Install tmux for Claude Code agent team split-pane mode
-RUN apt-get update && apt-get install -y --no-install-recommends tmux && rm -rf /var/lib/apt/lists/*
+# Install libnss3-tools for dotnet dev-certs trust (certutil needed for browser/Playwright cert trust)
+RUN apt-get update && apt-get install -y --no-install-recommends tmux libnss3-tools && \
+  # Install ttyd for web-based terminal access (useful with tmux for split-pane viewing)
+  curl -fsSL -o /tmp/ttyd https://github.com/tsl0922/ttyd/releases/download/1.7.7/ttyd.x86_64 && \
+  install -m 755 /tmp/ttyd /usr/local/bin/ttyd && rm /tmp/ttyd && \
+  rm -rf /var/lib/apt/lists/*
 
 # Configure passwordless sudo for Docker-in-Docker
 # The docker-init.sh script needs to run dockerd and related commands as root
