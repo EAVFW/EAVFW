@@ -126,3 +126,13 @@ Phase 1 (Foundation) ──> Phase 2 (Type Safety) ──> Phase 3 (Architecture
 Phases 4 and 5 can proceed in parallel after Phase 3. Phase 6 depends on all prior phases.
 
 The multi-UI-framework epic (see `docs/roadmap/multi-ui-framework.md`) influences Phases 3, 5, and the component testing strategy in Phase 4.
+
+## Cross-Cutting Epics (Run in Parallel)
+
+These epics are independent of the phases above and can be worked on incrementally alongside any phase:
+
+- **OpenTelemetry** (`docs/roadmap/opentelemetry.md`) — Full-stack observability: backend spans/metrics, frontend tracing, Aspire dashboard enrichment. Touches `external/eavframework/` (backend) and `packages/` (frontend).
+- **Release Strategy** (`docs/roadmap/release-strategy.md`) — Unified versioning with Release Please. All npm + NuGet packages share one version. Central trigger from this repo, human-gated via release PRs. Replaces semantic-release.
+- **Multi-UI Framework** (`docs/roadmap/multi-ui-framework.md`) — Abstract away Fluent UI dependency.
+- **Testing Strategy** (`docs/roadmap/testing-strategy.md`) — Comprehensive testing approach.
+- **Apps Decomposition** (`docs/roadmap/apps-decomposition.md`) — Break up the 14K-line `@eavfw/apps` package.
