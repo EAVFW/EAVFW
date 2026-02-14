@@ -190,3 +190,80 @@ When an Aspire AppHost needs both an assembly reference (for `using Namespace.Mo
 ## CI/CD
 
 GitHub Actions runs on `windows-latest` with .NET 8 and Node 20. The test workflow creates a project from EAVFW dotnet templates, links local packages, and runs `npm run build` against it. There are no unit tests in this repo.
+
+## Coding Standards Summary
+
+Full standards: `docs/governance/coding-standards.md`. Key rules:
+
+- **TypeScript**: `strict: true`, never `any` (use `unknown` + narrowing), prefer `interface` for object shapes
+- **Exports**: Named only — never `export default` (see ADR-0003)
+- **File size**: Maximum 400 lines per file (see ADR-0004)
+- **Components**: Plain arrow functions (not `React.FC`), destructure props in signature, `React.memo` for object/array props
+- **Hooks**: Own file, `use` prefix, camelCase (`useEntityLookup.ts`)
+- **Naming**: PascalCase for components/types, camelCase for hooks/utils, `is`/`has`/`should` for booleans, no abbreviations (except `id`/`url`/`api`)
+- **State**: `useState` for local, props for 1-2 levels, Context for 3+, SWR for server cache, `useMemo` for derived
+- **Imports**: Group by 1) React/Next, 2) External, 3) `@eavfw/*`, 4) Relative — blank line between groups
+- **JSDoc**: Required on all exports with `@example` for non-trivial APIs
+- **Testing**: Vitest for pure logic, co-located test files (`{module}.test.ts`)
+- **Formatting**: Prettier (2-space indent, trailing commas, single quotes, print width 100)
+
+## Anti-Patterns — DO NOT
+
+1. **DO NOT** use `export default` — named exports only
+2. **DO NOT** use `any` — use `unknown`, generics, or specific types
+3. **DO NOT** create files over 400 lines — split into focused modules
+4. **DO NOT** add a build step — packages ship raw TypeScript (see ADR-0002)
+5. **DO NOT** use `React.FC` — use plain arrow functions with typed props
+6. **DO NOT** create new React contexts without checking existing ones (33 is already too many)
+7. **DO NOT** put business logic in React components — extract to hooks or pure functions
+8. **DO NOT** use wrong vocabulary — see Glossary below
+9. **DO NOT** import from internal paths of `@eavfw/*` packages — import from package root only
+10. **DO NOT** leave empty catch blocks or use `@ts-ignore` (use `@ts-expect-error` with explanation)
+11. **DO NOT** add commented-out code — use git history
+12. **DO NOT** create `helpers.ts` or `utils.ts` grab-bag files — one purpose per file
+
+## Glossary
+
+Use these terms consistently across code, comments, docs, and commit messages.
+
+| EAVFW Term | DO NOT Use | Meaning |
+|------------|-----------|---------|
+| **Entity** | table, model, resource | A data object defined in the manifest |
+| **Attribute** | field, column, property | A property of an entity |
+| **Manifest** | schema, config, spec | The JSON document defining the application model |
+| **View** | grid, table, list | A visual representation of entity records |
+| **Form** | detail, editor, screen | UI for creating/editing a single entity record |
+| **Control** | widget, input, component | A form field component (text, lookup, toggle, etc.) |
+| **Ribbon** | toolbar, commandbar, actionbar | The command/action bar above views and forms |
+| **Area** | section, module, zone | A navigation grouping in the app sidebar |
+| **App** | application, portal | A named application definition in the manifest |
+| **Logical Name** | slug, key, identifier | Lowercase programmatic name (e.g., `security_role`) |
+| **Display Name** | label, title | Human-readable name (e.g., `"Security Role"`) |
+
+## Verification After Large Changes
+
+After completing a phase, epic, or any large body of work, run the integration test suite at `tests/ScaffoldIntegrationTests/`. This is the single source of truth for "does everything work?"
+
+```bash
+dotnet test tests/ScaffoldIntegrationTests -- MSTest.TestTimeout=600000
+```
+
+This test automatically:
+1. Cleans `sandbox/TestCRM` if it exists
+2. Installs EAVFW templates from local `external/eavfw-templates/`
+3. Scaffolds a full project with local references
+4. Builds (twice — first generates manifest, second compiles)
+5. Runs Playwright smoke test and full login flow via Aspire
+6. Produces screenshots + videos in `sandbox/TestCRM/videos/` for human inspection
+
+**Do not manually scaffold for verification.** Just run the test. The `/eavfw-scaffold-dev` skill is separate — it's for humans and AI agents to interactively explore a scaffolded project.
+
+Note: `npm run test` (Vitest) runs unit tests for pure logic. `dotnet test tests/ScaffoldIntegrationTests` runs the full E2E integration test. They are different things.
+
+## Governance Documents
+
+- **ADRs**: `docs/governance/adr/` — Architecture Decision Records
+- **Coding Standards**: `docs/governance/coding-standards.md`
+- **Improvement Roadmap**: `docs/governance/improvement-roadmap.md`
+- **AI Contribution Guide**: `docs/governance/ai-contribution-guide.md`
+- **Roadmap Epics**: `docs/roadmap/` — Multi-UI framework, testing strategy, apps decomposition

@@ -1,0 +1,6 @@
+node_modules
+external/
+sandbox/
+bin
+obj
+*.json
