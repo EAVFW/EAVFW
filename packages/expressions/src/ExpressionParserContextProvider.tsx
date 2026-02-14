@@ -1,158 +1,186 @@
-import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ExpressionParserContext } from "./ExpressionParserContext";
-import { EnabledBlazorContextType, useBlazor, useDebouncer } from "@eavfw/hooks";
+import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ExpressionParserContext } from './ExpressionParserContext';
+import { EnabledBlazorContextType, useBlazor, useDebouncer } from '@eavfw/hooks';
 
 //const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
 const setVariablesFunction = process.env['NEXT_PUBLIC_BLAZOR_SET_VARIABLES'];
 
 declare global {
-    interface Window { expressionUpdated: any; expressionError: any; multipleExpressionsUpdated: any;}
+  interface Window {
+    expressionUpdated: any;
+    expressionError: any;
+    multipleExpressionsUpdated: any;
+  }
 }
 
-const expressionResults = {
-
-} as any;
-if (typeof global.window !== "undefined") {
-
-    window['multipleExpressionsUpdated'] = function ( valuesToUpdate: {id: any, result: any | undefined, error: any | undefined}[] ) {        
-        if(valuesToUpdate != undefined && valuesToUpdate.length != 0){
-            setTimeout(() => {
-                valuesToUpdate.forEach(elem => {
-                    expressionResults[elem.id](elem.result, elem.error);                
-                });
-            });
-        }
-    }
-
-    window['expressionUpdated'] = function (id: any, result: any) {
-        setTimeout(() => {
-            expressionResults[id](result);
+const expressionResults = {} as any;
+if (typeof global.window !== 'undefined') {
+  window['multipleExpressionsUpdated'] = function (
+    valuesToUpdate: { id: any; result: any | undefined; error: any | undefined }[],
+  ) {
+    if (valuesToUpdate != undefined && valuesToUpdate.length != 0) {
+      setTimeout(() => {
+        valuesToUpdate.forEach((elem) => {
+          expressionResults[elem.id](elem.result, elem.error);
         });
+      });
     }
+  };
 
-    window['expressionError'] = function (id: any, error: any) {
+  window['expressionUpdated'] = function (id: any, result: any) {
+    setTimeout(() => {
+      expressionResults[id](result);
+    });
+  };
 
-        setTimeout(() => {
-            expressionResults[id](undefined, error);
-        });
-    }
+  window['expressionError'] = function (id: any, error: any) {
+    setTimeout(() => {
+      expressionResults[id](undefined, error);
+    });
+  };
 }
 
 export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
+  const _variables = useRef({});
+  const _expresssions = useRef({});
+  const _results = useRef<any>({});
+  const [variables, setVariables] = useState(_variables.current);
+  const [formValues, setFormValues] = useState({});
+  const [expressions, setExpressions] = useState({});
+  const [results, setResults] = useState({});
 
-    const _variables = useRef({});
-    const _expresssions = useRef({});
-    const _results = useRef<any>({});
-    const [variables, setVariables] = useState(_variables.current);
-    const [formValues, setFormValues] = useState({});
-    const [expressions, setExpressions] = useState({});
-    const [results, setResults] = useState({});
+  const blazor = useBlazor();
+  const [isVariablesUpToDate, setIsVariablesUpToDate] = useState(true);
+  const [isParserContextVariablesInitialized, setisParserContextVariablesInitialized] =
+    useState(false);
+  const [isParserContextExpressionsInitialized, setisParserContextExpressionsInitialized] =
+    useState(false);
 
-    const blazor = useBlazor();
-    const [isVariablesUpToDate, setIsVariablesUpToDate] = useState(true);
-    const [isParserContextVariablesInitialized, setisParserContextVariablesInitialized] = useState(false);
-    const [isParserContextExpressionsInitialized, setisParserContextExpressionsInitialized] = useState(false);
+  //Using a ref to store variables to avoid triggering changes on the appendVariables method
+  const _appendVariables = useCallback((obj: any) => {
+    _variables.current = {
+      ..._variables.current,
+      ...obj,
+    };
+    setIsVariablesUpToDate(false);
+    setVariables(_variables.current);
+  }, []);
 
-    //Using a ref to store variables to avoid triggering changes on the appendVariables method
-    const _appendVariables = useCallback((obj: any) => {
-        _variables.current = {
-            ..._variables.current,
-            ...obj
-        };
-        setIsVariablesUpToDate(false);
-        setVariables(_variables.current);
-    }, []);
+  const [_resultetag, set_resultetag] = useState(new Date().getTime());
+  const t = useRef(0);
 
-    const [_resultetag, set_resultetag] = useState(new Date().getTime());
-    const t = useRef(0);
+  const _appendExpression = useCallback(
+    (
+      id: string,
+      expresssion: string,
+      context: any,
+      oncallback: (data: any, error: any, id?: string) => void,
+    ) => {
+      _results.current[id] = { isLoading: false };
 
-    const _appendExpression = useCallback((id: string, expresssion: string, context: any, oncallback: (data: any, error: any, id?: string) => void) => {
+      expressionResults[id] = (result: any, error: any) => {
+        oncallback(result, error, id);
+        _results.current[id].data = result;
+        _results.current[id].isLoading = false;
+        _results.current[id].error = error;
 
-        _results.current[id] = { isLoading: false };
+        window.clearTimeout(t.current);
+        t.current = window.setTimeout(() => {
+          set_resultetag(new Date().getTime());
+        }, 400);
+      };
 
-        expressionResults[id] = (result: any, error: any) => {
-            oncallback(result, error, id);
-            _results.current[id].data = result;
-            _results.current[id].isLoading = false;
-            _results.current[id].error = error;
+      setExpressions(
+        (_expresssions.current = {
+          ..._expresssions.current,
+          [id]: {
+            expression: expresssion,
+            context: context,
+          },
+        }),
+      );
 
-            window.clearTimeout(t.current);
-            t.current = window.setTimeout(() => {
-                set_resultetag(new Date().getTime());
-            }, 400);
+      //setResults(_results.current = {
+      //    ..._results.current,
+      //    [id]: {
+      //        data: undefined, isLoading: true, error: undefined
+      //    }
+      //});
+    },
+    [],
+  );
 
-        };
+  const allEvaluated = useMemo(
+    () => Object.values(_results.current).filter((x: any) => x.isLoading === true).length === 0,
+    [_resultetag],
+  );
 
-        setExpressions(_expresssions.current = {
-            ..._expresssions.current,
-            [id]: {
-                expression: expresssion,
-                context: context
+  const _removeExpresssion = useCallback((id: any) => {
+    let expr = { ..._expresssions.current } as any;
+    delete expr[id];
+    setExpressions((_expresssions.current = expr));
+  }, []);
+
+  useEffect(() => {}, [formValues]);
+
+  const _ti = useRef(new Date().getTime());
+  const _d = useDebouncer(
+    () => {
+      if (
+        blazor.isEnabled &&
+        setVariablesFunction &&
+        blazor.isInitialized &&
+        !isVariablesUpToDate
+      ) {
+        const localtime = (_ti.current = new Date().getTime());
+        DotNet.invokeMethodAsync(blazor.namespace, setVariablesFunction, _variables.current)
+          .then(() => {
+            if (localtime === _ti.current) {
+              setIsVariablesUpToDate(true);
+              setisParserContextVariablesInitialized(true);
             }
-        });
+          })
+          .catch((err) => {})
+          .finally(() => {
+            //   alert("variables set in " + (new Date().getTime() - time));
+          });
+      }
+    },
+    250,
+    [isVariablesUpToDate, variables, blazor.isInitialized],
+  ) as any;
 
-        //setResults(_results.current = {
-        //    ..._results.current,
-        //    [id]: {
-        //        data: undefined, isLoading: true, error: undefined
-        //    }
-        //});    
-    }, []);
+  useEffect(() => {
+    _d();
+  }, [isVariablesUpToDate, variables, blazor.isInitialized]);
+  const _tii = useRef(new Date().getTime());
+  const _dd = useDebouncer(
+    () => {
+      if (blazor.isEnabled && setVariablesFunction && blazor.isInitialized) {
+        const localtime = (_tii.current = new Date().getTime());
+        DotNet.invokeMethodAsync(blazor.namespace, 'SetExpresssions', _expresssions.current)
+          .then(() => {
+            if (localtime === _tii.current) {
+              setisParserContextExpressionsInitialized(true);
+            }
+          })
+          .catch((err) => {})
+          .finally(() => {
+            //   alert("variables set in " + (new Date().getTime() - time));
+          });
+      }
+    },
+    250,
+    [expressions, blazor.isInitialized],
+  ) as any;
 
-    const allEvaluated = useMemo(() => Object.values(_results.current).filter((x: any) => x.isLoading === true).length === 0, [_resultetag]);
+  useEffect(() => {
+    _dd();
+  }, [expressions, blazor.isInitialized]);
 
-    const _removeExpresssion = useCallback((id: any) => {
-        let expr = { ..._expresssions.current } as any;
-        delete expr[id];
-        setExpressions(_expresssions.current = expr)
-    }, []);
-
-    useEffect(() => {
-    }, [formValues]);
-
-    const _ti = useRef(new Date().getTime());
-    const _d = useDebouncer(() => {
-
-        if (blazor.isEnabled && setVariablesFunction && blazor.isInitialized && !isVariablesUpToDate) {
-
-            const localtime = _ti.current = new Date().getTime();
-            DotNet.invokeMethodAsync(blazor.namespace, setVariablesFunction, _variables.current)
-                .then(() => {
-                    if (localtime === _ti.current) {
-                        setIsVariablesUpToDate(true);
-                        setisParserContextVariablesInitialized(true);
-                    }
-                }).catch((err) => {
-                }).finally(() => {
-
-                    //   alert("variables set in " + (new Date().getTime() - time));
-                });
-        }
-    }, 250, [isVariablesUpToDate, variables, blazor.isInitialized]) as any;
-
-    useEffect(() => { _d(); }, [isVariablesUpToDate, variables, blazor.isInitialized]);
-    const _tii = useRef(new Date().getTime());
-    const _dd = useDebouncer(() => {
-
-        if (blazor.isEnabled && setVariablesFunction && blazor.isInitialized) {
-
-            const localtime = _tii.current = new Date().getTime();
-            DotNet.invokeMethodAsync(blazor.namespace, "SetExpresssions", _expresssions.current)
-                .then(() => {
-                    if (localtime === _tii.current) {
-                        setisParserContextExpressionsInitialized(true);
-                    }
-                }).catch((err) => {
-                }).finally(() => {
-                    //   alert("variables set in " + (new Date().getTime() - time));
-
-                });
-        }
-    }, 250, [expressions, blazor.isInitialized]) as any;
-
-    useEffect(() => { _dd(); }, [expressions, blazor.isInitialized]);
-
-    return <ExpressionParserContext.Provider value={{
+  return (
+    <ExpressionParserContext.Provider
+      value={{
         isInitialized: isParserContextExpressionsInitialized && isParserContextVariablesInitialized,
         formValues,
         setFormValues,
@@ -162,6 +190,10 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
         addExpresssion: _appendExpression,
         removeExpression: _removeExpresssion,
         variables,
-        isVariablesUpToDate: isVariablesUpToDate
-    }}>{children}</ExpressionParserContext.Provider>;
-}
+        isVariablesUpToDate: isVariablesUpToDate,
+      }}
+    >
+      {children}
+    </ExpressionParserContext.Provider>
+  );
+};

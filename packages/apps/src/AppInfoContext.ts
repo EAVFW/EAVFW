@@ -1,8 +1,7 @@
-import { createContext } from "react";
-
+import { createContext } from 'react';
 
 export type AppInfoContext = {
-    title: string
-}
+  title: string;
+};
 
 export const AppInfoContext = createContext<AppInfoContext | undefined>(undefined);

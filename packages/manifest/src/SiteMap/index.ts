@@ -1,2 +1,2 @@
-export * from "./MultipleSiteMapDefinitions";
-export * from "./SiteMapDefinition";
+export * from './MultipleSiteMapDefinitions';
+export * from './SiteMapDefinition';

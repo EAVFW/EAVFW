@@ -1,2 +1,1 @@
-
-export * from "./useBlazor";
+export * from './useBlazor';

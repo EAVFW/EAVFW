@@ -1,33 +1,33 @@
-import { RibbonViewInfo } from "../Ribbon";
-import { FormColumnDefinition, FormTabDefinition } from "./FormLayout";
+import { RibbonViewInfo } from '../Ribbon';
+import { FormColumnDefinition, FormTabDefinition } from './FormLayout';
 
 export type FormDefinition = {
-    type: "Main" | "Modal" | "QuickCreate";
-    name: string;
-    ribbon?: RibbonViewInfo,
-    buttons?: {
-        save?: {
-            text?: string
-        };
-        cancel?: {
-            text?: string
-        }
+  type: 'Main' | 'Modal' | 'QuickCreate';
+  name: string;
+  ribbon?: RibbonViewInfo;
+  buttons?: {
+    save?: {
+      text?: string;
     };
-    query?:any,
-    scripts?: {
-        onInit?: {
-            [name: string]: string;
-        };
-        preSave?: {
-            [name: string]: string;
-        };
+    cancel?: {
+      text?: string;
     };
-    layout: {
-        tabs: {
-            [tabName: string]: FormTabDefinition;
-        };
+  };
+  query?: any;
+  scripts?: {
+    onInit?: {
+      [name: string]: string;
     };
-    columns: {
-        [columnName: string]: FormColumnDefinition;
+    preSave?: {
+      [name: string]: string;
     };
+  };
+  layout: {
+    tabs: {
+      [tabName: string]: FormTabDefinition;
+    };
+  };
+  columns: {
+    [columnName: string]: FormColumnDefinition;
+  };
 };

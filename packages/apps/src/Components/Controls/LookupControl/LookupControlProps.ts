@@ -1,3 +1,3 @@
-import { FieldProps } from "@rjsf/utils";
+import { FieldProps } from '@rjsf/utils';
 
-export type LookupControlProps<T> = {} & FieldProps
+export type LookupControlProps<T> = {} & FieldProps;

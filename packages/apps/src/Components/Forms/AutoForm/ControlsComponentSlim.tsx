@@ -1,6 +1,3 @@
-
-
 export const ControlsComponentSlim = () => {
-
-    return <div>hej</div>
-}
+  return <div>hej</div>;
+};

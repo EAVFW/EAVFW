@@ -1,1 +1,1 @@
-export * from "./ODataBuilder";
+export * from './ODataBuilder';

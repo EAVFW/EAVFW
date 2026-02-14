@@ -1,5 +1,5 @@
-import { RibbonViewItemInfo } from "./RibbonViewItemInfo";
+import { RibbonViewItemInfo } from './RibbonViewItemInfo';
 
 export type RibbonViewInfo = {
-    [key: string]: RibbonViewItemInfo
-}
+  [key: string]: RibbonViewItemInfo;
+};

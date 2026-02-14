@@ -1,1 +1,1 @@
-export * from "./ModelDrivenTopBar";
+export * from './ModelDrivenTopBar';

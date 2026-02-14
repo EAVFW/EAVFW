@@ -168,17 +168,30 @@ See `docs/governance/coding-standards.md` for the complete standards document.
 
 ## Verification After Large Changes
 
-After completing a phase, epic, or any large body of work, run the integration test. This is mandatory — do not skip it.
+After completing a phase, epic, or any large body of work, verify in two stages. This is mandatory.
 
+### Stage 1: Scaffold + Build
 ```bash
-dotnet test tests/ScaffoldIntegrationTests -- MSTest.TestTimeout=600000
+dotnet test tests/ScaffoldIntegrationTests --filter ScaffoldAndRunSmokeTest -- MSTest.TestTimeout=600000
+```
+Automatically cleans sandbox, scaffolds, builds, runs smoke test. If this passes, scaffold + build is healthy.
+
+### Stage 2: Aspire + Full E2E
+If Stage 1 passes but Aspire validation is needed (or timed out):
+```bash
+cd sandbox/TestCRM && aspire run
+```
+Use Aspire MCP tools (`list_resources`, `list_console_logs`, `list_structured_logs`) to debug. Once healthy, run Playwright tests directly:
+```bash
+dotnet test tests/TestCRM.AppHost.Tests --filter FullLoginFlow --no-build -- MSTest.TestTimeout=600000
 ```
 
-This test automatically cleans sandbox, scaffolds from templates, builds, runs Aspire, and executes Playwright tests. Screenshots + videos go to `sandbox/TestCRM/videos/` for human inspection.
+### Quick checks (always run first)
+```bash
+npm run format:check && npm run lint && npm run test
+```
 
-**Do not manually scaffold for verification.** Just run the test. The `/eavfw-scaffold-dev` skill is separate — for interactive exploration.
-
-Note: `npm run test` = Vitest unit tests (pure logic). `dotnet test tests/ScaffoldIntegrationTests` = full E2E integration test. Different things.
+Screenshots + videos go to `sandbox/TestCRM/videos/` for human inspection.
 
 ## Governance
 

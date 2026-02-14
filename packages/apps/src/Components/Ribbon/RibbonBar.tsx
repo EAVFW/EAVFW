@@ -1,48 +1,67 @@
-import { CommandBar, ContextualMenu, DialogType, ICommandBarItemProps, ICommandBarStyleProps, ICommandBarStyles, IStackProps, IStackStyles, IStyleFunction, Stack, Theme } from "@fluentui/react";
+import {
+  CommandBar,
+  ContextualMenu,
+  DialogType,
+  ICommandBarItemProps,
+  ICommandBarStyleProps,
+  ICommandBarStyles,
+  IStackProps,
+  IStackStyles,
+  IStyleFunction,
+  Stack,
+  Theme,
+} from '@fluentui/react';
 
-import React, { useEffect, useState } from "react";
-import { RibbonBarBackButton } from "./RibbonBarBackButton";
-import { useRibbon } from "./useRibbon";
-import { useSectionStyles } from "../../Styles/SectionStyles.styles";
+import React, { useEffect, useState } from 'react';
+import { RibbonBarBackButton } from './RibbonBarBackButton';
+import { useRibbon } from './useRibbon';
+import { useSectionStyles } from '../../Styles/SectionStyles.styles';
 
-const RibbonStyles = (props: IStackProps, theme: Theme) => ({
+const RibbonStyles = (props: IStackProps, theme: Theme) =>
+  ({
     root: {
-        overflow: 'hidden',
-        width: `100%`,//
-        borderBottom: `solid 0.5px ${theme.palette.neutralLight}`
-    }
-} as Partial<IStackStyles>);
+      overflow: 'hidden',
+      width: `100%`, //
+      borderBottom: `solid 0.5px ${theme.palette.neutralLight}`,
+    },
+  }) as Partial<IStackStyles>;
 
 const leftribbon: IStyleFunction<ICommandBarStyleProps, ICommandBarStyles> = (props) => ({
-    root: {
-        padding: 0,
-        margin: 0,
-        borderLeft: `solid 1px ${props.theme?.palette.neutralLight}`,
-    },
+  root: {
+    padding: 0,
+    margin: 0,
+    borderLeft: `solid 1px ${props.theme?.palette.neutralLight}`,
+  },
 });
 
-export const RibbonBar: React.FC<{ hideBack?: boolean, className?: string }> = ({ hideBack, className }) => {
+export const RibbonBar: React.FC<{ hideBack?: boolean; className?: string }> = ({
+  hideBack,
+  className,
+}) => {
+  const { buttons } = useRibbon();
+  const styles = useSectionStyles();
 
-    const { buttons } = useRibbon();
-    const styles = useSectionStyles();
+  const [copy, setCopy] = useState<ICommandBarItemProps[]>([]);
 
-    const [copy, setCopy] = useState<ICommandBarItemProps[]>([]);
+  useEffect(() => {
+    //https://github.com/microsoft/fluentui/issues/23502
+    const t = setTimeout(() => setCopy(buttons), 100);
+    return () => {
+      clearTimeout(t);
+    };
+  }, [buttons]);
 
-    useEffect(() => { //https://github.com/microsoft/fluentui/issues/23502
-       const t= setTimeout(() => setCopy(buttons), 100);
-        return () => {
-            clearTimeout(t);
-        }
-    }, [buttons]);
-
-    return <Stack horizontal id="RibbonBar" styles={RibbonStyles} className={className}  >
-        {!hideBack && <RibbonBarBackButton />}
-        <Stack.Item grow >
-            <CommandBar id="RibbonBarCommands"
-                styles={leftribbon}
-                items={copy}
-                ariaLabel="Use left and right arrow keys to navigate between commands"
-            />
-        </Stack.Item>
+  return (
+    <Stack horizontal id="RibbonBar" styles={RibbonStyles} className={className}>
+      {!hideBack && <RibbonBarBackButton />}
+      <Stack.Item grow>
+        <CommandBar
+          id="RibbonBarCommands"
+          styles={leftribbon}
+          items={copy}
+          ariaLabel="Use left and right arrow keys to navigate between commands"
+        />
+      </Stack.Item>
     </Stack>
-}
+  );
+};

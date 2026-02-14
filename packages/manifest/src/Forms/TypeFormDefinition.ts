@@ -1,12 +1,12 @@
-import { RibbonViewInfo } from "../Ribbon";
+import { RibbonViewInfo } from '../Ribbon';
 
 export type TypeFormDefinition = {
-    type: "Main";
-    name: string;
-    tab: string;
-    column: string;
-    section: string;
-    view?: string;
-    filter?: string;
-    ribbon?: RibbonViewInfo,
+  type: 'Main';
+  name: string;
+  tab: string;
+  column: string;
+  section: string;
+  view?: string;
+  filter?: string;
+  ribbon?: RibbonViewInfo;
 };

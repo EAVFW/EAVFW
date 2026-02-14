@@ -1,10 +1,8 @@
-import { makeStyles } from "@fluentui/react-components";
-
+import { makeStyles } from '@fluentui/react-components';
 
 export const useFooterStyles = makeStyles({
-
-    dropdown: {
-        flexGrow: "1",
-        minWidth: "150px"
-    },
+  dropdown: {
+    flexGrow: '1',
+    minWidth: '150px',
+  },
 });

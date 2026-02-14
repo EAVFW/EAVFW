@@ -1,1 +1,1 @@
-export * from "./SimpleDialog";
+export * from './SimpleDialog';

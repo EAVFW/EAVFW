@@ -1,10 +1,10 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
-import isEqual from "react-fast-compare";
-import { EAVFormContext } from "./EAVFormContext";
-import { EAVCollectContext, EAVFormContextActions } from "./EAVFormContextActions";
-import { EAVFormContextProps } from "./EAVFormContextProps";
-import cloneDeep from "clone-deep";
-import { EAVFormContextState } from "./EAVFormContextState";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import isEqual from 'react-fast-compare';
+import { EAVFormContext } from './EAVFormContext';
+import { EAVCollectContext, EAVFormContextActions } from './EAVFormContextActions';
+import { EAVFormContextProps } from './EAVFormContextProps';
+import cloneDeep from 'clone-deep';
+import { EAVFormContextState } from './EAVFormContextState';
 
 //export const showErrors: (arg: JsonSchemaError, prefix: string, visited: (n: string) => boolean) => JsonSchemaErrorObjectWrap =
 //    (errors, prefix, visited) => {
@@ -65,48 +65,67 @@ import { EAVFormContextState } from "./EAVFormContextState";
 //    }
 //}
 
-export function useEAVForm<TCollected, TFormValues = any>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, EAVFormContextState<TFormValues>>, string]
-export function useEAVForm<TFormValues, TCollected>(collector: (state: EAVFormContextState<TFormValues>) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, EAVFormContextState<TFormValues>>, string]
-export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, TState>, string]
-export function useEAVForm<TFormValues, TCollected, TState extends EAVFormContextState<TFormValues>>(collector: (state: TState) => TCollected, timeoutOrLogin?: number | string, logid?: string): [TCollected, EAVFormContextActions<TFormValues, TState>, string] {
+export function useEAVForm<TCollected, TFormValues = any>(
+  collector: (state: EAVFormContextState<TFormValues>) => TCollected,
+  timeoutOrLogin?: number | string,
+  logid?: string,
+): [TCollected, EAVFormContextActions<TFormValues, EAVFormContextState<TFormValues>>, string];
+export function useEAVForm<TFormValues, TCollected>(
+  collector: (state: EAVFormContextState<TFormValues>) => TCollected,
+  timeoutOrLogin?: number | string,
+  logid?: string,
+): [TCollected, EAVFormContextActions<TFormValues, EAVFormContextState<TFormValues>>, string];
+export function useEAVForm<
+  TFormValues,
+  TCollected,
+  TState extends EAVFormContextState<TFormValues>,
+>(
+  collector: (state: TState) => TCollected,
+  timeoutOrLogin?: number | string,
+  logid?: string,
+): [TCollected, EAVFormContextActions<TFormValues, TState>, string];
+export function useEAVForm<
+  TFormValues,
+  TCollected,
+  TState extends EAVFormContextState<TFormValues>,
+>(
+  collector: (state: TState) => TCollected,
+  timeoutOrLogin?: number | string,
+  logid?: string,
+): [TCollected, EAVFormContextActions<TFormValues, TState>, string] {
+  const { purpose, actions, state, etag } =
+    useContext<EAVFormContextProps<TFormValues, TState>>(EAVFormContext);
 
-    const {purpose,
-        actions,
-        state,        
-        etag
-    } = useContext<EAVFormContextProps<TFormValues, TState>>(EAVFormContext);
+  logid = typeof timeoutOrLogin === 'string' ? timeoutOrLogin : logid;
 
-    logid = typeof (timeoutOrLogin) === "string" ? timeoutOrLogin : logid;
-   
-    return actions.useCollector(collector);
+  return actions.useCollector(collector);
 
-   // return [collected, actions, etag];
-    //useEffect(() => {
-      
-    //    const currentTime = new Date().getTime();
-    //    if (currentTime - timeout > reftime.current) {
+  // return [collected, actions, etag];
+  //useEffect(() => {
 
-    //        const newValues = collector(state as TState);
+  //    const currentTime = new Date().getTime();
+  //    if (currentTime - timeout > reftime.current) {
 
-    //        reftime.current = currentTime;
+  //        const newValues = collector(state as TState);
 
-    //        if (!isEqual(oldValues.current, newValues)) {
-    //            oldValues.current = cloneDeep(newValues);
+  //        reftime.current = currentTime;
 
-    //           // setsubscriptionid(new Date().toISOString());
-    //            setCollected([
-    //                cloneDeep(newValues), actions, etag]);
-              
-    //        }
-    //    }
+  //        if (!isEqual(oldValues.current, newValues)) {
+  //            oldValues.current = cloneDeep(newValues);
 
-    //}, [etag]);
+  //           // setsubscriptionid(new Date().toISOString());
+  //            setCollected([
+  //                cloneDeep(newValues), actions, etag]);
 
-    //const collected = useMemo(() => {
-       
-    //    let collected = collector(state as TState);
-    //    return [
-    //        cloneDeep(collected), actions, etag] as [TCollected, EAVFormContextActions<TFormValues>, string];
-    //}, [state,subscriptionid]);
-     
+  //        }
+  //    }
+
+  //}, [etag]);
+
+  //const collected = useMemo(() => {
+
+  //    let collected = collector(state as TState);
+  //    return [
+  //        cloneDeep(collected), actions, etag] as [TCollected, EAVFormContextActions<TFormValues>, string];
+  //}, [state,subscriptionid]);
 }

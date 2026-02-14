@@ -1,51 +1,58 @@
-
-import React, { Fragment, PropsWithChildren, useCallback, useContext, useMemo, useRef, useState } from "react";
-import { IChangeEvent, FormProps } from "@rjsf/core";
-import { FieldTemplateProps, UiSchema, FieldValidation, RJSFValidationError } from "@rjsf/utils"
-import { JSONSchema7, JSONSchema7Definition } from "json-schema";
-import Form from "@rjsf/fluentui-rc";
-import { mergeDeep } from "@eavfw/utils";
+import React, {
+  Fragment,
+  PropsWithChildren,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { IChangeEvent, FormProps } from '@rjsf/core';
+import { FieldTemplateProps, UiSchema, FieldValidation, RJSFValidationError } from '@rjsf/utils';
+import { JSONSchema7, JSONSchema7Definition } from 'json-schema';
+import Form from '@rjsf/fluentui-rc';
+import { mergeDeep } from '@eavfw/utils';
 import {
-    Callout,
-    FontWeights,
-    getTheme,
-    IButtonStyles,
-    Icon,
-    IconButton,
-    IDropdownProps,
-    IIconProps,
-    IIconStyles,
-    IStackStyles,
-    IStackTokens,
-    IStyleFunction,
-    ITextFieldProps,
-    ITextFieldStyleProps,
-    ITextFieldStyles,
-    ITheme,
-    Label,
-    mergeStyleSets,
-    Stack,
-    ThemeContext
-} from "@fluentui/react";
-import { useBoolean, useId } from "@fluentui/react-hooks";
+  Callout,
+  FontWeights,
+  getTheme,
+  IButtonStyles,
+  Icon,
+  IconButton,
+  IDropdownProps,
+  IIconProps,
+  IIconStyles,
+  IStackStyles,
+  IStackTokens,
+  IStyleFunction,
+  ITextFieldProps,
+  ITextFieldStyleProps,
+  ITextFieldStyles,
+  ITheme,
+  Label,
+  mergeStyleSets,
+  Stack,
+  ThemeContext,
+} from '@fluentui/react';
+import { useBoolean, useId } from '@fluentui/react-hooks';
 
-import { useChangeDetector } from "@eavfw/hooks";
+import { useChangeDetector } from '@eavfw/hooks';
 
-import ControlHostWidget from "../../Controls/ControlHostWidget";
-import SelectWidget from "../../Controls/SelectWidget";
-import { OptionsFactory } from "./OptionsFactory";
-import { ControlJsonSchemaObject } from "./ControlJsonSchema";
-import { FormValidation } from "@rjsf/utils";
-import { useModelDrivenApp } from "../../../useModelDrivenApp";
-import { FieldTemplate } from "./Templates/FieldTemplate";
-import { useVisitedContext } from "../../../../../forms/src/EAVForm";
-import { useAppInfo } from "../../../useAppInfo";
-import TextWidget from "./Widgets/TextWidget";
-import CheckboxWidget from "./Widgets/CheckboxWidget";
+import ControlHostWidget from '../../Controls/ControlHostWidget';
+import SelectWidget from '../../Controls/SelectWidget';
+import { OptionsFactory } from './OptionsFactory';
+import { ControlJsonSchemaObject } from './ControlJsonSchema';
+import { FormValidation } from '@rjsf/utils';
+import { useModelDrivenApp } from '../../../useModelDrivenApp';
+import { FieldTemplate } from './Templates/FieldTemplate';
+import { useVisitedContext } from '../../../../../forms/src/EAVForm';
+import { useAppInfo } from '../../../useAppInfo';
+import TextWidget from './Widgets/TextWidget';
+import CheckboxWidget from './Widgets/CheckboxWidget';
 
 import { TextField } from '@fluentui/react';
 
-import DateWidget from "./Widgets/DateWidget";
+import DateWidget from './Widgets/DateWidget';
 import validator from '@rjsf/validator-ajv8';
 
 //declare module '@rjsf/utils' {
@@ -54,259 +61,305 @@ import validator from '@rjsf/validator-ajv8';
 //}
 
 declare module 'json-schema' {
-    export interface JSONSchema7 {
-        'x-widget-props'?: {
-            attributeName?: string,
-            entityName?: string,
-            fieldName?: string,
-            formName?: string,
-
-        }
-    }
+  export interface JSONSchema7 {
+    'x-widget-props'?: {
+      attributeName?: string;
+      entityName?: string;
+      fieldName?: string;
+      formName?: string;
+    };
+  }
 }
 
 export type ControlsComponentProps<T> = {
-    onFormDataChange?: (formdata: T) => void;
-    schema: ControlJsonSchemaObject;
-    formData: T;
-    locale: string;
-    factory?: OptionsFactory;
-    tabName?: string;
-    columnName?: string;
-    sectionName?: string;
-    entityName: string;
-    formContext?: any;
-    extraErrors?: FormValidation;
-}
+  onFormDataChange?: (formdata: T) => void;
+  schema: ControlJsonSchemaObject;
+  formData: T;
+  locale: string;
+  factory?: OptionsFactory;
+  tabName?: string;
+  columnName?: string;
+  sectionName?: string;
+  entityName: string;
+  formContext?: any;
+  extraErrors?: FormValidation;
+};
 
 function createVisitedObject(id: string) {
-    let keys = id.split('_');
-    let obj = {} as any;
-    let root = obj;
-    while (keys.length) {
-        let a = keys.shift()!;
-        obj[a] = keys.length === 0 ? true : {};
-        obj = obj[a]
-    }
-    return root;
+  let keys = id.split('_');
+  let obj = {} as any;
+  let root = obj;
+  while (keys.length) {
+    let a = keys.shift()!;
+    obj[a] = keys.length === 0 ? true : {};
+    obj = obj[a];
+  }
+  return root;
 }
 
 //import DateTimeWidget from "./Widgets/DateTimeWidget";
-import { React8BaseInputTemplate, React9BaseInputTemplate } from "./Widgets/BaseInputTemplate";
-import { TextareaWidget } from "./Widgets/TextareaWidget";
-import { EAVFWLabel } from "./Templates/EAVFWLabel";
-import { useEAVForm } from "@eavfw/forms";
-import ObjectFieldTemplate from "./Templates/ObjectFieldTemplate";
-import { useSectionStyles } from "../../../Styles";
-import { mergeClasses } from "@fluentui/react-components";
-import { Controls } from "../../Controls";
+import { React8BaseInputTemplate, React9BaseInputTemplate } from './Widgets/BaseInputTemplate';
+import { TextareaWidget } from './Widgets/TextareaWidget';
+import { EAVFWLabel } from './Templates/EAVFWLabel';
+import { useEAVForm } from '@eavfw/forms';
+import ObjectFieldTemplate from './Templates/ObjectFieldTemplate';
+import { useSectionStyles } from '../../../Styles';
+import { mergeClasses } from '@fluentui/react-components';
+import { Controls } from '../../Controls';
 
-export const WidgetRegister: FormProps["widgets"] = {
-    SelectWidget: SelectWidget,
-    CheckboxWidget: CheckboxWidget,
-   // DateTimeWidget,
-    DateWidget,
-    TextareaWidget
-}
+export const WidgetRegister: FormProps['widgets'] = {
+  SelectWidget: SelectWidget,
+  CheckboxWidget: CheckboxWidget,
+  // DateTimeWidget,
+  DateWidget,
+  TextareaWidget,
+};
 
-const ControlsComponent =
-    <T extends {}>(props1: PropsWithChildren<ControlsComponentProps<T>>) => {
-        const {
-            schema, onFormDataChange, formData, locale, factory, tabName, formContext
-            , columnName,
-            sectionName,
-            extraErrors = {} as FormValidation
-        } = props1;
-        try {
+const ControlsComponent = <T extends {}>(props1: PropsWithChildren<ControlsComponentProps<T>>) => {
+  const {
+    schema,
+    onFormDataChange,
+    formData,
+    locale,
+    factory,
+    tabName,
+    formContext,
+    columnName,
+    sectionName,
+    extraErrors = {} as FormValidation,
+  } = props1;
+  try {
+    const app = useAppInfo();
+    const styles = useSectionStyles();
 
-            const app = useAppInfo();
-            const styles = useSectionStyles();
+    const renderId = useRef(new Date().toISOString());
+    renderId.current = new Date().toISOString();
+    useChangeDetector(
+      `ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} schema`,
+      schema,
+      renderId,
+    );
+    useChangeDetector(
+      `ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} onFormDataChange`,
+      onFormDataChange,
+      renderId,
+    );
+    useChangeDetector(
+      `ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} formData`,
+      formData,
+      renderId,
+    );
+    useChangeDetector(
+      `ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} locale`,
+      locale,
+      renderId,
+    );
+    useChangeDetector(
+      `ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} factory`,
+      factory,
+      renderId,
+    );
 
-            const renderId = useRef(new Date().toISOString());
-            renderId.current = new Date().toISOString();
-            useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} schema`, schema, renderId);
-            useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} onFormDataChange`, onFormDataChange, renderId);
-            useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} formData`, formData, renderId);
-            useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} locale`, locale, renderId);
-            useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} factory`, factory, renderId);
+    const { visitedFields, setVisitedFields } = useVisitedContext();
 
-            const { visitedFields, setVisitedFields } = useVisitedContext();
+    // const currentData = React.useRef(formData);
+    let order = Object.keys(schema.properties);
 
-            // const currentData = React.useRef(formData);
-            let order = Object.keys(schema.properties);
+    if (schema.dependencies) {
+      for (let dependant of Object.keys(schema.dependencies)) {
+        //dependant = has6thvacationweek
+        //
+        let depencies = schema.dependencies[dependant];
+        if (typeof depencies === 'object' && !Array.isArray(depencies)) {
+          let oneOfs = depencies.oneOf;
+          if (Array.isArray(oneOfs)) {
+            for (let oneOf of oneOfs) {
+              if (typeof oneOf === 'object') {
+                let otherProps = Object.keys(oneOf.properties ?? {}).filter((x) => x !== dependant);
 
-            if (schema.dependencies) {
-                 for (let dependant of Object.keys(schema.dependencies)) {
-                    //dependant = has6thvacationweek
-                    //
-                    let depencies = schema.dependencies[dependant];
-                    if (typeof depencies === "object" && !Array.isArray(depencies)) {
-                        let oneOfs = depencies.oneOf;
-                        if (Array.isArray(oneOfs)) {
-                            for (let oneOf of oneOfs) {
-
-                                if (typeof oneOf === "object") {
-                                    let otherProps = Object.keys(oneOf.properties ?? {}).filter(x => x !== dependant);
-
-                                    for (let otherProp of otherProps) {
-
-                                        if (order.indexOf(otherProp) === -1) {
-                                            order.splice(order.indexOf(dependant) + 1, 0, otherProp);
-                                        }
-                                    }
-                                }
-                            }
-                        } 
-                    } 
+                for (let otherProp of otherProps) {
+                  if (order.indexOf(otherProp) === -1) {
+                    order.splice(order.indexOf(dependant) + 1, 0, otherProp);
+                  }
                 }
+              }
             }
-
-            const uiSChema = React.useMemo(() => ({ ...getUiSchema(schema, factory, formContext), "ui:order": order }), [schema, factory, formContext]);
-
-            // const timerRef = React.useRef(0);
-            const onChange = React.useCallback((e: Partial<IChangeEvent<T>>) => {
-                // currentData.current = e.formData!;
-
-                //  window.clearTimeout(timerRef.current);
-                //  timerRef.current = window.setTimeout(() => {
-                onFormDataChange?.(e.formData!);
-                // }, 500);
-            }, [onFormDataChange]);
-
-            const addVisited = useCallback<Required<FormProps<any>>['onBlur']>((id, value) => {
-                setVisitedFields(id.substr(app.currentEntityName.length + 1), schema.type === "array" ? createVisitedObject(id.substr(app.currentEntityName.length + 1)) : true);
-            }, [app.currentEntityName]);
-
-            if (!process.browser)
-                return <div>"loading"</div>
-
-            //TODO INVESTIGATE THIS. seems odd its running on each render.
-            let formErrors = {} as FormValidation;
-            for (let extraErrorsKey of Object.keys(extraErrors)) {
-                let keys = extraErrorsKey.split('.');
-                if (keys[0] in formErrors) {
-                    //@ts-ignore
-
-                    //@ts-ignore
-                    formErrors[keys[0]] = { __errors: formErrors?.[keys[0]]?.__errors.concat(extraErrors[extraErrorsKey].__errors) } as FieldValidation;
-                } else {
-                    formErrors[keys[0]] = extraErrors[extraErrorsKey];
-                }
-            }
-
-          //  const formDataInitial = useMemo(() => formData,[]);
-
-            //const [a, b] = useState(formData);
-            //useEffect(() => {
-            //    b(formData)
-
-            //}, [formData, section.logicalName]);
-            //const [formdata1] = useEAVForm(x => x.formValues);
-            return (
-
-                <Form tagName="div" className={mergeClasses('controls', sectionName, styles.element, styles.flex, styles.grow)}
-                        onBlur={addVisited}
-                        schema={schema as JSONSchema7}
-                        onChange={onChange}
-                        formContext={{
-                            ...(formContext ?? {}),
-                            onFormDataChange: (data: any) => onChange({ formData: { ...formData, ...data } }), // onFormDataChange,                            
-                            formData: formData,
-                            extraErrors: extraErrors,
-                            formErrors: formErrors
-                        }}
-                        idPrefix={app.currentEntityName}
-                        formData={formData}
-                        fields={{ ControlHostWidget: ControlHostWidget, ...Controls }}
-                        widgets={WidgetRegister} 
-                        uiSchema={uiSChema}
-                        templates={{
-                          
-                            FieldTemplate: FieldTemplate,
-                            BaseInputTemplate: React9BaseInputTemplate,
-                            ObjectFieldTemplate: ObjectFieldTemplate
-                        }}                     
-                        transformErrors={transformErrors}
-                        showErrorList={false}
-                        validator={validator}                
-                        extraErrors={formErrors} // Even though we have to manually access and add the error for custom widget ourself through formContext, we have to set the error here too, to make thure the errors is added to the overview.
-                    ><Fragment /></Form>
-            );
-        } finally {
+          }
         }
+      }
     }
+
+    const uiSChema = React.useMemo(
+      () => ({ ...getUiSchema(schema, factory, formContext), 'ui:order': order }),
+      [schema, factory, formContext],
+    );
+
+    // const timerRef = React.useRef(0);
+    const onChange = React.useCallback(
+      (e: Partial<IChangeEvent<T>>) => {
+        // currentData.current = e.formData!;
+
+        //  window.clearTimeout(timerRef.current);
+        //  timerRef.current = window.setTimeout(() => {
+        onFormDataChange?.(e.formData!);
+        // }, 500);
+      },
+      [onFormDataChange],
+    );
+
+    const addVisited = useCallback<Required<FormProps<any>>['onBlur']>(
+      (id, value) => {
+        setVisitedFields(
+          id.substr(app.currentEntityName.length + 1),
+          schema.type === 'array'
+            ? createVisitedObject(id.substr(app.currentEntityName.length + 1))
+            : true,
+        );
+      },
+      [app.currentEntityName],
+    );
+
+    if (!process.browser) return <div>"loading"</div>;
+
+    //TODO INVESTIGATE THIS. seems odd its running on each render.
+    let formErrors = {} as FormValidation;
+    for (let extraErrorsKey of Object.keys(extraErrors)) {
+      let keys = extraErrorsKey.split('.');
+      if (keys[0] in formErrors) {
+        const existing = formErrors[keys[0]]?.__errors ?? [];
+        const incoming = extraErrors[extraErrorsKey]?.__errors ?? [];
+        // @ts-expect-error -- FieldValidation assignment to FormValidation index (pre-existing type mismatch)
+        formErrors[keys[0]] = {
+          __errors: existing.concat(incoming),
+        } as FieldValidation;
+      } else {
+        formErrors[keys[0]] = extraErrors[extraErrorsKey];
+      }
+    }
+
+    //  const formDataInitial = useMemo(() => formData,[]);
+
+    //const [a, b] = useState(formData);
+    //useEffect(() => {
+    //    b(formData)
+
+    //}, [formData, section.logicalName]);
+    //const [formdata1] = useEAVForm(x => x.formValues);
+    return (
+      <Form
+        tagName="div"
+        className={mergeClasses('controls', sectionName, styles.element, styles.flex, styles.grow)}
+        onBlur={addVisited}
+        schema={schema as JSONSchema7}
+        onChange={onChange}
+        formContext={{
+          ...(formContext ?? {}),
+          onFormDataChange: (data: any) => onChange({ formData: { ...formData, ...data } }), // onFormDataChange,
+          formData: formData,
+          extraErrors: extraErrors,
+          formErrors: formErrors,
+        }}
+        idPrefix={app.currentEntityName}
+        formData={formData}
+        fields={{ ControlHostWidget: ControlHostWidget, ...Controls }}
+        widgets={WidgetRegister}
+        uiSchema={uiSChema}
+        templates={{
+          FieldTemplate: FieldTemplate,
+          BaseInputTemplate: React9BaseInputTemplate,
+          ObjectFieldTemplate: ObjectFieldTemplate,
+        }}
+        transformErrors={transformErrors}
+        showErrorList={false}
+        validator={validator}
+        extraErrors={formErrors} // Even though we have to manually access and add the error for custom widget ourself through formContext, we have to set the error here too, to make thure the errors is added to the overview.
+      >
+        <Fragment />
+      </Form>
+    );
+  } finally {
+  }
+};
 
 export default ControlsComponent;
 
-function hasCustomControl(obj: JSONSchema7Definition, type: "x-widget" | "x-field"): obj is JSONSchema7 & { "x-widget": string, "x-field": string } {
-    return typeof obj === "object" && type in obj;
+function hasCustomControl(
+  obj: JSONSchema7Definition,
+  type: 'x-widget' | 'x-field',
+): obj is JSONSchema7 & { 'x-widget': string; 'x-field': string } {
+  return typeof obj === 'object' && type in obj;
 }
 
-const readonlyStylesFunction: (outerProps: any, props: ITextFieldStyleProps) => Partial<ITextFieldStyles> = (outerProps, props) => {
-    return {
-        fieldGroup: {
-            backgroundColor: props.disabled || outerProps.readOnly ? props.theme.palette.neutralLight : props.theme.palette.neutralLighterAlt,
-            cursor: "default"
-        }
-    }
-}
+const readonlyStylesFunction: (
+  outerProps: any,
+  props: ITextFieldStyleProps,
+) => Partial<ITextFieldStyles> = (outerProps, props) => {
+  return {
+    fieldGroup: {
+      backgroundColor:
+        props.disabled || outerProps.readOnly
+          ? props.theme.palette.neutralLight
+          : props.theme.palette.neutralLighterAlt,
+      cursor: 'default',
+    },
+  };
+};
 
-function getControl(obj: JSONSchema7Definition, type: "widget" | "field") {
-    let t = 'x-' + type as "x-widget" | "x-field";
-    if (hasCustomControl(obj, t)) {
-
-        return obj[t]
-    }
+function getControl(obj: JSONSchema7Definition, type: 'widget' | 'field') {
+  let t = ('x-' + type) as 'x-widget' | 'x-field';
+  if (hasCustomControl(obj, t)) {
+    return obj[t];
+  }
 }
 
 const theme = getTheme();
 const iconCloseButtonStylesFunc = (theme: ITheme) => ({
-    root: {
-        color: theme.palette.neutralPrimary,
-        marginLeft: 'auto',
-        marginTop: '4px',
-        marginRight: '2px',
-    },
-    rootHovered: {
-        color: theme.palette.neutralDark,
-    },
+  root: {
+    color: theme.palette.neutralPrimary,
+    marginLeft: 'auto',
+    marginTop: '4px',
+    marginRight: '2px',
+  },
+  rootHovered: {
+    color: theme.palette.neutralDark,
+  },
 });
 
-const contentStylesFunc = (theme: ITheme) => mergeStyleSets({
+const contentStylesFunc = (theme: ITheme) =>
+  mergeStyleSets({
     container: {
-        display: 'flex',
-        flexFlow: 'column nowrap',
-        alignItems: 'stretch',
-        maxWidth: '400px'
+      display: 'flex',
+      flexFlow: 'column nowrap',
+      alignItems: 'stretch',
+      maxWidth: '400px',
     },
     header: [
-        // eslint-disable-next-line deprecation/deprecation
-        theme.fonts.xLargePlus,
-        {
-            flex: '1 1 auto',
-            borderTop: `2px solid ${theme.palette.themePrimary}`,
-            color: theme.palette.neutralPrimary,
-            display: 'flex',
-            alignItems: 'center',
-            fontWeight: FontWeights.semibold,
-            padding: '12px 12px 14px 24px',
-        },
+      theme.fonts.xLargePlus,
+      {
+        flex: '1 1 auto',
+        borderTop: `2px solid ${theme.palette.themePrimary}`,
+        color: theme.palette.neutralPrimary,
+        display: 'flex',
+        alignItems: 'center',
+        fontWeight: FontWeights.semibold,
+        padding: '12px 12px 14px 24px',
+      },
     ],
     body: {
-        flex: '4 4 auto',
-        padding: '0 24px 24px 24px',
-        overflowY: 'hidden',
+      flex: '4 4 auto',
+      padding: '0 24px 24px 24px',
+      overflowY: 'hidden',
 
-        selectors: {
-            p: { margin: '14px 0' },
-            'p:first-child': { marginTop: 0 },
-            'p:last-child': { marginBottom: 0 },
-        },
+      selectors: {
+        p: { margin: '14px 0' },
+        'p:first-child': { marginTop: 0 },
+        'p:last-child': { marginBottom: 0 },
+      },
     },
-});
+  });
 
 const stackTokens: IStackTokens = {
-    childrenGap: 4,
+  childrenGap: 4,
 };
 
 const labelCalloutStackStyles: Partial<IStackStyles> = { root: { padding: 20 } };
@@ -384,43 +437,62 @@ const cancelIcon: IIconProps = { iconName: 'Cancel' };
 
 const emojiIcon: IIconProps = { iconName: 'Clear' };
 /** Render Caret Down Icon */
-const _onRenderCaretDown = (formContext: any, schema: any, props?: IDropdownProps, originalRender?: Function) => {
-    //  const formdata = useFormContext();
-    const value = formContext.formData[schema["x-logicalname"]];
-    return <>
-        {(value || value === 0) && !props?.disabled && <IconButton iconProps={emojiIcon} title="Clear" ariaLabel="Clear" style={{ height: 28, margin: 1 }} onClick={(e) => {
-            formContext.onFormDataChange({ [schema["x-logicalname"]]: null });
+const _onRenderCaretDown = (
+  formContext: any,
+  schema: any,
+  props?: IDropdownProps,
+  originalRender?: Function,
+) => {
+  //  const formdata = useFormContext();
+  const value = formContext.formData[schema['x-logicalname']];
+  return (
+    <>
+      {(value || value === 0) && !props?.disabled && (
+        <IconButton
+          iconProps={emojiIcon}
+          title="Clear"
+          ariaLabel="Clear"
+          style={{ height: 28, margin: 1 }}
+          onClick={(e) => {
+            formContext.onFormDataChange({ [schema['x-logicalname']]: null });
             e.preventDefault();
             e.stopPropagation();
-        }} />}
-        {originalRender?.(props)}</>;
+          }}
+        />
+      )}
+      {originalRender?.(props)}
+    </>
+  );
 };
 function mapUISchema(props: any, formContext: any) {
-    if (typeof props === "object") {
-       
-        const entries = Object.keys(props).map((k) => [k, {
-            
-            //"ui:disabled": props[k]?.["x-widget-props"]?.disabled,
-            "ui:widget": getControl(props[k], "widget"),
-            "ui:field": getControl(props[k], "field"),             
-            "ui:options": {
-                ...props[k]["x-widget-props"] ?? {},
+  if (typeof props === 'object') {
+    const entries = Object.keys(props).map((k) => [
+      k,
+      {
+        //"ui:disabled": props[k]?.["x-widget-props"]?.disabled,
+        'ui:widget': getControl(props[k], 'widget'),
+        'ui:field': getControl(props[k], 'field'),
+        'ui:options': {
+          ...(props[k]['x-widget-props'] ?? {}),
 
-               // styles: readonlyStylesFunction.bind(null, props[k]),  //props[k].readOnly ? readonlyStylesFunction : props[k]["x-widget-props"]?.["styles"],
-                onRenderCaretDown: _onRenderCaretDown.bind(null, formContext, props[k]),
+          // styles: readonlyStylesFunction.bind(null, props[k]),  //props[k].readOnly ? readonlyStylesFunction : props[k]["x-widget-props"]?.["styles"],
+          onRenderCaretDown: _onRenderCaretDown.bind(null, formContext, props[k]),
 
-                //Hack to render labels correct for booleans, due to react json form will set renderLabel=false for booleans
-                onRenderLabel: (p: any) => props[k].type === "boolean" ? <EAVFWLabel {...p} description={props[k]?.description} /> : undefined
-            },
-            //"ui:placeholder": props[k]?.["x-widget-props"]?.placeholder,
-            "ui:emptyValue": null
-        }]);
-        
-        return Object.fromEntries(entries);
-    }
+          //Hack to render labels correct for booleans, due to react json form will set renderLabel=false for booleans
+          onRenderLabel: (p: any) =>
+            props[k].type === 'boolean' ? (
+              <EAVFWLabel {...p} description={props[k]?.description} />
+            ) : undefined,
+        },
+        //"ui:placeholder": props[k]?.["x-widget-props"]?.placeholder,
+        'ui:emptyValue': null,
+      },
+    ]);
 
-    return {};
+    return Object.fromEntries(entries);
+  }
 
+  return {};
 }
 /**
  * Extracts a specialized `UiSchema` from the custom Json schema given.
@@ -432,19 +504,23 @@ function mapUISchema(props: any, formContext: any) {
  * @param options Options which should be given to all widgets
  */
 function getUiSchema(
-    jsonSchema: ControlJsonSchemaObject,
-    options?: OptionsFactory, //UiSchemaOpts,
-    formContext?: any
+  jsonSchema: ControlJsonSchemaObject,
+  options?: OptionsFactory, //UiSchemaOpts,
+  formContext?: any,
 ): UiSchema {
-    const props = jsonSchema.properties;
-    const deps = mergeDeep({
-        "ui:options": { styles: formContext.section?.styles }
+  const props = jsonSchema.properties;
+  const deps = mergeDeep(
+    {
+      'ui:options': { styles: formContext.section?.styles },
     },
-        ...Object.values(jsonSchema.dependencies ?? {})
-            .map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext))).flat(), mapUISchema(props, formContext));
-    return deps;
+    ...Object.values(jsonSchema.dependencies ?? {})
+      .map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext)))
+      .flat(),
+    mapUISchema(props, formContext),
+  );
+  return deps;
 
-    // return mapUISchema(props);
+  // return mapUISchema(props);
 }
 
 /**
@@ -452,13 +528,13 @@ function getUiSchema(
  * @param errors List of Error to transform
  */
 function transformErrors(errors: RJSFValidationError[], uischema?: UiSchema) {
-    return errors.map((error) => {
-        if (error.name === "multipleOf") {
-            let numberOfDecimals = error.params.multipleOf.toString().split('.')[1]?.length || 0;
-            error.message = `Only ${numberOfDecimals} decimal${numberOfDecimals > 1 ? 's' : ''} are allowed.`;
-            // TODO: Figure out how to get the Display name for the property
-            error.stack = `${error.property}: ${error.message}`;
-        }
-        return error;
-    });
+  return errors.map((error) => {
+    if (error.name === 'multipleOf') {
+      let numberOfDecimals = error.params.multipleOf.toString().split('.')[1]?.length || 0;
+      error.message = `Only ${numberOfDecimals} decimal${numberOfDecimals > 1 ? 's' : ''} are allowed.`;
+      // TODO: Figure out how to get the Display name for the property
+      error.stack = `${error.property}: ${error.message}`;
+    }
+    return error;
+  });
 }

@@ -1,5 +1,4 @@
-import { IColumn, Target } from "@fluentui/react";
-import { IRecord } from "@eavfw/manifest";
+import { IColumn, Target } from '@fluentui/react';
+import { IRecord } from '@eavfw/manifest';
 
-export type ColumnFilterProps = {
-}
+export type ColumnFilterProps = {};

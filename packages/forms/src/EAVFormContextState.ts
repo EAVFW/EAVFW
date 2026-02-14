@@ -1,10 +1,9 @@
-import { EAVFWErrorDefinition, ManifestDefinition } from "@eavfw/manifest";
-
+import { EAVFWErrorDefinition, ManifestDefinition } from '@eavfw/manifest';
 
 export type EAVFormContextState<T> = {
-    formValues: T;
-    formDefinition?: ManifestDefinition;
-    fieldMetadata: any;
-    errors: EAVFWErrorDefinition;
-    isErrorsUpdated: boolean;
-}
+  formValues: T;
+  formDefinition?: ManifestDefinition;
+  fieldMetadata: any;
+  errors: EAVFWErrorDefinition;
+  isErrorsUpdated: boolean;
+};

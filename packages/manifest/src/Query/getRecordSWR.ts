@@ -1,29 +1,33 @@
-import { useEffect, useState } from "react";
-import useSWR, { mutate  } from "swr";
-import { IRecord } from "../Types";
-import { useJsonFetcher } from "./jsonFetcher";
+import { useEffect, useState } from 'react';
+import useSWR, { mutate } from 'swr';
+import { IRecord } from '../Types';
+import { useJsonFetcher } from './jsonFetcher';
 
-export function getRecordSWR(entityName: string, recordId: string, query: string = "", ready = true, initialData: any = undefined, refreshInterval=0) {
+export function getRecordSWR(
+  entityName: string,
+  recordId: string,
+  query: string = '',
+  ready = true,
+  initialData: any = undefined,
+  refreshInterval = 0,
+) {
+  const [baseUrl, jsonFetcher] = useJsonFetcher();
 
-    const [baseUrl, jsonFetcher] = useJsonFetcher();
+  const key = `${baseUrl}/entities/${entityName}/records/${recordId}${query}`;
 
-    const key = `${baseUrl}/entities/${entityName}/records/${recordId}${query}`;
+  const [record, setRecord] = useState<IRecord | undefined>(initialData);
 
-    const [record, setRecord] = useState<IRecord | undefined>(initialData);
+  const { data, error } = useSWR(ready ? key : null, {
+    revalidateOnFocus: false,
+    revalidateOnMount: true,
+    revalidateOnReconnect: false,
+    refreshWhenOffline: false,
+    refreshWhenHidden: false,
+    refreshInterval: refreshInterval,
+    fetcher: jsonFetcher,
+  });
 
-    const { data, error } = useSWR(ready ? key : null,
-        {
-            revalidateOnFocus: false,
-            revalidateOnMount: true,
-            revalidateOnReconnect: false,
-            refreshWhenOffline: false,
-            refreshWhenHidden: false,
-            refreshInterval: refreshInterval,
-            fetcher: jsonFetcher
-        }
-    )
-
-    /* Comment added for context
+  /* Comment added for context
         useSWR will fetch in the background and in the meantime the initialData will be served.
         When useSWR is done fetching, the initialData in record will be overridden with the retrieved data,
         which is what we want in some cases.
@@ -33,17 +37,17 @@ export function getRecordSWR(entityName: string, recordId: string, query: string
         retrieved. Then the initial references are overwritten and the record saved with no relation to its parent.
         This case is indicated when recordId is None, then no data can be retrieved.
      */
-    useEffect(() => {
-        if (recordId !== undefined) {
-            setRecord(data?.value);
-        } else if(data?.value !== undefined){
-        }
-    }, [data?.value])
-
-    return {
-        record: record!,
-        isLoading: !error && !record,
-        isError: error,
-        mutate: () => mutate(key)
+  useEffect(() => {
+    if (recordId !== undefined) {
+      setRecord(data?.value);
+    } else if (data?.value !== undefined) {
     }
+  }, [data?.value]);
+
+  return {
+    record: record!,
+    isLoading: !error && !record,
+    isError: error,
+    mutate: () => mutate(key),
+  };
 }

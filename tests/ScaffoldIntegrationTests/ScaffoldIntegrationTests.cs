@@ -23,6 +23,9 @@ public class ScaffoldIntegrationTests
             CreateNoWindow = true,
         };
 
+        // Ensure Node.js has enough memory for Next.js builds
+        psi.Environment["NODE_OPTIONS"] = "--max-old-space-size=4096";
+
         using var process = new Process { StartInfo = psi };
         var stdout = new System.Text.StringBuilder();
         var stderr = new System.Text.StringBuilder();

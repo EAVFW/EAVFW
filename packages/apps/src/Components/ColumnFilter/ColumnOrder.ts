@@ -1,5 +1,4 @@
-
 export enum ColumnOrder {
-    Up,
-    Down
+  Up,
+  Down,
 }

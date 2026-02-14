@@ -1,5 +1,5 @@
-import { EAVFWErrorDefinition } from "./EAVFWErrorDefinition";
+import { EAVFWErrorDefinition } from './EAVFWErrorDefinition';
 
 export type EAVFWErrorDefinitionMap = {
-    [key: string]: EAVFWErrorDefinition
-}
+  [key: string]: EAVFWErrorDefinition;
+};

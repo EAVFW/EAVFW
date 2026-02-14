@@ -1,2 +1,1 @@
-
-export * from "./RibbonViewInfo";
+export * from './RibbonViewInfo';

@@ -1,2 +1,2 @@
-export * from "./DecimalType";
-export * from "./IntegerType";
+export * from './DecimalType';
+export * from './IntegerType';

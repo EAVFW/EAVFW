@@ -1,5 +1,5 @@
-import { PrimitiveType } from "./PrimitiveType";
+import { PrimitiveType } from './PrimitiveType';
 
 export type PrimitiveTypeDefinition = {
-    type: PrimitiveType;
-}
+  type: PrimitiveType;
+};

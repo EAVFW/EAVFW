@@ -1,1 +1,1 @@
-export * from "./handleValidationErrors";
+export * from './handleValidationErrors';

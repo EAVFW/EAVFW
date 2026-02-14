@@ -1,79 +1,112 @@
-import { mergeDeep } from "@eavfw/utils";
-import { PropsWithChildren, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { useEAVForm } from "./useEAVForm";
+import { mergeDeep } from '@eavfw/utils';
+import {
+  PropsWithChildren,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { useEAVForm } from './useEAVForm';
 
 type DirtyFieldElement = {
-    [key: string]: DirtyFieldElementValue
+  [key: string]: DirtyFieldElementValue;
 };
-type DirtyFieldContainer = { __isDirty: boolean, value: DirtyFieldElementValue };
-type DirtyFieldElementValue = DirtyFieldElement | undefined | Array<DirtyFieldElement> | DirtyFieldContainer;
+type DirtyFieldContainer = { __isDirty: boolean; value: DirtyFieldElementValue };
+type DirtyFieldElementValue =
+  | DirtyFieldElement
+  | undefined
+  | Array<DirtyFieldElement>
+  | DirtyFieldContainer;
 
 export type SetDirtyFieldsFunction = (dirtyField: string, value?: DirtyFieldElementValue) => void;
-export type DirtyContextType = { dirtyFields: DirtyFieldElement, setDirtyFields: SetDirtyFieldsFunction, clearDirtyFields: SetDirtyFieldsFunction }
+export type DirtyContextType = {
+  dirtyFields: DirtyFieldElement;
+  setDirtyFields: SetDirtyFieldsFunction;
+  clearDirtyFields: SetDirtyFieldsFunction;
+};
 const DirtyContext = createContext<DirtyContextType>({
-    dirtyFields: {} as DirtyFieldElement,
-    setDirtyFields: (dirtyField: string, value?: DirtyFieldElementValue) => { console.log("dirty container updated", [dirtyField, value]) },
-    clearDirtyFields: (dirtyField: string, value?: DirtyFieldElementValue) => { console.log("dirty container updated", [dirtyField, value]) }
+  dirtyFields: {} as DirtyFieldElement,
+  setDirtyFields: (dirtyField: string, value?: DirtyFieldElementValue) => {
+    console.log('dirty container updated', [dirtyField, value]);
+  },
+  clearDirtyFields: (dirtyField: string, value?: DirtyFieldElementValue) => {
+    console.log('dirty container updated', [dirtyField, value]);
+  },
 });
 
 export const useDirtyContext = () => useContext(DirtyContext);
 
 function isDirtyContainer(o: any): o is DirtyFieldContainer {
-    return "__isDirty" in o;
+  return '__isDirty' in o;
 }
-export const DirtyContainer: React.FC<PropsWithChildren<{ id: string, initialdata?: DirtyFieldElement }>> = ({ id, children, initialdata = {} }) => {
+export const DirtyContainer: React.FC<
+  PropsWithChildren<{ id: string; initialdata?: DirtyFieldElement }>
+> = ({ id, children, initialdata = {} }) => {
+  const [_, __, etag] = useEAVForm((state) => null);
 
-    const [_, __, etag] = useEAVForm((state) => null);
+  const { setDirtyFields: setParentDirtyFields, dirtyFields: rootDirtyFields } = useDirtyContext();
+  const refDirtyFields = useRef<DirtyFieldElement>(initialdata);
+  const [dirtyFields, setDirtyFields] = useState<DirtyFieldElement>(refDirtyFields.current);
+  const updateDirtyFields = useCallback(
+    (dirtyField: string, value?: DirtyFieldElementValue) => {
+      if (typeof value === 'object' && value != null)
+        refDirtyFields.current[dirtyField] = mergeDeep(
+          refDirtyFields.current[dirtyField] ?? {},
+          value,
+        );
+      else {
+        refDirtyFields.current[dirtyField] = { value: value, __isDirty: true };
+      }
 
-    const { setDirtyFields: setParentDirtyFields, dirtyFields: rootDirtyFields } = useDirtyContext();
-    const refDirtyFields = useRef<DirtyFieldElement>(initialdata);
-    const [dirtyFields, setDirtyFields] = useState<DirtyFieldElement>(refDirtyFields.current);
-    const updateDirtyFields = useCallback((dirtyField: string, value?: DirtyFieldElementValue) => {
+      setDirtyFields({ ...refDirtyFields.current });
+      setParentDirtyFields(id, refDirtyFields.current);
+    },
+    [id],
+  );
 
-        if (typeof value === "object" && value != null)
-            refDirtyFields.current[dirtyField] = mergeDeep(refDirtyFields.current[dirtyField] ?? {}, value);
-        else {
-            refDirtyFields.current[dirtyField] = { value: value, __isDirty: true };
-        }
-
-        setDirtyFields({ ...refDirtyFields.current });
+  const clearDirtyFields = useCallback(
+    (dirtyField: string, value?: DirtyFieldElementValue) => {
+      let old = refDirtyFields.current[dirtyField];
+      if (isDirtyContainer(old) && value === old?.value) {
+        refDirtyFields.current[dirtyField] = { value: value, __isDirty: false };
         setParentDirtyFields(id, refDirtyFields.current);
-    }, [id]);
+      }
+    },
+    [id],
+  );
 
-    const clearDirtyFields = useCallback((dirtyField: string, value?: DirtyFieldElementValue) => {
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
 
-        let old = refDirtyFields.current[dirtyField];
-        if (isDirtyContainer(old) && value === old?.value) {
-            refDirtyFields.current[dirtyField] = { value: value, __isDirty: false };
-            setParentDirtyFields(id, refDirtyFields.current);
-        }
+    if (id === 'root') {
+      refDirtyFields.current = initialdata;
+      setParentDirtyFields(id, refDirtyFields.current);
+    }
+  }, [etag, id]);
 
-    }, [id]);
+  const alldirtyFields = useMemo(
+    () => Object.assign({}, rootDirtyFields[id] ?? {}, dirtyFields),
+    [rootDirtyFields[id], dirtyFields],
+  );
 
-    const first = useRef(true);
-    useEffect(() => {
+  useEffect(() => {}, [alldirtyFields]);
 
-        if (first.current) {
-            first.current = false;
-            return;
-        }
-
-        if (id === "root") {
-            refDirtyFields.current = initialdata;
-            setParentDirtyFields(id, refDirtyFields.current);
-        }
-    }, [etag, id]);
-
-    const alldirtyFields = useMemo(() => Object.assign({}, rootDirtyFields[id] ?? {}, dirtyFields), [rootDirtyFields[id], dirtyFields]);
-
-    useEffect(() => {
-    }, [alldirtyFields]);
-
-    return (<DirtyContext.Provider value={{
+  return (
+    <DirtyContext.Provider
+      value={{
         dirtyFields: alldirtyFields,
         setDirtyFields: updateDirtyFields,
         clearDirtyFields: clearDirtyFields,
-    }}>
-        {children}
-    </DirtyContext.Provider>)
-}
+      }}
+    >
+      {children}
+    </DirtyContext.Provider>
+  );
+};

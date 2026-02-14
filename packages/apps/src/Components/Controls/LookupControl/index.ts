@@ -1,1 +1,1 @@
-export * from "./LookupControl";
+export * from './LookupControl';

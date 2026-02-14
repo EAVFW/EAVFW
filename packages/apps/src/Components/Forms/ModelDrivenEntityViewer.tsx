@@ -1,431 +1,551 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import { IDropdownOption, mergeStyles, ShimmerElementsGroup, ShimmerElementType, Stack } from "@fluentui/react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import {
+  IDropdownOption,
+  mergeStyles,
+  ShimmerElementsGroup,
+  ShimmerElementType,
+  Stack,
+} from '@fluentui/react';
 
-import isEqual from "react-fast-compare";
+import isEqual from 'react-fast-compare';
 
-import { useUuid } from "@eavfw/hooks";
-import { AttributeDefinition, EntityDefinition, FormDefinition, FormColumnDefinition, FormTabDefinition, isLookup, queryEntitySWR, IRecord } from "@eavfw/manifest";
+import { useUuid } from '@eavfw/hooks';
+import {
+  AttributeDefinition,
+  EntityDefinition,
+  FormDefinition,
+  FormColumnDefinition,
+  FormTabDefinition,
+  isLookup,
+  queryEntitySWR,
+  IRecord,
+} from '@eavfw/manifest';
 
-import { EAVForm, useEAVForm } from "@eavfw/forms"
-import { ModelDrivenApp } from "../../ModelDrivenApp";
-import { ModelDrivenEntityViewerProps } from "./ModelDrivenEntityViewerProps";
-import { useModelDrivenApp } from "../../useModelDrivenApp";
-import { ResolveFeature } from "../../FeatureFlags";
-import { RibbonHost } from "../Ribbon/RibbonHost";
-import { FormSelectorComponent } from "./FormSelectorComponent";
-import FormComponent from "./AutoForm/FormComponent";
-import { useAppInfo } from "../../useAppInfo";
-import { useFormChangeHandlerProvider } from "./useFormChangeHandler";
-import { useRibbon } from "../../Components/Ribbon";
-import { useSectionStyles } from "../../Styles/SectionStyles.styles";
-import { Tab, TabList } from "@fluentui/react-components";
-import { useTabProvider } from "./Tabs";
-import { FormHeader } from "./FormHeader";
+import { EAVForm, useEAVForm } from '@eavfw/forms';
+import { ModelDrivenApp } from '../../ModelDrivenApp';
+import { ModelDrivenEntityViewerProps } from './ModelDrivenEntityViewerProps';
+import { useModelDrivenApp } from '../../useModelDrivenApp';
+import { ResolveFeature } from '../../FeatureFlags';
+import { RibbonHost } from '../Ribbon/RibbonHost';
+import { FormSelectorComponent } from './FormSelectorComponent';
+import FormComponent from './AutoForm/FormComponent';
+import { useAppInfo } from '../../useAppInfo';
+import { useFormChangeHandlerProvider } from './useFormChangeHandler';
+import { useRibbon } from '../../Components/Ribbon';
+import { useSectionStyles } from '../../Styles/SectionStyles.styles';
+import { Tab, TabList } from '@fluentui/react-components';
+import { useTabProvider } from './Tabs';
+import { FormHeader } from './FormHeader';
 
 export const FormHostContext = createContext({ formDefinition: {} as FormDefinition });
 export const useFormHost = () => useContext(FormHostContext);
 
 const wrapperClass = mergeStyles({
-    padding: 2,
-    selectors: {
-        '& > .ms-Shimmer-container': {
-            margin: '10px 0',
-        },
+  padding: 2,
+  selectors: {
+    '& > .ms-Shimmer-container': {
+      margin: '10px 0',
     },
+  },
 });
 const wrapperStyle = { display: 'flex' };
 
 const groupBy = function <T extends { [key: string]: any }>(xs: Array<T>, key: (a: T) => string) {
-    return xs.reduce(function (rv, x) {
-        (rv[key(x)] = rv[key(x)] || []).push(x);
-        return rv;
-    }, {} as { [key: string]: Array<T> });
+  return xs.reduce(
+    function (rv, x) {
+      (rv[key(x)] = rv[key(x)] || []).push(x);
+      return rv;
+    },
+    {} as { [key: string]: Array<T> },
+  );
 };
 
 function getForm(app: ModelDrivenApp, entityName: string, formName: string) {
-
-    const entity = app.getEntity(entityName);
-    const form: FormDefinition = entity?.forms?.[formName] ??
-    {
-        "name": "Main Information",
-        "type": "Main",
-        "layout": {
-            "tabs": {
-                "TAB_General": {
-                    "title": "General Information",
-                    "locale": {
-                        "1030": {
-                            "title": "General Information"
-                        }
-                    },
-                    "columns": {
-                        "COLUMN_First": {
-                            "sections": {
-                                "SECTION_General": {}
-                            }
-                        },
-                        "COLUMN_Second": {
-                            "sections": {
-                                "SECTION_Additional": {}
-                            }
-                        }
-                    }
-                },
-            }
+  const entity = app.getEntity(entityName);
+  const form: FormDefinition = entity?.forms?.[formName] ?? {
+    name: 'Main Information',
+    type: 'Main',
+    layout: {
+      tabs: {
+        TAB_General: {
+          title: 'General Information',
+          locale: {
+            '1030': {
+              title: 'General Information',
+            },
+          },
+          columns: {
+            COLUMN_First: {
+              sections: {
+                SECTION_General: {},
+              },
+            },
+            COLUMN_Second: {
+              sections: {
+                SECTION_Additional: {},
+              },
+            },
+          },
         },
-        "columns": Object.fromEntries(
-            Object.entries(app.getAttributes(entity.logicalName))
-                .filter(([k, entry]) => k.toLowerCase() !== "id")
-                .map(([k, entry]) => [k, {
-                    "tab": "TAB_General",
-                    "column": "COLUMN_First",
-                    "section": "SECTION_General"
-                }])
-        )
-    };
+      },
+    },
+    columns: Object.fromEntries(
+      Object.entries(app.getAttributes(entity.logicalName))
+        .filter(([k, entry]) => k.toLowerCase() !== 'id')
+        .map(([k, entry]) => [
+          k,
+          {
+            tab: 'TAB_General',
+            column: 'COLUMN_First',
+            section: 'SECTION_General',
+          },
+        ]),
+    ),
+  };
 
-    if (form === undefined) {
-        throw new Error("No form available");
-    }
+  if (form === undefined) {
+    throw new Error('No form available');
+  }
 
-    return form;
+  return form;
 }
 
 function createRadioGroups(form: FormDefinition, entity: EntityDefinition) {
-    let radioGroups = groupBy(Object.keys(form.columns)
-        .filter(k => form.columns[k].radio_group)
-        .map(k => [k, form.columns[k], entity.attributes[k]] as [string, FormColumnDefinition, AttributeDefinition]), (x) => x[1].radio_group!);
-    return Object.values(radioGroups);
+  let radioGroups = groupBy(
+    Object.keys(form.columns)
+      .filter((k) => form.columns[k].radio_group)
+      .map(
+        (k) =>
+          [k, form.columns[k], entity.attributes[k]] as [
+            string,
+            FormColumnDefinition,
+            AttributeDefinition,
+          ],
+      ),
+    (x) => x[1].radio_group!,
+  );
+  return Object.values(radioGroups);
 }
 
 /**
-  * Load the evaludated form and only forward it when its actually updated.
-  * */
-export function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurrent: any, formName: string, entityName: string) {
+ * Load the evaludated form and only forward it when its actually updated.
+ * */
+export function useEvaluateFormDefinition(
+  form: FormDefinition,
+  formDataRefcurrent: any,
+  formName: string,
+  entityName: string,
+) {
+  const useEvaluateFormDefinition = ResolveFeature('useEvaluateFormDefinition');
+  const { evaluatedForm: evaluatedFormDelayed, isEvaluatedFormLoading } = useEvaluateFormDefinition(
+    form,
+    formDataRefcurrent,
+  );
+  const [evaluatedForm, setevaluatedForm] = useState(evaluatedFormDelayed);
+  const [isLoadingForm, setisLoadingForm] = useState(true);
 
-    const useEvaluateFormDefinition = ResolveFeature("useEvaluateFormDefinition");
-    const { evaluatedForm: evaluatedFormDelayed, isEvaluatedFormLoading } = useEvaluateFormDefinition(form, formDataRefcurrent);
-    const [evaluatedForm, setevaluatedForm] = useState(evaluatedFormDelayed);
-    const [isLoadingForm, setisLoadingForm] = useState(true);
+  // const key = useMemo(() => `${formName}${entityName}`, [formName, entityName])
 
-    // const key = useMemo(() => `${formName}${entityName}`, [formName, entityName])
+  const [oldKey, setOldKey] = useState(`${formName}${entityName}`);
 
-    const [oldKey, setOldKey] = useState(`${formName}${entityName}`);
+  //useEffect(() => {
+  //    setOldKey(`${formName}${entityName}`);
+  //}, [formName, entityName]);
 
-    //useEffect(() => {
-    //    setOldKey(`${formName}${entityName}`);
-    //}, [formName, entityName]);
+  //useEffect(() => {
 
-    //useEffect(() => {
+  //    if (oldKey !== `${formName}${entityName}`) {
+  //        setisLoadingForm(true);
+  //    }
+  //}, [formName, entityName, oldKey]);
 
-    //    if (oldKey !== `${formName}${entityName}`) {
-    //        setisLoadingForm(true);
-    //    }
-    //}, [formName, entityName, oldKey]);
+  //useEffect(() => {
+  //    setisLoadingForm(true);
+  //}, [formName, entityName]);
 
-    //useEffect(() => {
-    //    setisLoadingForm(true);
-    //}, [formName, entityName]);
+  useEffect(() => {
+    if (!isEvaluatedFormLoading && evaluatedFormDelayed !== evaluatedForm) {
+      setevaluatedForm(evaluatedFormDelayed);
+      setisLoadingForm(false);
+    }
+  }, [evaluatedForm, evaluatedFormDelayed, isEvaluatedFormLoading]);
 
-    useEffect(() => {
-        if (!isEvaluatedFormLoading && evaluatedFormDelayed !== evaluatedForm) {
-            setevaluatedForm(evaluatedFormDelayed);
-            setisLoadingForm(false);
-        }
-    }, [evaluatedForm, evaluatedFormDelayed, isEvaluatedFormLoading]);
+  //useEffect(() => {
+  //    setisLoadingForm(false);
+  //}, [evaluatedForm]);
 
-    //useEffect(() => {
-    //    setisLoadingForm(false);
-    //}, [evaluatedForm]);
+  //let current= useMemo(() => {
 
-    //let current= useMemo(() => {
+  //    return { evaluatedForm, isLoadingForm: false, formName, entityName };
+  //}, [evaluatedForm,])
 
-    //    return { evaluatedForm, isLoadingForm: false, formName, entityName };
-    //}, [evaluatedForm,])
+  //return current;
+  return { evaluatedForm, isLoadingForm: false };
 
-    //return current;
-    return { evaluatedForm, isLoadingForm: false };
-
-    //-
+  //-
 }
 
 type ModelDrivenFormProps = ModelDrivenEntityViewerProps & {
-    form: FormDefinition,
-    //   formDataRef: any,
-    //  onFormDataChange: any
-}
+  form: FormDefinition;
+  //   formDataRef: any,
+  //  onFormDataChange: any
+};
 export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
-    entity,
-    formName,
-    locale,
-    entityName,
-    //   record,
-    factory,
-    extraErrors,
-    form,
-    //formDataRef,
-    //  onFormDataChange
+  entity,
+  formName,
+  locale,
+  entityName,
+  //   record,
+  factory,
+  extraErrors,
+  form,
+  //formDataRef,
+  //  onFormDataChange
 }) => {
+  const compID = useUuid();
+  const app = useModelDrivenApp();
+  const { currentRecordId } = useAppInfo();
 
-    const compID = useUuid();
-    const app = useModelDrivenApp();
-    const { currentRecordId } = useAppInfo();
+  const [{ record }, { onChange }] = useEAVForm(
+    (state) => ({ record: state.formValues }),
+    'ModelDrivenForm FormValues',
+  );
+  useEffect(() => {
+    console.log('ModelDrivenForm FormValues changed', record);
+  }, [record]);
 
-    const [{ record }, { onChange }] = useEAVForm((state) => ({ record: state.formValues }), "ModelDrivenForm FormValues");
-    useEffect(() => { console.log("ModelDrivenForm FormValues changed", record) }, [record]);
+  const { evaluatedForm, isLoadingForm } = useEvaluateFormDefinition(
+    form,
+    record,
+    formName,
+    entityName,
+  );
+  const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
 
-    const { evaluatedForm, isLoadingForm } = useEvaluateFormDefinition(form, record, formName, entityName);
-    const formHostContextValue = useMemo(() => ({ formDefinition: evaluatedForm }), [evaluatedForm]);
+  const _onFormDataChange = useCallback(
+    (newformdata: any) => {
+      onChange((form) => {
+        Object.assign(form, newformdata);
+      });
+    },
+    [onChange],
+  );
+  const getTabName = useCallback(
+    (tab: FormTabDefinition) => {
+      return tab.locale?.[locale]?.title ?? tab.title;
+    },
+    [locale],
+  );
 
-    const _onFormDataChange = useCallback((newformdata: any) => { onChange(form => { Object.assign(form, newformdata); }) }, [onChange]);
-    const getTabName = useCallback((tab: FormTabDefinition) => {
-        return tab.locale?.[locale]?.title ?? tab.title;
-    }, [locale]);
+  const tabs = useMemo(
+    () =>
+      Object.keys(evaluatedForm?.layout.tabs ?? {}).filter(
+        (tab) =>
+          !(
+            typeof currentRecordId === 'undefined' &&
+            evaluatedForm?.layout?.tabs?.[tab].visibleOnCreate === false
+          ),
+      ),
+    [evaluatedForm, currentRecordId],
+  );
 
-    const tabs = useMemo(() => Object.keys(evaluatedForm?.layout.tabs ?? {}).filter(tab => !(typeof currentRecordId === "undefined" && evaluatedForm?.layout?.tabs?.[tab].visibleOnCreate === false)), [evaluatedForm, currentRecordId]);
+  const { data: { items: descriptions } = { items: [] }, isLoading } = process.env[
+    'NEXT_PUBLIC_DESCRIPTION_ENTITY'
+  ]
+    ? queryEntitySWR(app.getEntity(process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] as string), {
+        $filter: `entity eq '${entityName}' `,
+      })
+    : (console.log(
+        'NO NEXT_PUBLIC_DESCRIPTION_ENTITY: ' + process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'],
+      ) as any) || { data: { items: [] as IRecord[] }, isLoading: false };
 
-    const { data: { items: descriptions } = { items: [] }, isLoading } =
-        process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] ?
-            queryEntitySWR(app.getEntity(process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] as string), { '$filter': `entity eq '${entityName}' ` })
-            : (console.log("NO NEXT_PUBLIC_DESCRIPTION_ENTITY: " + process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY']) as any || { data: { items: [] as IRecord[] }, isLoading: false })
-
-    if (!evaluatedForm || isLoading) {
-
-        return <div style={wrapperStyle}>
-            <ShimmerElementsGroup
-                shimmerElements={[
-                    { type: ShimmerElementType.line, width: 180, height: 50 },
-                    { type: ShimmerElementType.gap, width: 130, height: 30 },
-                ]}
-            />
-            <ShimmerElementsGroup
-                flexWrap
-                shimmerElements={[
-                    { type: ShimmerElementType.line, width: 70, height: 30 },
-                    { type: ShimmerElementType.line, width: 70, height: 30 },
-                    { type: ShimmerElementType.gap, width: 70, height: 30 },
-                ]}
-            />
-        </div>
-
-        //   return <div>loading form...</div>
-    }
-
-    if (isLoadingForm)
-        return <div>loading..</div>
-
-    return <Stack verticalFill className="model-drive-form">
-
-        <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
-            <FormHostContext.Provider value={formHostContextValue}>
-
-                <FormHeader form={evaluatedForm} record={record} entity={entity} entityName={entityName} locale={locale} formName={formName} getTabName={getTabName} tabs={tabs} />
-
-                <Stack.Item grow styles={{ root: { padding: 0 } }}>
-                    <FormComponent onFormDataChange={_onFormDataChange} {... { tabs, getTabName, entity, formName, locale, factory, extraErrors }}
-                        form={evaluatedForm}
-                        formData={record}
-                        formContext={{ descriptions: descriptions, locale: locale, isCreate: record.id ? false : true, formData: record, onFormDataChange: _onFormDataChange }}
-
-                    />
-                </Stack.Item>
-            </FormHostContext.Provider>
-        </RibbonHost>
-
-    </Stack>
-}
-
-const useObservable = (value: any, ...deps: any[]) => {
-
-    const oldvalue = useRef(value);
-    const oldvalues = useRef(deps);
-    //const [state,setState] = useState(value);
-    useEffect(() => {
-        if (oldvalues.current.some((c, i) => c !== deps[i]) && oldvalue.current !== value) {
-            oldvalues.current = deps;
-            oldvalue.current = value;
-            //    setState(value);
-        }
-    }, [value, ...deps])
-
-    return oldvalue.current;
-}
-
-export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (props) => {
-
-    const compID = useUuid();
-
-    const app = useModelDrivenApp();
-    const info = useAppInfo();
-
-    const { record: record2, onChangeCallback, extraErrors: extraErrors2 } = useFormChangeHandlerProvider();
-    const { record = record2, entityName, formName, entity, onChange = onChangeCallback, related, extraErrors = extraErrors2 } = props;
-    const { events } = useRibbon();
-
-    const form = useMemo(() => getForm(app, entityName, formName), [app, entityName, formName]);
-
-    //  const [form, setForm] = useState<FormDefinition>(getForm(app, entity, formName));
-
-    //const firstFormUpdate = useRef(true);
-    //useEffect(() => {
-    //    if (firstFormUpdate.current) {
-    //        firstFormUpdate.current = false;
-    //        return;
-    //    }
-    //    setForm(getForm(app, entity, formName));
-    //}, [entity, formName]);
-
-    const formdatamerger = useRef({});
-
-    const formDataRef = useRef(record);
-    //  const [etag, setEtag] = useState(new Date().toISOString());
-
-    //  const outerRecord = useObservable(record, info.currentRecordId, info.currentEntityName);
-
-    const groups = useMemo(() => createRadioGroups(form, entity), [form, entity]);
-
-    const onCommitCollector = useRef<Function>();
-
-    const onFormDataChange2 = useCallback((formdata: any, ctx?: any) => {
-        try {
-            formdatamerger.current = {};
-            onCommitCollector.current = undefined;
-            let oldFormData = Object.assign({}, formDataRef.current);
-            let changed = false;
-
-            let attributes = [...Object.keys(entity.attributes), ...(Object.keys((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}))];
-
-            while (attributes.length > 0) {
-                let attributeKey = attributes.shift()!;
-                let attribute = entity.attributes[attributeKey] ?? app.getEntity(entity.TPT!).attributes[attributeKey];
-
-                if (attribute.logicalName in formdata || (isLookup(attribute.type) && attribute.logicalName.slice(0, -2) in formdata)) {
-
-                    if (oldFormData[attribute.logicalName] !== formdata[attribute.logicalName]) {
-
-                        oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
-                        if (formdata[attribute.logicalName] === undefined) {
-
-                            /**
-                             * 
-                             * If the old data prioer to changing contains
-                             * {
-                             *    addresssid = 5,
-                             *    addresss = {... id=5}
-                             * }
-                             * and current data
-                             * {
-                             *    addressid = undefined
-                             * }
-                             */
-
-                            delete oldFormData[attribute.logicalName.slice(0, -2)];
-                            oldFormData[attribute.logicalName] = null;
-                        }
-                        changed = true;
-
-                        let partOfGroup = groups.filter(g => g.filter(gg => gg[2].logicalName === attribute.logicalName).length > 0)[0];
-
-                        if (partOfGroup && oldFormData[attribute.logicalName]) {
-
-                            for (let others of partOfGroup.filter(g => g[2].logicalName !== attribute.logicalName)) {
-                                oldFormData[others[2].logicalName] = false;
-                                attributes.splice(attributes.indexOf(others[0]), 1);
-                            }
-                        }
-
-                        if (!formdata[attribute.logicalName]) {
-
-                            let dependants = Object.keys(form.columns).filter(k => form.columns[k].dependant === attributeKey);
-                            for (let dependant of dependants) {
-                                formdata[entity.attributes[dependant].logicalName] = undefined;
-                            }
-                            attributes.push(...dependants.filter(d => attributes.indexOf(d) === -1));
-                        }
-                    } else {
-
-                        const lookupValue = typeof formdata[attribute.logicalName] == "object" ? formdata[attribute.logicalName] : formdata[attribute.logicalName.slice(0, -2)];
-
-                        if (isLookup(attribute.type) && lookupValue) {
-
-                            const oldvalue = oldFormData[attribute.logicalName.slice(0, -2)];
-
-                            if (lookupValue.id) {
-                                oldFormData[attribute.logicalName] = lookupValue.id;
-                            } else {
-                                // Remove ID from old object
-                                delete oldFormData[attribute.logicalName]
-                            }
-                            //  const keys = Object.keys(formdata[attribute.logicalName]);
-                            if (!isEqual(oldvalue, lookupValue)) {
-                                changed = true;
-
-                            }
-                            oldFormData[attribute.logicalName.slice(0, -2)] = lookupValue;
-
-                        }
-                    }
-                }
-            }
-            for (let relate of related ?? []) {
-                if (!isEqual(oldFormData[relate] ?? [], formdata[relate] ?? [])) {
-                    oldFormData[relate] = formdata[relate];
-                    changed = true;
-                }
-
-                if (!isEqual(oldFormData[relate + "@deleted"] ?? [], formdata[relate + "@deleted"] ?? [])) {
-                    oldFormData[relate + "@deleted"] = formdata[relate + "@deleted"];
-                    changed = true;
-                }
-            }
-
-            if (changed) {
-                formDataRef.current = oldFormData;
-                onChange?.(oldFormData, ctx);
-                // setEtag(new Date().toISOString());
-            }
-
-        } finally {
-        }
-    }, [record, entity]);
-
-    //Collect all the incoming changes, latest is newest
-    //debounce and update.
-    const onFormDataChange = useCallback((formdata: any, ctx?: any) => {
-
-        formdatamerger.current = { ...formdatamerger.current, ...formdata }; //TODO - should this be a deep merge.
-        if (ctx?.onCommit) {
-            const old = onCommitCollector.current;
-            const next = ctx?.onCommit;
-            onCommitCollector.current = () => {
-                if (old)
-                    old();
-
-                next();
-            }
-        }
-
-        onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
-        setTimeout(() => {
-            if (ctx?.autoSave) {
-                events.emit('onSave');
-            }
-        });
-    }, [onFormDataChange2]);
-
-    /**
-     * When recordid or entityname changes, reset to other record.
-     **/
-    useEffect(() => {
-        onFormDataChange(record)
-    }, [record]);
-
+  if (!evaluatedForm || isLoading) {
     return (
-        <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
-            <ModelDrivenForm  {...props} record={record} onChange={onChange} extraErrors={extraErrors} form={form} />
-        </EAVForm>
+      <div style={wrapperStyle}>
+        <ShimmerElementsGroup
+          shimmerElements={[
+            { type: ShimmerElementType.line, width: 180, height: 50 },
+            { type: ShimmerElementType.gap, width: 130, height: 30 },
+          ]}
+        />
+        <ShimmerElementsGroup
+          flexWrap
+          shimmerElements={[
+            { type: ShimmerElementType.line, width: 70, height: 30 },
+            { type: ShimmerElementType.line, width: 70, height: 30 },
+            { type: ShimmerElementType.gap, width: 70, height: 30 },
+          ]}
+        />
+      </div>
     );
 
-}
+    //   return <div>loading form...</div>
+  }
 
-export default ModelDrivenEntityViewer
+  if (isLoadingForm) return <div>loading..</div>;
+
+  return (
+    <Stack verticalFill className="model-drive-form">
+      <RibbonHost ribbon={evaluatedForm?.ribbon ?? form.ribbon ?? {}}>
+        <FormHostContext.Provider value={formHostContextValue}>
+          <FormHeader
+            form={evaluatedForm}
+            record={record}
+            entity={entity}
+            entityName={entityName}
+            locale={locale}
+            formName={formName}
+            getTabName={getTabName}
+            tabs={tabs}
+          />
+
+          <Stack.Item grow styles={{ root: { padding: 0 } }}>
+            <FormComponent
+              onFormDataChange={_onFormDataChange}
+              {...{ tabs, getTabName, entity, formName, locale, factory, extraErrors }}
+              form={evaluatedForm}
+              formData={record}
+              formContext={{
+                descriptions: descriptions,
+                locale: locale,
+                isCreate: record.id ? false : true,
+                formData: record,
+                onFormDataChange: _onFormDataChange,
+              }}
+            />
+          </Stack.Item>
+        </FormHostContext.Provider>
+      </RibbonHost>
+    </Stack>
+  );
+};
+
+const useObservable = (value: any, ...deps: any[]) => {
+  const oldvalue = useRef(value);
+  const oldvalues = useRef(deps);
+  //const [state,setState] = useState(value);
+  useEffect(() => {
+    if (oldvalues.current.some((c, i) => c !== deps[i]) && oldvalue.current !== value) {
+      oldvalues.current = deps;
+      oldvalue.current = value;
+      //    setState(value);
+    }
+  }, [value, ...deps]);
+
+  return oldvalue.current;
+};
+
+export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (props) => {
+  const compID = useUuid();
+
+  const app = useModelDrivenApp();
+  const info = useAppInfo();
+
+  const {
+    record: record2,
+    onChangeCallback,
+    extraErrors: extraErrors2,
+  } = useFormChangeHandlerProvider();
+  const {
+    record = record2,
+    entityName,
+    formName,
+    entity,
+    onChange = onChangeCallback,
+    related,
+    extraErrors = extraErrors2,
+  } = props;
+  const { events } = useRibbon();
+
+  const form = useMemo(() => getForm(app, entityName, formName), [app, entityName, formName]);
+
+  //  const [form, setForm] = useState<FormDefinition>(getForm(app, entity, formName));
+
+  //const firstFormUpdate = useRef(true);
+  //useEffect(() => {
+  //    if (firstFormUpdate.current) {
+  //        firstFormUpdate.current = false;
+  //        return;
+  //    }
+  //    setForm(getForm(app, entity, formName));
+  //}, [entity, formName]);
+
+  const formdatamerger = useRef({});
+
+  const formDataRef = useRef(record);
+  //  const [etag, setEtag] = useState(new Date().toISOString());
+
+  //  const outerRecord = useObservable(record, info.currentRecordId, info.currentEntityName);
+
+  const groups = useMemo(() => createRadioGroups(form, entity), [form, entity]);
+
+  const onCommitCollector = useRef<Function>();
+
+  const onFormDataChange2 = useCallback(
+    (formdata: any, ctx?: any) => {
+      try {
+        formdatamerger.current = {};
+        onCommitCollector.current = undefined;
+        let oldFormData = Object.assign({}, formDataRef.current);
+        let changed = false;
+
+        let attributes = [
+          ...Object.keys(entity.attributes),
+          ...Object.keys((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}),
+        ];
+
+        while (attributes.length > 0) {
+          let attributeKey = attributes.shift()!;
+          let attribute =
+            entity.attributes[attributeKey] ?? app.getEntity(entity.TPT!).attributes[attributeKey];
+
+          if (
+            attribute.logicalName in formdata ||
+            (isLookup(attribute.type) && attribute.logicalName.slice(0, -2) in formdata)
+          ) {
+            if (oldFormData[attribute.logicalName] !== formdata[attribute.logicalName]) {
+              oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
+              if (formdata[attribute.logicalName] === undefined) {
+                /**
+                 *
+                 * If the old data prioer to changing contains
+                 * {
+                 *    addresssid = 5,
+                 *    addresss = {... id=5}
+                 * }
+                 * and current data
+                 * {
+                 *    addressid = undefined
+                 * }
+                 */
+
+                delete oldFormData[attribute.logicalName.slice(0, -2)];
+                oldFormData[attribute.logicalName] = null;
+              }
+              changed = true;
+
+              let partOfGroup = groups.filter(
+                (g) => g.filter((gg) => gg[2].logicalName === attribute.logicalName).length > 0,
+              )[0];
+
+              if (partOfGroup && oldFormData[attribute.logicalName]) {
+                for (let others of partOfGroup.filter(
+                  (g) => g[2].logicalName !== attribute.logicalName,
+                )) {
+                  oldFormData[others[2].logicalName] = false;
+                  attributes.splice(attributes.indexOf(others[0]), 1);
+                }
+              }
+
+              if (!formdata[attribute.logicalName]) {
+                let dependants = Object.keys(form.columns).filter(
+                  (k) => form.columns[k].dependant === attributeKey,
+                );
+                for (let dependant of dependants) {
+                  formdata[entity.attributes[dependant].logicalName] = undefined;
+                }
+                attributes.push(...dependants.filter((d) => attributes.indexOf(d) === -1));
+              }
+            } else {
+              const lookupValue =
+                typeof formdata[attribute.logicalName] == 'object'
+                  ? formdata[attribute.logicalName]
+                  : formdata[attribute.logicalName.slice(0, -2)];
+
+              if (isLookup(attribute.type) && lookupValue) {
+                const oldvalue = oldFormData[attribute.logicalName.slice(0, -2)];
+
+                if (lookupValue.id) {
+                  oldFormData[attribute.logicalName] = lookupValue.id;
+                } else {
+                  // Remove ID from old object
+                  delete oldFormData[attribute.logicalName];
+                }
+                //  const keys = Object.keys(formdata[attribute.logicalName]);
+                if (!isEqual(oldvalue, lookupValue)) {
+                  changed = true;
+                }
+                oldFormData[attribute.logicalName.slice(0, -2)] = lookupValue;
+              }
+            }
+          }
+        }
+        for (let relate of related ?? []) {
+          if (!isEqual(oldFormData[relate] ?? [], formdata[relate] ?? [])) {
+            oldFormData[relate] = formdata[relate];
+            changed = true;
+          }
+
+          if (
+            !isEqual(oldFormData[relate + '@deleted'] ?? [], formdata[relate + '@deleted'] ?? [])
+          ) {
+            oldFormData[relate + '@deleted'] = formdata[relate + '@deleted'];
+            changed = true;
+          }
+        }
+
+        if (changed) {
+          formDataRef.current = oldFormData;
+          onChange?.(oldFormData, ctx);
+          // setEtag(new Date().toISOString());
+        }
+      } finally {
+      }
+    },
+    [record, entity],
+  );
+
+  //Collect all the incoming changes, latest is newest
+  //debounce and update.
+  const onFormDataChange = useCallback(
+    (formdata: any, ctx?: any) => {
+      formdatamerger.current = { ...formdatamerger.current, ...formdata }; //TODO - should this be a deep merge.
+      if (ctx?.onCommit) {
+        const old = onCommitCollector.current;
+        const next = ctx?.onCommit;
+        onCommitCollector.current = () => {
+          if (old) old();
+
+          next();
+        };
+      }
+
+      onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
+      setTimeout(() => {
+        if (ctx?.autoSave) {
+          events.emit('onSave');
+        }
+      });
+    },
+    [onFormDataChange2],
+  );
+
+  /**
+   * When recordid or entityname changes, reset to other record.
+   **/
+  useEffect(() => {
+    onFormDataChange(record);
+  }, [record]);
+
+  return (
+    <EAVForm defaultData={formDataRef.current} onChange={onFormDataChange}>
+      <ModelDrivenForm
+        {...props}
+        record={record}
+        onChange={onChange}
+        extraErrors={extraErrors}
+        form={form}
+      />
+    </EAVForm>
+  );
+};
+
+export default ModelDrivenEntityViewer;

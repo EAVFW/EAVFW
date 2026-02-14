@@ -1,9 +1,9 @@
-import { IStackStyles } from "@fluentui/react";
+import { IStackStyles } from '@fluentui/react';
 
 export const PageStackStyles: IStackStyles = {
-    root: {
-        // background: DefaultPalette.themeDark,
-        overflow: 'hidden',
-        width: `100%`,
-    },
+  root: {
+    // background: DefaultPalette.themeDark,
+    overflow: 'hidden',
+    width: `100%`,
+  },
 };

@@ -1,1 +1,1 @@
-export * from "./StringType";
+export * from './StringType';

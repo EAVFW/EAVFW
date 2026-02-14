@@ -1,3 +1,2 @@
-
-export * from "./ColumnFilterCallout";
-export * from "./IColumnData";
+export * from './ColumnFilterCallout';
+export * from './IColumnData';

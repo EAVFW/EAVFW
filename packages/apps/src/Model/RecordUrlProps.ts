@@ -1,7 +1,6 @@
-
 export type RecordUrlProps = {
-    areaName: string;
-    appName: string;
-    entityName: string;
-    recordId: string;
+  areaName: string;
+  appName: string;
+  entityName: string;
+  recordId: string;
 };

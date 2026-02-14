@@ -1,5 +1,3 @@
 interface Window {
-
-    public __env: { [key: string]: string } = { };
-
+  __env: Record<string, string>;
 }

@@ -1,1 +1,1 @@
-export * from "./IRecord";
+export * from './IRecord';

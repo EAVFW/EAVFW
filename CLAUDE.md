@@ -242,23 +242,47 @@ Use these terms consistently across code, comments, docs, and commit messages.
 
 ## Verification After Large Changes
 
-After completing a phase, epic, or any large body of work, run the integration test suite at `tests/ScaffoldIntegrationTests/`. This is the single source of truth for "does everything work?"
+After completing a phase, epic, or any large body of work, run verification in two stages:
+
+### Stage 1: Scaffold + Build (deterministic, no Aspire)
 
 ```bash
-dotnet test tests/ScaffoldIntegrationTests -- MSTest.TestTimeout=600000
+dotnet test tests/ScaffoldIntegrationTests --filter ScaffoldAndRunSmokeTest -- MSTest.TestTimeout=600000
 ```
 
-This test automatically:
-1. Cleans `sandbox/TestCRM` if it exists
-2. Installs EAVFW templates from local `external/eavfw-templates/`
-3. Scaffolds a full project with local references
-4. Builds (twice — first generates manifest, second compiles)
-5. Runs Playwright smoke test and full login flow via Aspire
-6. Produces screenshots + videos in `sandbox/TestCRM/videos/` for human inspection
+This automatically cleans `sandbox/TestCRM`, scaffolds from local templates, builds (twice for manifest generation), and runs a Playwright smoke test. If this passes, the scaffold + build pipeline is healthy.
 
-**Do not manually scaffold for verification.** Just run the test. The `/eavfw-scaffold-dev` skill is separate — it's for humans and AI agents to interactively explore a scaffolded project.
+### Stage 2: Aspire + Full E2E (interactive debugging)
 
-Note: `npm run test` (Vitest) runs unit tests for pure logic. `dotnet test tests/ScaffoldIntegrationTests` runs the full E2E integration test. They are different things.
+If Stage 1 passes but you need full Aspire validation (or Stage 1's Aspire portion times out):
+
+```bash
+cd sandbox/TestCRM
+aspire run
+```
+
+Then use the **Aspire MCP tools** to investigate:
+1. `list_resources` — check all resources are running/healthy
+2. `list_console_logs` — check resource stdout for errors
+3. `list_structured_logs` — check for application errors
+4. Once resources are healthy, run the Playwright tests directly:
+   ```bash
+   dotnet test tests/TestCRM.AppHost.Tests --filter FullLoginFlow --no-build -- MSTest.TestTimeout=600000
+   ```
+
+This approach gives you visibility into what's failing (SQL Server not starting? npm build error? Aspire config issue?) rather than an opaque timeout.
+
+### Quick checks (always run first)
+
+```bash
+npm run format:check   # Prettier
+npm run lint           # ESLint (warn-only)
+npm run test           # Vitest unit tests
+```
+
+These are fast (<5s) and catch most issues before the expensive scaffold test.
+
+The `/eavfw-scaffold-dev` skill is separate — it's for humans and AI agents to interactively explore a scaffolded project, not for automated verification.
 
 ## Governance Documents
 

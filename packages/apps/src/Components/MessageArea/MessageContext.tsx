@@ -1,11 +1,11 @@
-import { ModelDrivenApp, useModelDrivenApp } from "@eavfw/apps";
-import { MessageBar, MessageBarType } from "@fluentui/react";
-import React, {useContext, useState} from "react";
+import { ModelDrivenApp, useModelDrivenApp } from '@eavfw/apps';
+import { MessageBar, MessageBarType } from '@fluentui/react';
+import React, { useContext, useState } from 'react';
 
 type ContextType = {
-    messages: { [key: string]: (props?: {[prop: string]: any}) => JSX.Element },
-    addMessage: (key: string, messageRender: messageRenderType) => void,
-    removeMessage: (key: string) => void
+  messages: { [key: string]: (props?: { [prop: string]: any }) => JSX.Element };
+  addMessage: (key: string, messageRender: messageRenderType) => void;
+  removeMessage: (key: string) => void;
 };
 
 type messageRenderType = (props?: { [prop: string]: any }) => JSX.Element;
@@ -15,14 +15,15 @@ type messageRenderType = (props?: { [prop: string]: any }) => JSX.Element;
  * @constructor
  */
 function MessageArea(): JSX.Element {
+  const { messages } = useMessageContext();
 
-    const {messages} = useMessageContext();
-
-    return (
-        <>
-            {Object.keys(messages).map((v,i) => <div key={`messagearea-${i}-${v}`}>{messages[v]({})}</div>)}
-        </>
-    );
+  return (
+    <>
+      {Object.keys(messages).map((v, i) => (
+        <div key={`messagearea-${i}-${v}`}>{messages[v]({})}</div>
+      ))}
+    </>
+  );
 }
 
 /**
@@ -30,49 +31,65 @@ function MessageArea(): JSX.Element {
  * Extend this interface to make the props StronglyTyped.
  */
 interface MessageProps {
-    messageContent: JSX.Element,
-    props: { [key: string]: { [prop: string]: any } }
+  messageContent: JSX.Element;
+  props: { [key: string]: { [prop: string]: any } };
 }
 
 /**
  * Create the React Context
  */
 const MessagesContext = React.createContext<ContextType>({
-    messages: {},
-    addMessage: () => {
-        throw new Error("MessageContext not used");
-    },
-    removeMessage: () => {
-        throw new Error("MessageContext not used");
-    }
+  messages: {},
+  addMessage: () => {
+    throw new Error('MessageContext not used');
+  },
+  removeMessage: () => {
+    throw new Error('MessageContext not used');
+  },
 });
 
 /**
  *
  */
 function useMessageContext() {
-    return useContext(MessagesContext);
+  return useContext(MessagesContext);
 }
 
-export function successMessageFactory(factoryProps: { key: string, removeMessage: (key: string) => void }, app?: ModelDrivenApp) {
-    return (props?: any) => {
-        const _app = app?? useModelDrivenApp();
-        return <MessageBar messageBarType={MessageBarType.success} {...props}
-            onDismiss={() => factoryProps.removeMessage(factoryProps.key)}>
-            {_app.getLocalization('entitySaved') ?? <>Entity have been saved!</>}
-        </MessageBar>
-    }
+export function successMessageFactory(
+  factoryProps: { key: string; removeMessage: (key: string) => void },
+  app?: ModelDrivenApp,
+) {
+  return (props?: any) => {
+    const _app = app ?? useModelDrivenApp();
+    return (
+      <MessageBar
+        messageBarType={MessageBarType.success}
+        {...props}
+        onDismiss={() => factoryProps.removeMessage(factoryProps.key)}
+      >
+        {_app.getLocalization('entitySaved') ?? <>Entity have been saved!</>}
+      </MessageBar>
+    );
+  };
 }
 
-export function errorMessageFactory(factoryProps: { key: string, removeMessage: (key: string) => void, messages?: string[] }, app?: ModelDrivenApp) {
-    return (props?: any) => {
-        const _app = app?? useModelDrivenApp();
-        return <MessageBar messageBarType={MessageBarType.error} {...props}
-            onDismiss={() => factoryProps.removeMessage(factoryProps.key)}>
-            {_app.getLocalization('entitySavedErr') ?? <>An error happened!</>}
-            {factoryProps.messages?.join("\n")}
-        </MessageBar>
-    }
+export function errorMessageFactory(
+  factoryProps: { key: string; removeMessage: (key: string) => void; messages?: string[] },
+  app?: ModelDrivenApp,
+) {
+  return (props?: any) => {
+    const _app = app ?? useModelDrivenApp();
+    return (
+      <MessageBar
+        messageBarType={MessageBarType.error}
+        {...props}
+        onDismiss={() => factoryProps.removeMessage(factoryProps.key)}
+      >
+        {_app.getLocalization('entitySavedErr') ?? <>An error happened!</>}
+        {factoryProps.messages?.join('\n')}
+      </MessageBar>
+    );
+  };
 }
 
 /**
@@ -82,34 +99,31 @@ export function errorMessageFactory(factoryProps: { key: string, removeMessage: 
  * @constructor
  */
 const MessagesProvider = (props: any) => {
+  let initialState: { [key: string]: messageRenderType } = {};
+  const [messages, setMessages] = useState(initialState);
 
-    let initialState: { [key: string]: messageRenderType } = {};
-    const [messages, setMessages] = useState(initialState);
+  let addMessage = function (key: string, messageRender: messageRenderType): void {
+    setMessages((prevState) => ({
+      ...prevState,
+      [key]: messageRender,
+    }));
+  };
 
-    let addMessage = function (
-        key: string,
-        messageRender: messageRenderType): void {
-        setMessages(prevState => ({
-            ...prevState,
-            [key]: messageRender
-        }));
-    };
+  let removeMessage = function (key: string): void {
+    setMessages((prevState) => {
+      let tState = { ...prevState };
+      delete tState[key];
+      return tState;
+    });
+  };
 
-    let removeMessage = function (key: string): void {
-        setMessages(prevState => {
-            let tState = {...prevState};
-            delete tState[key];
-            return tState;
-        })
-    };
-
-    return (
-        <MessagesContext.Provider value={{messages, addMessage, removeMessage}}>
-            {props.children}
-        </MessagesContext.Provider>
-    );
+  return (
+    <MessagesContext.Provider value={{ messages, addMessage, removeMessage }}>
+      {props.children}
+    </MessagesContext.Provider>
+  );
 };
 
 export default MessageArea;
-export {MessagesContext, MessagesProvider, useMessageContext};
-export type {MessageProps};
+export { MessagesContext, MessagesProvider, useMessageContext };
+export type { MessageProps };

@@ -1,2 +1,2 @@
-export * from "./isChoice";
-export * from "./ChoiceType"
+export * from './isChoice';
+export * from './ChoiceType';

@@ -1,2 +1,2 @@
-export * from "./LocalizationDefinition";
-export * from "./LocaleDefinition";
+export * from './LocalizationDefinition';
+export * from './LocaleDefinition';

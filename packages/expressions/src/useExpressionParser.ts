@@ -1,89 +1,92 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useBlazor, useUuid } from "@eavfw/hooks";
-import { useExpressionParserAttributeContext, useExpressionParserLoadingContext } from "./ExpressionParserAttributeContext";
-import { useExpressionParserContext } from "./useExpressionParserContext";
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useBlazor, useUuid } from '@eavfw/hooks';
+import {
+  useExpressionParserAttributeContext,
+  useExpressionParserLoadingContext,
+} from './ExpressionParserAttributeContext';
+import { useExpressionParserContext } from './useExpressionParserContext';
 
-// Enum used to set the exprssion order. 
+// Enum used to set the exprssion order.
 // ordered is used when the expression should be ordered between other ordered expressions
 // First is used when it should be placed unordered before the ordered expression.
 // Last is used when it should be placed unordered after the ordered expression.
 export enum ExpressionOrder {
-    first = "first",
-    ordered = "ordered",
-    last = "last",
-} 
-
-export type useExpressionParserValue<T> = {
-    data: T | string | undefined;
-    isLoading: boolean;
-    error?: string;
+  first = 'first',
+  ordered = 'ordered',
+  last = 'last',
 }
 
-export function useExpressionParser<T = string>(expression?: string, expressionOrder?: ExpressionOrder) {
+export type useExpressionParserValue<T> = {
+  data: T | string | undefined;
+  isLoading: boolean;
+  error?: string;
+};
 
-    const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
-    const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
+export function useExpressionParser<T = string>(
+  expression?: string,
+  expressionOrder?: ExpressionOrder,
+) {
+  const { variables, formValues, addExpresssion, removeExpression } = useExpressionParserContext();
+  const { attributeKey, entityKey, arrayIdx } = useExpressionParserAttributeContext();
   //  const blazor = useBlazor();
-    const id = useUuid();
+  const id = useUuid();
 
-    var [evaluated, setEvaluated] = useState<useExpressionParserValue<T>>(expression && expression.indexOf("@") !== -1 ?
-        { data: undefined, isLoading: true, error: undefined } :
-        { data: expression, isLoading: false, error: undefined });
-    var etag = useRef(new Date().getTime());
-    var oldvalue = useRef(evaluated?.data);
+  var [evaluated, setEvaluated] = useState<useExpressionParserValue<T>>(
+    expression && expression.indexOf('@') !== -1
+      ? { data: undefined, isLoading: true, error: undefined }
+      : { data: expression, isLoading: false, error: undefined },
+  );
+  var etag = useRef(new Date().getTime());
+  var oldvalue = useRef(evaluated?.data);
 
-    useExpressionParserLoadingContext(evaluated?.isLoading, id);
+  useExpressionParserLoadingContext(evaluated?.isLoading, id);
 
-    useEffect(() => { 
-        const etagLocal = etag.current = new Date().getTime();
+  useEffect(() => {
+    const etagLocal = (etag.current = new Date().getTime());
 
-        //const vars = { ...variables };
+    //const vars = { ...variables };
 
-        //if ("manifest" in vars)
-        //    delete vars["manifest"];
+    //if ("manifest" in vars)
+    //    delete vars["manifest"];
 
-        const context = {
-           // formValues,
-           // variables,
-            fieldInfo: {
-                attributeKey,
-                entityKey,
-                arrayIdx
-            },
-            expressionOrder: expressionOrder
-        };
+    const context = {
+      // formValues,
+      // variables,
+      fieldInfo: {
+        attributeKey,
+        entityKey,
+        arrayIdx,
+      },
+      expressionOrder: expressionOrder,
+    };
 
-        if (expression && expression.indexOf("@") !== -1) {
+    if (expression && expression.indexOf('@') !== -1) {
+      addExpresssion(id, expression, context, (result: any, error: any) => {
+        //
 
-            addExpresssion(id, expression, context, (result: any, error: any) => {
-                //
-
-                if (error) {
-                    setEvaluated({ data: undefined, isLoading: false });
-                  //  setExpressionResult(id, undefined, error);
-                    return;
-                }
-              
-                if (oldvalue.current !== result) {
-                    //Using an timeout to make sure the render loop is completed beforethe value is changes. If not the value can change back after the new value is placed
-                    setTimeout(() => {
-                        setEvaluated({ data: result, isLoading: false });
-                        //     setExpressionResult(id, result, undefined);
-                        oldvalue.current = result;                                 
-                    }, 0);                 
-                }
-
-            });
-
-            return () => {
-                removeExpression(id);
-            }
-          
-        } else if (expression !== evaluated?.data) {
-            setEvaluated({ data: expression, isLoading: false });
+        if (error) {
+          setEvaluated({ data: undefined, isLoading: false });
+          //  setExpressionResult(id, undefined, error);
+          return;
         }
 
-    }, [expression]);
+        if (oldvalue.current !== result) {
+          //Using an timeout to make sure the render loop is completed beforethe value is changes. If not the value can change back after the new value is placed
+          setTimeout(() => {
+            setEvaluated({ data: result, isLoading: false });
+            //     setExpressionResult(id, result, undefined);
+            oldvalue.current = result;
+          }, 0);
+        }
+      });
 
-    return evaluated;
+      return () => {
+        removeExpression(id);
+      };
+    } else if (expression !== evaluated?.data) {
+      setEvaluated({ data: expression, isLoading: false });
+    }
+  }, [expression]);
+
+  return evaluated;
 }

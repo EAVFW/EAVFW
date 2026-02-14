@@ -1,4 +1,6 @@
-import { createContext } from "react";
-import { NotAuthorizedProfile, UserProfile } from "./UserProfile";
+import { createContext } from 'react';
+import { NotAuthorizedProfile, UserProfile } from './UserProfile';
 
-export const UserContext = createContext<UserProfile | NotAuthorizedProfile>({ isAuthenticated:false });
+export const UserContext = createContext<UserProfile | NotAuthorizedProfile>({
+  isAuthenticated: false,
+});

@@ -1,67 +1,60 @@
-import { makeStyles } from "@fluentui/react-components";
-
+import { makeStyles } from '@fluentui/react-components';
 
 export const useStackStyles = makeStyles({
-    root: {
-        display: 'flex',
-        flexDirection: 'column',
-        flexWrap: 'nowrap',
-      
-        width: 'auto',
-        height: 'auto',
-        boxSizing: 'border-box',
-        '> *': {
-            textOverflow: 'ellipsis',
-        },
-        '> :not(:first-child)': {
-            marginTop: '0px',
-        },
-        '> *:not(.ms-StackItem)': {
-            flexShrink: 1,
-        },
-        '> :not(:last-child)': {
-            marginBottom: '10px',
-        }
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    flexWrap: 'nowrap',
+
+    width: 'auto',
+    height: 'auto',
+    boxSizing: 'border-box',
+    '> *': {
+      textOverflow: 'ellipsis',
     },
-    horizontal: {
-        flexDirection: 'row',
-        '> :not(:last-child)': {
-            marginBottom: '10px',
-            marginRight: '10px',
-        }
+    '> :not(:first-child)': {
+      marginTop: '0px',
     },
-    noGap: {
-       
-        '> :not(:last-child)': {
-            marginBottom: '0px',
-            marginRight: '0px',
-        }
+    '> *:not(.ms-StackItem)': {
+      flexShrink: 1,
     },
-    verticalFill: {
-        height: '100%',
+    '> :not(:last-child)': {
+      marginBottom: '10px',
     },
-    item: {
-        height: 'auto',
-        width: 'auto',
-        flexShrink: 1,
+  },
+  horizontal: {
+    flexDirection: 'row',
+    '> :not(:last-child)': {
+      marginBottom: '10px',
+      marginRight: '10px',
     },
-    itemShrink: {
-        flexShrink: 1,
-        flexGrow:0,
-      
+  },
+  noGap: {
+    '> :not(:last-child)': {
+      marginBottom: '0px',
+      marginRight: '0px',
     },
-   
-    itemGrow: {
-       
-            flexGrow: 1,
-        
-        }
-})
+  },
+  verticalFill: {
+    height: '100%',
+  },
+  item: {
+    height: 'auto',
+    width: 'auto',
+    flexShrink: 1,
+  },
+  itemShrink: {
+    flexShrink: 1,
+    flexGrow: 0,
+  },
+
+  itemGrow: {
+    flexGrow: 1,
+  },
+});
 
 export const useVerticalFill = makeStyles({
-    root: {
-        height: '100%',
-    },
-})
-
- 
+  root: {
+    height: '100%',
+  },
+});

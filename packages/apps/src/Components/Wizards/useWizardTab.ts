@@ -1,8 +1,8 @@
-import { useContext } from "react";
-import { WizardContext } from "./WizardContext";
+import { useContext } from 'react';
+import { WizardContext } from './WizardContext';
 
 export const useWizardTab = () => {
-    const [state, dispatch] = useContext(WizardContext)!;
+  const [state, dispatch] = useContext(WizardContext)!;
 
-    return state.tabName;
-}
+  return state.tabName;
+};

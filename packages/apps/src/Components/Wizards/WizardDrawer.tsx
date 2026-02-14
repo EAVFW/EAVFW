@@ -1,184 +1,207 @@
-
-import { EAVForm, useEAVForm } from "@eavfw/forms";
-import { mergeDeep } from "@eavfw/utils";
+import { EAVForm, useEAVForm } from '@eavfw/forms';
+import { mergeDeep } from '@eavfw/utils';
 import {
-    Button, Divider, mergeClasses, ProgressBar, SelectTabEventHandler
-} from "@fluentui/react-components";
+  Button,
+  Divider,
+  mergeClasses,
+  ProgressBar,
+  SelectTabEventHandler,
+} from '@fluentui/react-components';
 import {
-    Drawer, DrawerBody,
-    DrawerHeader,
-    DrawerHeaderTitle, DrawerProps
-} from "@fluentui/react-components/unstable";
+  Drawer,
+  DrawerBody,
+  DrawerHeader,
+  DrawerHeaderTitle,
+  DrawerProps,
+} from '@fluentui/react-components/unstable';
 
-import { Dismiss24Regular } from "@fluentui/react-icons";
+import { Dismiss24Regular } from '@fluentui/react-icons';
 
-import React, { PropsWithChildren, useContext, useEffect, useState } from "react";
-import { ResolveFeature } from "../../FeatureFlags";
-import { useStackStyles } from "../useStackStyles";
-import { useWizard, useWizardOpener } from "./useWizard";
-import { WizardContext } from "./WizardContext";
-import { WizardFooter } from "./WizardFooter";
-import { WizardMessages } from "./WizardMessages";
-import { WizardTabs } from "./WizardTabs";
-import { WizardToaster } from "./WizardToaster";
+import React, { PropsWithChildren, useContext, useEffect, useState } from 'react';
+import { ResolveFeature } from '../../FeatureFlags';
+import { useStackStyles } from '../useStackStyles';
+import { useWizard, useWizardOpener } from './useWizard';
+import { WizardContext } from './WizardContext';
+import { WizardFooter } from './WizardFooter';
+import { WizardMessages } from './WizardMessages';
+import { WizardTabs } from './WizardTabs';
+import { WizardToaster } from './WizardToaster';
 
 const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
+  //const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
 
-    //const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
+  const [data, { onChange, updateState }] = useEAVForm((x) => x.formValues, undefined, 'Wizard');
+  const r = useContext(WizardContext)!;
 
-    const [data, { onChange, updateState }] = useEAVForm(x => x.formValues, undefined, 'Wizard');
-    const r = useContext(WizardContext)!;
+  /*
+   * When data is updated, we set the internal data.
+   */
+  useEffect(() => {
+    r[1]({ action: 'setValues', values: data });
+  }, [data]);
 
-    /*
-     * When data is updated, we set the internal data.
-     */
-    useEffect(() => {
-        r[1]({ action: "setValues", values: data })
-    }, [data]);
+  /**
+   * Reset data when the wizardkey is altered
+   */
+  useEffect(() => {
+    updateState((p, c) => {
+      p.formValues = {};
+      c.replaceState = true;
+    });
+  }, [r[0].wizardKey]);
 
-    /**
-     * Reset data when the wizardkey is altered
-     */
-    useEffect(() => {
-        updateState((p, c) => { p.formValues = {}; c.replaceState = true });
-    }, [r[0].wizardKey])
+  /*
+   * Handle the transition promise when set as part of transition into a new tab.
+   */
+  useEffect(() => {
+    let p = r[0].transition;
+    const dispatch = r[1];
 
-    /*
-     * Handle the transition promise when set as part of transition into a new tab.
-     */
-    useEffect(() => {
+    if (p) {
+      let isCurrent = true;
+      let t5 = setTimeout(() => {
+        dispatch({
+          action: 'updateMessage',
+          messageKey: 'TransitionIn',
+          message: 'Still working.',
+        });
+      }, 5000);
+      let t11 = setTimeout(() => {
+        dispatch({
+          action: 'updateMessage',
+          messageKey: 'TransitionIn',
+          message: 'Sorry, its taking longer than expected.',
+        });
+      }, 11000);
+      let t18 = setTimeout(() => {
+        dispatch({
+          action: 'updateMessage',
+          messageKey: 'TransitionIn',
+          message: 'Still working, sorry for keeping you wait.',
+        });
+      }, 18000);
 
-        let p = r[0].transition;
-        const dispatch = r[1];
+      p.then((result) => {
+        clearTimeout(t5);
+        clearTimeout(t11);
+        clearTimeout(t18);
 
-        if (p) {
-            let isCurrent = true;
-            let t5 = setTimeout(() => {
-                dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Still working." });
-            }, 5000);
-            let t11 = setTimeout(() => {
-                dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Sorry, its taking longer than expected." });
-            }, 11000);
-            let t18 = setTimeout(() => {
-                dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Still working, sorry for keeping you wait." });
-            }, 18000);
+        if (result.status.toLowerCase() === 'failed') {
+          dispatch({
+            action: 'setMessages',
+            messages: {
+              WorkflowFailed: {
+                intent: 'error',
+                title: 'Workflow Failed',
+                message: 'Pleaes reload, and try again',
+                detailedMessage: result.failedReason,
+              },
+            },
+          });
 
-            p.then(result => {
-                clearTimeout(t5);
-                clearTimeout(t11);
-                clearTimeout(t18);
-
-                if (result.status.toLowerCase() === "failed") {
-
-                    dispatch({
-                        action: "setMessages", messages: {
-                            "WorkflowFailed": {
-                                "intent": "error",
-                                "title": "Workflow Failed",
-                                "message": "Pleaes reload, and try again",
-                                "detailedMessage": result.failedReason
-                            }
-                        }
-                    });
-
-                    return;
-                }
-
-                for (let action of Object.values(result.actions)) {
-                    if (action.type === "UpdateWizardContext") {
-
-                        if (action.body?.values) {
-                            // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
-                            onChange(props => {
-                                dispatch({ action: "setValues", values: mergeDeep(props, result.body?.values) });
-                            });
-                        }
-
-                        if (action.body?.messages) {
-                            dispatch({ action: "setMessages", messages: action.body?.messages });
-
-                        }
-
-                    }
-                }
-                onChange(props => {
-                    dispatch({ action: "setValues", values: mergeDeep(props, result.body) });
-                });
-                //  dispatch({ action: "setValues", values: result.body, expressionsProvider: onFormValuesChange, merge: true });
-
-                if (isCurrent) {
-                    r[1]({ action: "setTransition", transition: false });
-                }
-            });
-
-            return () => {
-                isCurrent = false;
-                clearTimeout(t5);
-                clearTimeout(t11);
-                clearTimeout(t18);
-
-            }
-        } else if (r[0].isTransitioning) {
-            r[1]({ action: "setTransition", transition: false });
+          return;
         }
 
-    }, [r[0].transition]);
+        for (let action of Object.values(result.actions)) {
+          if (action.type === 'UpdateWizardContext') {
+            if (action.body?.values) {
+              // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
+              onChange((props) => {
+                dispatch({ action: 'setValues', values: mergeDeep(props, result.body?.values) });
+              });
+            }
 
-    const stack = useStackStyles();
+            if (action.body?.messages) {
+              dispatch({ action: 'setMessages', messages: action.body?.messages });
+            }
+          }
+        }
+        onChange((props) => {
+          dispatch({ action: 'setValues', values: mergeDeep(props, result.body) });
+        });
+        //  dispatch({ action: "setValues", values: result.body, expressionsProvider: onFormValuesChange, merge: true });
 
-    //  const [selectedTab, setSelectedTab] = useState(Object.keys(wizard?.tabs ?? {})[0]);
-    //const selectedTab = useWizardTab() ?? Object.keys(wizard?.tabs ?? {})[0];
-    const [{ tabName, wizard, isTransitioning }, { setSelectedTab }] = useWizard();
-    const { closeWizard } = useWizardOpener();
+        if (isCurrent) {
+          r[1]({ action: 'setTransition', transition: false });
+        }
+      });
 
-    const [detailedError, setDetailedError] = useState<string>();
-    if (!tabName)
-        return null;
+      return () => {
+        isCurrent = false;
+        clearTimeout(t5);
+        clearTimeout(t11);
+        clearTimeout(t18);
+      };
+    } else if (r[0].isTransitioning) {
+      r[1]({ action: 'setTransition', transition: false });
+    }
+  }, [r[0].transition]);
 
-    const onTabSelect: SelectTabEventHandler = (event, data) => {
-        setSelectedTab(data.value as string);
-    };
+  const stack = useStackStyles();
 
-    return (<Drawer position="end" size="large"
-        type="overlay"
-        separator
-        open={typeof wizard !== "undefined"}
-        onOpenChange={(_, { open }) => closeWizard()}
+  //  const [selectedTab, setSelectedTab] = useState(Object.keys(wizard?.tabs ?? {})[0]);
+  //const selectedTab = useWizardTab() ?? Object.keys(wizard?.tabs ?? {})[0];
+  const [{ tabName, wizard, isTransitioning }, { setSelectedTab }] = useWizard();
+  const { closeWizard } = useWizardOpener();
+
+  const [detailedError, setDetailedError] = useState<string>();
+  if (!tabName) return null;
+
+  const onTabSelect: SelectTabEventHandler = (event, data) => {
+    setSelectedTab(data.value as string);
+  };
+
+  return (
+    <Drawer
+      position="end"
+      size="large"
+      type="overlay"
+      separator
+      open={typeof wizard !== 'undefined'}
+      onOpenChange={(_, { open }) => closeWizard()}
     >
-        <ProgressBar shape="square" thickness="large" style={{ visibility: isTransitioning ? "visible" : "hidden" }} />
-        <DrawerHeader>
-            <DrawerHeaderTitle
-                action={
-                    <Button
-                        appearance="subtle"
-                        aria-label="Close"
-                        icon={<Dismiss24Regular />}
-                        onClick={closeWizard}
-                    />
-                }
-            >
-                {wizard?.title}
-            </DrawerHeaderTitle>
-        </DrawerHeader>
-        <DrawerBody>
-            {detailedError && <div dangerouslySetInnerHTML={{ __html: detailedError }}></div>}
-            <div className={mergeClasses(stack.root, stack.verticalFill)}>
-                <WizardToaster />
-                <WizardMessages setDetailedError={setDetailedError} />
-                <WizardTabs tabs={wizard?.tabs} className={stack.itemGrow} onTabSelect={onTabSelect} selectedTab={tabName} />
-                <Divider className={stack.itemShrink} />
-                <WizardFooter />
-            </div>
-        </DrawerBody>
-    </Drawer>)
-}
+      <ProgressBar
+        shape="square"
+        thickness="large"
+        style={{ visibility: isTransitioning ? 'visible' : 'hidden' }}
+      />
+      <DrawerHeader>
+        <DrawerHeaderTitle
+          action={
+            <Button
+              appearance="subtle"
+              aria-label="Close"
+              icon={<Dismiss24Regular />}
+              onClick={closeWizard}
+            />
+          }
+        >
+          {wizard?.title}
+        </DrawerHeaderTitle>
+      </DrawerHeader>
+      <DrawerBody>
+        {detailedError && <div dangerouslySetInnerHTML={{ __html: detailedError }}></div>}
+        <div className={mergeClasses(stack.root, stack.verticalFill)}>
+          <WizardToaster />
+          <WizardMessages setDetailedError={setDetailedError} />
+          <WizardTabs
+            tabs={wizard?.tabs}
+            className={stack.itemGrow}
+            onTabSelect={onTabSelect}
+            selectedTab={tabName}
+          />
+          <Divider className={stack.itemShrink} />
+          <WizardFooter />
+        </div>
+      </DrawerBody>
+    </Drawer>
+  );
+};
 
-export const WizardDrawer: React.FC = ({ }) => {
-
-    return (
-        <EAVForm purpose="drawer" onChange={(data, ctx) => {
-
-        }}><Wizard />
-        </EAVForm>
-    )
-}
+export const WizardDrawer: React.FC = ({}) => {
+  return (
+    <EAVForm purpose="drawer" onChange={(data, ctx) => {}}>
+      <Wizard />
+    </EAVForm>
+  );
+};

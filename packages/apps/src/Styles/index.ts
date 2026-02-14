@@ -1,1 +1,1 @@
-export * from "./SectionStyles.styles";
+export * from './SectionStyles.styles';

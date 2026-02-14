@@ -1,30 +1,29 @@
-import React, { PropsWithChildren, useState } from "react";
-import { AppInfoProvider } from "./AppInfoProvider";
-import { AppNavigationContext } from "./AppNavigationContext";
-import { EAVApp } from "./EAVApp";
-import { ModelDrivenApp } from "./ModelDrivenApp";
+import React, { PropsWithChildren, useState } from 'react';
+import { AppInfoProvider } from './AppInfoProvider';
+import { AppNavigationContext } from './AppNavigationContext';
+import { EAVApp } from './EAVApp';
+import { ModelDrivenApp } from './ModelDrivenApp';
 
-export const StateBasedAppContextProvider: React.FC<PropsWithChildren<{ model: ModelDrivenApp }>> = ({ children, model }) => {
+export const StateBasedAppContextProvider: React.FC<
+  PropsWithChildren<{ model: ModelDrivenApp }>
+> = ({ children, model }) => {
+  const [currentAppName, setcurrentAppName] = useState('');
+  const [currentAreaName, setcurrentAreaName] = useState('');
+  const [currentEntityName, setcurrentEntityName] = useState('');
+  const [currentRecordId, setcurrentRecordId] = useState('');
 
-    const [currentAppName, setcurrentAppName] = useState("");
-    const [currentAreaName, setcurrentAreaName] = useState("");
-    const [currentEntityName, setcurrentEntityName] = useState("");
-    const [currentRecordId, setcurrentRecordId] = useState("");
-
-    return (
-        <EAVApp model={model} >
-            <AppNavigationContext.Provider value={
-                {
-                    currentAppName,
-                    currentAreaName,
-                    currentRecordId,
-                    currentEntityName,
-                }
-            }>
-                <AppInfoProvider>
-                    {children}
-                </AppInfoProvider>
-            </AppNavigationContext.Provider>
-        </EAVApp>
-    )
-}
+  return (
+    <EAVApp model={model}>
+      <AppNavigationContext.Provider
+        value={{
+          currentAppName,
+          currentAreaName,
+          currentRecordId,
+          currentEntityName,
+        }}
+      >
+        <AppInfoProvider>{children}</AppInfoProvider>
+      </AppNavigationContext.Provider>
+    </EAVApp>
+  );
+};

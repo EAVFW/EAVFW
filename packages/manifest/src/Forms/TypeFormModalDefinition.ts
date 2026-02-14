@@ -1,4 +1,4 @@
 export type TypeFormModalDefinition = {
-    type: "Modal";
-    name: string;
+  type: 'Modal';
+  name: string;
 };

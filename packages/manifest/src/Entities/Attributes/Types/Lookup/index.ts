@@ -1,2 +1,2 @@
-export * from "./isLookup";
-export * from "./LookupType";
+export * from './isLookup';
+export * from './LookupType';

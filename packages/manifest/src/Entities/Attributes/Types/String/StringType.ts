@@ -1,6 +1,6 @@
 export type StringType = {
-    type: "string";
-    format?: string;
-    minLength?: number;
-    maxLength?: number;
+  type: 'string';
+  format?: string;
+  minLength?: number;
+  maxLength?: number;
 };

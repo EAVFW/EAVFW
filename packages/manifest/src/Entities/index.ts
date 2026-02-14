@@ -1,3 +1,3 @@
-export * from "./EntityViewsDefinition";
-export * from "./EntityDefinition";
-export * from "./Attributes";
+export * from './EntityViewsDefinition';
+export * from './EntityDefinition';
+export * from './Attributes';

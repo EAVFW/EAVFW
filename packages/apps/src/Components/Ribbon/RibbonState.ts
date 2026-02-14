@@ -1,7 +1,7 @@
-import { ICommandBarItemProps } from "@fluentui/react";
+import { ICommandBarItemProps } from '@fluentui/react';
 
 export type RibbonState = {
-    canSave: boolean;
-    skipRedirect: boolean;
-    buttons: ICommandBarItemProps[];
-}
+  canSave: boolean;
+  skipRedirect: boolean;
+  buttons: ICommandBarItemProps[];
+};

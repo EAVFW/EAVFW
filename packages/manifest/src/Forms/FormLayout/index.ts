@@ -1,2 +1,2 @@
-export * from "./FormColumnDefinition";
-export * from "./FormTabDefinition";
+export * from './FormColumnDefinition';
+export * from './FormTabDefinition';

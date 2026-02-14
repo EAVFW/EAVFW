@@ -1,6 +1,3 @@
-
-
-export type BaseNestedType =
-{
-    required?: boolean
+export type BaseNestedType = {
+  required?: boolean;
 };

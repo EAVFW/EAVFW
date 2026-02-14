@@ -1,24 +1,33 @@
-import { createContext,Dispatch,SetStateAction,useContext, useEffect } from "react";
-import { useUuid } from "@eavfw/hooks";
+import { createContext, Dispatch, SetStateAction, useContext, useEffect } from 'react';
+import { useUuid } from '@eavfw/hooks';
 
 export type ExpressionParserAttributeContextType = {
-    "attributeKey": string;
-    "entityKey": string;
-    "arrayIdx"?: number;
-    isLoading: boolean;
-    ids: string;
-    setIsLoading: (id: string, isLoading: boolean) => void;
-}
+  attributeKey: string;
+  entityKey: string;
+  arrayIdx?: number;
+  isLoading: boolean;
+  ids: string;
+  setIsLoading: (id: string, isLoading: boolean) => void;
+};
 
-export const ExpressionParserAttributeContext = createContext<ExpressionParserAttributeContextType>({ ids:"", isLoading:false, attributeKey: "", entityKey: "", arrayIdx: -1, setIsLoading: () => { } });
+export const ExpressionParserAttributeContext = createContext<ExpressionParserAttributeContextType>(
+  {
+    ids: '',
+    isLoading: false,
+    attributeKey: '',
+    entityKey: '',
+    arrayIdx: -1,
+    setIsLoading: () => {},
+  },
+);
 
-export const useExpressionParserAttributeContext = () => useContext(ExpressionParserAttributeContext);
-export const useExpressionParserLoadingContext = (isLoading: boolean, id:string) => {
+export const useExpressionParserAttributeContext = () =>
+  useContext(ExpressionParserAttributeContext);
+export const useExpressionParserLoadingContext = (isLoading: boolean, id: string) => {
+  const { setIsLoading, attributeKey } = useExpressionParserAttributeContext();
+  // const id = useUuid();
 
-    const { setIsLoading, attributeKey } = useExpressionParserAttributeContext();
-   // const id = useUuid();
-
-    useEffect(() => {
-        setIsLoading(id, isLoading);
-    }, [isLoading]);
-}
+  useEffect(() => {
+    setIsLoading(id, isLoading);
+  }, [isLoading]);
+};

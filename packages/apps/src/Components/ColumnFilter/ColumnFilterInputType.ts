@@ -1,5 +1,4 @@
-
 export const enum ColumnFilterInputType {
-    None,
-    Single
+  None,
+  Single,
 }

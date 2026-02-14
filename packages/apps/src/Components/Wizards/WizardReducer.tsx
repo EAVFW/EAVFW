@@ -1,220 +1,241 @@
+import { PropsWithChildren, createContext, useEffect, useReducer } from 'react';
+import { ResolveFeature } from './../../FeatureFlags';
+import { IWizardAction } from './IWizardAction';
+import { IWizardState } from './IWizardState';
+import { Reducer } from 'react';
+import { runWorkflow } from '@eavfw/utils';
+import { mergeDeep } from '@eavfw/utils';
+import { IWizardMessage } from '@eavfw/manifest';
+import { useEAVForm } from '@eavfw/forms';
+import { WizardContext } from './WizardContext';
 
-import { PropsWithChildren, createContext, useEffect, useReducer } from "react";
-import { ResolveFeature } from "./../../FeatureFlags";
-import { IWizardAction } from "./IWizardAction";
-import { IWizardState } from "./IWizardState";
-import { Reducer } from "react";
-import { runWorkflow } from "@eavfw/utils";
-import { mergeDeep } from "@eavfw/utils";
-import { IWizardMessage } from "@eavfw/manifest";
-import { useEAVForm } from "@eavfw/forms";
-import { WizardContext } from "./WizardContext";
-
-import { trace, context, diag, DiagConsoleLogger, DiagLogLevel, SpanKind, propagation } from '@opentelemetry/api';
+import {
+  trace,
+  context,
+  diag,
+  DiagConsoleLogger,
+  DiagLogLevel,
+  SpanKind,
+  propagation,
+} from '@opentelemetry/api';
 
 const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
-    switch (action.action) {
-        case "setTab": return {
-            ...state,
-            tabName: action.tabName
-        }
-        case "setWizard":
-            {
-                if (state.spanResolve) {
-                    state.spanResolve();
-                }
-                const wizard = action.wizard?.[1];
-                if (!wizard)
-                    return {
-                        expressions: ResolveFeature("WizardExpressionsProvider")({})
-                    };
+  switch (action.action) {
+    case 'setTab':
+      return {
+        ...state,
+        tabName: action.tabName,
+      };
+    case 'setWizard': {
+      if (state.spanResolve) {
+        state.spanResolve();
+      }
+      const wizard = action.wizard?.[1];
+      if (!wizard)
+        return {
+          expressions: ResolveFeature('WizardExpressionsProvider')({}),
+        };
 
-                // Get the active trace provider  
-                const tracerProvider = trace.getTracerProvider();
+      // Get the active trace provider
+      const tracerProvider = trace.getTracerProvider();
 
-                // Use the tracer provider to get a tracer  
-                const tracer = tracerProvider.getTracer('eavfw-wizard');
+      // Use the tracer provider to get a tracer
+      const tracer = tracerProvider.getTracer('eavfw-wizard');
 
-                const wizardPromise = new Promise<any>((resolve, reject) => {
-                    state.spanResolve = resolve;
-                    state.spanReject = reject;
-                });
+      const wizardPromise = new Promise<any>((resolve, reject) => {
+        state.spanResolve = resolve;
+        state.spanReject = reject;
+      });
 
-                const parentContext = context.active();
-                const span = tracer.startSpan('eavfw-wizard-start', undefined, parentContext);
-                const contextWithSpanSet = trace.setSpan(parentContext, span);
+      const parentContext = context.active();
+      const span = tracer.startSpan('eavfw-wizard-start', undefined, parentContext);
+      const contextWithSpanSet = trace.setSpan(parentContext, span);
 
-                // context.with(contextWithSpanSet, () => {
-                //    await wizardPromise;
-                //}, undefined, span);
+      // context.with(contextWithSpanSet, () => {
+      //    await wizardPromise;
+      //}, undefined, span);
 
-                //const monitorMe = async () => {
-                //    await tracer.startActiveSpan("eavfw-wizard-start", async (span) => {
-                //        try {
-                //            state.span = span;
-                //            span.setAttribute('wizard', wizard[0]);
-                //            const fooResult = await wizardPromise; // this or some inner function my create child spans
-                //           // span.setAttribute("fooResult", fooResult);
-                //         //   const barResult = await bar(); // this or some inner function my create child spans
-                //         //   span.setAttribute("barResult", barResult);
-                //            // ...
-                //        } catch (e) {
-                //            //@ts-ignore
-                //            span.recordException(e);
-                //        } finally {
-                //            span.end();
-                //        }
-                //    });
-                //}
-                //monitorMe();
+      //const monitorMe = async () => {
+      //    await tracer.startActiveSpan("eavfw-wizard-start", async (span) => {
+      //        try {
+      //            state.span = span;
+      //            span.setAttribute('wizard', wizard[0]);
+      //            const fooResult = await wizardPromise; // this or some inner function my create child spans
+      //           // span.setAttribute("fooResult", fooResult);
+      //         //   const barResult = await bar(); // this or some inner function my create child spans
+      //         //   span.setAttribute("barResult", barResult);
+      //            // ...
+      //        } catch (e) {
+      //            //@ts-ignore
+      //            span.recordException(e);
+      //        } finally {
+      //            span.end();
+      //        }
+      //    });
+      //}
+      //monitorMe();
 
-                // const activeContext = context.active();
+      // const activeContext = context.active();
 
-                // Assume "input" is an object with 'traceparent' & 'tracestate' keys
-                //  const input = {};
+      // Assume "input" is an object with 'traceparent' & 'tracestate' keys
+      //  const input = {};
 
-                // Extracts the 'traceparent' and 'tracestate' data into a context object.
-                //
-                // You can then treat this context as the active context for your
-                // traces.
-                let activeContext = context.active(); // propagation.extract(context.active(), input);
+      // Extracts the 'traceparent' and 'tracestate' data into a context object.
+      //
+      // You can then treat this context as the active context for your
+      // traces.
+      let activeContext = context.active(); // propagation.extract(context.active(), input);
 
-                // let tracer = trace.getTracer('app-name');
+      // let tracer = trace.getTracer('app-name');
 
-                //let span = tracer.startSpan(
-                //    'eavfw-wizard-start',
-                //    {
-                //        attributes: {},
-                //    },
-                //    context.active(),
-                //);
+      //let span = tracer.startSpan(
+      //    'eavfw-wizard-start',
+      //    {
+      //        attributes: {},
+      //    },
+      //    context.active(),
+      //);
 
-                // Set the created span as active in the deserialized context.
-                // trace.setSpan(activeContext, rootSpan);
+      // Set the created span as active in the deserialized context.
+      // trace.setSpan(activeContext, rootSpan);
 
-                // Use the tracer to create a new span  
-                // const span = tracer.startSpan('eavfw-wizard-start', {}, context.active());
+      // Use the tracer to create a new span
+      // const span = tracer.startSpan('eavfw-wizard-start', {}, context.active());
 
-                // trace.setSpan(activeContext, span),
+      // trace.setSpan(activeContext, span),
 
-                //   const newContext = context.with();  
-                let tabName = Object.keys(wizard?.tabs ?? {})[0];
-                let transitionIn = wizard.tabs[tabName].onTransitionIn;
-                return {
-                    ...state,
-                    ...getTransitionProps(transitionIn, action.action, state),
-                    tracer: tracer,
-                    otelContext: contextWithSpanSet,
-                    wizard: wizard,
-                    wizardKey: action.wizard?.[0],
-                    tabName: tabName
-
-                }
-            }
-        //case "updateExpressions": return {
-        //    ...state,
-        //    values: action.values,
-        //    expressions: action.result
-        //}
-        case "setMessages": return {
-            ...state,
-            messages: action.messages
-        }
-        case "setValues":
-            let values = action.merge === true ? mergeDeep(state.values, action.values) : action.values;
-            return {
-                ...state,
-                values,
-                expressions: (action.expressionsProvider ?? ResolveFeature("WizardExpressionsProvider"))(values),
-            };
-        case "updateMessage":
-            state.messages![action.messageKey].message = action.message;
-            return { ...state };
-        case "setTransition":
-            if (state.messages?.["TransitionIn"] && action.transition === false) {
-                delete state.messages!["TransitionIn"];
-            }
-            return {
-                ...state,
-                isTransitioning: action.transition
-            }
-        case "moveNext":
-            return context.with(state.otelContext!, () => {
-
-                const spanContext = trace.getSpan(context.active())?.spanContext()!;
-
-                const expressionResults = state.expressions;
-                const wizard = state.wizard!;
-                const selectedTab = state.tabName!;
-
-                let keys = Object.entries(wizard?.tabs ?? {})
-                    .filter(([key, value]) => typeof value.visible === "undefined" || (typeof value.visible === "boolean" && value.visible) || (typeof value.visible === "string" && expressionResults[value.visible]))
-                    .map(kv => kv[0]);
-
-                let nextTab = keys[keys.indexOf(selectedTab) + 1];
-
-                if (nextTab) {
-                    let transitionIn = wizard.tabs[nextTab].onTransitionIn;
-
-                    return {
-                        ...state,
-                        ...getTransitionProps(transitionIn, action.trigger, state),
-                        tabName: nextTab,
-
-                    }
-                } else {
-                    return {
-
-                    }
-                }
-
-            });
-
+      //   const newContext = context.with();
+      let tabName = Object.keys(wizard?.tabs ?? {})[0];
+      let transitionIn = wizard.tabs[tabName].onTransitionIn;
+      return {
+        ...state,
+        ...getTransitionProps(transitionIn, action.action, state),
+        tracer: tracer,
+        otelContext: contextWithSpanSet,
+        wizard: wizard,
+        wizardKey: action.wizard?.[0],
+        tabName: tabName,
+      };
     }
-}
+    //case "updateExpressions": return {
+    //    ...state,
+    //    values: action.values,
+    //    expressions: action.result
+    //}
+    case 'setMessages':
+      return {
+        ...state,
+        messages: action.messages,
+      };
+    case 'setValues':
+      let values = action.merge === true ? mergeDeep(state.values, action.values) : action.values;
+      return {
+        ...state,
+        values,
+        expressions: (action.expressionsProvider ?? ResolveFeature('WizardExpressionsProvider'))(
+          values,
+        ),
+      };
+    case 'updateMessage':
+      state.messages![action.messageKey].message = action.message;
+      return { ...state };
+    case 'setTransition':
+      if (state.messages?.['TransitionIn'] && action.transition === false) {
+        delete state.messages!['TransitionIn'];
+      }
+      return {
+        ...state,
+        isTransitioning: action.transition,
+      };
+    case 'moveNext':
+      return context.with(state.otelContext!, () => {
+        const spanContext = trace.getSpan(context.active())?.spanContext()!;
+
+        const expressionResults = state.expressions;
+        const wizard = state.wizard!;
+        const selectedTab = state.tabName!;
+
+        let keys = Object.entries(wizard?.tabs ?? {})
+          .filter(
+            ([key, value]) =>
+              typeof value.visible === 'undefined' ||
+              (typeof value.visible === 'boolean' && value.visible) ||
+              (typeof value.visible === 'string' && expressionResults[value.visible]),
+          )
+          .map((kv) => kv[0]);
+
+        let nextTab = keys[keys.indexOf(selectedTab) + 1];
+
+        if (nextTab) {
+          let transitionIn = wizard.tabs[nextTab].onTransitionIn;
+
+          return {
+            ...state,
+            ...getTransitionProps(transitionIn, action.trigger, state),
+            tabName: nextTab,
+          };
+        } else {
+          return {};
+        }
+      });
+  }
+};
 
 export const WizardReducer: React.FC<PropsWithChildren> = ({ children }) => {
+  const onFormValuesChange = ResolveFeature('WizardExpressionsProvider');
 
-    const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
+  const r = useReducer(wizardReducer, {
+    expressions: onFormValuesChange({}),
+  });
 
-    const r = useReducer(wizardReducer, {
-        expressions: onFormValuesChange({})
-    });
+  return <WizardContext.Provider value={r}>{children}</WizardContext.Provider>;
+};
 
-    return (<WizardContext.Provider value={r}>
-
-        {children}
-
-    </WizardContext.Provider>)
+function getTransitionProps(
+  transitionIn: { message: IWizardMessage; workflow: string } | undefined,
+  trigger: string,
+  state: IWizardState,
+) {
+  return {
+    messages: getTransitionMessages(transitionIn),
+    isTransitioning: transitionIn ? true : false,
+    transition: getTransitionWorker(transitionIn, trigger, state),
+  };
 }
 
-function getTransitionProps(transitionIn: { message: IWizardMessage; workflow: string; } | undefined, trigger: string, state: IWizardState) {
-    return {
-        messages: getTransitionMessages(transitionIn),
-        isTransitioning: transitionIn ? true : false,
-        transition: getTransitionWorker(transitionIn, trigger, state)
-    };
-}
-
-function getTransitionWorker(transitionIn: { message: IWizardMessage; workflow: string; } | undefined, trigger: string, state: IWizardState) {
-    return transitionIn ? new Promise(async (resolve, reject) => {
+function getTransitionWorker(
+  transitionIn: { message: IWizardMessage; workflow: string } | undefined,
+  trigger: string,
+  state: IWizardState,
+) {
+  return transitionIn
+    ? new Promise(async (resolve, reject) => {
         if (transitionIn) {
+          let { result, rsp } = await runWorkflow(transitionIn.workflow, trigger, state.values);
 
-            let { result, rsp } = await runWorkflow(transitionIn.workflow, trigger, state.values);
-
-            if (rsp.ok) {
-                resolve(result);
-            }
-            else {
-                reject();
-            }
-
+          if (rsp.ok) {
+            resolve(result);
+          } else {
+            reject();
+          }
         }
-
-    }) : undefined;
+      })
+    : undefined;
 }
 
-function getTransitionMessages(transitionIn: { message: IWizardMessage; workflow: string; } | undefined) {
-    return transitionIn?.message ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next", ...(transitionIn.message as Partial<IWizardMessage>) } } :
-        transitionIn ? { "TransitionIn": { intent: "info", message: "Working.", title: "Moving Next" } } : {};
+function getTransitionMessages(
+  transitionIn: { message: IWizardMessage; workflow: string } | undefined,
+) {
+  return transitionIn?.message
+    ? {
+        TransitionIn: {
+          intent: 'info',
+          message: 'Working.',
+          title: 'Moving Next',
+          ...(transitionIn.message as Partial<IWizardMessage>),
+        },
+      }
+    : transitionIn
+      ? { TransitionIn: { intent: 'info', message: 'Working.', title: 'Moving Next' } }
+      : {};
 }

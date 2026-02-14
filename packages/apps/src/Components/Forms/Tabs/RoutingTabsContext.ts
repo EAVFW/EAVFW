@@ -1,8 +1,8 @@
-import { IPivotProps } from "@fluentui/react";
+import { IPivotProps } from '@fluentui/react';
 
 export type RoutingTabsContext = {
-    tabName: string;
-    tabs: string[];
-    setTabs: (tabs: string[]) => void;
-    onTabChange: (tabName: string) => void;
-}
+  tabName: string;
+  tabs: string[];
+  setTabs: (tabs: string[]) => void;
+  onTabChange: (tabName: string) => void;
+};

@@ -1,5 +1,7 @@
-import { EAVFWError } from "./EAVFWError";
-import { EAVFWErrorDefinitionMap } from "./EAVFWErrorDefinitionMap";
+import { EAVFWError } from './EAVFWError';
+import { EAVFWErrorDefinitionMap } from './EAVFWErrorDefinitionMap';
 
-export type EAVFWErrorDefinition = EAVFWError | EAVFWErrorDefinitionMap | Array<EAVFWError | EAVFWErrorDefinitionMap>;
-
+export type EAVFWErrorDefinition =
+  | EAVFWError
+  | EAVFWErrorDefinitionMap
+  | Array<EAVFWError | EAVFWErrorDefinitionMap>;

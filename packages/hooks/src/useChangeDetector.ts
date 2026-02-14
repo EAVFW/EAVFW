@@ -1,16 +1,19 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
-export const useChangeDetector = (name: string, data: any, renderId?: React.MutableRefObject<string>) => {
+export const useChangeDetector = (
+  name: string,
+  data: any,
+  renderId?: React.MutableRefObject<string>,
+) => {
+  // #!if ENVIRONMENT === 'LOCAL'
+  const ref = useRef<Boolean>(true);
 
-    // #!if ENVIRONMENT === 'LOCAL'
-    const ref = useRef<Boolean>(true);
+  useEffect(() => {
+    if (ref.current) {
+      ref.current = false;
+      return;
+    }
+  }, [data]);
 
-    useEffect(() => {
-        if (ref.current) {
-            ref.current = false;
-            return
-        }
-    }, [data])
-
-    // #!endif
+  // #!endif
 };

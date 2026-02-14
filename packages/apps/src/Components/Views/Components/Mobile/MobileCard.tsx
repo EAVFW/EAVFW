@@ -1,4 +1,14 @@
-import { Body1, Button, Card, CardFooter, CardHeader, Checkbox, Subtitle2, Title3, makeStyles } from '@fluentui/react-components';
+import {
+  Body1,
+  Button,
+  Card,
+  CardFooter,
+  CardHeader,
+  Checkbox,
+  Subtitle2,
+  Title3,
+  makeStyles,
+} from '@fluentui/react-components';
 import React from 'react';
 import { ExtensionMethods } from '@eavfw/utils';
 import { CardObject } from './ItemToCardResolver';
@@ -6,120 +16,136 @@ import { useSelectionContext } from '../../../Selection';
 // import { Views } from "../../../Views/ViewRegister";
 
 export type Action = {
-    label: string;
-    onClick: () => void;
+  label: string;
+  onClick: () => void;
 };
 
 type MobileCardProps = {
-    item: CardObject
-    className: string
-    handleItemClicked: (item: any) => void
-}
+  item: CardObject;
+  className: string;
+  handleItemClicked: (item: any) => void;
+};
 const useFloatingItemsStyle = makeStyles({
-    root: {
-        display: 'flex',
-        flexDirection: 'row',
-        flexWrap: 'nowrap',
-        width: 'auto',
-        height: 'auto',
-        boxSizing: 'border-box',
-        '> *': {
-            textOverflow: 'ellipsis',
-        },
-        '> :not(:first-child)': {
-            marginTop: '0px',
-        },
-        '> *:not(.ms-StackItem)': {
-            flexShrink: 1,
-        },
+  root: {
+    display: 'flex',
+    flexDirection: 'row',
+    flexWrap: 'nowrap',
+    width: 'auto',
+    height: 'auto',
+    boxSizing: 'border-box',
+    '> *': {
+      textOverflow: 'ellipsis',
     },
+    '> :not(:first-child)': {
+      marginTop: '0px',
+    },
+    '> *:not(.ms-StackItem)': {
+      flexShrink: 1,
+    },
+  },
 });
 
 interface CheckboxState {
-    selected: boolean;
-    checked: boolean;
+  selected: boolean;
+  checked: boolean;
 }
 
-export const MobileCard: React.FC<MobileCardProps> = (
-    {
-        item,
-        className,
-        handleItemClicked
-    }: MobileCardProps
-) => {
-    const style = useFloatingItemsStyle();
-    const { selection } = useSelectionContext();
-    const [selected1, setSelected1] = React.useState(false);
-    const setCheckboxState = React.useCallback(
-        ({ selected, checked }: CheckboxState, setFn: (value: boolean) => void) => {
-            setFn(!!(selected || checked));
-            selection.setIndexSelected(item.index, !!(selected || checked), false);
-        },
-        []
-    );
-    const onSelected1Change = React.useCallback(
-        (_: any, state: any) => setCheckboxState(state, setSelected1),
-        [setCheckboxState]
-    );
+export const MobileCard: React.FC<MobileCardProps> = ({
+  item,
+  className,
+  handleItemClicked,
+}: MobileCardProps) => {
+  const style = useFloatingItemsStyle();
+  const { selection } = useSelectionContext();
+  const [selected1, setSelected1] = React.useState(false);
+  const setCheckboxState = React.useCallback(
+    ({ selected, checked }: CheckboxState, setFn: (value: boolean) => void) => {
+      setFn(!!(selected || checked));
+      selection.setIndexSelected(item.index, !!(selected || checked), false);
+    },
+    [],
+  );
+  const onSelected1Change = React.useCallback(
+    (_: any, state: any) => setCheckboxState(state, setSelected1),
+    [setCheckboxState],
+  );
 
-    return (
-        <Card style={{ marginBottom: '10px' }} className={className} floatingAction={
-            <div className={style.root}>
-                {item.headerAction}
-                <Checkbox onChange={onSelected1Change} checked={selected1} />
-            </div>
-        } selected={selected1} onSelectionChange={onSelected1Change}>
-            <CardHeader
-                style={{ padding: '0 5px' }}
-                // image={<ShipIcon size={24} fill="currentColor" />}
-                image={item.cardIcon}
-                header={<Title3><b>{ExtensionMethods.capitalizeFirstLetter(item?.title ?? 'N/A')}</b></Title3>}
-                description={<Subtitle2> {item?.subTitle ?? 'N/A'}</Subtitle2>}
-            // action={<LedIcon color={getStatusColor(item.otherAttributes.Status)} />}
-            // action={item.headerAction}
-            />
+  return (
+    <Card
+      style={{ marginBottom: '10px' }}
+      className={className}
+      floatingAction={
+        <div className={style.root}>
+          {item.headerAction}
+          <Checkbox onChange={onSelected1Change} checked={selected1} />
+        </div>
+      }
+      selected={selected1}
+      onSelectionChange={onSelected1Change}
+    >
+      <CardHeader
+        style={{ padding: '0 5px' }}
+        // image={<ShipIcon size={24} fill="currentColor" />}
+        image={item.cardIcon}
+        header={
+          <Title3>
+            <b>{ExtensionMethods.capitalizeFirstLetter(item?.title ?? 'N/A')}</b>
+          </Title3>
+        }
+        description={<Subtitle2> {item?.subTitle ?? 'N/A'}</Subtitle2>}
+        // action={<LedIcon color={getStatusColor(item.otherAttributes.Status)} />}
+        // action={item.headerAction}
+      />
 
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '0 5px' }}>
-                {
-                    item.otherAttributes &&
-                    Object.entries(item.otherAttributes).map(([key, value], index) => {
-                        return (
-                            <BodyComponent propertyName={key} value={value} key={index} />
-                        );
-                    })
-                }
-            </div>
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'flex-start',
+          padding: '0 5px',
+        }}
+      >
+        {item.otherAttributes &&
+          Object.entries(item.otherAttributes).map(([key, value], index) => {
+            return <BodyComponent propertyName={key} value={value} key={index} />;
+          })}
+      </div>
 
-            <CardFooter style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 10px' }}>
-                {item.otherActions.map((action, index) => (
-                    <Button
-                        key={index}
-                        // icon={action.icon ? action.icon.iconName : ''}
-                        onClick={action.onClick}
-                    >
-                        {action.title}
-                    </Button>
-                ))}
-            </CardFooter>
-        </Card>
-    )
-}
+      <CardFooter style={{ display: 'flex', justifyContent: 'flex-end', padding: '0 10px' }}>
+        {item.otherActions.map((action, index) => (
+          <Button
+            key={index}
+            // icon={action.icon ? action.icon.iconName : ''}
+            onClick={action.onClick}
+          >
+            {action.title}
+          </Button>
+        ))}
+      </CardFooter>
+    </Card>
+  );
+};
 
 type PropertyComponentProps = {
-    propertyName: string;
-    value: any;
+  propertyName: string;
+  value: any;
 };
 
 const spanStyle: React.CSSProperties = {
-    display: 'inline-block',
-    width: '130px',
-    fontWeight: 'bold',
-    textAlign: 'left',
-    paddingRight: '10px'
-}
+  display: 'inline-block',
+  width: '130px',
+  fontWeight: 'bold',
+  textAlign: 'left',
+  paddingRight: '10px',
+};
 
 const BodyComponent: React.FC<PropertyComponentProps> = ({ propertyName, value }) => (
-    <Body1><b><span style={spanStyle}>{propertyName}:</span></b> {value}</Body1>
+  <Body1>
+    <b>
+      <span style={spanStyle}>{propertyName}:</span>
+    </b>{' '}
+    {value}
+  </Body1>
 );
 
 // const StringComponent: React.FC<PropertyComponentProps> = ({ propertyName, value }) => (
