@@ -129,7 +129,7 @@ The development container includes Node 20, .NET 8/10, Docker-in-Docker, and a r
 ## Scaffolding Projects (eavfw-init)
 
 **This is the EAVFW development repo.** When using `/eavfw-init` to scaffold a project, always use **dev mode**:
-- Scaffold into `samples/{Namespace}` (not the repo root)
+- Scaffold into `sandbox/{Namespace}` (not the repo root)
 - Use local project references (`UseEAVFromNuget=false`) so changes to `external/eavframework/`, `external/EAVFW.Extensions.*`, and `packages/` are tested directly
 - Follow the full `/eavfw-scaffold-dev` skill for step-by-step instructions
 - Verify with the E2E Playwright test that exercises login and record creation

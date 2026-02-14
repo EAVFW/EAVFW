@@ -6,7 +6,7 @@ user_invocable: true
 
 # EAVFW Developer Scaffold Skill
 
-Scaffolds a fresh EAVFW project inside `samples/` for testing local changes to the framework, templates, Aspire hosting, and extension packages.
+Scaffolds a fresh EAVFW project inside `sandbox/` for testing local changes to the framework, templates, Aspire hosting, and extension packages.
 
 ## When to Use
 
@@ -26,8 +26,8 @@ dotnet new install ./external/eavfw-templates/templates/EAVFW.NextJS/ --force
 ### Step 2: Scaffold
 
 ```bash
-mkdir -p samples/{Namespace}
-cd samples/{Namespace}
+mkdir -p sandbox/{Namespace}
+cd sandbox/{Namespace}
 
 dotnet new eavfw \
   --namespace {Namespace} \
@@ -58,7 +58,7 @@ Key flags:
 ### Step 3: Build (twice)
 
 ```bash
-cd samples/{Namespace}
+cd sandbox/{Namespace}
 dotnet tool restore --no-cache
 dotnet build {Namespace}.sln        # First build generates manifest.g.json, will error
 dotnet build {Namespace}.sln        # Second build succeeds with generated types
@@ -98,7 +98,7 @@ This is needed because NuGet extension packages pull in the NuGet version of EAV
 ### Step 5: Run with Aspire
 
 ```bash
-cd samples/{Namespace}
+cd sandbox/{Namespace}
 aspire run
 ```
 
@@ -123,7 +123,7 @@ The scaffolded project includes Playwright tests:
 
 ```bash
 # Quick smoke test (no Aspire needed)
-cd samples/{Namespace}
+cd sandbox/{Namespace}
 dotnet test tests/{Namespace}.AppHost.Tests --filter PlaywrightSmokeTest
 
 # Full login flow (starts Aspire, logs in, creates a record)

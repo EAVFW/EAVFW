@@ -6,7 +6,7 @@ namespace ScaffoldIntegrationTests;
 public class ScaffoldIntegrationTests
 {
     private static readonly string RepoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
-    private static readonly string SamplesDir = Path.Combine(RepoRoot, "samples");
+    private static readonly string SamplesDir = Path.Combine(RepoRoot, "sandbox");
     private static readonly string ProjectDir = Path.Combine(SamplesDir, "TestCRM");
     private static readonly string TemplatesDir = Path.Combine(RepoRoot, "external", "eavfw-templates", "templates");
 
@@ -74,7 +74,7 @@ public class ScaffoldIntegrationTests
         (exitCode, _, stdErr) = RunCommand("dotnet", $"new install {nextjsTemplate} --force", RepoRoot);
         Assert.AreEqual(0, exitCode, $"Failed to install EAVFW.NextJS template: {stdErr}");
 
-        // Create samples directory and scaffold project
+        // Create sandbox directory and scaffold project
         Directory.CreateDirectory(ProjectDir);
 
         (exitCode, _, stdErr) = RunCommand("dotnet",
@@ -152,6 +152,6 @@ public class ScaffoldIntegrationTests
     public static void ClassCleanup()
     {
         // Keep scaffolded project on failure for inspection
-        // Clean up manually with: rm -rf samples/TestCRM
+        // Clean up manually with: rm -rf sandbox/TestCRM
     }
 }

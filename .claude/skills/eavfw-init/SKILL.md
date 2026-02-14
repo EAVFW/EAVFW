@@ -36,7 +36,7 @@ This skill supports two modes. **Check the project's CLAUDE.md for instructions 
 ### Dev Mode (EAVFW development repo)
 
 When the CLAUDE.md or AGENTS.md instructs you to use dev mode (e.g., because you're inside the EAVFW monorepo), follow the `/eavfw-scaffold-dev` skill. Key differences:
-- Scaffold into `samples/{Namespace}`
+- Scaffold into `sandbox/{Namespace}`
 - Use local project references (`--useLocalReferences`)
 - Configure conditional extension references in csproj files
 
