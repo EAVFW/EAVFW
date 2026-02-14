@@ -10,26 +10,18 @@ import { RibbonViewItemInfo } from "@eavfw/manifest/src/Ribbon/RibbonViewItemInf
 
 let id = 0;
 
-
 export class ModelDrivenApp {
     _id = id++;
     _data!: ModelDrivenAppModel;
     _isInitialized = false;
     //dispatcher!: Dispatch<EAVAppReducerAction>;
 
-   
     // prettier-ignore
     get sitemap() {
         return this._data.sitemap;
     }
 
-    
     public locale: string;
-
-
-       
-
-    
 
     // prettier-ignore
     get canSave() {
@@ -42,7 +34,6 @@ export class ModelDrivenApp {
     //}
 
     constructor(manifest?: ManifestDefinition, locale = "1030") {
-        console.log("EAVAPP - Creating ModelDrivenApp", [id, this._id]);
         this.locale = locale;
         if (manifest) {
             this._data = generateAppContext(manifest,locale);
@@ -140,8 +131,6 @@ export class ModelDrivenApp {
         return attributes[column];
     }
 
-
-
     getApps() {
 
         return Object.entries(this._data.apps);// Object.keys(this._data.apps);
@@ -165,6 +154,7 @@ export class ModelDrivenApp {
     }
 
     getRelated(entityName: string) {
+        entityName = entityName?.toLowerCase().replace(/\s/g, "");
         let relatedEntities = [];
         for (const entity of Object.values(this._data.entities)) {
             for (const attribute of Object.values(entity.attributes)) {
@@ -195,8 +185,6 @@ export class ModelDrivenApp {
     }
     getExpandQueryParam(entityDefinition: EntityDefinition, expandall = false, includeHierachi = false, isReferenceLoopup?: EntityDefinition) {
 
-        console.log("getExpandQueryParam", [entityDefinition, isReferenceLoopup])
-
         let attributes = this.getAttributes(entityDefinition.logicalName);
 
         if (expandall) {
@@ -221,20 +209,15 @@ export class ModelDrivenApp {
     }
 
     getReferences(entityName: string, formName: string, tabName: string, columnName: string, sectionName: string) {
-        console.group("ModelDrivenApp::getReferences");
 
-        //  console.log("arguments:\n", arguments);
         const references: Array<ViewReference> = [];
         try {
             for (const entity of Object.values(this._data.entities)) {
-                console.groupCollapsed("entity.collectionSchemaName:\n", entity.collectionSchemaName);
                 try {
                     for (const attribute of Object.values(entity.attributes).filter(isAttributeLookup)) {
 
-
                         const referenceTypes = attribute.type.referenceTypes ?? [attribute.type.referenceType]
                         const tpt = this._data.entities[entityName].TPT;
-                        //   console.log("attribute.type:\n", [attribute.type, tpt, referenceTypes, entityName,
                         //    referenceTypes.map(referenceType => this._data.entityMap[referenceType]),
                         //    referenceTypes.map(referenceType => this._data.entityMap[referenceType]).some(n => n === entityName || (tpt && this._data.entityMap[tpt] === n))]);
                         if (
@@ -242,8 +225,6 @@ export class ModelDrivenApp {
                             //(this._data.entityMap[attribute.type.referenceType] === entityName || this._data.entities[entityName].TPT === attribute.type.referenceType) &&
                             attribute.type.forms
                         ) {
-                            //   console.log("attribute.type:\n", attribute.type);
-                            //    console.log("attribute.type.forms:\n", attribute.type.forms);
 
                             //let forms = Object.values(attribute.type.forms).filter(form => this.isMatchingForm(form, formName, tabName, columnName, sectionName));
                             for (const formKey of Object.keys(attribute.type.forms)) {
@@ -271,39 +252,31 @@ export class ModelDrivenApp {
                                             key: entity.logicalName + attribute.logicalName
                                         });
                                     } else {
-                                        console.group("Form found but did not match arguments");
                                         const _formKey = (form.name ?? formKey) === formName;
-                                        //console.log(`FormKey: ${_formKey}, ${form.name ?? formKey}, ${formName}`);
-                                        //console.log(`Tab: ${form.tab === tabName}, ${form.tab} ${tabName}`);
-                                        //console.log(`Column: ${form.column === columnName},  ${form.column} ${columnName}`);
-                                        //console.log(`Section: ${form.section === sectionName},  ${form.section} ${sectionName}`);
 
-                                        //  console.log("form:\n", form);
-                                        console.groupEnd();
                                     }
                                 }
                             }
                         }
                     }
                 } finally {
-                    console.groupEnd();
                 }
             }
 
-            console.log("Found References:\n", references);
         } finally {
-            console.groupEnd();
         }
         return references;
     }
     getWizardsTriggeredByNew(appname: string, area: string, entityname: string) {
-        let wizards = Object.entries(this._data.entities[entityname].wizards ?? {})
+        const entity = this.getEntity(entityname);
+        let wizards = Object.entries(entity?.wizards ?? {})
             .filter(([key, wizard]) => Object.values(wizard.triggers ?? {}).some(x => x.ribbon && x.ribbon == "NEW"));
 
         return wizards;
     }
     getWizardsTriggeredByRibbons(appname: string, area: string, entityname: string) {
-        let wizards = Object.entries(this._data.entities[entityname].wizards ?? {})
+        const entity = this.getEntity(entityname);
+        let wizards = Object.entries(entity?.wizards ?? {})
             .filter(([key, wizard]) => Object.values(wizard.triggers ?? {}).some(x => x.ribbon && typeof x.ribbon === "object"))
             .map(([key, wizard]) => [
                 key,
@@ -315,10 +288,6 @@ export class ModelDrivenApp {
     }
     newEntityUrl(appname: string, area: string, entityname: string, formName?: string, query?: any) {
 
-        console.group("ModelDrivenApp::newEntityUrl");
-        console.log("this", this);
-        console.log("arguments", arguments);
-
         if (!entityname)
             throw new Error("entityName not given");
 
@@ -327,7 +296,6 @@ export class ModelDrivenApp {
             .join("&");
         const _formName = formName ?? this.getDefaultFormName(entityname);
 
-        console.groupEnd();
         return `/apps/${appname}/areas/${area}/entities/${entityname}/forms/${_formName}${q ? `?${q}` : ""}`;
     }
 
@@ -337,7 +305,6 @@ export class ModelDrivenApp {
             return `/apps/${props.appName}/areas/${props.areaName}/entities/${props.entityName}/records/${props.recordId}/forms/${formPath}`;
         } catch (err) {
             const [_props, _context] = [JSON.stringify(props), JSON.stringify(props)];
-            console.warn(`Failed to generate url for'${_props}' with context '${_context}'`);
             throw err;
         }
     }
