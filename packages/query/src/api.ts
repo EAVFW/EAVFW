@@ -1,13 +1,11 @@
 import { revalidateTag } from "next/cache";
 import { ODataBuilder } from "./odata/ODataBuilder";
 
-
 export type TokenResponse = {
     access_token: string;
     not_after: number;
 }
 let token: TokenResponse | null = null;
-
 
 async function renewToken() {
     //const spanContext = trace.getActiveSpan()?.spanContext()!;
@@ -34,18 +32,9 @@ async function renewToken() {
 
 export const getTokenAsync = async () => {
 
-
-
     if (token && token.not_after > new Date().getTime())
         return token;
     try {
-
-        console.log("Renew Token: ", [
-            token === null,
-            token?.not_after,
-            new Date().getTime(),
-            token && token.not_after > new Date().getTime(),
-            `${process.env['NEXT_BUILD_API_BASEURL']}/connect/token`]);
 
         token = await renewToken();
         if (token.not_after < new Date().getTime()) {
@@ -54,14 +43,10 @@ export const getTokenAsync = async () => {
         }
 
     } catch (err) {
-        console.error(err);
         throw err;
     }
 
-    //   console.log("Fetched Token:", token);
-
     return token;
-
 
 };
 
@@ -69,8 +54,6 @@ export const queryRecords = async<T>(url: string, query: ODataBuilder<T>, cache:
     const token = await getTokenAsync();
 
     url = `${process.env['NEXT_BUILD_API_BASEURL']}${url}?${query.build()}`
-
-    console.log("Querying", url);
 
     let a = await fetch(url,
         {
@@ -87,7 +70,6 @@ export const queryRecords = async<T>(url: string, query: ODataBuilder<T>, cache:
 
     let b = await a.json();
 
-
     return b?.items as Array<T>;
 }
 
@@ -95,8 +77,6 @@ export const queryRecord = async<T>(url: string, query: ODataBuilder<T>, cache: 
     const token = await getTokenAsync();
 
     url = `${process.env['NEXT_BUILD_API_BASEURL']}${url}?${query.build()}`
-
-    console.log("Querying", url);
 
     let a = await fetch(url,
         {
@@ -121,8 +101,6 @@ export const fetch_eav = async<T>(url: string, query: ODataBuilder<T>, cache: Re
     const token = await getTokenAsync();
 
     url = `${process.env['NEXT_BUILD_API_BASEURL']}${url}?${query.build()}`
-
-    console.log("Querying", url);
 
     let a = await fetch(url,
         {

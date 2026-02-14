@@ -43,7 +43,6 @@ export function FormRender<T>(props: FormRenderProps) {
 
     const _onSave = () => {
 
-        console.log("Closing Modal", record.current);
         var results = preSaveValidators.map((c) => c(record.current, entity))
         if (results.every(r => r.success === true)) {
             onChange(record.current, { autoSave: preSaveValidators.length > 0 });
@@ -74,7 +73,6 @@ export function FormRender<T>(props: FormRenderProps) {
     }, []);
 
     //useEffect(() => {
-    //    console.log("FormRender, Record Updated:", props.record)
     //    //  record.current = props.record;
     //    if (props.record)
     //        setRecord(props.record);
@@ -99,14 +97,12 @@ export function FormRender<T>(props: FormRenderProps) {
     );
 
     const _onChange = useCallback((data: any) => {
-        console.log("FormRender, Data changed Modal", data);
          record.current = data;
        // setRecord(data);
       //  onChange(data);
     }, []);
 
     //useEffect(() => {
-    //    console.log("FormRender outer changed:", props.record);
 
     //}, [props.record]);
 

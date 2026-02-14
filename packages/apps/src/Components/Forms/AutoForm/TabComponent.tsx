@@ -11,8 +11,6 @@ import { Controls, ResolveFeature } from "../../..";
 import { makeStyles, shorthands, Spinner } from "@fluentui/react-components";
 import { useSectionStyles } from "../../../Styles/SectionStyles.styles";
 
-
-
 type TabComponentProps<T extends { id?: string, [key: string]: any }> = {
     form: FormDefinition;
     columns?: FormTabDefinitionWithColumns["columns"];
@@ -32,7 +30,6 @@ const StackTokens = { childrenGap: 25 };
 const TabComponent = <T extends { id?: string, [key: string]: any }>(props: TabComponentProps<T>) => {
     const { form, columns, tabName, entity, formName, formData, onFormDataChange, locale, factory, entityName, formContext, extraErrors } = props;
     try {
-        console.group("Tabcomponent: Tab: " + tabName);
         const styles = useSectionStyles();
         const renderId = useRef(new Date().toISOString());
         renderId.current = new Date().toISOString();
@@ -52,13 +49,11 @@ const TabComponent = <T extends { id?: string, [key: string]: any }>(props: TabC
             if (controlName && controlName in Controls) {
                 const Component = Controls[controlName];
 
-
                 return <Stack verticalFill horizontal tokens={StackTokens}><Component /></Stack>
             }
             throw new Error("Control or Columns must be defined, or control is not registered");
         }
 
-        console.log("Rendering tab", [Controls, columns]);
         const ui = (
             <Stack verticalFill horizontal tokens={{ childrenGap:25 }} styles={{
                 root: {
@@ -89,9 +84,7 @@ const TabComponent = <T extends { id?: string, [key: string]: any }>(props: TabC
         );
         return ui;
     } finally {
-        console.groupEnd();
     }
 };
 
 export default TabComponent;
-

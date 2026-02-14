@@ -10,7 +10,6 @@ import { makeStyles, mergeClasses } from "@fluentui/react-components";
 import { useStackStyles, useVerticalFill } from "../../useStackStyles";
 import { useSectionStyles } from "../../../Styles/SectionStyles.styles";
 
-
 export type ColumnComponentProps<T> = {
     form: FormDefinition;
     sections: AutoFormSectionsDefinition;
@@ -44,7 +43,6 @@ const ColumnComponent = <T extends { id?: string, [key: string]: any }>(props: C
         extraErrors
     } = props;
     try {
-        console.group("ColumnComponent: Column: " + columnName);
         const styles = useSectionStyles();
         const renderId = useRef(new Date().toISOString());
         renderId.current = new Date().toISOString();
@@ -85,19 +83,15 @@ const ColumnComponent = <T extends { id?: string, [key: string]: any }>(props: C
 
         return ui;
     } finally {
-        console.groupEnd();
     }
 };
 
 export default ColumnComponent;
 
-
-
 export const WizardColumn: React.FC<{ column: AutoFormColumnDefinition, columnName: string }> = ({ column, columnName }) => {
 
     const styles = useStackStyles();
    
-
     return (
         <div className={mergeClasses(styles.root, styles.verticalFill)}>
             {Object.keys(column.sections).map((sectionName, idx) => (

@@ -36,8 +36,6 @@ function mergeDeep(target: any, ...sources: any[]): any {
     return mergeDeep(target, ...sources);
 }
 
-
-
 export type ValidationExpression = {
     validationexpression: any;
     isEntity: boolean;//wether multiplefiles or not
@@ -77,12 +75,8 @@ const addValidation = (manifest: ManifestDefinition, expression: ValidationExpre
         };
     }
 
-    console.log("NEWMANIFEST", newmanifest)
     return newmanifest;
 }
-
-
-
 
 //const manifestcontext = React.createContext<any>({ current: {} });
 export type useManifestProps = {
@@ -107,7 +101,6 @@ export const useManifest: (props: useManifestProps) => [ManifestDefinition, (man
             const manifest = JSON.parse(ungzip(new Uint8Array(atob(value).split("").map(function (c) {
                 return c.charCodeAt(0)
             })), { to: "string" }) as string);
-            console.log("Updating Manifest Source", manifest);
             return manifest;
         }
         //TODO - design here to set schema from context
@@ -548,26 +541,16 @@ export const useManifest: (props: useManifestProps) => [ManifestDefinition, (man
         }
     }, [data.manifest, column.logicalName]);
 
-
     //    const _manifestmerger = useRef(_manifest);
     const _manifestmerger = useRef<ManifestDefinition>({} as any);
 
     const setManifest = (manifest: ManifestDefinition, merge = true) => {
 
-
-
         const content = { ...data[column.logicalName.slice(0, -2)] ?? { path: `/${data.id}/manifest.json`, container: "manifests", contenttype: "application/json" } };
-
-        //console.log("Updating manifest", [_manifest, manifest, content.data === btoa(String.fromCharCode.apply(null, Array.from(gzip(JSON.stringify(manifest)))))]);
-        console.log("Updating Manifest Before", [content, _manifestmerger.current]);
 
         _manifestmerger.current = merge ? mergeDeep(_manifestmerger.current, manifest) : manifest;
 
         content.data = btoa(String.fromCharCode.apply(null, Array.from(gzip(JSON.stringify(_manifestmerger.current)))));
-
-        console.log("Updating Manifest After",
-            [data[column.logicalName.slice(0, -2)], content, data[column.logicalName.slice(0, -2)] === content,
-            data[column.logicalName.slice(0, -2)]?.data === content.data, _manifestmerger.current]);
 
         onFormDataChange((props) => { props[isLookup(column.type) ? column.logicalName.slice(0, -2):column.logicalName] = isLookup(column.type) ? content : content.data });
     }
@@ -576,6 +559,5 @@ export const useManifest: (props: useManifestProps) => [ManifestDefinition, (man
         setManifest,
         (validationExpression: ValidationExpression) => setManifest(addValidation(_manifest, validationExpression))
     ]
-
 
 }

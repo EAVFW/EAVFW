@@ -29,7 +29,6 @@ interface IColumnFilterProps {
     currentEntityName: string
 }
 
-
 interface IColumnFilterContext {
     menuTarget?: Target,
     isCalloutVisible: boolean,
@@ -75,7 +74,6 @@ const ColumnFilterContext = React.createContext<
     ] | undefined>(undefined)
 
 const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (state, action) => {
-    console.log("COLUMN ACTION", [action, state])
     switch (action.type) {
         case "openFilter": return {
             ...state,
@@ -93,7 +91,6 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
             const columns = cloneDeep(state.columns)
             const currentColumn = cloneDeep(state.currentColumn)
             if (currentColumn == null) {
-                console.log("Trying to set filter without current column")
                 return state
             }
 
@@ -116,11 +113,8 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
             const columns = cloneDeep(state.columns)
             const currentColumn = cloneDeep(state.currentColumn)
             if (currentColumn == null) {
-                console.log("Trying to set filter without current column")
                 return state
             }
-
-            console.log("Sorting...", [action.order, currentColumn, columns])
 
             columns.forEach((newCol: IColumn) => {
                 const isCurrent = newCol.key === currentColumn.key
@@ -140,10 +134,7 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
         case "initializeColumns": {
             const { view, attributes, locale, dispatch, onHeaderRender, app } = action
             
-
-
             const columnKeys = Object.keys(view?.columns ?? {}).filter(c => c.indexOf('/') || (attributes[c] && !(attributes[c].isPrimaryKey ?? false)));
-
 
             function columnDisplayName(column:string) {
 
@@ -161,7 +152,6 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
                             if (parts.length === 0)
                                 return entity.locale?.[locale ?? "1033"]?.displayName ?? entity.displayName;
 
-
                             navAttributes = entity.attributes;
                             nav = Object.entries(navAttributes).filter(a => a[1].isPrimaryField)[0]?.[0];
                         } else {
@@ -169,7 +159,6 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
                         }
                         
                     }
-                    console.log("View with Parts", [view, column, nav, navAttributes, parts]);
                     return  navAttributes[nav].locale?.[locale ?? "1033"]?.displayName ?? navAttributes[nav].displayName;
                 }
                 if (!(column in attributes))
@@ -178,8 +167,6 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
                 return attributes[column].locale?.[locale ?? "1033"]?.displayName ?? attributes[column].displayName
             }
 
-
-            console.log("VIEWS", [attributes, view, columnKeys])
             const columns: Array<IColumn> = columnKeys
                 /*.filter(field => view?.columns![field]?.visible !== false)*/
                 .filter(field => (!view?.columns![field]?.roles) || filterRoles(view.columns![field]?.roles, state.user))
@@ -205,7 +192,6 @@ const columnFilterReducer: Reducer<IColumnFilterContext, ColumnFilterAction> = (
                     onRenderHeader: onHeaderRender
 
                 }));
-            console.log("Set Columns", [columns]);
             return {
                 ...state,
                 columns: columns
@@ -254,8 +240,6 @@ const ColumnFilterProvider = ({
         user
     })
 
-   
-
     const columnAttributes = React.useMemo(() => {
 
         function mapselect(attr: AttributeDefinition) {
@@ -280,29 +264,19 @@ const ColumnFilterProvider = ({
         return columns.concat(keys);
     }, [view, attributes]);
 
-
     React.useEffect(() => {
         const { columns } = columnFilterState;
         if (columns?.length <= 0)
             return;
 
-        console.log("Recalculating fetch qury:", [filter, columns, attributes]);
-
         function expandPolyLookup(key:string,attr: AttributeDefinition) {
             let type = attr.type;
 
-       
-
             if (isPolyLookup(type)) {
-
-                console.log("Polylookup", [type]);
- 
 
                 let expands = (type.inline ? type.referenceTypes : [type.referenceType]).map(referenceType => Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName))
                     .filter(isAttributeLookup)
                     .map(a => `${getNavigationProperty(a)}($select=${Object.values(app.getAttributes(app.getEntityFromKey(a.type.referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName})`));
-                console.log("Polylookup", expands);
-
 
                 return `$expand=${expands.join(',')};`
             } else if (isAttributeLookup(attr)) {
@@ -322,7 +296,6 @@ const ColumnFilterProvider = ({
                     return `$expand=${a.join(',')};`
                 }
 
-
             }
 
             //return [];
@@ -330,7 +303,6 @@ const ColumnFilterProvider = ({
         }
 
         function selectPolyLookup(key: string, attr: AttributeDefinition) {
-            console.log("selectPolyLookup", [key, attr]);
             let type = attr.type;
             if (isPolyLookup(type)) {
 
@@ -361,12 +333,10 @@ const ColumnFilterProvider = ({
             return Object.values(app.getAttributes(app.getEntityFromKey(referenceType).logicalName)).filter(c => c.isPrimaryField)[0].logicalName;
         }
 
-
         function createExpandForLookups([key,a]:[string, LookupAttributeDefinition]) {
 
             if (a.type.split)
                 return a.type.referenceTypes?.map(referenceType => `${currentEntityName}${app.getEntityFromKey(referenceType).logicalName}references`);
-
 
             if (a.type.inline)
                 return `${a.type.referenceTypes?.map(referenceType => `${app.getEntityFromKey(referenceType).logicalName}($select=${getPrimaryField(referenceType)})`).join(',')}`;
@@ -402,7 +372,6 @@ const ColumnFilterProvider = ({
         } else if (filter) {
             localFilter = filter;
         }
-        console.log("Recalculating fetch qury:", [localColumnFilter,localFilters,filter,localFilter]);
 
         if (localFilter?.startsWith("$filter="))
             localFilter = localFilter?.substr('$filter='.length);
@@ -425,13 +394,10 @@ const ColumnFilterProvider = ({
             query['$orderby'] = orderBy.fieldName + ' ' + (orderBy.isSortedDescending ? 'desc' : 'asc');
         }
 
-        console.log('Recalculating fetch qury:', [filter, localColumnFilter, query, onBuildFetchQuery(query)])
-
         setFetchQuery(onBuildFetchQuery(query));
     }, [attributes, columnFilterState.columns, filter, currentPage, pageSize, columnAttributes])
 
     useEffect(() => {
-        console.log("Calling reducer from memo");
         columnFilterDispatch({
             type: 'initializeColumns',
             view: view ?? { columns: { ...Object.fromEntries(Object.keys(attributes).map(column => [column, {}])) } },

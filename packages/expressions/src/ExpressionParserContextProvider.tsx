@@ -2,10 +2,8 @@ import { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } 
 import { ExpressionParserContext } from "./ExpressionParserContext";
 import { EnabledBlazorContextType, useBlazor, useDebouncer } from "@eavfw/hooks";
 
-
 //const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
 const setVariablesFunction = process.env['NEXT_PUBLIC_BLAZOR_SET_VARIABLES'];
-
 
 declare global {
     interface Window { expressionUpdated: any; expressionError: any; multipleExpressionsUpdated: any;}
@@ -17,7 +15,6 @@ const expressionResults = {
 if (typeof global.window !== "undefined") {
 
     window['multipleExpressionsUpdated'] = function ( valuesToUpdate: {id: any, result: any | undefined, error: any | undefined}[] ) {        
-        console.log('multipleExpressionsUpdated', arguments);
         if(valuesToUpdate != undefined && valuesToUpdate.length != 0){
             setTimeout(() => {
                 valuesToUpdate.forEach(elem => {
@@ -27,23 +24,19 @@ if (typeof global.window !== "undefined") {
         }
     }
 
-
     window['expressionUpdated'] = function (id: any, result: any) {
-        console.log('expressionUpdated', arguments);
         setTimeout(() => {
             expressionResults[id](result);
         });
     }
 
     window['expressionError'] = function (id: any, error: any) {
-        console.log('expressionError', arguments);
 
         setTimeout(() => {
             expressionResults[id](undefined, error);
         });
     }
 }
-
 
 export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
@@ -66,7 +59,6 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
             ..._variables.current,
             ...obj
         };
-        console.log("Setting Variables: ", _variables.current);
         setIsVariablesUpToDate(false);
         setVariables(_variables.current);
     }, []);
@@ -107,8 +99,6 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
         //});    
     }, []);
 
-
-
     const allEvaluated = useMemo(() => Object.values(_results.current).filter((x: any) => x.isLoading === true).length === 0, [_resultetag]);
 
     const _removeExpresssion = useCallback((id: any) => {
@@ -118,7 +108,6 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
     }, []);
 
     useEffect(() => {
-        console.log("ExpressionParser FormValues Updated: ", formValues);
     }, [formValues]);
 
     const _ti = useRef(new Date().getTime());
@@ -127,18 +116,14 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
         if (blazor.isEnabled && setVariablesFunction && blazor.isInitialized && !isVariablesUpToDate) {
 
             const localtime = _ti.current = new Date().getTime();
-            console.log(`ExpressionParser Variables Updating (${setVariablesFunction}): `, _variables.current);
             DotNet.invokeMethodAsync(blazor.namespace, setVariablesFunction, _variables.current)
                 .then(() => {
                     if (localtime === _ti.current) {
-                        console.log("ExpressionParser Variables Updated: ", _variables.current);
                         setIsVariablesUpToDate(true);
                         setisParserContextVariablesInitialized(true);
                     }
                 }).catch((err) => {
-                    console.error("ExpressionParser Variables Update error: ", [err, _variables.current]);
                 }).finally(() => {
-                    console.log("ExpressionParser Variables Updated in " + (new Date().getTime() - localtime), _variables.current);
 
                     //   alert("variables set in " + (new Date().getTime() - time));
                 });
@@ -152,26 +137,20 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
         if (blazor.isEnabled && setVariablesFunction && blazor.isInitialized) {
 
             const localtime = _tii.current = new Date().getTime();
-            console.log("ExpressionParser Expressions Updating: ", _expresssions.current);
             DotNet.invokeMethodAsync(blazor.namespace, "SetExpresssions", _expresssions.current)
                 .then(() => {
                     if (localtime === _tii.current) {
-                        console.log("ExpressionParser Expressions Updated: ", _expresssions.current);
                         setisParserContextExpressionsInitialized(true);
                     }
                 }).catch((err) => {
-                    console.error("ExpressionParser Expressions Update error: ", [err, _expresssions.current]);
                 }).finally(() => {
-                    console.log("ExpressionParser Expressions Updated in " + (new Date().getTime() - localtime), _expresssions.current);
                     //   alert("variables set in " + (new Date().getTime() - time));
-
 
                 });
         }
     }, 250, [expressions, blazor.isInitialized]) as any;
 
     useEffect(() => { _dd(); }, [expressions, blazor.isInitialized]);
-
 
     return <ExpressionParserContext.Provider value={{
         isInitialized: isParserContextExpressionsInitialized && isParserContextVariablesInitialized,

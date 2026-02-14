@@ -1,7 +1,6 @@
 export class ExtensionMethods {
     static capitalizeFirstLetter(input: any): string {
         if (typeof input !== 'string') {
-            console.error('Input must be a string.');
             return "";
         }
 

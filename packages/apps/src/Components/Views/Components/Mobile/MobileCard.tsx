@@ -47,7 +47,6 @@ export const MobileCard: React.FC<MobileCardProps> = (
         handleItemClicked
     }: MobileCardProps
 ) => {
-    console.log("item: ", item);
     const style = useFloatingItemsStyle();
     const { selection } = useSelectionContext();
     const [selected1, setSelected1] = React.useState(false);
@@ -84,7 +83,6 @@ export const MobileCard: React.FC<MobileCardProps> = (
                 {
                     item.otherAttributes &&
                     Object.entries(item.otherAttributes).map(([key, value], index) => {
-                        console.log("####MobileCard: Rendering BodyComponent for: ", key, value);
                         return (
                             <BodyComponent propertyName={key} value={value} key={index} />
                         );
@@ -149,8 +147,6 @@ const BodyComponent: React.FC<PropertyComponentProps> = ({ propertyName, value }
 //             return <div>Unsupported type: {type}</div>;
 //     }
 // };
-
-
 
 // const LedIcon: React.FC<{ color: string }> = ({ color }) => (
 //     <svg height="24" width="24" style={{ marginBottom: '5px' }}>

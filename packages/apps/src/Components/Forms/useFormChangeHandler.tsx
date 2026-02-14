@@ -76,7 +76,6 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                 }
             }
         }
-        console.log("DEFAULT DATA", data);
         return data ;
 
     }, [initialdata,attributes]);
@@ -98,7 +97,6 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
 
             return expand;
         }
-
 
         function expandLookup(a: AttributeDefinition) {
             
@@ -140,38 +138,25 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
     const changedRecord = useRef(record);
 
     const onChangeCallback = useCallback((formData: any, ctx?: any) => {
-      //  console.group("CreateNewRecordPage");
-        console.log("onChangeCallback",formData);
         try {
             changedRecord.current = formData;
 
             const [changed, changedValues] = cleanDiff(deepDiffMapper.map(recordId ? record : {}, changedRecord.current))
             
-            console.log("onChangeCallback UpdatedValues", [JSON.stringify( changedRecord.current),JSON.stringify( record),
-                deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
-                changed, changedValues]);
-
             setTimeout(() => {
-                console.log("onChangeCallback UpdatedValues", [changedRecord.current, record,
-                deepDiffMapper.map(changedRecord.current, record), deepDiffMapper.map(record, changedRecord.current),
-                    changed, changedValues]);
 
-                console.log("onChangeCallback", [changed, changedValues, changedRecord.current]);
                 updateRibbonState({ canSave: changed });
                 if (ctx?.onCommit) {
-                    console.log("RUNNING COMMIT HANDLE");
                     ctx.onCommit();
                 }
             });
         } finally {
-          //  console.groupEnd();
         }
     }, [record?.rowversion ?? record]);
 
     useEffect(() => {
         const entitySaveMessageKey = 'entitySaved';
         const onSaveCallBack = async () => {
-            console.log("onChangeCallback", [changedRecord.current]);
             showIndeterminateProgressIndicator();
             updateRibbonState({canSave: false, skipRedirect: false});
 
@@ -184,9 +169,7 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
             hideProgressBar();
 
             if (rsp.ok) {
-                console.log("Saved", [skipRedirect, recordId]);
                 let data = await rsp.json();
-                console.log(data);
                 if (!skipRedirect && !recordId) {
                     router.pathname = app.recordUrl({
                         recordId: data.id,
@@ -209,7 +192,6 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
                     removeMessage: removeMessage
                 }, app));
 
-
                 return 1;
             }
 
@@ -228,20 +210,17 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         };
 
         const onSaveAndCloseCallback = async () => {
-            console.log("closing");
 
             updateRibbonState({skipRedirect: true});
 
             if (await onSaveCallBack())
                 router.back();
 
-            console.log("closed");
         }
 
         events.on("onSave", onSaveCallBack);
         events.on("onSaveAndClose", onSaveAndCloseCallback);
         return () => {
-            console.log("disposing onSave")
             hideProgressBar();
             events.off("onSave", onSaveCallBack);
             events.off("onSaveAndClose", onSaveAndCloseCallback);
@@ -256,7 +235,6 @@ export function useFormChangeHandler(entity: EntityDefinition, recordId?: string
         };
     }, [recordId])
 
-    console.log("RecordData", [recordId, record, isLoading, typeof (record) === "undefined"]);
     return {
         onChangeCallback,
         record,

@@ -12,9 +12,6 @@ import { EAVFWLabel } from "./EAVFWLabel";
 import { Field, mergeClasses } from "@fluentui/react-components";
 import { useSectionStyles } from "../../../../Styles";
 
-
-
-
 export const FieldTemplate = ({
     id,
     children,
@@ -28,15 +25,12 @@ export const FieldTemplate = ({
     required, label, schema, disabled,
     formContext, uiSchema, ... rest
 }: FieldTemplateProps) => {
-    console.log("Field Template:", [id, uiSchema, getUiOptions(uiSchema), displayLabel, rawErrors, rawHelp, rawDescription, classNames, hidden, description, rest]);
 
     const styles = useSectionStyles();
     const parentwarnings = useWarnings();
     const warnings = useMemo(() => {
 
-
         const resultWarnings = schema.type === "object" ? parentwarnings.map(p => ({ warning: p.warning, logicalName: id + "_" + p.logicalName })) : parentwarnings.filter(w => id == w.logicalName);
-        console.log("Filtering Warnings:", [id, schema.type, schema, parentwarnings, resultWarnings]);
         return resultWarnings;
     }, [parentwarnings]);
 
@@ -65,7 +59,5 @@ export const FieldTemplate = ({
         </WarningContextProvider>
     );
 };
-
-
 
 export default FieldTemplate;

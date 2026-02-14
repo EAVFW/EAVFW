@@ -7,7 +7,6 @@ import { IWizardState } from "./IWizardState";
 import { WizardContext } from "./WizardContext";
 import { WorkflowState } from "@eavfw/utils";
 
-
 export const useWizardOpener = () => {
     const [_, dispatch] = useContext(WizardContext)!;
     return {
@@ -28,19 +27,16 @@ export const useWizard = () => {
                 const wizard = state.wizard;
                 const tabName = state.tabName!;
                 const spanContext = trace.getActiveSpan()?.spanContext()!;
-               // console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
 
                 //setTimeout(async () => {
                 //    {
                 //        await new Promise<void>((resolve, reject) => { resolve() });
                 //        const spanContext = trace.getActiveSpan()?.spanContext()!;
-                //        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext?.traceId}-${spanContext?.spanId}-0${spanContext?.traceFlags}`]);
                 //    }
                 //}, 5000);
                 //new Promise((resolve) => setTimeout(resolve, 1000)).then(() => {
                 //    {
                 //        const spanContext = trace.getActiveSpan()?.spanContext()!;
-                //        console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
                 //    }
                 //});
 
@@ -49,7 +45,6 @@ export const useWizard = () => {
 
                     //{
                     //    const spanContext = trace.getActiveSpan()?.spanContext()!;
-                    //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
                     //}
 
                     dispatch({ action: "setTransition", transition: true });
@@ -64,7 +59,6 @@ export const useWizard = () => {
                     });
                     //{
                     //    const spanContext = trace.getActiveSpan()?.spanContext()!;
-                    //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
                     //}
 
                     let id = await rsp.json().then(x => x.id);
@@ -84,17 +78,14 @@ export const useWizard = () => {
 
                         //{
                         //    const spanContext = trace.getActiveSpan()?.spanContext()!;
-                        //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
                         //}
 
                         await new Promise((resolve) => setTimeout(resolve, 1000));
-
 
                     }
 
                     //{
                     //    const spanContext = trace.getActiveSpan()?.spanContext()!;
-                    //    console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext.traceId}-${spanContext.spanId}-0${spanContext.traceFlags}`]);
                     //}
 
                     let stateRsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/workflows/${transition.workflow}/runs/${id}`, {
@@ -105,7 +96,6 @@ export const useWizard = () => {
                     });
 
                     let result = await stateRsp.json() as WorkflowState;
-                    console.log("jobstate", result);
 
                     if (result.status.toLowerCase() === "failed") {
 
@@ -122,8 +112,6 @@ export const useWizard = () => {
 
                         return;
                     }
-
-
 
                     for (let action of Object.values(result.actions)) {
                         if (action.type === "UpdateWizardContext") {
@@ -164,7 +152,6 @@ export const useWizard = () => {
             });
         });
     };
-
 
     let actions = {       
         startTransitioning: () => dispatch({ action: "setTransition", transition: true }),

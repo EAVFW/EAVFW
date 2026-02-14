@@ -112,7 +112,6 @@ export class ItemToCardResolver {
             // const colorDerivedByStatus = statusViewConfigObject.options.
             // const colorOption = Object.entries(statusViewConfigObject!.options!)
             //     .find(([, value]) => value === statusValue);
-            console.log("statusViewConfigObject", statusViewConfigObject!.options, statusViewConfigObject!.options[statusText].color);
             const colorOption = statusViewConfigObject!.options[statusText].color;
             const statusColor = colorOption ? colorOption : 'grey';
             const headerActionElement = React.createElement(StatusColorComponent, { color: statusColor });
@@ -143,7 +142,6 @@ export class ItemToCardResolver {
                 if (mobileView) {
                     const componentKey = mobileView['cardIcon'];
                     if (componentKey && componentKey in Views) {
-                        // console.log("ItemToCardResolver.getElementByKey(): ", Views[componentKey]());
                         return Views[componentKey]();
                     }
                 }
@@ -152,7 +150,6 @@ export class ItemToCardResolver {
 
         return React.createElement(React.Fragment, null);
     }
-
 
     // public static resolveOtherActions(items: IRecord[], app: ModelDrivenApp) {
     //     const entityName = items.find(item => item.entityName != null)?.entityName;
@@ -163,10 +160,8 @@ export class ItemToCardResolver {
 
     //             if (mobileView) {
     //                 if (mobileView["ribbon"]) {
-    //                     console.log("mobileView[\"ribbon\"]", mobileView["ribbon"]);
     //                     const elements = Object.entries(mobileView["ribbon"]).map(o => o[0]);
     //                     for (const element in elements) {
-    //                         console.log("element: ", element);
     //                     }
     //                 }
     //             }
@@ -186,7 +181,6 @@ export class ItemToCardResolver {
                 if (mobileView && mobileView["ribbon"]) {
                     const ribbonEntries = Object.entries(mobileView["ribbon"]);
                     for (const [key, ribbonElement] of ribbonEntries) {
-                        // console.log("found ribbon with key: ", key, "and value: ", ribbonElement);
 
                         const buttonObject = buttons.find(b => b.key == key);
                         if (buttonObject) {
@@ -196,7 +190,6 @@ export class ItemToCardResolver {
                                 icon: buttonObject.iconProps,
                                 visibleOnCard: ribbonElement.visibleOnCard
                             }
-                            // console.log("buttonObject: ", buttonObject, "otherActionObject: ", otherActionObject);
                             otherActions.push(otherActionObject)
                         }
                         ribbons.push(ribbonElement);
@@ -222,4 +215,3 @@ function filterOtherActions(oa: OtherAction, item: IRecord): unknown {
     }
     return oa.visibleOnCard;
 }
-

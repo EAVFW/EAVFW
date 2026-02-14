@@ -17,9 +17,6 @@ export interface EAVAppManifestProps extends EAVAppProps {
 }
 export type Test = EAVAppModelProps | EAVAppManifestProps;
 
-
-
-
 export type EAVAppReducerAction =
     {
         action: 'setLocale',
@@ -28,10 +25,6 @@ export type EAVAppReducerAction =
     {
         action: 'toggleNav'
     };
-
-
-
-
 
 const EAVAppReducer = (state: AppContextType, action: EAVAppReducerAction) => {
     switch (action.action) {
@@ -44,15 +37,11 @@ const EAVAppReducer = (state: AppContextType, action: EAVAppReducerAction) => {
                 isModelDrivenNavigationOpen: !state.isModelDrivenNavigationOpen
             }
 
-             
-
     }
 
     return { ...state };
 
 }
-
-
 
 export const EAVApp: React.FC<PropsWithChildren<Test>> = ({ children, baseUrl, ...props }) => {
 
@@ -67,14 +56,6 @@ export const EAVApp: React.FC<PropsWithChildren<Test>> = ({ children, baseUrl, .
         }
     ));
     
-
-     
-
-    console.log("EAVAPP", [
-        state, dispatcher,
-        state.isModelDrivenNavigationOpen,
-        state.model._id]);
-  
     return (<EAVClientProvider baseUrl={baseUrl}>
 
         <AppContext.Provider value={[state, { toggleNav: () => dispatcher({ action: 'toggleNav' }) }]}>
@@ -83,4 +64,3 @@ export const EAVApp: React.FC<PropsWithChildren<Test>> = ({ children, baseUrl, .
     </EAVClientProvider>
     )
 }
-

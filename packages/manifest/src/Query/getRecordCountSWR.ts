@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import useSWR, { mutate } from "swr";
 import { useJsonFetcher } from "./jsonFetcher";
 
-
 export function getRecordCount(entityName: string, query: any = {}, automaticallyrefreshtime=0) {
 
     const [baseUrl, jsonFetcher] = useJsonFetcher();
@@ -27,7 +26,6 @@ export function getRecordCount(entityName: string, query: any = {}, automaticall
             fetcher: jsonFetcher
         }
     )
-    console.log(data, error);
     return {
         count: data?.count || 0,
         isLoading: !error && !data,

@@ -28,17 +28,12 @@ export type EAVFormProps<T extends {}, TState extends EAVFormContextState<T>> = 
     stripForValidation?: (data: T) => T
 }
 
-
 //const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
 //const validationFunction = process.env['NEXT_PUBLIC_BLAZOR_EVAL_VALIDATION'];
-
-
-
 
 declare global {
     interface Window { formValuesUpdate: any; }
 }
-
 
 const callbacks: { [key: string]: Function } = {
 
@@ -46,7 +41,6 @@ const callbacks: { [key: string]: Function } = {
 
 if (typeof global.window !== "undefined") {
     window['formValuesUpdate'] = function (id: string, etag: string, validations: any, log?: string) {
-        console.log('Run Validation Result Raw', arguments);
 
         if (id in callbacks) {
             callbacks[id](etag, validations, log);
@@ -54,7 +48,6 @@ if (typeof global.window !== "undefined") {
     }
 
 }
-
 
 function uuidv4() {
     //@ts-ignore
@@ -66,25 +59,19 @@ function isDefined(v: any) {
     return !(v === null || typeof v === "undefined");
 }
 function mergeAndUpdate<T extends object>(data: any, updatedFields: T): T {
-    console.log("mergeAndUpdate input", JSON.stringify(data), JSON.stringify(updatedFields));
 
     if (updatedFields) {
 
         for (let [k, v] of Object.entries(updatedFields)) {
 
-            console.log("mergeAndUpdate", [k, JSON.stringify(data[k]), JSON.stringify(v)]);
-
             if (k.endsWith("@deleted") && data[k] && isDefined(v)) {
-                console.log("", [data[k], v])
                 data[k] = v.filter((c: string) => c).concat((data[k] ?? []).filter((vvv: string) => v.filter((vv: string) => vv === vvv).length == 0));
-                console.log("deleting", [data[k], data[k.slice(0, -8)]]);
                 data[k.slice(0, -8)] = data[k.slice(0, -8)].filter((n: any) => n && data[k].filter((nn: any) => nn === n.id).length === 0);
             } else if (Array.isArray(v)) {
                 let a = data[k] ?? [];
 
                 //v.forEach((value) => {
                 //    let found = a.filter((n: any) => ((value.id && n.id === value.id) || (value["__id"] && n["__id"] === value["__id"])))[0];
-                //    console.log("mergeAndUpdate array", [k, JSON.stringify(found), JSON.stringify( value)]);
                 //    if (found) {
                 //        mergeAndUpdate(found, value)
                 //    } else {
@@ -106,13 +93,11 @@ function mergeAndUpdate<T extends object>(data: any, updatedFields: T): T {
 
                 data[k] = a;
 
-
             } else if (typeof v === "object" && v !== null) {
 
                 data[k] = mergeAndUpdate(data[k] ?? {}, v);
 
             } else if ((isDefined(data[k]) || isDefined(v)) && !isEqual(data[k], v)) { //Dont consider null and undefined a difference
-                console.log("merge", [data, data[k], k, v]);
                 if (Array.isArray(data)) {
                     (data as any[]).splice(parseInt(k), 1);
                 } else {
@@ -123,12 +108,10 @@ function mergeAndUpdate<T extends object>(data: any, updatedFields: T): T {
                         data[k] = v;
                 }
 
-
             }
         }
     }
 
-    console.log("mergeAndUpdate output", data);
     return data;
 }
 
@@ -146,18 +129,12 @@ const VisitedContext = createContext<VisitedContextType>({
 
 export const useVisitedContext = () => useContext(VisitedContext);
 
-
-
 export const VisitedContainer: React.FC<PropsWithChildren<{ id: string, initialdata?: VisitedFieldElement }>> = ({ id, children, initialdata = {} }) => {
 
     const { setVisitedFields: setParentVisitedFields, visitedFields: rootVisitedFields } = useVisitedContext();
     const refVisitedFields = useRef<VisitedFieldElement>(initialdata);
     const [visitedFields, setVisitedFields] = useState<VisitedFieldElement>(refVisitedFields.current);
     const updateVisitedFields = useCallback((visitedField: string, value: VisitedFieldElementValue = true) => {
-        console.log("Setting visible field " + visitedField, [JSON.stringify(value),
-        JSON.stringify(refVisitedFields.current[visitedField]), JSON.stringify(refVisitedFields.current),
-        typeof value === "boolean" ? value : mergeDeep(refVisitedFields.current[visitedField] ?? {}, value)
-        ]);
         if (typeof value === "boolean")
             refVisitedFields.current[visitedField] = value;
         else {
@@ -167,14 +144,9 @@ export const VisitedContainer: React.FC<PropsWithChildren<{ id: string, initiald
         setParentVisitedFields(id, refVisitedFields.current);
     }, [id]);
 
-
-
-
-
     const allvisitedFields = useMemo(() => Object.assign({}, rootVisitedFields[id] ?? {}, visitedFields), [rootVisitedFields[id], visitedFields]);
 
     useEffect(() => {
-        console.log("visitedFields updated: " + id, [allvisitedFields]);
     }, [allvisitedFields]);
 
     return (<VisitedContext.Provider value={{
@@ -270,14 +242,12 @@ export const EAVFormValidation: React.FC<PropsWithChildren<{ initialVisitedField
         };
     }, 100);
 
-
     /**
      * Set up initial validation rules and recreate when current entity/app/area has changed
      */
     if (blazor.isEnabled && blazor.addValidationRulesFunction) {
 
         useEffect(() => {
-            console.log("Extracted Validation rules", [validationRules.map(c => c.field), validationRules, localFromValues])
             setTimeout(() => {
                 if (blazor.addValidationRulesFunction) {
                     DotNet.invokeMethodAsync(blazor.namespace, blazor.addValidationRulesFunction, validationRules)
@@ -294,8 +264,6 @@ export const EAVFormValidation: React.FC<PropsWithChildren<{ initialVisitedField
      */
     useEffect(() => {
         let startTime = new Date().getTime();
-        console.log("Data changed, validating rules:");
-        console.log("localFromValues", localFromValues);
 
         const start = currentTime.current = new Date().getTime();
 
@@ -309,7 +277,6 @@ export const EAVFormValidation: React.FC<PropsWithChildren<{ initialVisitedField
                                 return;
                             }
 
-                            console.log(`Data changed, validating rules ran in ${new Date().getTime() - startTime}:`, res);
                             const validationResponses = res as validationResponse[];
 
                             for (let validationResponse of validationResponses) {
@@ -318,16 +285,12 @@ export const EAVFormValidation: React.FC<PropsWithChildren<{ initialVisitedField
                                 }
 
                                 if (validationResponse.type === "error") {
-                                    console.error("Validation error: ", [validationResponse.field, validationResponse.validationKey, validationResponse.message])
                                 } else if (validationResponse.type === "warning") {
-                                    console.warn("Validation warning: ", [validationResponse.field, validationResponse.validationKey, validationResponse.message])
                                 }
                             }
 
                             const warnings = validationResponses.filter(x => x.type === "warning").map(w => ({ logicalName: attributes[w.field].logicalName, warning: w.message! }));
-                            console.log("setting warnings: ", warnings);
                             setWarnings(warnings);
-
 
                         })
                         .catch(err => console.error("Error occured in validation:", [err]));
@@ -395,14 +358,12 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
     const formId = useUuid();
 
-    console.log("EAVForm: ID", [formId, (defaultData as any)?.name, (state?.formValues as any)?.name, initialErrors, state?.formValues, defaultData]);
     const blazor = useBlazor();
 
     const global_etag = useRef<string>(new Date().toISOString());
     const [etag, setEtag] = useState(new Date().toISOString());
 
     useEffect(() => {
-        console.log("eavform change", defaultData);
         /*
          * If <EAVForm defaultData={defaultData} , onChange={setDefaultData} /> iused to control state outside eavform for data object,
          * then the internal etag should only change when its a new object. 
@@ -430,7 +391,6 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                         true, //runExpressions
                         true) //includeLogs
                         .finally(() => {
-                            console.log("UpdateFormData in " + (new Date().getTime() - t) + " milisecond");
                         })
                 }
             });
@@ -444,21 +404,15 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
             const local = global_etag.current = new Date().toISOString();
             const formValuesForValidation = stripForValidation(state.formValues);
             const id = uuidv4();
-            console.log("Run Validation", [id, local, global_etag.current, state, formValuesForValidation]);
 
             setTimeout(() => {
                 if (blazor.validateFormFunction) {
                     DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition }>(blazor.namespace, blazor.validateFormFunction, formDefinition, formValuesForValidation, true)
                         .then(({ errors: results }) => {
-                            console.log("Run Validation RESULT", [new Date().getTime() - new Date(local).getTime() + "ms", id, results, local, global_etag.current, JSON.stringify(formValuesForValidation)]);
-
-
 
                             if (local === global_etag.current) {
                                 // mergeDeep(data, updatedFields);
-                                console.log("Update State", JSON.stringify(formValuesForValidation));
                                 //  mergeAndUpdate(state.formValues, updatedFields);
-                                console.log("Update State Complete", JSON.stringify(formValuesForValidation))
 
                                 // Gives the caller the ability to manipulate the result before it is propegated down to sub components
                                 if(manipulateResult)
@@ -467,16 +421,12 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                                 state.errors = results;
                                 state.isErrorsUpdated = true;
 
-
                                 if (onValidationResult)
                                     onValidationResult({ errors: results, actions: actions.current, state: state });
                             }
 
-
                         }).catch(err => {
-                            console.error(err);
                         }).finally(() => {
-                            console.log("Validation Complated in " + (new Date().getTime() - new Date(local).getTime()), [id]);
                             // alert("Validation Complated in " + (new Date().getTime() - new Date(local).getTime()));
                             if (local === global_etag.current) {
 
@@ -488,14 +438,9 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                                 if (complete)
                                     complete();
 
-                                console.log("Completed update", [id, global_etag.current, JSON.stringify(state.formValues)]);
-
                             } else {
-                                console.log("Running validation again", [id, global_etag.current, JSON.stringify(state.formValues)]);
                                 // runValidation(complete); //Run again, state was changed;
                             }
-
-
 
                         });
                 }
@@ -517,12 +462,10 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
             useEffect(() => {
 
                 let id = uuidv4();
-                console.log("Registered Collector:", [id]);
 
                 collectors.current[id] = {
                     oldValue: collected[0],
                     trigger: (localstate: TState, etag: string) => {
-
 
                         let newValue = collector(localstate);
                         if (!isEqual(collectors.current[id].oldValue, newValue)) {
@@ -533,37 +476,29 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                 };
 
                 return () => {
-                    console.log("unregistered collector:", [id]);
 
                     delete collectors.current[id];
                 }
             }, []);
             return collected;
 
-
         },
         runValidation: runValidation,
         updateState: (cb: (props: any, ctx:any) => void): {changedProp: boolean, changedValues: any } | undefined => {
-            console.groupCollapsed("EAVFW : UpdateState");
             try {
                 console.time("Callings Calback");
                 const updatedProps = cloneDeep(state);
                 const ctx = { replaceState: false };
                 cb(updatedProps, ctx);
                 console.timeEnd("Callings Calback");
-                console.log("Updated State Props", updatedProps);
 
                 console.time("Computing Diff");
                 const a = deepDiffMapper.map(state, updatedProps);
-                console.log("Updated State Diffs: ", a);
                 console.timeEnd("Computing Diff");
 
                 console.time("Running Diff");
                 const [changedProp, changedValues] = cleanDiff(a);
-                console.log("Updated State: ", [changedProp, changedValues]);
                 console.timeEnd("Running Diff");
-
-
 
                 if (changedProp) {
                     if (ctx.replaceState) {
@@ -574,7 +509,6 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                         mergeAndUpdate(state, changedValues);
                     }
 
-                    console.log("Merged State: ", [state]);
                     let newetag = new Date().toISOString();
                     for (let collector of Object.values(collectors.current)) {
                         collector.trigger(state, newetag);
@@ -583,11 +517,9 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                 }
 
                 //Returns values
-                console.groupEnd();
                 return { changedProp, changedValues }
 
             } finally {
-                console.groupEnd();
             }
         },
         addVisited: (id: string) => {
@@ -600,7 +532,6 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
         },
         onChange: (cb) => {
 
-            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Start`, [new Error()]);
             const updatedProps = cloneDeep(state.formValues);
             const ctx: EAVFormOnChangeCallbackContext = { skipValidation: false };
 
@@ -608,47 +539,33 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
             const changed = !isEqual(state.formValues, updatedProps);
 
-            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Changed`, [changed,
-                JSON.stringify(state.formValues),
-                JSON.stringify(updatedProps)]);
-
             const a = deepDiffMapper.map(state.formValues, updatedProps);
             const [_, changedValues] = cleanDiff(a);
-
-            console.log(`[${new Date().toISOString()}]RUN ACTION OnChange Updated Props`, [updatedProps, changedValues, state, changed, ctx, a]);
 
             if (changed) {
 
                 const local = global_etag.current = new Date().toISOString();
                 state.formValues = updatedProps;
 
-                console.log("Updated Props", [changed, changedValues, JSON.stringify(state.formValues, null, 4), state]);
-
                 let cloneerrors = cloneDeep(state.errors);
                 clearErrorsFromDiff(state.errors, a);
-
-                console.log(`Run Validation: Cleared Errors from changed Values[\n${JSON.stringify(cloneerrors)},\n${JSON.stringify(changedValues)},\n${JSON.stringify(state.errors)}]`);
-
 
                 if (blazor.isEnabled) {
                     let t = new Date().getTime();
                     state.isErrorsUpdated = false;
                     setTimeout(() => {
                         if (blazor.updateFormDataFunction && local === global_etag.current) {
-                            console.log(`[${new Date().toISOString()}]RUN ACTION Invoking ${blazor.updateFormDataFunction}`, [local, global_etag.current, changed]);
                             DotNet.invokeMethodAsync<{ errors: EAVFWErrorDefinition, updatedFields: any }>(
                                 blazor.namespace, blazor.updateFormDataFunction,
                                 formId,
                                 local,
                                 stripForValidation(state.formValues), true, true, true)
                                 .finally(() => {
-                                    console.log("UpdateFormData in " + (new Date().getTime() - t) + " milisecond");
 
                                 })
                         }
                     });
                 }
-
 
                 for (let collector of Object.values(collectors.current)) {
                     collector.trigger(state, local);
@@ -658,14 +575,7 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                 if (onChange)
                     onChange(state.formValues, ctx);
 
-                console.log("Updated Props Changed", [changed, state.formValues]);
-                console.log("Completed update", [global_etag.current, JSON.stringify(state.formValues)]);
-
-
-
             }
-
-
 
             return state;
 
@@ -692,13 +602,6 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
                 // mergeAndUpdate(state.formValues, calculated);
                 var test = mergeErrors(state.errors as EAVFWErrorDefinitionMap, errors as EAVFWErrorDefinitionMap);
 
-
-                console.log("Run Validation Result", [(new Date().getTime() - new Date(etag).getTime()) + "ms"]);
-                console.log("Run Validation Result: \n" + log);
-                console.log("Run Validation Result: \n" + JSON.stringify([clone, errors, state.errors]));
-
-
-
                 state.isErrorsUpdated = true;
                 if (onValidationResult)
                     onValidationResult({ errors: errors, actions: actions.current, state: state });
@@ -714,16 +617,12 @@ export const EAVForm = <T extends {}, TState extends EAVFormContextState<T>>({
 
     //useEffect(() => {
     //    const equal = isEqual(state.formValues, defaultData);
-    //    console.log("EAVForm Default Data Reset", [JSON.stringify(state.formValues), JSON.stringify( defaultData), equal]);
     //    if (defaultData && !equal) {
     //        state.formValues = cloneDeep(defaultData) ?? {};
     //        setEtag(global_etag.current = new Date().toISOString());
     //    }
 
-
     //}, [defaultData]);
-
-
 
     return (
         <EAVFormContext.Provider

@@ -7,10 +7,6 @@ export const RibbonHost: React.FC<PropsWithChildren<{ ribbon: { [key: string]: P
 
     const { registerButton } = useRibbon();
 
-
-    console.groupCollapsed("Ribbonhost: " + Object.keys(ribbon).join());
-    console.log(ribbon);
-
     try {
         let elements = [] as ReactNode[];
         let contexts = [] as Array<React.FC<PropsWithChildren>>;
@@ -21,7 +17,6 @@ export const RibbonHost: React.FC<PropsWithChildren<{ ribbon: { [key: string]: P
             if (ribbonKey in RibbonButtons) {
 
                 let element = RibbonButtons[ribbonKey]?.(props);
-                console.log("Setting up ribbon v2 for " + ribbonKey, [element, Array.isArray(element)]);
                 if (element) {
                     if (Array.isArray(element)) {
                         let RibbonElement = element[0];
@@ -40,7 +35,6 @@ export const RibbonHost: React.FC<PropsWithChildren<{ ribbon: { [key: string]: P
                 },[props]);
             }
         }
-        console.log("Render Ribbon V2:", [contexts, elements, children]);
 
         if (contexts.length) {
             let q = contexts.slice();
@@ -62,9 +56,7 @@ export const RibbonHost: React.FC<PropsWithChildren<{ ribbon: { [key: string]: P
             {children}
         </>
 
-
     } finally {
-        console.groupEnd();
     }
 
 };

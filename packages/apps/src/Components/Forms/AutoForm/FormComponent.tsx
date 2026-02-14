@@ -1,7 +1,6 @@
 import React, { createContext, useEffect, useRef, useState } from "react";
 import { IPivotProps, Pivot, PivotItem } from "@fluentui/react";
 
-
 import TabComponent from "./TabComponent";
 import { useRouter } from "next/router";
 import { useChangeDetector } from "@eavfw/hooks";
@@ -31,8 +30,6 @@ const pivotItemStyle = {
     overflow: 'auto',
 }
 
-
-
 const FormComponent = <T extends { id?: string, [key: string]: any }>(props: FormComponentProps<T>) => {
     const {
         form,
@@ -46,7 +43,6 @@ const FormComponent = <T extends { id?: string, [key: string]: any }>(props: For
         extraErrors
     } = props;
     try {
-        console.group("FormComponent: " + formName);
 
         const renderId = useRef(new Date().toISOString());
         renderId.current = new Date().toISOString();
@@ -76,7 +72,6 @@ const FormComponent = <T extends { id?: string, [key: string]: any }>(props: For
             }
         },[]);
 
-
         if (form?.type === "QuickCreate") {
             const [tabName, tab] = Object.entries(form.layout.tabs)[0];
 
@@ -95,7 +90,6 @@ const FormComponent = <T extends { id?: string, [key: string]: any }>(props: For
                 extraErrors={extraErrors}
             />
         }
-
 
         const { onTabChange, tabName = tabs[0] } = useTabProvider();
 
@@ -149,10 +143,8 @@ const FormComponent = <T extends { id?: string, [key: string]: any }>(props: For
                 })}
             </Pivot>
         );
-        console.groupEnd();
         return ui;
     } finally {
-        console.groupEnd();
     }
 };
 

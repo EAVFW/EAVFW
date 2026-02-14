@@ -5,8 +5,6 @@ import { WizardColumn } from "../Forms/AutoForm/ColumnComponent";
 import { useStackStyles } from "../useStackStyles";
 import { useWizard } from "./useWizard";
 
-
-
 const useOverlay = makeStyles({
     container: { position: "relative" },
     root: {
@@ -29,26 +27,22 @@ const useOverlay = makeStyles({
     }
 });
 
-
 export const WizardTab: React.FC<{ tabName:string, className?: string, columns?: FormTabDefinitionWithColumns["columns"], controlName?: string }> = ({ tabName, columns, controlName, className }) => {
 
     const [{ isTransitioning }] = useWizard();
     const styles = useOverlay();
     const stack = useStackStyles();
     
-
     if (!columns || Object.keys(columns).length === 0) {
 
         if (controlName && controlName in Controls) {
             const Component = Controls[controlName];
-
 
             return <div className={mergeClasses(stack.verticalFill, stack.horizontal)} /* tokens={StackTokens}*/ ><Component /></div>
         }
         throw new Error("Control or Columns must be defined, or control is not registered");
     }
 
-    console.log("Rendering tab", [Controls, columns]);
     const ui = (
         <div className={mergeClasses(className, styles.grid, styles.container, stack.verticalFill, stack.horizontal)} /* tokens={{ childrenGap: 25 }}*/ style={{ gridTemplateColumns: `${Object.keys(columns).map(c => '1fr').join(' ')}` }}>
             {isTransitioning && <div className={styles.root} style={{margin:'0px'}}>

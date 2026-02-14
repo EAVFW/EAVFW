@@ -7,7 +7,6 @@ import { useCallback } from "react";
 import { DragEvent } from "react";
 import styles from "./KanbanBoard.module.scss";
 
-
 const useStyles = makeStyles({
     kanbancontainer: {
         display: 'flex',
@@ -61,7 +60,6 @@ const useStyles = makeStyles({
     }
 });
 
-
 const Title = ({
     children
 }: React.PropsWithChildren<{}>) => {
@@ -98,9 +96,6 @@ const Task: React.FC<TaskProps> = ({ cardProps, title, description }) => {
     </Card>;
 };
 
-
-
-
 type KanbanBoardColumnProps = {
     stateid: any;
     onDrop: any;
@@ -128,7 +123,6 @@ const KanbanBoardColumn: React.FC<KanbanBoardColumnProps> = ({ stateid, title, o
 }
 export const KanbanBoard: React.FC = () => {
 
-
     const app = useModelDrivenApp();
     const { currentRecordId } = useAppInfo();
     const [baseUrl, jsonFetcher] = useJsonFetcher();
@@ -137,8 +131,6 @@ export const KanbanBoard: React.FC = () => {
         { "$filter": `boardid eq ${currentRecordId}`, "$select": "id,task", "$expand": "task($select=name,id,description,stateid)" });
     const boardColumns = queryEntitySWR(app.getEntityFromKey("Board Column"),
         { "$filter": `boardid eq ${currentRecordId}`, "$select": "taskstate,id", "$expand": "taskstate($select=name,id)" });
-
-    console.log("KanbanBoard", [boardTasks, boardColumns]);
 
     const drag = useCallback((ev: DragEvent<HTMLDivElement>) => {
         //@ts-ignore
@@ -160,10 +152,8 @@ export const KanbanBoard: React.FC = () => {
                 stateid: stateid,
             })
         }).then(() => {
-            console.log("dropped ", [taskid, ev.currentTarget, stateid]);
         });
 
-        console.log("dropping ", [taskid, ev.currentTarget, stateid]);
     }, []);
 
     const createTask = useCallback(() => {
@@ -227,7 +217,6 @@ export const KanbanBoard: React.FC = () => {
                         drag={drag}
                         onCreateTask={createTask} />) ?? null}
 
-               
                 <div className={styles["create-new-task-block"]} id="create-new-task-block">
                     <strong>New Task</strong>
                     <span className={styles["form-row"]}>

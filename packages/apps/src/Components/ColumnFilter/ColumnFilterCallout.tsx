@@ -57,7 +57,6 @@ function composeOdataFilterExpression(filterValue: string | number | boolean | u
     }
 }
 
-
 /**[
  * Composes the OData filter part for the given column, filterText and filterOption.
  * @param filterValue The input for the filter operation
@@ -77,7 +76,6 @@ function composeOdataFilterPart(filterValue: string | undefined, filterOption: C
         case "choice": return composeOdataFilterExpression(filterValue === undefined ? undefined : +filterValue, filterOption, column.fieldName)
         case "polylookup": {
             const lookup = columnType as LookupType;
-            console.log("composeOdataFilterPart", [columnType, lookup.foreignKey]);
 
             if (lookup.foreignKey == null) return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
 
@@ -88,7 +86,6 @@ function composeOdataFilterPart(filterValue: string | undefined, filterOption: C
         case "lookup": {
 
             const lookup = columnType as LookupType;
-            console.log("composeOdataFilterPart", [columnType, lookup.foreignKey]);
             if (lookup.foreignKey == null) return composeOdataFilterExpression(filterValue, filterOption, column.fieldName)
 
             const columnKey = `${lookup.foreignKey.name}/${lookup.foreignKey.principalNameColumn}`;
@@ -162,8 +159,6 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             ? (currentColumn?.data?.type as NestedType).type
             : "string"
 
-    console.log("currentColumnType", currentColumnType);
-
     const _currentColumnOptions: () => ColumnOptions[] = () => {
         switch (currentColumnType) {
             case "integer":
@@ -200,7 +195,6 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
     useEffect(() => {
         const newFilterOptions = _currentFilterOptions()
         setFilterOptions(newFilterOptions)
-        console.log("COLUMN TYPE CHANGED", [newFilterOptions])
     }, [currentColumnType])
 
     useEffect(() => {
@@ -208,8 +202,6 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
     }, [filterOptions])
 
     const currentFilterOption = filterOptions.filter(x => x.key === filterOption)[0]
-    console.log("CUrrent FIlter", currentFilterOption)
-
 
     const applyColumnFilter = () => {
         const isFilterValueValid =
@@ -217,10 +209,8 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
             (filterValue !== undefined && currentFilterOption.inputType === ColumnFilterInputType.Single)
 
         if (isFilterValueValid && currentColumn !== undefined) {
-            console.log("Current column", currentColumn)
             const odataFilterText = composeOdataFilterPart(filterValue, filterOption, currentColumn);
             const data: IColumnData = { filterText: filterValue, odataFilter: odataFilterText, filterOption: filterOption }
-            console.log("Applying Filter Values", data);
             columnFilterDispatch({
                 type: 'setCurrentColumnFilter',
                 filter: data
@@ -310,7 +300,6 @@ export const ColumnFilterCallout: React.FC<ColumnFilterProps> = () => {
     // Load saved filter data
     useEffect(() => {
         if (isCalloutVisible) {
-            console.log("toggleColumn", ["triggered", currentColumn?.data['columnFilter'] as IColumnData])
 
             let data = currentColumn?.data['columnFilter'] as IColumnData;
             setFilterText(data?.filterText)

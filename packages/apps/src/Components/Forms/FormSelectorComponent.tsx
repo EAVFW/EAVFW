@@ -27,8 +27,6 @@ export type FormSelectorProps = {
 };
 
 export  const FormSelectorComponent: React.VFC<FormSelectorProps> = (props) => {
-    console.group("FormSelectorComponent");
-    console.log("props:\n", props);
     const {
         onChangeView,
         selectedForm,
@@ -40,7 +38,6 @@ export  const FormSelectorComponent: React.VFC<FormSelectorProps> = (props) => {
     const forms: IDropdownOption[] = Object.keys(
         entity.forms ?? {}
     ).map((v) => ({ key: v, text: v, data: v }));
-    console.log("forms:\n", forms);
 
     const _styles: IStyleFunction<IDropdownStyleProps, IDropdownStyles> = (
         props
@@ -58,7 +55,6 @@ export  const FormSelectorComponent: React.VFC<FormSelectorProps> = (props) => {
         ...styles,
     });
 
-    console.groupEnd();
     return (
         <Dropdown
             ariaLabel={ariaLabel}

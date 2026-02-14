@@ -6,12 +6,9 @@ export function cleanDiff(updatedValues: object, isArray: boolean = false): [boo
     console.time("cleandiff" + id);
     try {
        
-        console.groupCollapsed("cleanDiff");
         let a = isArray?[]: { } as any;
         let changed = false;
-      //  console.log("cleanDiff: Start: ", updatedValues);
         for (let [key, value] of Object.entries(updatedValues)) {
-          //  console.log("cleanDiff: entry: ", [changed, "__type" in value, key, value]);
             if ("__type" in value) {
                 if (value.__type === "updated" || value.__type === "created") {
                     a[key] = value.data;
@@ -35,13 +32,10 @@ export function cleanDiff(updatedValues: object, isArray: boolean = false): [boo
 
             }
         }
-        //console.log("CleanDiff: End: ", [updatedValues, a, changed ? a : undefined]);
         return [changed, changed ? a : undefined]
     } finally {
-        console.groupEnd();
        
         console.timeEnd("cleandiff" + id);
     }
     
-  
 }

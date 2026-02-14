@@ -14,14 +14,10 @@ export function getJsonSchema(
     formContext: any,
 ): ControlJsonSchema {
     try {
-        console.group("getJsonSchema");
-        console.log(arguments);
 
-       
         const { locale, descriptions } = formContext;
         const descriptionInfo = descriptions?.filter((d: any) => d.name === attribute?.logicalName && d.locale == locale)?.[0];
         const description = descriptionInfo?.description ?? attribute?.locale?.[locale]?.description ?? attribute?.description;
-
 
         if (field.schema) {
             return {
@@ -41,7 +37,6 @@ export function getJsonSchema(
             }
         }
 
-
         const attributeType = attribute.type;
         const type =
             typeof attributeType === "string"
@@ -53,10 +48,8 @@ export function getJsonSchema(
                 ? attribute.type
                 : ({} as NestedType);
 
-
         const controlType = field.control ??
             ((typeProps as any)['format'] === "html" ? "RichTextEditorControl" : field.control);
-
 
         const defaultProps: ControlJsonSchema = {
             title: field.displayName ??
@@ -79,8 +72,6 @@ export function getJsonSchema(
             }
         };
 
-
-
         if (formContext.isCreate) {
             defaultProps["default"] = attribute.default ?? field.default;
         }
@@ -88,7 +79,6 @@ export function getJsonSchema(
         if (field.minLength) {
             defaultProps.minLength = field.minLength;
         }
-
 
         if (defaultProps["x-control"]) {
             defaultProps["x-field"] = "ControlHostWidget";
@@ -98,7 +88,6 @@ export function getJsonSchema(
             }
         }
 
-        console.log(defaultProps);
         switch (type) {
             case "decimal":
                 //Fixes https://github.com/rjsf-team/react-jsonschema-form/pull/2497
@@ -132,8 +121,6 @@ export function getJsonSchema(
                     format: "date-time",
                 };
             case "multilinetext":
-
-
 
                 return {
                     ...defaultProps,
@@ -189,6 +176,5 @@ export function getJsonSchema(
         }
      
     } finally {
-        console.groupEnd();
     }
 }

@@ -10,7 +10,6 @@ export const useChangeDetector = (name: string, data: any, renderId?: React.Muta
             ref.current = false;
             return
         }
-        console.debug(`${renderId?.current}: ${name} changed:`, data)
     }, [data])
 
     // #!endif

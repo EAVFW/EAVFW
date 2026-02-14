@@ -3,7 +3,6 @@ import { TextField } from "@fluentui/react";
 import { WidgetProps } from "@rjsf/utils";
 import { usePick } from "./usePick";
 
-
 // Keys of ITextFieldProps from @fluentui/react
 const allowedProps = [
     "multiline",
@@ -75,8 +74,6 @@ const TextWidget = ({
 
     const uiProps = usePick(options ?? {}, allowedProps);
     const inputType = schema.type === 'string' ? 'text' : `${schema.type}`
-
-    console.log("TextWidget", [id, placeholder, autofocus, required, disabled, readonly, inputType, value, rawErrors, options,uiProps]);
 
     return (
         <TextField

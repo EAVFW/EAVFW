@@ -4,18 +4,12 @@ import { ValidationError } from "./ValidationError";
 import { stringFormat } from "@eavfw/utils";
 import { isLookup } from "@eavfw/manifest";
 
-
-
 export async function handleValidationErrors(rsp: Response, app: ModelDrivenApp) {
-    console.log("An error occured");
     let errors = [];
     let extraErrors = {} as FormValidation;
    
-
     if (rsp.status === 409 || rsp.status === 401) {
         let responseJson = (await rsp.json()).errors as ValidationError[];
-        console.log(responseJson);
-
 
         for (let x of responseJson) {
             let localizedError = x.Error;
@@ -40,7 +34,6 @@ export async function handleValidationErrors(rsp: Response, app: ModelDrivenApp)
                 errors.push(localizedError);
             }
         }
-
 
     }
 

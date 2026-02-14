@@ -6,21 +6,16 @@ import { ResolveFeature } from "../FeatureFlags";
 import { PageLayoutProps } from "./PageLayoutProps";
 import { PageStackStyles } from "./PageStackStyles";
 
- 
-
 export function PageLayout(props: PageLayoutProps) {
-    console.log(props);
 
     const topBarTheme = ResolveFeature("topBarTheme");
 
-   
     if (!props.sitemap)
         return <div>loading</div>
 
     return (
         <Stack verticalFill>
             <TopBar theme={topBarTheme} title={props.title} search={true} />
-
 
             <Stack.Item grow style={{ overflow: "hidden" }}>
                 <Stack styles={PageStackStyles} horizontal verticalFill>

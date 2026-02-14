@@ -9,11 +9,6 @@ import ChoicesControl from "./ChoicesControl/ChoicesControl";
 import LookupControl from "./LookupControl/LookupControl";
 import { EAVFWLabel } from "../Forms/AutoForm/Templates/EAVFWLabel";
 
- 
- 
-
-
-
 export type ControlHostWidgetProps = {
     schema: {
         "x-widget-props"?: {
@@ -53,20 +48,14 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
     
     const { styles, onRenderLabel, entityName, fieldName, attributeName, formName  } = options!;
     
-
     const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];
     const label = props.schema.title!;
 
-
     const _onChange = (data: any, es?: ErrorSchema) => {
         try {
-            console.group("ControlHostWidget")
-
-            console.log(data);
 
             props.onChange(data);
         } finally {
-            console.groupEnd();
         }
     }
 
@@ -108,7 +97,6 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
             </>
         );
     if (control === "PercentageControl") {
-        console.log("percent", props.formData);
         return <>
 
             <LabelTemplate />
@@ -124,7 +112,6 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
             onChange={_onChange} {...widgetProps} {...props.uiSchema}
             extraErrors={localExtraErrors} errorMessage={errorMessage} />
     </>
-
 
 }
 

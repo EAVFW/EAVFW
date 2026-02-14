@@ -1,11 +1,9 @@
 import React, { PropsWithChildren, useContext, useMemo, useState } from "react";
 import { useEffect } from "react";
 
-
 declare global {
     interface Window { Blazor: any; }
 }
-
 
 const namespace = process.env['NEXT_PUBLIC_BLAZOR_NAMESPACE'];
 const addValidationRulesFunction = process.env['NEXT_PUBLIC_BLAZOR_ADD_VALIDATION_RULES'];
@@ -30,7 +28,6 @@ export type EnabledBlazorContextType = {
     updateFormDataFunction?: string;
 }
 
-
 const blazorContext = React.createContext<DisabledBlazorContextType | EnabledBlazorContextType>({ isInitialized: false, isEnabled: false } as DisabledBlazorContextType);
 export const useBlazor = () => useContext(blazorContext);
 export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
@@ -41,21 +38,16 @@ export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     if (typeof namespace !== "undefined" && typeof window !== "undefined" && window.Blazor) {
         useEffect(() => {
-            console.log(window.Blazor);
             let loadedCount = 0;
             const resourcesToLoad = [];
 
-
             window.Blazor.start({
                 loadBootResource: function (type: string, name: string, defaultUri: string, integrity: string) {
-
 
                     switch (type) {
                         case 'dotnetjs':
                             return defaultUri;
                         default:
-
-                            console.log(`Blazor Initialization: Loading '${type}', '${name}', '${defaultUri}', '${integrity}'`);
 
                             let fetchResources = fetch(defaultUri, {
                                 cache: 'no-cache',
@@ -75,7 +67,6 @@ export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
                                 const elapsed = new Date().getTime() - startTime;
                                 const expectedTotal = elapsed / (percentLoaded) * 100;
                                 const remaining = expectedTotal - elapsed;
-                                console.log(`Blazor Initialization: Loading Done '${type}', '${name}', '${defaultUri}', '${integrity}' : ${percentLoaded}% done - ${remaining}ms remaining`)
 
                             });;
 
@@ -92,15 +83,12 @@ export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
                 }
             }).then(() => {
-                console.log("Blazor Has Started");
 
                 DotNet.invokeMethodAsync(namespace, "GetSystemInfo")
                     .then((info: any) => {
-                        console.log("Blazor Initialization: ", info);
                         setInitTime(info.init_time);
                         setInitialized(true);
                     });
-
 
             });
 
@@ -119,7 +107,6 @@ export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
         }} >{children}</blazorContext.Provider>
 
     }
-
 
     return <blazorContext.Provider value={{ startTime, isEnabled: false, isInitialized: false, namespace: undefined }} >{children}</blazorContext.Provider>
 

@@ -116,7 +116,6 @@ export type ModelDrivenGridViewerState = {
 };
 
 export const DefaultDataQuery = (entity: EntityDefinition, newRecord?: boolean, fetchQuery?: IFetchQuery) => {
-    console.log("DefaultDataQuery", [!newRecord && typeof fetchQuery !== "undefined", !newRecord, typeof fetchQuery !== "undefined", fetchQuery])
     return queryEntitySWR(
         entity,
         setCount(fetchQuery, false),
@@ -315,7 +314,6 @@ const LookupControlRender: React.FC<LookupControlRenderProps> = ({
 
     const recordRef = useRef<any>(item[attribute.logicalName.slice(0, -2)]);
     const _onDataChange = useCallback((data: any) => {
-        console.log("LookupControlRender-OnDataChange", data);
         recordRef.current = data;
     }, []);
 
@@ -335,7 +333,6 @@ const LookupControlRender: React.FC<LookupControlRenderProps> = ({
     );
 
     const _onModalDismiss = useCallback(async (data: any) => {
-        console.log(data);
         setFalse();
         if (data === "save") {
             showIndeterminateProgressIndicator();
@@ -511,10 +508,8 @@ function convertDateTimeFormat(inputDateTime: string): string {
     }
 }
 
-
 const RenderChoiceColumn: React.FC<{ value: any, type: ChoiceType, locale:string }> = ({ value,type,locale }) => {
     
-
     if (value || value === 0) {
         const [key, optionValue] = Object.entries<any>(type.options ?? {})
             .filter(([key, option]) =>
@@ -544,10 +539,8 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
     if (!column)
         throw new Error("Column not defined");
 
-
     const attribute = column.data as AttributeDefinition;
     
-
     const { onRenderPrimaryField: RenderPrimaryField } =
         useModelDrivenGridViewerContext();
 
@@ -570,7 +563,6 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
        
         if (column.key.indexOf('/') !== -1) {
 
-
             const app = useModelDrivenApp();
             const [subitem, value, lookup] = traverseRecordPath(app, column, item);
 
@@ -578,7 +570,6 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
                 return <RenderChoiceColumn value={value} type={lookup.type} locale={locale} />
             }
 
-           // console.log("Lookup With Traverse", [column.key, item, subitem, lookup]);
             return <Link legacyBehavior={true} href={recordRouteGenerator({ id: subitem.id, entityName: subitem?.["$type"] ?? lookup.type.foreignKey?.principalTable! })} >
 
                 <a>{value}</a>
@@ -627,14 +618,12 @@ const ConditionRenderComponent: React.FC<{ [key: string]: any, column?: IColumn,
 
             </Link>
         }
-        console.log("ConditionRenderComponent:", [attribute.logicalName, item, type.foreignKey?.principalNameColumn?.toLowerCase()]);
         return <Link legacyBehavior={true} href={recordRouteGenerator({ id: item[attribute.logicalName], entityName: item[attribute.logicalName.slice(0, -2)]?.["$type"] ?? type.foreignKey?.principalTable! })} >
 
             <a>{item[attribute.logicalName.slice(0, -2)]?.[type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
 
         </Link>
 
-       
     } else if (column.data.control && column.data.control in Controls) {
         const CustomControl = Controls[column.data.control] as React.FC<{
             value: any;
@@ -712,7 +701,6 @@ export function ModelDrivenGridViewer({
 }: ModelDrivenGridViewerProps) {
     const app = useModelDrivenApp();
     const appinfo = useAppInfo();
-    console.log("GridView: " + locale);
 
     const [items, setItems] = useState<IRecord[]>(
         newRecord ? formData[entity.collectionSchemaName.toLowerCase()] ?? [] : []
@@ -736,7 +724,6 @@ export function ModelDrivenGridViewer({
         () => entity.views?.[selectedView],
         [selectedView]
     );
-    console.log("View", [entity, viewDefinition]);
     const { hideProgressBar, showIndeterminateProgressIndicator } =
         useProgressBarContext();
 
@@ -763,7 +750,6 @@ export function ModelDrivenGridViewer({
     const { buttons, addButton, removeButton, events } = useRibbon();
 
     useEffect(() => {
-        console.log("stateCommands changed", stateCommands);
         for (let cmd of stateCommands) {
             addButton(cmd);
         }
@@ -796,7 +782,6 @@ export function ModelDrivenGridViewer({
             `Please wrap ModelDrivenEntityViewer with the PagingProvider or set allowNoPaging=true: pagingContextEnabled=${pagingContextEnabled}, allowNoPaging=${allowNoPaging}, pagingDisabled=${pagingDisabled}`
         );
 
-    console.log("Render FetchQuery", [viewDefinition, fetchQuery]);
     if (fetchQuery) {
         fetchQuery["$count"] = false;
     }
@@ -820,26 +805,17 @@ export function ModelDrivenGridViewer({
 
     //Show loading bar based on loading from data.
     useEffect(() => {
-        console.log("isLoading", isLoading);
-        console.log("isError", isError);
         if (isLoading && !newRecord) showIndeterminateProgressIndicator();
         else {
             hideProgressBar();
         }
         return () => {
-            console.log("hide");
             hideProgressBar();
         };
     }, [isLoading, isError]);
 
     //Set items whenever its done loading and augment with entityName.
     useEffect(() => {
-        console.log("setItems from data", [
-            data,
-            isLoading,
-            defaultValues,
-            fetchQuery,
-        ]);
 
         if (data)
             setItems(
@@ -892,12 +868,9 @@ export function ModelDrivenGridViewer({
         [theme.palette.neutralLighterAlt]
     );
 
-    console.log("WithTimeButton Theme", theme.palette.themePrimary);
-
     const _onItemInvoked = (item: IRecord): void => {
         window.location.href = recordRouteGenerator(item);
     };
-    console.log([showViewSelector, hasMoreViews]);
 
     return (
         <Stack verticalFill>
@@ -999,18 +972,14 @@ export type ModelDrivenGridViewerContextProps = {
 
 export const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem: any) => {
 
-
-
     let parts = column.key.split('/');
     let navattributes = app.getEntity(subitem['$type']).attributes;
     let value = null as any;
-    console.log("DefaultPrimaryFieldRender", [column.key, parts, navattributes])
     while (parts.length) {
 
         let nav = parts.shift()!;
         let attribute = navattributes[nav];
         if (isAttributeLookup(attribute)) {
-
 
             subitem = subitem[attribute.logicalName.slice(0, -2)];
 
@@ -1018,9 +987,7 @@ export const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem
                 return [subitem, subitem[attribute.type.foreignKey?.principalNameColumn?.toLowerCase()!], attribute];
 
             navattributes = app.getEntityFromKey(attribute.type.referenceType).attributes;
-            console.log("DefaultPrimaryFieldRender", [nav, parts.length, navattributes, attribute, subitem])
         } else {
-            console.log("DefaultPrimaryFieldRender", [parts, navattributes])
             value = subitem[attribute.logicalName];
             return [subitem, value, attribute];
         }
@@ -1029,13 +996,10 @@ export const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem
 }
 const DefaultPrimaryFieldRender: React.FC<DefaultPrimaryFieldRenderProps> = ({ recordRouteGenerator, item, column }) => {
 
-
     if (column.key.indexOf('/') !== -1) {
-
 
         const app = useModelDrivenApp();
         const [subitem, value] = traverseRecordPath(app, column, item);
-
 
         return <Link legacyBehavior={true} href={recordRouteGenerator(subitem)}><a>{value}</a></Link>;
     }
@@ -1043,7 +1007,6 @@ const DefaultPrimaryFieldRender: React.FC<DefaultPrimaryFieldRenderProps> = ({ r
     return <Link legacyBehavior={true} href={recordRouteGenerator(item)}><a>{value}</a></Link>;
 }
 const ModelDrivenGridViewerContext = createContext<ModelDrivenGridViewerContextProps>({ onRenderPrimaryField: DefaultPrimaryFieldRender });
-
 
 export function useModelDrivenGridViewerContext<T>() {
     return useContext<ModelDrivenGridViewerContextProps>(

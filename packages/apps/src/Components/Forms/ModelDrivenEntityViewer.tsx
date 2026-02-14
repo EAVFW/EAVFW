@@ -22,8 +22,6 @@ import { Tab, TabList } from "@fluentui/react-components";
 import { useTabProvider } from "./Tabs";
 import { FormHeader } from "./FormHeader";
 
-
-
 export const FormHostContext = createContext({ formDefinition: {} as FormDefinition });
 export const useFormHost = () => useContext(FormHostContext);
 
@@ -46,7 +44,6 @@ const groupBy = function <T extends { [key: string]: any }>(xs: Array<T>, key: (
 
 function getForm(app: ModelDrivenApp, entityName: string, formName: string) {
 
-    console.log("Resolving Form for :", [entityName, formName]);
     const entity = app.getEntity(entityName);
     const form: FormDefinition = entity?.forms?.[formName] ??
     {
@@ -88,11 +85,8 @@ function getForm(app: ModelDrivenApp, entityName: string, formName: string) {
     };
 
     if (form === undefined) {
-        console.error("No form available on entity:", entity);
         throw new Error("No form available");
     }
-
-    console.log("Resolving Form for :", [entityName, formName, Object.keys(form.columns).join(", ")]);
 
     return form;
 }
@@ -118,8 +112,6 @@ export function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurre
 
     const [oldKey, setOldKey] = useState(`${formName}${entityName}`);
 
-
-
     //useEffect(() => {
     //    setOldKey(`${formName}${entityName}`);
     //}, [formName, entityName]);
@@ -131,26 +123,20 @@ export function useEvaluateFormDefinition(form: FormDefinition, formDataRefcurre
     //    }
     //}, [formName, entityName, oldKey]);
 
-
     //useEffect(() => {
     //    setisLoadingForm(true);
     //}, [formName, entityName]);
 
     useEffect(() => {
-        console.log("useEvaluateFormDefinition: ", [entityName, formName, evaluatedForm, isEvaluatedFormLoading]);
         if (!isEvaluatedFormLoading && evaluatedFormDelayed !== evaluatedForm) {
-            console.log("useEvaluateFormDefinition: setting new form definition", [evaluatedForm, isEvaluatedFormLoading]);
             setevaluatedForm(evaluatedFormDelayed);
             setisLoadingForm(false);
         }
     }, [evaluatedForm, evaluatedFormDelayed, isEvaluatedFormLoading]);
 
-
-
     //useEffect(() => {
     //    setisLoadingForm(false);
     //}, [evaluatedForm]);
-
 
     //let current= useMemo(() => {
 
@@ -182,12 +168,8 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
 }) => {
 
     const compID = useUuid();
-    console.log("ModelDrivenForm: ID", [compID]);
     const app = useModelDrivenApp();
     const { currentRecordId } = useAppInfo();
-
-
-
 
     const [{ record }, { onChange }] = useEAVForm((state) => ({ record: state.formValues }), "ModelDrivenForm FormValues");
     useEffect(() => { console.log("ModelDrivenForm FormValues changed", record) }, [record]);
@@ -197,34 +179,15 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
 
     const _onFormDataChange = useCallback((newformdata: any) => { onChange(form => { Object.assign(form, newformdata); }) }, [onChange]);
     const getTabName = useCallback((tab: FormTabDefinition) => {
-        console.log(tab);
         return tab.locale?.[locale]?.title ?? tab.title;
     }, [locale]);
 
-
-
     const tabs = useMemo(() => Object.keys(evaluatedForm?.layout.tabs ?? {}).filter(tab => !(typeof currentRecordId === "undefined" && evaluatedForm?.layout?.tabs?.[tab].visibleOnCreate === false)), [evaluatedForm, currentRecordId]);
-
-
-
-
 
     const { data: { items: descriptions } = { items: [] }, isLoading } =
         process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] ?
             queryEntitySWR(app.getEntity(process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY'] as string), { '$filter': `entity eq '${entityName}' ` })
             : (console.log("NO NEXT_PUBLIC_DESCRIPTION_ENTITY: " + process.env['NEXT_PUBLIC_DESCRIPTION_ENTITY']) as any || { data: { items: [] as IRecord[] }, isLoading: false })
-
-
-    console.log(descriptions);
-
-
-
-
-
-
-
-
-
 
     if (!evaluatedForm || isLoading) {
 
@@ -248,11 +211,8 @@ export const ModelDrivenForm: React.FC<ModelDrivenFormProps> = ({
         //   return <div>loading form...</div>
     }
 
-
-
     if (isLoadingForm)
         return <div>loading..</div>
-
 
     return <Stack verticalFill className="model-drive-form">
 
@@ -281,7 +241,6 @@ const useObservable = (value: any, ...deps: any[]) => {
     const oldvalues = useRef(deps);
     //const [state,setState] = useState(value);
     useEffect(() => {
-        console.log("useObservalbe:", [value, ...deps, oldvalues.current.some((c, i) => c !== deps[i])]);
         if (oldvalues.current.some((c, i) => c !== deps[i]) && oldvalue.current !== value) {
             oldvalues.current = deps;
             oldvalue.current = value;
@@ -295,7 +254,6 @@ const useObservable = (value: any, ...deps: any[]) => {
 export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (props) => {
 
     const compID = useUuid();
-    console.log("ModelDrivenEntityViewer: ID", [compID]);
 
     const app = useModelDrivenApp();
     const info = useAppInfo();
@@ -303,10 +261,6 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
     const { record: record2, onChangeCallback, extraErrors: extraErrors2 } = useFormChangeHandlerProvider();
     const { record = record2, entityName, formName, entity, onChange = onChangeCallback, related, extraErrors = extraErrors2 } = props;
     const { events } = useRibbon();
-
-
-
-    console.log("ModelDrivenEntityViewer:", [record, record?.name, entityName, formName]);
 
     const form = useMemo(() => getForm(app, entityName, formName), [app, entityName, formName]);
 
@@ -336,7 +290,6 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
         try {
             formdatamerger.current = {};
             onCommitCollector.current = undefined;
-            console.groupCollapsed("onFormDataChange", [formDataRef.current, formdata]);
             let oldFormData = Object.assign({}, formDataRef.current);
             let changed = false;
 
@@ -344,16 +297,11 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
             while (attributes.length > 0) {
                 let attributeKey = attributes.shift()!;
-                console.debug("partOfGroup", attributeKey);
                 let attribute = entity.attributes[attributeKey] ?? app.getEntity(entity.TPT!).attributes[attributeKey];
 
                 if (attribute.logicalName in formdata || (isLookup(attribute.type) && attribute.logicalName.slice(0, -2) in formdata)) {
-                    console.log(`Found ${attribute.logicalName} in formdata. type=${attribute.type}`);
-
 
                     if (oldFormData[attribute.logicalName] !== formdata[attribute.logicalName]) {
-
-                        console.log(`Found ${attribute.logicalName} in formdata that changed from '${oldFormData[attribute.logicalName]}' to '${formdata[attribute.logicalName]}'`);
 
                         oldFormData[attribute.logicalName] = formdata[attribute.logicalName];
                         if (formdata[attribute.logicalName] === undefined) {
@@ -380,26 +328,19 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
                         if (partOfGroup && oldFormData[attribute.logicalName]) {
 
-                            console.log(`Found ${attribute.logicalName} in formdata that is part of group`);
-
                             for (let others of partOfGroup.filter(g => g[2].logicalName !== attribute.logicalName)) {
-                                console.log(`Changing ${others[2].logicalName} in formdata to false and removing from attributes`);
                                 oldFormData[others[2].logicalName] = false;
-                                console.log(attributes);
                                 attributes.splice(attributes.indexOf(others[0]), 1);
-                                console.log(attributes);
                             }
                         }
 
                         if (!formdata[attribute.logicalName]) {
 
                             let dependants = Object.keys(form.columns).filter(k => form.columns[k].dependant === attributeKey);
-                            console.log("found deps: ", dependants);
                             for (let dependant of dependants) {
                                 formdata[entity.attributes[dependant].logicalName] = undefined;
                             }
                             attributes.push(...dependants.filter(d => attributes.indexOf(d) === -1));
-                            console.log("updated attributes ", attributes);
                         }
                     } else {
 
@@ -407,11 +348,7 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
 
                         if (isLookup(attribute.type) && lookupValue) {
 
-
-
                             const oldvalue = oldFormData[attribute.logicalName.slice(0, -2)];
-                            console.log(`Found ${attribute.logicalName} in formdata as lookup object`,
-                                oldFormData[attribute.logicalName.slice(0, -2)], lookupValue);
 
                             if (lookupValue.id) {
                                 oldFormData[attribute.logicalName] = lookupValue.id;
@@ -422,20 +359,15 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                             //  const keys = Object.keys(formdata[attribute.logicalName]);
                             if (!isEqual(oldvalue, lookupValue)) {
                                 changed = true;
-                                console.log(`Found ${attribute.logicalName.slice(0, -2)} in formdata as lookup object that was changed`);
 
                             }
                             oldFormData[attribute.logicalName.slice(0, -2)] = lookupValue;
-
-
 
                         }
                     }
                 }
             }
-            console.log(related);
             for (let relate of related ?? []) {
-                console.log([formdata[relate], oldFormData[relate], isEqual(oldFormData[relate], formdata[relate])]);
                 if (!isEqual(oldFormData[relate] ?? [], formdata[relate] ?? [])) {
                     oldFormData[relate] = formdata[relate];
                     changed = true;
@@ -447,10 +379,6 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
                 }
             }
 
-            console.log("ModelDrivenEntityViewer: oldFormData", oldFormData);
-            console.log("ModelDrivenEntityViewer: formDataRef.current", formDataRef.current);
-            console.log("ModelDrivenEntityViewer: changed", changed);
-
             if (changed) {
                 formDataRef.current = oldFormData;
                 onChange?.(oldFormData, ctx);
@@ -458,35 +386,24 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
             }
 
         } finally {
-            console.groupEnd();
         }
     }, [record, entity]);
-
-
 
     //Collect all the incoming changes, latest is newest
     //debounce and update.
     const onFormDataChange = useCallback((formdata: any, ctx?: any) => {
-
-        console.log("FormData Changing", { changes: formdata, old: formdatamerger.current, ctx });
 
         formdatamerger.current = { ...formdatamerger.current, ...formdata }; //TODO - should this be a deep merge.
         if (ctx?.onCommit) {
             const old = onCommitCollector.current;
             const next = ctx?.onCommit;
             onCommitCollector.current = () => {
-                console.log("onFormDataChange Wrap", [next, old]);
                 if (old)
                     old();
 
                 next();
             }
         }
-
-
-
-        console.log("FormData Changed", { changes: formdata, new: formdatamerger.current });
-
 
         onFormDataChange2(formdatamerger.current, { onCommit: onCommitCollector.current });
         setTimeout(() => {
@@ -500,7 +417,6 @@ export const ModelDrivenEntityViewer: React.FC<ModelDrivenEntityViewerProps> = (
      * When recordid or entityname changes, reset to other record.
      **/
     useEffect(() => {
-        console.log("Changing form record state from outside", [record, record?.name, info.currentRecordId, info.currentEntityName]);
         onFormDataChange(record)
     }, [record]);
 

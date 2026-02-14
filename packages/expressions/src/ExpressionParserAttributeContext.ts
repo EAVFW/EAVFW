@@ -1,7 +1,6 @@
 import { createContext,Dispatch,SetStateAction,useContext, useEffect } from "react";
 import { useUuid } from "@eavfw/hooks";
 
-
 export type ExpressionParserAttributeContextType = {
     "attributeKey": string;
     "entityKey": string;
@@ -20,7 +19,6 @@ export const useExpressionParserLoadingContext = (isLoading: boolean, id:string)
    // const id = useUuid();
 
     useEffect(() => {
-        console.log("Loading changed for " + attributeKey);
         setIsLoading(id, isLoading);
     }, [isLoading]);
 }

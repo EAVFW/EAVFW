@@ -1,5 +1,4 @@
 ﻿
-
 export type EAVServiceCollection = {
     
     logger?: IQuickFormLogger
@@ -16,13 +15,11 @@ export interface IQuickFormLogger {
 }
 export function getOrCreateEAVServiceCollection(): EAVServiceCollection {
     if (!globalThis.__eav_services) {
-        console.info(`✨ Created a service container ✨`);
         globalThis.__eav_services = {};
         ;
     }
     return globalThis.__eav_services;
 }
-
 
 export function registerEAVService<Key extends keyof EAVServiceCollection>(name: Key, instance: (EAVServiceCollection)[Key]) {
     let services = getOrCreateEAVServiceCollection();
@@ -51,21 +48,16 @@ export class DefaultLogger implements IQuickFormLogger {
             try {
                 return s.startsWith("{@") ? JSON.stringify(args[i++]) : args[i++]
             } catch (e) {
-                console.warn("Failed to serialize: ", [args[i - 1]]);
                 return "..." + args[i - 1] + "..."
             }
         });
     }
     log(message: string, ...args: any[]): void {
-        console.log(this.replaceLiteral(`[{category}] ${message}`, this.category, ...args), [this.category,...args]);
     }
     warn(message: string, ...args: any[]): void {
-        console.warn(this.replaceLiteral(`[{category}] ${message}`, this.category, ...args), [this.category, ...args]);
     }
 
 }
 
-
 registerEAVService("logger", new DefaultLogger());
 registerEAVService("loggerFactory", (category: string) => new DefaultLogger(category));
-

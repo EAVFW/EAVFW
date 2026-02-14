@@ -12,11 +12,7 @@ import { WizardContext } from "./WizardContext";
 
 import { trace, context, diag, DiagConsoleLogger, DiagLogLevel, SpanKind, propagation } from '@opentelemetry/api';
 
-
-
-
 const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
-    console.log('WizardReducer: ' + action.action, [state, action]);
     switch (action.action) {
         case "setTab": return {
             ...state,
@@ -38,7 +34,6 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
 
                 // Use the tracer provider to get a tracer  
                 const tracer = tracerProvider.getTracer('eavfw-wizard');
-
 
                 const wizardPromise = new Promise<any>((resolve, reject) => {
                     state.spanResolve = resolve;
@@ -73,10 +68,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 //}
                 //monitorMe();
 
-                // console.log('WizardReducer', [JSON.stringify(rootSpan.spanContext()), trace.getSpan(context.active())?.spanContext()])
-
                 // const activeContext = context.active();
-
 
                 // Assume "input" is an object with 'traceparent' & 'tracestate' keys
                 //  const input = {};
@@ -103,12 +95,9 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                 // Use the tracer to create a new span  
                 // const span = tracer.startSpan('eavfw-wizard-start', {}, context.active());
 
-
-
                 // trace.setSpan(activeContext, span),
 
                 //   const newContext = context.with();  
-                console.log("WizardReducer", [parentContext, activeContext, contextWithSpanSet, span, state.span, trace.getSpan(activeContext), trace.getSpan(activeContext)?.spanContext(), trace.getActiveSpan(), trace.getActiveSpan()?.spanContext()!]);
                 let tabName = Object.keys(wizard?.tabs ?? {})[0];
                 let transitionIn = wizard.tabs[tabName].onTransitionIn;
                 return {
@@ -153,10 +142,8 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
             return context.with(state.otelContext!, () => {
 
                 const spanContext = trace.getSpan(context.active())?.spanContext()!;
-                console.log("WizardReducer moveNext", [state.otelContext, context.active(), trace.getSpan(context.active()), `00-${spanContext?.traceId}-${spanContext?.spanId}-0${spanContext?.traceFlags}`]);
 
                 const expressionResults = state.expressions;
-                console.log("useWizardExpressionsProvider movenext", expressionResults);
                 const wizard = state.wizard!;
                 const selectedTab = state.tabName!;
 
@@ -166,20 +153,13 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
 
                 let nextTab = keys[keys.indexOf(selectedTab) + 1];
 
-
-
-
-
                 if (nextTab) {
                     let transitionIn = wizard.tabs[nextTab].onTransitionIn;
-
-
 
                     return {
                         ...state,
                         ...getTransitionProps(transitionIn, action.trigger, state),
                         tabName: nextTab,
-
 
                     }
                 } else {
@@ -188,10 +168,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
                     }
                 }
 
-
-
             });
-
 
     }
 }
@@ -200,12 +177,9 @@ export const WizardReducer: React.FC<PropsWithChildren> = ({ children }) => {
 
     const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
 
-
     const r = useReducer(wizardReducer, {
         expressions: onFormValuesChange({})
     });
-
-
 
     return (<WizardContext.Provider value={r}>
 
@@ -227,9 +201,6 @@ function getTransitionWorker(transitionIn: { message: IWizardMessage; workflow: 
         if (transitionIn) {
 
             let { result, rsp } = await runWorkflow(transitionIn.workflow, trigger, state.values);
-
-            console.log("jobstate", result);
-
 
             if (rsp.ok) {
                 resolve(result);

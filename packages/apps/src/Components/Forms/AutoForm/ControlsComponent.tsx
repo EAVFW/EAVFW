@@ -1,6 +1,4 @@
 
-
-
 import React, { Fragment, PropsWithChildren, useCallback, useContext, useMemo, useRef, useState } from "react";
 import { IChangeEvent, FormProps } from "@rjsf/core";
 import { FieldTemplateProps, UiSchema, FieldValidation, RJSFValidationError } from "@rjsf/utils"
@@ -30,7 +28,6 @@ import {
     ThemeContext
 } from "@fluentui/react";
 import { useBoolean, useId } from "@fluentui/react-hooks";
-
 
 import { useChangeDetector } from "@eavfw/hooks";
 
@@ -94,7 +91,6 @@ function createVisitedObject(id: string) {
     return root;
 }
 
-
 //import DateTimeWidget from "./Widgets/DateTimeWidget";
 import { React8BaseInputTemplate, React9BaseInputTemplate } from "./Widgets/BaseInputTemplate";
 import { TextareaWidget } from "./Widgets/TextareaWidget";
@@ -113,11 +109,6 @@ export const WidgetRegister: FormProps["widgets"] = {
     TextareaWidget
 }
 
-
-
-
-
-
 const ControlsComponent =
     <T extends {}>(props1: PropsWithChildren<ControlsComponentProps<T>>) => {
         const {
@@ -127,7 +118,6 @@ const ControlsComponent =
             extraErrors = {} as FormValidation
         } = props1;
         try {
-            console.group("ControlsComponent: ");
 
             const app = useAppInfo();
             const styles = useSectionStyles();
@@ -139,7 +129,6 @@ const ControlsComponent =
             useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} formData`, formData, renderId);
             useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} locale`, locale, renderId);
             useChangeDetector(`ControlsComponent: Tab: ${tabName} Column: ${columnName} Section: ${sectionName} factory`, factory, renderId);
-
 
             const { visitedFields, setVisitedFields } = useVisitedContext();
 
@@ -174,14 +163,8 @@ const ControlsComponent =
 
             const uiSChema = React.useMemo(() => ({ ...getUiSchema(schema, factory, formContext), "ui:order": order }), [schema, factory, formContext]);
 
-            console.log("Generated UISchema:", [order,schema, uiSChema]);
-
             // const timerRef = React.useRef(0);
             const onChange = React.useCallback((e: Partial<IChangeEvent<T>>) => {
-                console.group("OnChange", [e, formData, { ...e.formData }]);
-                console.log(e.formData);
-                console.log(formData);
-                console.groupEnd();
                 // currentData.current = e.formData!;
 
                 //  window.clearTimeout(timerRef.current);
@@ -191,28 +174,22 @@ const ControlsComponent =
             }, [onFormDataChange]);
 
             const addVisited = useCallback<Required<FormProps<any>>['onBlur']>((id, value) => {
-                console.log("AddVisited", [id,value]);
                 setVisitedFields(id.substr(app.currentEntityName.length + 1), schema.type === "array" ? createVisitedObject(id.substr(app.currentEntityName.length + 1)) : true);
             }, [app.currentEntityName]);
-
 
             if (!process.browser)
                 return <div>"loading"</div>
 
             //TODO INVESTIGATE THIS. seems odd its running on each render.
             let formErrors = {} as FormValidation;
-            console.log("AutoForm: ControlsComponent: ExtraErrors", extraErrors);
             for (let extraErrorsKey of Object.keys(extraErrors)) {
                 let keys = extraErrorsKey.split('.');
                 if (keys[0] in formErrors) {
                     //@ts-ignore
-                    console.log("Adding", extraErrors[extraErrorsKey].__errors)
 
                     //@ts-ignore
                     formErrors[keys[0]] = { __errors: formErrors?.[keys[0]]?.__errors.concat(extraErrors[extraErrorsKey].__errors) } as FieldValidation;
-                    console.log("After", formErrors[keys[0]])
                 } else {
-                    console.log("Creating", [extraErrorsKey,extraErrors[extraErrorsKey], /*extraErrors[extraErrorsKey].__errors*/])
                     formErrors[keys[0]] = extraErrors[extraErrorsKey];
                 }
             }
@@ -225,7 +202,6 @@ const ControlsComponent =
 
             //}, [formData, section.logicalName]);
             //const [formdata1] = useEAVForm(x => x.formValues);
-          //  console.log("uncronlled4", [(formdata1 as any)?.name]);
             return (
 
                 <Form tagName="div" className={mergeClasses('controls', sectionName, styles.element, styles.flex, styles.grow)}
@@ -257,7 +233,6 @@ const ControlsComponent =
                     ><Fragment /></Form>
             );
         } finally {
-            console.groupEnd();
         }
     }
 
@@ -268,7 +243,6 @@ function hasCustomControl(obj: JSONSchema7Definition, type: "x-widget" | "x-fiel
 }
 
 const readonlyStylesFunction: (outerProps: any, props: ITextFieldStyleProps) => Partial<ITextFieldStyles> = (outerProps, props) => {
-    console.log("RenderStyles", [outerProps, props]);
     return {
         fieldGroup: {
             backgroundColor: props.disabled || outerProps.readOnly ? props.theme.palette.neutralLight : props.theme.palette.neutralLighterAlt,
@@ -341,7 +315,6 @@ const iconProps = { iconName: 'Info' };
 
 const cancelIcon: IIconProps = { iconName: 'Cancel' };
 //export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
-//    console.log("customlabel", props);
 //    const [isCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
 //    const descriptionId = useId('description');
 //    const iconButtonId = useId('iconButton');
@@ -393,10 +366,7 @@ const cancelIcon: IIconProps = { iconName: 'Cancel' };
 //    );
 //};
 
-
 //const CustomLabelWrapper = ({ schema, textProps, formContext }: { schema: any, formContext: any, textProps: ITextFieldProps }) => {
-
-
 
 //    const app = useModelDrivenApp();
 //    const { attributeName, entityName, fieldName, formName
@@ -407,21 +377,15 @@ const cancelIcon: IIconProps = { iconName: 'Cancel' };
 //    const attribute = entity.attributes[attributeName!];
 //    const descriptionInfo = descriptions.filter((d: any) => d.name === attribute.logicalName && d.locale == locale)?.[0];
 
-//    console.log("CustomLabelWrapper", [descriptions, descriptionInfo])
 //    return <CustomLabel
 //        label={schema.title} description={descriptionInfo?.description ?? schema["x-description"]}  {...textProps} />
 
 //}
 
-
 const emojiIcon: IIconProps = { iconName: 'Clear' };
 /** Render Caret Down Icon */
 const _onRenderCaretDown = (formContext: any, schema: any, props?: IDropdownProps, originalRender?: Function) => {
     //  const formdata = useFormContext();
-    console.log(formContext);
-    console.log(schema);
-    console.log(props);
-    // console.log(formdata);
     const value = formContext.formData[schema["x-logicalname"]];
     return <>
         {(value || value === 0) && !props?.disabled && <IconButton iconProps={emojiIcon} title="Clear" ariaLabel="Clear" style={{ height: 28, margin: 1 }} onClick={(e) => {
@@ -432,7 +396,6 @@ const _onRenderCaretDown = (formContext: any, schema: any, props?: IDropdownProp
         {originalRender?.(props)}</>;
 };
 function mapUISchema(props: any, formContext: any) {
-    console.log("MAP UISCHEMA", [props, formContext]);
     if (typeof props === "object") {
        
         const entries = Object.keys(props).map((k) => [k, {
@@ -473,7 +436,6 @@ function getUiSchema(
     options?: OptionsFactory, //UiSchemaOpts,
     formContext?: any
 ): UiSchema {
-    //  console.log("jsonSchema",jsonSchema);
     const props = jsonSchema.properties;
     const deps = mergeDeep({
         "ui:options": { styles: formContext.section?.styles }
@@ -481,12 +443,9 @@ function getUiSchema(
         ...Object.values(jsonSchema.dependencies ?? {})
             .map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext))).flat(), mapUISchema(props, formContext));
     return deps;
-    //   console.log("jsonSchema", [jsonSchema, mapUISchema(props), deps]);
 
     // return mapUISchema(props);
 }
-
-
 
 /**
  * This function is used to customize error and it is used to add localization.
@@ -494,8 +453,6 @@ function getUiSchema(
  */
 function transformErrors(errors: RJSFValidationError[], uischema?: UiSchema) {
     return errors.map((error) => {
-        console.log("Heres the error")
-        console.log(error)
         if (error.name === "multipleOf") {
             let numberOfDecimals = error.params.multipleOf.toString().split('.')[1]?.length || 0;
             error.message = `Only ${numberOfDecimals} decimal${numberOfDecimals > 1 ? 's' : ''} are allowed.`;

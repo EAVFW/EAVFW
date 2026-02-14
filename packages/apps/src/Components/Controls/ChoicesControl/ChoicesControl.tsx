@@ -8,14 +8,11 @@ import { useRibbon } from "../../Ribbon/useRibbon";
 import { useModelDrivenApp } from "../../../useModelDrivenApp";
 import { useAppInfo } from "../../../useAppInfo";
 
-
-
 declare module 'json-schema' {
     export interface JSONSchema7 {
         enumNames?: string[];        
     }
 }
-
 
 export const ChoicesControl: React.FC<ChoicesControlProps> =
     ({
@@ -44,9 +41,7 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
         const changedItems = useRef<{ [key: number]: any }>({});
         const [newOptions, setnewOptions] = useState<Array<IDropdownOption>>([]);
 
-
         const saveinfo = useRibbon();
-        console.log("ChoicesControl", [value]);
 
         const dummy = useRef({
             data: { items: [] }, mutate: () => {
@@ -88,23 +83,17 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
         const { onFormDataChange, locale, formData } = formContext;
 
         const _onChange: IDropdownProps["onChange"] = (a1, item, a3) => {
-            console.log([a1, item, a3]);
             const value = item!.key as number;
 
             if (item!.selected && item?.data.state === "new") {
-                console.log('Adding new item to change tracking');
                 changedItems.current[value] = item?.data;
             } else if (!item!.selected && item?.data.state === "new") {
-                console.log('Removing new item from change tracking');
                 delete changedItems.current[value];
             } else if (!item!.selected) {
-                console.log('Removing existing item and added to change tracking');
                 changedItems.current[value] = item?.data;
                 changedItems.current[value].state = "deleted";
             } else {
-                console.log('Did nothing');
             }
-            console.log(JSON.parse(JSON.stringify(changedItems.current)));
 
             let relatedItems = Object.fromEntries([
                 [name, Object.keys(changedItems.current).map(Number)
@@ -115,7 +104,6 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
                     .filter(itemId => changedItems.current[itemId].state === "deleted")
                     .map(itemId => changedItems.current[itemId].item.id)]
             ]);
-            console.log(relatedItems);
             setselectedKeys(item?.selected ? [value].concat(selectedKeys) : selectedKeys.filter(v => v !== value));
             onFormDataChange(relatedItems);
         }
@@ -132,11 +120,9 @@ export const ChoicesControl: React.FC<ChoicesControlProps> =
             const selectedKeys =
                 fromFormData.concat(fromRemoteFiltered);
 
-            console.log("selectedKeys", [fromFormData, fromRemote, fromRemoteFiltered, selectedKeys, formData[`${name}@deleted`]]);
             setselectedKeys(selectedKeys);
         }, [formData, data]);
 
-        console.log(newOptions);
         return <Dropdown
             multiSelect={true}
             selectedKeys={selectedKeys}

@@ -39,7 +39,6 @@ const useWizardRibbonButtons = () => {
                     key: key,
                     text: capitalize(app.getLocalization(triggerKey) ?? triggerKey),
                     
-                    
                     onClick: (e, i) => {
                         openWizard([key, wizard]);
                     }
@@ -81,7 +80,6 @@ const useNewRibbonButton = (ribbonInfo: RibbonViewInfo, pushRoute: (url: URL) =>
 
                     const url = new URL(app.newEntityUrl(appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName), location.href);
                     const oldUrl = new URL(location.href);
-                    console.log(url);
                     for (let p of oldUrl.searchParams) {
 
                         if (p[0] === "tabName")
@@ -103,7 +101,6 @@ const useNewRibbonButton = (ribbonInfo: RibbonViewInfo, pushRoute: (url: URL) =>
 
     }, [ribbonInfo.new?.visible, appInfo.currentAppName, appInfo.currentAreaName, appInfo.currentEntityName]);
 
-
 }
 
 const useSaveRibbonButton = (withSave: boolean) => {
@@ -120,7 +117,6 @@ const useSaveRibbonButton = (withSave: boolean) => {
                     disabled: !canSave,
                     data: { order: 1 },
                     onClick: (e, i) => {
-                        console.log("Saving");
                         events.emit("onSave", e);
                     },
                     split: true,
@@ -132,7 +128,6 @@ const useSaveRibbonButton = (withSave: boolean) => {
                                 text: capitalize(app.getLocalization('SaveAndClose') ?? 'Save and Close'),
                                 iconProps: { iconName: 'Save' },
                                 onClick: (e, i) => {
-                                    console.log("Saving and closing");
                                     events.emit("onSaveAndClose", e);
                                 },
                             },
@@ -146,7 +141,6 @@ const useSaveRibbonButton = (withSave: boolean) => {
             }
         }
 
-
     }, [canSave]);
 }
 const useDeleteRibbonButton = (ribbonInfo: RibbonViewInfo) => {
@@ -154,7 +148,6 @@ const useDeleteRibbonButton = (ribbonInfo: RibbonViewInfo) => {
     const { addButton, removeButton, canSave, events } = useRibbon();
     const { selection, selectionDetails } = useSelectionContext();
     useEffect(() => {
-        console.log("ribbonInfo", ribbonInfo);
         if (ribbonInfo.delete?.visible !== false) {
             addButton({
                 key: 'deleteItem',
@@ -162,7 +155,6 @@ const useDeleteRibbonButton = (ribbonInfo: RibbonViewInfo) => {
                 iconProps: { iconName: 'Delete' }, data: { order: 2 },
                 disabled: ribbonInfo.delete?.disabled || selection.count === 0,
                 onClick: (e, i) => {
-
 
                     setTimeout(async () => {
                         let tasks = selection.getSelection().map(i => deleteRecordSWR(app.getEntity(i.entityName!), i.id!));

@@ -13,8 +13,6 @@ import { filterRoles } from "../../filterRoles";
 import { useUserProfile } from "../Profile/useUserProfile";
 import { Dropdown, Option, Select } from "@fluentui/react-components";
 
-
-
 export type IViewSelectorStyles = {
     root: IStyle;
 };
@@ -31,15 +29,10 @@ export type ViewSelectorComponentProps = {
     styles?: IViewSelectorStyles;
 };
 
-
-
-
 const ViewSelectorComponent: React.VFC<ViewSelectorComponentProps> = (
     props
 ) => {
    
-    console.group("ViewSelectorComponent");
-    console.log("props:\n", props);
     const {
         onChangeView,
         selectedView,
@@ -54,7 +47,6 @@ const ViewSelectorComponent: React.VFC<ViewSelectorComponentProps> = (
         entity.views ?? {}
     ).filter(([viewKey, view]) => filterRoles(view?.roles, user)).map(([viewKey, view]) => ({ key: viewKey, text: view.title ?? viewKey, data: view }));
      
-    console.groupEnd();
     return (
         <Dropdown style={{ margin: "5px 5px 5px 25px", width: 240 }}
             aria-label={ariaLabel}

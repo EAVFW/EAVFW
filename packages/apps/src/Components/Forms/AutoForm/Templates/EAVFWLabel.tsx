@@ -83,7 +83,6 @@ const iconWarningButtonStylesFunc = (theme: ITheme) => ({
     root: { marginBottom: -3 }, icon: { color: theme.palette.yellowDark }
 } as Partial<IButtonStyles>);
 
-
 const stackTokens: IStackTokens = {
     childrenGap: 4,
 };
@@ -93,7 +92,6 @@ const iconButtonStyles: Partial<IButtonStyles> = { root: { marginBottom: -3, hei
 
 export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boolean, disabled?: boolean, description?: string }> = ({ id, description, required, label, disabled, ...props }) => {
     const { data: _label, isLoading, error } = useExpressionParser(label);
-    console.log("EAVFWLabel:", id, description, required, label, disabled, props);
     const [isInfoCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
     const descriptionId = useId(id + '_description');   //id contains data attribute, so reference is possible through descriptionId
     const iconButtonId = useId('iconButton');
@@ -114,7 +112,6 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
     return (
         <div className={requiredStyles.label}>
              
-
             {_label}{required ? <span className={requiredStyles.required}>*</span> : null}
             {description && <IconButton
                     id={iconButtonId}
@@ -141,7 +138,6 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     styles={iconWarningButtonStyles}
                 />}
             
-
             {(isInfoCalloutVisible || isInfoCalloutVisibleOnHover) && (
                 <Callout
                     target={'#' + iconButtonId}
@@ -169,7 +165,6 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
                     </div>
                 </Callout>
             )}
-
 
             {(isWarningCalloutVisible || isWarningCalloutVisibleOnHover) && (
                 <Callout
@@ -199,7 +194,5 @@ export const EAVFWLabel: React.FC<{ id?: string, label: string, required?: boole
             )}
         </div>
     );
-
-
 
 }

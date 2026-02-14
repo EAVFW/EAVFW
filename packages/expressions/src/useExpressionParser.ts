@@ -3,8 +3,6 @@ import { useBlazor, useUuid } from "@eavfw/hooks";
 import { useExpressionParserAttributeContext, useExpressionParserLoadingContext } from "./ExpressionParserAttributeContext";
 import { useExpressionParserContext } from "./useExpressionParserContext";
 
- 
-
 // Enum used to set the exprssion order. 
 // ordered is used when the expression should be ordered between other ordered expressions
 // First is used when it should be placed unordered before the ordered expression.
@@ -39,7 +37,6 @@ export function useExpressionParser<T = string>(expression?: string, expressionO
     useEffect(() => { 
         const etagLocal = etag.current = new Date().getTime();
 
-        console.log("useExpressionParser:Form Values Changed expressions: " + expression, [id,etagLocal, formValues]);
         //const vars = { ...variables };
 
         //if ("manifest" in vars)
@@ -56,14 +53,10 @@ export function useExpressionParser<T = string>(expression?: string, expressionO
             expressionOrder: expressionOrder
         };
 
-
-
         if (expression && expression.indexOf("@") !== -1) {
 
-          
             addExpresssion(id, expression, context, (result: any, error: any) => {
                 //
-                console.log(`useExpressionParser<${entityKey},${arrayIdx},${attributeKey}> result: ${expression}=${result}, id=${id}, error=${error}`);
 
                 if (error) {
                     setEvaluated({ data: undefined, isLoading: false });
@@ -80,7 +73,6 @@ export function useExpressionParser<T = string>(expression?: string, expressionO
                     }, 0);                 
                 }
 
-
             });
 
             return () => {
@@ -92,8 +84,6 @@ export function useExpressionParser<T = string>(expression?: string, expressionO
         }
 
     }, [expression]);
-
-  
 
     return evaluated;
 }

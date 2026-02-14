@@ -71,7 +71,6 @@ function getTitle(item: EntityDefinition | DashboardDefinition, sitemap: any, lo
     return title ?? item.pluralName ?? item.displayName;
 }
 
-
 function getLogicalName(item: EntityDefinition | DashboardDefinition, key: string): string {
     return item.logicalName ?? key.toLowerCase().replace(/\s/g, "");
 }
@@ -87,20 +86,14 @@ function processSitemap(apps: ManifestAppsDefinition,
             sitemaps = { [`${key}dummy`]: sitemaps };
 
         const test = sitemaps;
-        console.log("sitemaps", test);
         for (const sitemapKey of Object.keys(sitemaps).sort((sitemapKeyA, sitemapKeyB) => (test[sitemapKeyA].order ?? Infinity) - (test[sitemapKeyB].order ?? Infinity))) {
             const sitemap = sitemaps[sitemapKey];
             const app = apps[sitemap.app];
            
-
-
             if (sitemap !== undefined && areas[sitemap.area] === undefined)
                 areas[sitemap.area] = {};
 
-
             const groupTitle = app?.sitemap?.groups?.[sitemap.group]?.locale?.[locale]?.title ?? app?.sitemap?.groups?.[sitemap.group]?.title ?? sitemap.group;
-
-
 
             areas[sitemap.area][groupTitle] = areas[sitemap.area][groupTitle] ?? {};
 
@@ -128,12 +121,10 @@ function processSitemap(apps: ManifestAppsDefinition,
                     
                 }
             };
-            console.log("sitemapEntry", [sitemapEntry, sitemap,locale, item.locale, selectedLocale, sitemapEntry.title, title ?? item.pluralName ?? item.displayName, getTitle(item, sitemap, locale)]);
             areas[sitemap.area][groupTitle][sitemapKey] = sitemapEntry;
         }
     }
 }
-
 
 function processItems(
     apps: ManifestAppsDefinition,
@@ -154,17 +145,13 @@ function processItems(
     for (const key of Object.keys(items).sort((a, b) => getOrder(items[a].sitemap) - getOrder(items[b].sitemap))) {
         const item = items[key];
 
-
-
         if (itemType === "entity" && isEntityDefinition(item) && item.attributes)
             Object.values((item as EntityDefinition).attributes).forEach(normalizeType);
 
         entityMap[key] = getLogicalName(item, key);
         entityCollectionSchemaNameMap[item.collectionSchemaName] = getLogicalName(item, key);
 
-
         processSitemap(apps, key, item, item.sitemap, areas, itemType,locale);
-
 
     }
 }

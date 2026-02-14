@@ -6,7 +6,6 @@ import {
     IPivotProps,
 } from "@fluentui/react";
  
- 
 import { EntityDefinition, IRecord } from "@eavfw/manifest";
 import { ModelDrivenBodyViewerProps } from "./ModelDrivenBodyViewerProps";
 import { useUserProfile } from "../Profile/useUserProfile";
@@ -21,13 +20,8 @@ import { PagingProvider } from "./PagingContext";
 import { useIsMobileDevice } from "@eavfw/utils";
 import { MobileList } from "./Components/Mobile/MobileList";
 
-
-
-
 import { useRouter } from "next/router";
 import { useSectionStyles } from "../../Styles/SectionStyles.styles";
-
-
 
 export function ModelDrivenBodyViewer
     (
@@ -40,7 +34,6 @@ export function ModelDrivenBodyViewer
             showViewSelector = true,
         }: ModelDrivenBodyViewerProps) {
 
-
     const user = useUserProfile();
     const { } = useRibbon();
     const router = useRouter();
@@ -48,7 +41,6 @@ export function ModelDrivenBodyViewer
     const views = Object.fromEntries(Object.entries(
         entity.views ?? {}
     ).filter(([viewKey, view]) => filterRoles(view?.roles, user)));
-    console.log("views:\n", views);
 
     const [selectedView, setselectedView] = useState(viewName ?? Object.keys(views)[0]);
     const hasMoreViews = Object.keys(views).length > 1;
@@ -61,11 +53,8 @@ export function ModelDrivenBodyViewer
 
     const BodyViewElement = useMemo(() => {
 
-        console.log("BodyViewerElement", [isMobile]);
-       
         if (entityName !== undefined && selectedView !== undefined) {
              
-
             if (view !== undefined && view.type !== undefined) {
                 if (view.type in Views) {
                     const CustomView = Views[view.type];
@@ -104,7 +93,6 @@ export function ModelDrivenBodyViewer
     }
    
     const ribboninfo = useMemo(() => entity.views?.[selectedView]?.ribbon ?? {}, [ selectedView]);
-    console.log("Model Driven View:", [showViewSelector, hasMoreViews]);
     return (
         <PagingProvider initialPageSize={typeof (view?.paging) === "object" ? view.paging.pageSize ?? undefined : undefined} enabled={!(view?.paging === false || (typeof (view?.paging) === "object" && view?.paging?.enabled === false))} >
             <Stack verticalFill className={styles.section}>

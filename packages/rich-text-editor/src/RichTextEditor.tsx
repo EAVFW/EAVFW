@@ -30,9 +30,7 @@ export type RichTextEditorProps = {
 };
 
 export const RichTextEditor: React.VFC<RichTextEditorProps> = ({ alwaysVisible, onChange, value, styles }) => {
-    console.groupCollapsed("RichTextEditor");
     try {
-        // console.log("props:\n", props);
         const theme = useTheme();
         // const { value } = props;
         const app = useModelDrivenApp();
@@ -44,11 +42,9 @@ export const RichTextEditor: React.VFC<RichTextEditorProps> = ({ alwaysVisible, 
         const [visisble, setVisisble] = useState(alwaysVisible || false);
         const onEditorStateChange: NonNullable<EditorProps["onEditorStateChange"]> = (editorState) => {
             try {
-                console.groupCollapsed("RichTextEditor::onEditorStateChange");
 
                 setEditorState(editorState);
                 const content = draftToHtml(convertToRaw(editorState.getCurrentContent()));
-                console.log("content:\n", [content, striptags(content)]);
 
                 if (striptags(content).trim()) {
 
@@ -57,12 +53,10 @@ export const RichTextEditor: React.VFC<RichTextEditorProps> = ({ alwaysVisible, 
                     onChange(undefined);
                 }
             } finally {
-                console.groupEnd();
             }
         };
         const editorStyle = useMemo(() => ({ padding: "5px", border: "1px solid #F1F1F1", borderRadius: "2px", ...(styles?.editor ?? {}) }), [Object.values(styles?.editor ?? {})]);
 
-        console.groupEnd();
         return (
             <Editor wrapperClassName="rdw-editor-wrapper-buttom" onFocus={() => setVisisble(alwaysVisible || true)} onBlur={() => setVisisble(alwaysVisible || false)}
                 toolbarHidden={!visisble}
@@ -74,7 +68,6 @@ export const RichTextEditor: React.VFC<RichTextEditorProps> = ({ alwaysVisible, 
             />
         );
     } finally {
-        console.groupEnd();
     }
 };
 

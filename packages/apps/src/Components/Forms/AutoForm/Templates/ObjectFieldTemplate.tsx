@@ -43,7 +43,6 @@ export default function ObjectFieldTemplate<
         registry,
         uiOptions
     );
-    console.log("objectfieldtemplate", [uiOptions]);
     // Button templates are not overridden in the uiSchema
     const {
         ButtonTemplates: { AddButton },

@@ -3,8 +3,6 @@ import { EntityDefinition, IRecord, queryEntity } from "@eavfw/manifest";
 import { IComboBoxOption, IDropdownOption, ISearchBox, SearchBox } from "@fluentui/react";
 import React, { useEffect } from "react";
 
-
-
 export type ComboBoxSearchProps = {
     setOptions: (options: IComboBoxOption[]) => void,
     entityDefinition: EntityDefinition,
@@ -44,7 +42,6 @@ export function ComboBoxSearch(props: ComboBoxSearchProps) {
         event?: string,
         option?: IDropdownOption | IComboBoxOption,
         index?: number) => {
-        console.log("BigDropDown", [event, typeof event, option, index]);
 
         // setSearchTerm(event);
 

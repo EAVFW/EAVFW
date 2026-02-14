@@ -4,10 +4,7 @@ import { TopBar } from "../Components/TopBar/ModelDrivenTopBar";
 import { ResolveFeature } from "../FeatureFlags";
 import { useSectionStyles } from "../Styles";
 
-
-
 export function AppPickerLayout(props: any) {
-    console.log("AppPickerLayout", props);
   
     const topBarTheme = ResolveFeature("topBarTheme");
     const styles = useSectionStyles();

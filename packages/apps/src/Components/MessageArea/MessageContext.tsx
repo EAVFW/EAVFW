@@ -2,7 +2,6 @@ import { ModelDrivenApp, useModelDrivenApp } from "@eavfw/apps";
 import { MessageBar, MessageBarType } from "@fluentui/react";
 import React, {useContext, useState} from "react";
 
-
 type ContextType = {
     messages: { [key: string]: (props?: {[prop: string]: any}) => JSX.Element },
     addMessage: (key: string, messageRender: messageRenderType) => void,
@@ -10,7 +9,6 @@ type ContextType = {
 };
 
 type messageRenderType = (props?: { [prop: string]: any }) => JSX.Element;
-
 
 /**
  * Returns and renders the MessageArea which lists the messages
@@ -20,7 +18,6 @@ function MessageArea(): JSX.Element {
 
     const {messages} = useMessageContext();
 
-    console.log("MessageArea", messages, typeof messages);
     return (
         <>
             {Object.keys(messages).map((v,i) => <div key={`messagearea-${i}-${v}`}>{messages[v]({})}</div>)}
@@ -57,7 +54,6 @@ function useMessageContext() {
     return useContext(MessagesContext);
 }
 
-
 export function successMessageFactory(factoryProps: { key: string, removeMessage: (key: string) => void }, app?: ModelDrivenApp) {
     return (props?: any) => {
         const _app = app?? useModelDrivenApp();
@@ -93,7 +89,6 @@ const MessagesProvider = (props: any) => {
     let addMessage = function (
         key: string,
         messageRender: messageRenderType): void {
-        console.log('addMessage', messageRender);
         setMessages(prevState => ({
             ...prevState,
             [key]: messageRender

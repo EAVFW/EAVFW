@@ -2,7 +2,6 @@ import React, { useCallback, useMemo, useState, useRef, ReactNode, PropsWithChil
 import { ExpressionParserAttributeContext, ExpressionParserAttributeContextType, useExpressionParserAttributeContext } from "./ExpressionParserAttributeContext";
 import { ExpressionParserVisibilityHost } from "./ExpressionParserVisibilityHost";
 
-
 const StyleInjector: React.FC<PropsWithChildren<{ isLoading: boolean }>> = ({ children, isLoading }) => {
     const StyledChildren = () =>
         React.Children.map(children, (child: any) =>
@@ -16,7 +15,6 @@ const StyleInjector: React.FC<PropsWithChildren<{ isLoading: boolean }>> = ({ ch
     return <StyledChildren />;
 };
 
-
 export const ExpressionParserFieldProvider: React.FC<PropsWithChildren<Omit<ExpressionParserAttributeContextType, "setIsLoading" | "isLoading" | "ids"> & {
     visible?: string | boolean,
     onVisibilityCalculated?: (visiblity: boolean) => void
@@ -26,19 +24,15 @@ export const ExpressionParserFieldProvider: React.FC<PropsWithChildren<Omit<Expr
 
     const [loadingInfoTime, setIsLoadingTime] = useState({});
 
-
     const _setIsLoading = useCallback((id: any, isLoading: any) => {
-        console.log("ExpressionParserFieldProvider Loading: " + attributeKey, [id, isLoading]);
         loadingInfo.current = { ...loadingInfo.current, [id]: isLoading };
         setIsLoadingTime(new Date().getTime());
     }, [loadingInfo]);
 
     const isLoading = useMemo(() => {
-        console.log("ExpressionParserFieldProvider Loading: " + attributeKey, [JSON.stringify(loadingInfo.current), Object.values(loadingInfo.current).filter(v => v).length !== 0])
         return Object.values(loadingInfo.current).filter(v => v).length !== 0;
     }, [loadingInfoTime]);
     const { attributeKey: parentAttributeKey, entityKey: parentEntityKey, arrayIdx: parentArrayIdx } = useExpressionParserAttributeContext();
-
 
     return (
         <ExpressionParserAttributeContext.Provider value={{ ids: Object.keys(loadingInfo.current).join(","), setIsLoading: _setIsLoading, isLoading: isLoading, attributeKey: attributeKey ?? parentAttributeKey, entityKey: entityKey ?? parentEntityKey, arrayIdx: (arrayIdx === -1 || arrayIdx === undefined) ? parentArrayIdx : arrayIdx }}>

@@ -1,5 +1,4 @@
 
-
 import { useSWRFetch } from "@eavfw/manifest";
 import {
     Button,
@@ -46,14 +45,11 @@ export const WorkFlowDialog = ({ ribbonkey, workflow, disabledHook = () => false
 
     if (!workflow) throw new Error("Workflow is required");
    
-
-
     const { registerButton, events } = useRibbon();
     const app = useModelDrivenApp();
     const { currentEntityName, currentRecordId } = useAppInfo();
     const currentEntityCollectionSchemaName = app.getEntity(currentEntityName).collectionSchemaName;
    
-
     const { mutate:mutateView } = useModelDrivenViewContext();
     const { mutate: mutateForm } = useFormChangeHandlerProvider();
     const mutate = () => { mutateView(); mutateForm(); }
@@ -68,7 +64,6 @@ export const WorkFlowDialog = ({ ribbonkey, workflow, disabledHook = () => false
     const { selection, selectionDetails } = useSelectionContext();
 
     const disabled = disabledHook();
-
 
     registerButton({
         key: ribbonkey,
@@ -96,11 +91,9 @@ export const WorkFlowDialog = ({ ribbonkey, workflow, disabledHook = () => false
 
     const formRef = createRef<DefaultForm>();
     //useEffect(() => {
-    //    console.log("Form Is Valid?", [!!formRef.current && formRef.current.validateForm()]);
     //        setIsValid(!!formRef.current && formRef.current.validateForm());
 
     //}, [payload, hideDialog, formRef.current, rjsfProps])
-
 
     return (
         <Dialog open={!hideDialog}>
@@ -124,13 +117,11 @@ export const WorkFlowDialog = ({ ribbonkey, workflow, disabledHook = () => false
                                     },
                                     { currentEntityCollectionSchemaName, currentRecordId });
                                  
-
                                 if (result.status.toLowerCase() === "failed") {
 
                                     return;
                                 }
                                  
-
                                 mutate();
                                 toggleHideDialog();
                                 //TODO - mutate is not implemented properly, dirty fix now

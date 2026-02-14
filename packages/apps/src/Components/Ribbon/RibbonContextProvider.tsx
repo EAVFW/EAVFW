@@ -37,12 +37,10 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
     const app = useModelDrivenApp();
     const router = useRouter();
 
-
     const [pastUrl, setPastUrl] = useState<string>();
     const confirmedRef = useRef<boolean>(false);
     const [hideDialog, { toggle: toggleHideDialog }] = useBoolean(true);
     const [isDraggable, { toggle: toggleIsDraggable }] = useBoolean(true);
-
 
     const labelId: string = useId('RibbonContextProviderLabel');
     const subTextId: string = useId('RibbonContextProviderSubLabel');
@@ -58,28 +56,21 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
         [isDraggable, labelId, subTextId],
     );
 
-
-
     const stateRef = useRef<RibbonState>({ canSave: false, skipRedirect: false, buttons: [] });
     const [ribbonState, setRibbonState2] = useState<RibbonState>(stateRef.current);
     const updateRibbonState = useCallback((state: Partial<RibbonState>) => {
         stateRef.current = { ...stateRef.current, ...state };
-        console.log("updateRibbonState", stateRef.current);
         try {
             throw new Error("updateRibbonState");
         } catch (err) {
-            console.log("updateRibbonState", err);
         }
         setRibbonState2(stateRef.current)
     }, []);
-
-
 
     const ribbonButtonsRef = useRef<ICommandBarItemProps[]>([]);
     const [ribbonButtons, setRibbonButtons] = useState<ICommandBarItemProps[]>(ribbonButtonsRef.current)
 
     const _addButton = (command: ICommandBarItemProps) => {
-        console.log("Adding Ribbon Item: ", command);
 
         if (typeof command.cacheKey === "undefined" || command.cacheKey === command.key)
             command.cacheKey = uuidv4();
@@ -88,39 +79,30 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
             .sort((a, b) => (a.data?.order ?? Infinity) - (b.data?.order ?? Infinity)));
     };
     const _removeButton = (key: string) => {
-        console.log("Removing Ribbon Item: ", key);
         setRibbonButtons(ribbonButtonsRef.current = ribbonButtonsRef.current.filter(b => b.key !== key)
             .sort((a, b) => (a.data?.order ?? Infinity) - (b.data?.order ?? Infinity)));
     };
-
 
     const { events } = useRibbon();
 
     const ribbonEvents = events ?? useMemo(() => {
         const mitter = mitt();
 
-        console.log("Setting up : SHOW_RIBBON_ITEM");
         const _onShow = (data: any) => {
-            console.log("SHOW_RIBBON_ITEM fired", data);
             const button = ribbonButtonsRef.current.filter(k => k.key === data.type)[0];
             if (button) {
                 button.disabled = false;
                 setRibbonButtons(ribbonButtonsRef.current.slice());
             }
         };
-        console.log("Setting up : HIDE_RIBBON_ITEM");
         const _onHide = (data: any) => {
-            console.log("HIDE_RIBBON_ITEM fired", data);
             const button = ribbonButtonsRef.current.filter(k => k.key === data.type)[0];
             if (button) {
                 button.disabled = true;
                 setRibbonButtons(ribbonButtonsRef.current.slice());
             }
 
-
         };
-
-
 
         mitter.on("SHOW_RIBBON_ITEM", _onShow);
         mitter.on("HIDE_RIBBON_ITEM", _onHide);
@@ -128,13 +110,9 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
         return mitter;
     }, []);
 
-
-
-
     //  const [oldUrl, setOldUrl] = useState<URL>();
     // prompt the user if they try and leave with unsaved changes
     useEffect(() => {
-        console.log("UPDATING handleBrowseAway", stateRef.current.canSave);
         // if (oldUrl?.href !== window.location.href)
         //                setOldUrl(new URL(window.location.href));
 
@@ -150,7 +128,6 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
         };
         const handleBrowseAway = (url: string, props: any) => {
             const hasUnSavedChanges = stateRef.current.canSave;// ribbonState.canSave;
-            console.log("handleBrowseAway", { url, props, currentUrl: router.asPath, hasUnSavedChanges, pastUrl, confirmed: confirmedRef.current });
 
             const oldUrl = new URL(router.asPath, window.location.href);
             const newUrl = new URL(url, window.location.href);
@@ -160,14 +137,12 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
 
             if (!hasUnSavedChanges) return;
 
-            console.log("handleBrowseAway", [url, pastUrl, confirmedRef.current]);
             if (url === pastUrl && confirmedRef.current)
                 return;
 
             setPastUrl(url);
             toggleHideDialog();
 
-            console.log("handleBrowseAway: throwing");
             //  if (window.confirm(warningText)) return;
             router.events.emit('routeChangeError');
             throw 'routeChange aborted.';
@@ -180,9 +155,6 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
             router.events.off('routeChangeStart', handleBrowseAway);
         };
     }, [ribbonState.canSave, pastUrl]);
-
-
-
 
     return <>
         <Dialog
@@ -200,33 +172,25 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
 
                         const onComplete = (e: any) => {
                             ribbonEvents.off("saveComplete", onComplete);
-                            console.log("dialog saveCompleted", e);
                             const entityName = pastUrl?.match(/entities\/(.*?)\//)?.[1];
                             if (entityName) {
-                                console.log("dialog saveCompleted", [entityName]);
                                 const targetEntity = app.getEntity(entityName);
                                 const currentEntity = app.getEntity(e.entityName);
 
-                                console.log("dialog saveCompleted", [entityName, targetEntity.attributes]);
                                 const lookups = Object.values(targetEntity.attributes).filter(t => isLookup(t.type) && app.getEntityFromKey(t.type.referenceType).logicalName === e.entityName)
 
-                                console.log("dialog saveCompleted", [entityName, lookups]);
                                 const newUrl = new URL(pastUrl!, window.location.href);
                                 for (let lookup of lookups) {
-                                    console.log("dialog saveCompleted", [entityName, lookups, lookup.logicalName, e.id]);
                                     newUrl.searchParams.set(lookup.logicalName, e.id);
                                 }
-                                console.log("dialog saveCompleted", [entityName, lookups, newUrl.toString()]);
                                 router.push(newUrl);
                                 setPastUrl(undefined);
 
                             } else {
-                                console.log(e);
                                 router.push(pastUrl!);
                             }
 
                         }
-
 
                         ribbonEvents.on("saveComplete", onComplete);
                         ribbonEvents.emit("onSave", e);
@@ -250,7 +214,6 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
             //}),
             removeButton: _removeButton,
             //    (key) => {
-            //    console.log("removing " + key, {
             //        before: ribbonState.buttons,
             //        after: ribbonState.buttons.filter(b => b.key !== key)
             //    });
@@ -259,17 +222,12 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
             events: ribbonEvents,
             registerButton: (button, deps) => {
 
-
-
-
                 if (button.workflow) {
                     const [_, { onChange: onFormDataChange }] = useEAVForm(() => ({}));
-                    console.log(button.key, onFormDataChange);
                     button.onClick = useCallback((ev?: any) => {
 
                         const runner = (async () => {
                             const actions = button.workflow.actions;
-                            console.log("Execute Workflow", button.workflow);
                             const starter = Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "undefined" || Object.values(entry.runAfter).length === 0);
 
                             const queue = starter.slice(0, 1);
@@ -278,7 +236,6 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
 
                                 while (queue.length) {
                                     const [action, entry] = queue.pop() ?? [];
-                                    console.log("Execute Workflow action", [action, entry, new Date().toISOString()]);
                                     const type = entry.type;
                                     switch (type) {
                                         case "UpdateRecord":
@@ -287,16 +244,12 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
                                                 ctx.skipValidation = true;
 
                                                 ctx.onCommit = () => {
-                                                    console.log("Update Record Completed");
 
                                                     queue.push(...Object.entries<any>(actions).filter(([actionkey, entry]) => typeof (entry.runAfter) === "object" && Object.entries(entry.runAfter).filter(([runafterKey, runafterstatus]) => runafterKey === action).length === 1))
                                                     handleQueue();
                                                 };
                                                 Object.assign(props, entry.inputs.data)
                                             }); //TODO wait until change is applied
-
-
-
 
                                             break;
 
@@ -308,8 +261,6 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
 
                                             break;
                                     }
-
-                                    console.log("Executed Workflow action", [action, entry]);
 
                                 }
                             };
@@ -323,7 +274,6 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
 
                     if (!button.onClick) {
                         button.onClick = (e) => {
-                            console.log("Custom Ribbon: Clicked", [button.key, e]);
 
                             e?.preventDefault();
                             e?.stopPropagation();
@@ -331,17 +281,13 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
                         }
                     }
 
-                    console.log("useEffect: Ribbon Button", [button, button.visible !== false]);
-
                     if (button.visible !== false)
                         _addButton(button);
 
                     return () => {
-                        console.log("useEffect: Ribbon Button dispose", button);
                         _removeButton(button.key);
                     }
                 }, deps ?? []);
-
 
             }
         })
@@ -349,7 +295,3 @@ export const RibbonContextProvider: React.FC<PropsWithChildren<{ defaultRibbons?
         </RibbonContext.Provider>
     </>
 }
-
-
-
-

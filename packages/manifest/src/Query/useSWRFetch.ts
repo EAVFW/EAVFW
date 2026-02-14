@@ -18,7 +18,6 @@ export function useSWRFetch<T = any>(path?: string, isReady = true, refreshInter
             fetcher: jsonFetcher
         }
     )
-    console.log(data, error);
     return {
         data,
         isLoading: !error && !data,

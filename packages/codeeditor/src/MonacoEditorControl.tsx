@@ -20,9 +20,7 @@ export type MonacoEditorControlProps = {
 };
 export const MonacoEditorControl: React.VFC<MonacoEditorControlProps> = ({ entityName, formName, fieldName, "x-control-props": { schemas } = {},
     attributeName, ...props }) => {
-    console.groupCollapsed("MonacoEditorControl");
     try {
-        console.log("props:\n", props);
         const { value } = props;
         const app = useModelDrivenApp();
         const [height, setHeight] = useState<number>(0);
@@ -31,22 +29,18 @@ export const MonacoEditorControl: React.VFC<MonacoEditorControlProps> = ({ entit
         const attribute = entityAttributes[attributeName];
         //   const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];
         const [data, { onChange: onFormDataChange }] = useEAVForm<any, any, any>((state) => state.formValues);
-        console.log("Data", [data, attribute]);
         const _data = useMemo(() => {
             let value = isLookup(attribute.type) ?
                 data[attribute.logicalName.slice(0, -2)]?.data
                 : data[attribute.logicalName];
 
-            console.log("Updating Manifest Source", value);
             if (value) {
                 const manifest = ungzip(new Uint8Array(atob(value).split("").map(function (c) {
                     return c.charCodeAt(0)
                 })), { to: "string" }) as string;
-                console.log("Updating Manifest Source", manifest);
                 return manifest;
             }
         }, [attribute]);
-        console.log(_data);
         //   const [manifest,setManifest] = useManifest();
         const editorRef = React.useRef<editor.IStandaloneCodeEditor>();
         //  const wrapperRef = React.useRef<HTMLDivElement>(null);
@@ -75,7 +69,6 @@ export const MonacoEditorControl: React.VFC<MonacoEditorControlProps> = ({ entit
         const monaco = useMonaco();
         useEffect(() => {
             if (monaco) {
-                console.log("here is the monaco isntance:", monaco);
                 monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
                     validate: true, allowComments: true,
                     schemas: schemas,
@@ -99,8 +92,6 @@ export const MonacoEditorControl: React.VFC<MonacoEditorControlProps> = ({ entit
             </div>
         );
     } finally {
-        console.groupEnd();
     }
 };
 export default MonacoEditorControl;
-

@@ -3,9 +3,6 @@ import { isLookup } from "../Entities/Attributes/Types/Lookup/isLookup";
 import { EntityDefinition } from "../Entities/EntityDefinition";
 import { IRecord } from "../Types/IRecord";
 
-
-
-
 /**
  * Deprecated : Use queryEntitySWR
  * @param entity
@@ -22,7 +19,6 @@ export async function queryEntity<T extends IRecord>(entity: EntityDefinition, q
         query['$expand'] = expand;
 
     let q = Object.keys(query).filter(k => query[k]).map(k => `${k}=${query[k]}`).join('&');
-    console.log(`Query entity: ${baseUrl}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`)
     let data = (await fetch(
         `${baseUrl}/entities/${entity.collectionSchemaName}${q ? `?${q}` : ``}`,
         { method: "GET", credentials: "include" }

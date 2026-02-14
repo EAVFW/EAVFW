@@ -36,7 +36,6 @@ import {
 } from "@fluentui/react";
 import { FormValidation, FieldValidation } from "@rjsf/utils";
 
-
 import Link from 'next/link';
 
 import { useBoolean, useId } from "@fluentui/react-hooks"
@@ -172,7 +171,6 @@ const classNames = mergeStyleSets({
     }
 });
 
-
 const RenderDetailsFooter: IRenderFunction<IDetailsFooterProps> = (props, defaultRender) => {
     if (!props) {
         return null;
@@ -212,14 +210,12 @@ type LookupControlRenderProps = {
 
 const LookupControlRender: React.FC<LookupControlRenderProps> = ({ item, attribute, type, recordRouteGenerator, onChange }) => {
 
-
     const [isOpen, { setFalse, setTrue }] = useBoolean(false);
     const save = useRibbon();
     const app = useModelDrivenApp();
 
     const recordRef = useRef<any>(item[attribute.logicalName.slice(0, -2)]);
     const _onDataChange = useCallback((data: any) => {
-        console.log("LookupControlRender-OnDataChange", data);
         recordRef.current = data;
     }, []);
 
@@ -233,12 +229,10 @@ const LookupControlRender: React.FC<LookupControlRenderProps> = ({ item, attribu
 
     const _onModalDismiss = useCallback(async (data: any) => {
 
-        console.log(data);
         setFalse();
         if (data === "save") {
 
             showIndeterminateProgressIndicator();
-
 
             let plain = Object.fromEntries(Object.values(attributes).map(v => [v.logicalName, recordRef.current[v.logicalName]]));
             let rsp = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records/${recordRef.current.id}`, {
@@ -270,7 +264,6 @@ const LookupControlRender: React.FC<LookupControlRenderProps> = ({ item, attribu
                     key: entitySaveMessageKey,
                     removeMessage: removeMessage, messages: errors
                 }));
-
 
             }
 
@@ -330,8 +323,6 @@ function _getKey(item: any, index?: number): string {
     return item.key;
 }
 
-
-
 const getCellText = (item: any, column: IColumn): string => {
     let value = item && column && column.fieldName ? item[column.fieldName] : '';
 
@@ -346,8 +337,6 @@ const getCellText = (item: any, column: IColumn): string => {
     return value;
 };
 
-
-   
 export function ModelDrivenList(
     { onChange,
         formData,
@@ -365,8 +354,6 @@ export function ModelDrivenList(
     const { setSelection, selection, selectionDetails } = useSelectionContext();
     const [ { columns } ] = useColumnFilter()
   
-   
-
     const theme = useTheme();
 
     const _onRenderRow = useCallback<Required<IDetailsListProps>['onRenderRow']>(props => {
@@ -382,11 +369,8 @@ export function ModelDrivenList(
         return null;
     }, [theme.palette.neutralLighterAlt]);
 
-    console.log("WithTimeButton Theme", theme.palette.themePrimary);
-
     const localColumns = useMemo(() => columns?.filter(c => c.data.visible !== false)??[], [columns]);
 
-    console.log("ModelDrivenList", localColumns);
     if (!localColumns?.length)
         return <div>loading data</div>
 
@@ -419,7 +403,6 @@ export function ModelDrivenList(
 
             onRenderDetailsFooter={onRenderDetailsFooter}
         />
-
 
     )
 }

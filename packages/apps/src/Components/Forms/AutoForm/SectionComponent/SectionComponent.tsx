@@ -1,10 +1,7 @@
 import { useRouter } from "next/router";
 import React, { Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 
-
-
 import isEqual from "react-fast-compare";
-
 
 import { useChangeDetector, useLazyMemo } from "@eavfw/hooks";
 import { AutoFormColumnsDefinition, AutoFormControlsDefinition, AutoFormJsonSchemaDefinition, BaseNestedType, deleteRecordSWR, EntityDefinition, FormDefinition, FormTabDefinitionWithColumns, hasColumns, hasControl, hasFields, hasForm, hasHtml, hasJsonSchema, ViewReference } from "@eavfw/manifest";
@@ -41,8 +38,6 @@ import { React9FieldTemplate } from "../Templates/React9FieldTemplate";
 import { useWizard } from "../../../Wizards/useWizard";
 import { ResolveFeature } from "../../../../FeatureFlags";
 
-
-
 function trimId(str: string) {
     if (str.toLowerCase().endsWith("id"))
         return str.slice(0, -2);
@@ -54,16 +49,8 @@ function padId(str: string) {
     return str;
 }
 
-
-
-
-
-
-
-
 function throwError(err: Error) {
     if (process.env.NODE_ENV === "production") {
-        console.error(err);
         return;
     }
     throw err;
@@ -82,9 +69,7 @@ function findEntry(columns: Required<AutoFormColumnsDefinition>["columns"], colu
 
 const useSchema = (entityName: string, entity: EntityDefinition, columns: any, tabName: string, columnName: string, sectionName: string, app: ModelDrivenApp, formName: string, formContext: any) => {
 
-
     const [schema, setSchema] = useState<ControlJsonSchemaObject>();
-
 
     const lastSchema = useRef<ControlJsonSchemaObject>();
 
@@ -93,7 +78,6 @@ const useSchema = (entityName: string, entity: EntityDefinition, columns: any, t
     useEffect(() => {
 
         //   const entity = app.getEntity(entityName);
-        console.log("Recalculating Schema:", [entityName, entity, Object.keys(columns).join(", ")]);
         const fields = Object.keys(columns)
             .filter(
                 (field) =>
@@ -110,10 +94,7 @@ const useSchema = (entityName: string, entity: EntityDefinition, columns: any, t
                 field: columns[field]
             }));
 
-
-
         const deps = fields.filter(f => f.field.dependant).map(f => f.field.dependant).filter((v, i, a) => a.indexOf(v) === i);
-        console.log(deps);
         if (fields.length > 0) {
             const schemaDef: ControlJsonSchemaObject = {
                 type: "object",
@@ -135,7 +116,6 @@ const useSchema = (entityName: string, entity: EntityDefinition, columns: any, t
                 ),
             };
 
-            console.log("schemadetect", [JSON.parse(JSON.stringify(lastSchema.current ?? {})), JSON.parse(JSON.stringify(schemaDef)), isEqual(lastSchema.current, schemaDef)]);
             if (!isEqual(lastSchema.current, schemaDef)) {
                 lastSchema.current = schemaDef;
                 setSchema(schemaDef);
@@ -172,7 +152,6 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
     } = props;
 
     try {
-        console.group("SectionComponent: Section: " + sectionName);
 
         const renderId = useRef(new Date().toISOString());
         renderId.current = new Date().toISOString();
@@ -190,7 +169,6 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
         const columns = form.columns;
         const tab = form.layout.tabs[tabName] as FormTabDefinitionWithColumns;
         const section = findEntry(tab.columns, columnName, sectionName);
-        console.log("SectionComponent", [tab,section]);
 
         if (hasColumns(section)) {
             const columns = section.columns;
@@ -224,7 +202,6 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
             );
             return ui;
 
-
         } else if (hasControl(section)) {
             if (section.control in Controls) {
                 const CustomControl = Controls[section.control];
@@ -250,13 +227,11 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
 
         const schema = useSchema(entityName, entity, columns, tabName, columnName, sectionName, app, formName, formContext);
 
-
         //TODO , make expression parsning work on views.
         const [{ allowedforchildcreation }] = useEAVForm((state) => ({ "allowedforchildcreation": state.formValues.allowedforchildcreation }));
         const appinfo = useAppInfo();
 
         const views = useLazyMemo(() => {
-            console.groupCollapsed("Setting Related Views: " + entity.logicalName);
             try {
                 const views = app
                     .getReferences(
@@ -267,7 +242,6 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                         sectionName
                     );
 
-                console.log("Setting Views", JSON.stringify(views), allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId);
                 for (let view of views) {
                     view.ribbon = Object.assign({}, view?.ribbon ?? {});
                     let visible = view.ribbon.new?.visible as string | boolean;
@@ -277,14 +251,10 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                         }
                     }
                 }
-                console.log("Setting Views", JSON.stringify(views), allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId);
                 return views;
             } finally {
-                console.groupEnd();
             }
         }, [entity.logicalName, formName, tabName, columnName, sectionName, allowedforchildcreation, appinfo.currentEntityName, appinfo.currentRecordId]);
-
-
 
         const [activeViewRef, setactiveViewRef] = useState<ViewReference>();
         useEffect(() => {
@@ -309,14 +279,12 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                     <Stack verticalFill>
                         {activeViewRef && <FormRender stickyFooter={false} dismissPanel={(ev) => { setactiveViewRef(undefined); }} record={{}}
                             onChange={(data) => {
-                                console.log(data);
                                 onFormDataChange?.({ [activeViewRef!.entity.collectionSchemaName.toLowerCase()]: [...formData[activeViewRef.entity.collectionSchemaName.toLowerCase()] ?? [], data] } as any);
                             }} formName="Quick"
                             entityName={activeViewRef!.entityName} />
                         }
 
                     </Stack>
-
 
                 </Panel>
 
@@ -370,8 +338,6 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
                                                 iconProps: { iconName: "Add" },
                                                 onClick: (e, i) => {
 
-                                                    console.log([e, view, gridprops]);
-
                                                     if (gridprops.view?.ribbon?.new?.supportQuickCreate) {
 
                                                         setactiveViewRef(gridprops);
@@ -413,12 +379,10 @@ export function SectionComponent<T extends { id?: string, [key: string]: any }>(
             </>
         );
     } finally {
-        console.groupEnd();
     }
 }
 
 export default SectionComponent;
-
 
 const useExpressionEvaluator = (obj1: AutoFormColumnsDefinition | AutoFormControlsDefinition |string) => {
 
@@ -466,10 +430,6 @@ const useExpressionEvaluator = (obj1: AutoFormColumnsDefinition | AutoFormContro
         });
     }, [formValues, JSON.stringify(obj1)]);
 
-
-
-
-
     return [section, isLoading] as [AutoFormColumnsDefinition | AutoFormControlsDefinition, boolean];
 
 }
@@ -481,11 +441,9 @@ export const WizardSection: React.FC<{
 }> = ({ section: sectionIn, sectionName }) => {
 
     const styles = useStackStyles();
-    console.log("SectionComponentSlim", [sectionIn]);
 
     const [section, isLoading] = useExpressionEvaluator(sectionIn);
    
-
     if (hasColumns(section)) {
         const columns = section.columns;
         const ui = (
@@ -504,7 +462,6 @@ export const WizardSection: React.FC<{
         );
         return ui;
 
-
     } else if (hasControl(section)) {
         if (section.control in Controls) {
             const CustomControl = Controls[section.control];
@@ -518,7 +475,6 @@ export const WizardSection: React.FC<{
         }
 
     } else if (hasHtml(section)) {
-        console.log("sectioncomponent html", [section.html]);
 
         if (isLoading)
             return null;
@@ -542,14 +498,11 @@ export const WizardSection: React.FC<{
 
         return <ModelDrivenForm entity={entity} entityName={forminfo.entity} form={entity.forms![forminfo.form]} locale={app.locale} formName={forminfo.form} />
 
-
-
     } else if (hasFields(section)) {
         const app = useModelDrivenApp();
         const { currentEntityName } = useAppInfo();
         const [formData, { onChange }] = useEAVForm(x => x.formValues);
         const columns = useMemo(() => Object.fromEntries(Object.entries(section.fields).map(([x, v]) => [x, { ...v, tab: "TAB_General", column: "COLUMN_First", section: "SECTION_General" }])), [section.fields]);
-        console.log("Rendering Fields", [columns]);
 
         const form = useMemo(() => ({
             "type": "QuickCreate",
@@ -582,7 +535,6 @@ export const WizardSection: React.FC<{
 
         if (!schema)
             return null;
-        console.log("Rendering Fields", [columns, schema]);
         return (
             <FormHostContext.Provider value={formHostContextValue}>
                 <ControlsComponent entityName={currentEntityName}
@@ -613,23 +565,17 @@ type JsonScheamSectionProps = {
 };
 export const JsonScheamSection: React.FC<JsonScheamSectionProps & Required<AutoFormJsonSchemaDefinition>> = ({ schema, uiSchema, logicalName, sectionName }) => {
 
-
     const [formData, { onChange }] = useEAVForm(x => x.formValues, undefined, "sectioncomponent schema");
 
-    console.log("sectioncomponent schema", [uiSchema, schema, logicalName, formData]);
-  
     return (
         <Form key={sectionName}
             uiSchema={uiSchema}
             schema={schema}
             onBlur={(e) => {
-                console.log("sectioncomponent schema blur formdata", [e]);
             }}
             onChange={(e) => {
              
-
                 onChange((props, ctx) => {
-                    console.log("sectioncomponent schema updating formdata", [props,e]);
                     if (logicalName)
                         props[logicalName] = e.formData;
                     else

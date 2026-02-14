@@ -9,16 +9,13 @@ export type JsonSchemaErrorObjectWrap = {
 }
 export type JsonSchemaError = JsonSchemaErrorObjectWrap | JsonSchemaErrorObject | Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
 
-
 export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFWError, state:any) => JsonSchemaErrorObject) => JsonSchemaError =
     (errors, state = {}, fx) => {
-        console.debug("rjsfErrors start", [errors, state]);
 
         if (typeof errors === "undefined")
             return {} as JsonSchemaErrorObjectWrap;
 
         if (Array.isArray(errors)) {
-            console.debug("rjsfErrors array", [errors, state])
 
             //Either its schema array or its array of errors
             errors = errors.filter(e => !isEAVFWError(e) || e.visible !== false);
@@ -35,15 +32,12 @@ export const rjsfErrors: (arg: EAVFWErrorDefinition, state?: any, fx?: (n: EAVFW
         }
 
         if (isEAVFWError(errors)) {
-            console.debug("rjsfErrors obj error", [errors, state, fx])
             if (fx)
                 return fx(errors,state) as JsonSchemaErrorObject;
             return { __errors: [errors.error] } as JsonSchemaErrorObject;
         }
 
-        console.debug("rjsfErrors object", [errors, state]);
         const entries = Object.entries(errors).map(([k, v]) => [k, rjsfErrors(v, state[k], fx)]);
-        console.debug("rjsfErrors object entries", [errors, state, entries]);
         return Object.fromEntries(entries) as JsonSchemaErrorObjectWrap;
 
     }

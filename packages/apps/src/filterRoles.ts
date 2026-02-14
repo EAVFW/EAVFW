@@ -1,10 +1,7 @@
 import { FormColumnDefinition } from "@eavfw/manifest";
 
- 
-
 export function filterRoles(roles: FormColumnDefinition["roles"], user: any) {
     let noRoleInfoDefined = true;
-    console.log("filterrole", [roles, user]);
     if (roles) {
         noRoleInfoDefined = false;
 

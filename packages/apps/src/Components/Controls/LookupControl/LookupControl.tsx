@@ -47,7 +47,6 @@ import {
 } from "@fluentui/react-components";
 import type { ComboboxProps } from "@fluentui/react-components";
 
-
 const DUMMY_DATA_KEY = "dummy";
 
 const commandback: IButtonStyles = {
@@ -104,7 +103,6 @@ function returnQueryFilter(searchfilter: string | undefined, filter: string | un
         return { '$filter': '' };     //neither defined
 }
 
-
 export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     extraErrors,
     targetEntityName,
@@ -131,8 +129,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const _hideModal = () => setmodalOpen(false);
     const _showModal = () => setmodalOpen(true);
 
-    
-
     const localization = {
         new: capitalize(app.getLocalization("new") ?? "New"),
         clear: capitalize(app.getLocalization("clear") ?? "Clear"),
@@ -144,7 +140,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const [hasFilterChanged, setHasFilterChanged] = useState(false);
     const hasFilterChangedFirst = useRef(false);
 
-    console.log("lookup control: ", [selectedValue, targetEntity, primaryField, logicalName, filter])
     const initialOptions = useMemo(() => (typeof (selectedValue) === "object" ? [{ key: selectedValue.id ?? DUMMY_DATA_KEY, text: selectedValue[primaryField] }] : []), [selectedValue]);
 
     const [shouldLoadRemoteOptions, setShouldLoadRemoteOptions] = useState(false);
@@ -155,15 +150,12 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const loadRemoteValue = useMemo(() => !!value && typeof (selectedValue) === "undefined" && (!shouldLoadRemoteOptions || !isLoadingRemoteData) && remoteItems?.items.filter(x => x.id === value).length === 0, [selectedValue, isLoadingRemoteData, remoteItems?.items]);
     const { record: remoteSelectedValue, isLoading: isLoadingRemoteSelectedValue } = getRecordSWR(app.getEntity(targetEntityName).collectionSchemaName, value, `?$select=id,${primaryField}`, loadRemoteValue);
 
-
     const remoteOptions = useMemo(() => (remoteItems?.items.filter(c => c.id !== remoteSelectedValue?.id).map(m => ({
         key: m.id,
         text: m[primaryField],
         data: m.id
     })) as IComboBoxOption[] ?? []).concat(remoteSelectedValue?.id ?
         [{ key: remoteSelectedValue.id, text: remoteSelectedValue[primaryField] }] : []), [remoteItems?.items, remoteSelectedValue]);
-
-
 
     const [selectedKey, setSelectedKey] = useState<string | null>(value ?? (typeof (selectedValue) === "object" ? selectedValue.id ?? DUMMY_DATA_KEY : undefined));
 
@@ -177,10 +169,8 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const options = useMemo(() => (hasFilterChanged && shouldLoadRemoteOptions ? remoteOptions : remoteOptions.concat(localOptions.current).concat(initialOptions.filter(io => remoteOptions.filter(ro => ro.key === io.key).length === 0))),
         [initialOptions, remoteOptions, dummyData, hasFilterChanged]);
 
-
     useEffect(() => {
         if (!disabled && !!filter) {
-            console.log("Lookup Control: filter changed", [label, filter]);
 
             if (hasFilterChangedFirst.current) {
                 setHasFilterChanged(true);
@@ -196,7 +186,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
      * @param data
      */
     const _onFormRenderDataChange = useCallback((data: any, localctx: EAVFormOnChangeCallbackContext) => {
-        console.log("Lookup Control: Submitting Modal", data);
         //let o = localOptions.current;
         //if (o.filter(o => o.key === DUMMY_DATA_KEY).length === 0)
         //    o.unshift({
@@ -229,7 +218,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     //    option?: IDropdownOption | IComboBoxOption,
     //    index?: number) => {
 
-    //    console.log("Lookup Control: on change", [event, option, index]);
     //    onChange(props => {            
     //        if (option?.key === "dummy") {
     //            delete props[logicalName];
@@ -245,7 +233,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     const __onChange: ComboboxProps["onChange"] = (event) => {
         const value = event.target.value.trim();
-        console.log("Lookup Control: __onChange", [value])
          
        // ref.current?.focus(true);
         setfreeformvalue(value);
@@ -266,7 +253,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     const onOptionSelect: ComboboxProps["onOptionSelect"] = (event, data) => {
         const matchingOption = options.find(x => x.key === data.optionValue);
      
-
         if (!matchingOption) {
             resetValue();
         } else {
@@ -286,7 +272,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
      * If the value changes, then find and set key; Value is ids;
      * */
     useEffect(() => {
-        console.log("LookupControl: setting selected key for " + logicalName, [value]);
         if (value && typeof value !== "object") {
             setSelectedKey(value);
         }
@@ -298,8 +283,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
 
     const [isComboboxOpen, setIsComboboxOpen] = useState(false);
 
-       
-    
     return (<>
         <Dialog
             open={modalOpen}
@@ -320,7 +303,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                     forms={forms}
                     type={type}
                     dismissPanel={(event) => {
-                        console.log("dismissModal event", event, selectedKey, selectedValue, options, freeformvalue);
                         if (event === "cancel") {
                             _hideModal();
                         } else if (event === "save") {
@@ -431,12 +413,9 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
                 onInputValueChange: (value) => {
 
                     setIsFreeform(true);
-                    console.log("autofill->onInputValueChange->value:" + value + " , primaryField: " + primaryField);
                     ref.current?.focus(true);
                     setfreeformvalue(value);
                     setSearchFilter(`contains(${primaryField}, \'${value}\')`)
-
-                    console.log("onInputValueChange has run");
 
                 }
             }}
@@ -445,7 +424,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
             placeholder={placeHolder}
             errorMessage={errorMessage}
             onItemClick={(e: React.FormEvent<IComboBox>, option?: IComboBoxOption, index?: number) => {
-                console.log("OnItemCLick", [e, option, index]);
                 if (option?.key !== undefined && option.key === "dummy") {
                     _showModal();
                 }
@@ -476,7 +454,6 @@ export const LookupCoreControl: React.FC<LookupCoreControlProps> = ({
     )
 }
 
-
 export function LookupControl<T>({
     entityName,
     attributeName,
@@ -491,9 +468,6 @@ export function LookupControl<T>({
     extraErrors,
     errorMessage
 }: LookupControlProps<T>) {
-
-
-
 
     const app = useModelDrivenApp();
     
@@ -515,7 +489,6 @@ export function LookupControl<T>({
                 .find(([_, x]) => isLookup(x.type) && x.type.referenceType !== entityName)
                 ?.[1].logicalName.slice(0,-2)!];
             
-
         return {
             selectedValue: selectedValue,               
             value: isPolyLookup(attribute.type) && attribute.type.split ?
@@ -526,12 +499,9 @@ export function LookupControl<T>({
         }
     }, "LookupControl" + attributeName);
 
-
-
     const { formDefinition } = useFormHost();
     const column = formDefinition?.columns[fieldName];
 
-   
     const attributeType = attribute.type;
 
     if (!(isLookup(attributeType)))
@@ -573,17 +543,11 @@ export function LookupControl<T>({
 
             }
 
-
             return type.referenceTypes[0];
         }
 
         const [selectedEntity, setSelectedEntity] = useState(defaultEntity);
       
-       
-        console.log("Poly Lookup", [formvalues[attribute.logicalName], value, selectedValue, selectedEntity, options, entityName,
-            type.referenceTypes.map(x => app.getEntityFromKey(x))
-                ]);
-
         return <Stack horizontal tokens={{ childrenGap:10 }}>
 
             <Dropdown styles={{ root: { width: 150 } }} selectedKey={selectedEntity} onChange={(x, o) => setSelectedEntity(o?.data)} options={options} ></Dropdown>
@@ -632,14 +596,10 @@ export function LookupControl<T>({
         </Stack>
     }
 
-
     const targetEntityName = column.entityName ?? (isLookup(attribute.type) ? attribute.type.foreignKey?.principalTable! : throwIfNotDefined<string>(undefined, "Not a lookup attribute"));
-
 
     //  
     const forms = isLookup(attribute.type) ? attribute.type?.forms ?? {} : {};
-
-    
 
     return <LookupCoreControl
         selectedValue={selectedValue}
@@ -658,6 +618,4 @@ export function LookupControl<T>({
     />
 }
 
-
 export default LookupControl;
-

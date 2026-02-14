@@ -25,16 +25,10 @@ export const DirtyContainer: React.FC<PropsWithChildren<{ id: string, initialdat
 
     const [_, __, etag] = useEAVForm((state) => null);
 
-
-
     const { setDirtyFields: setParentDirtyFields, dirtyFields: rootDirtyFields } = useDirtyContext();
     const refDirtyFields = useRef<DirtyFieldElement>(initialdata);
     const [dirtyFields, setDirtyFields] = useState<DirtyFieldElement>(refDirtyFields.current);
     const updateDirtyFields = useCallback((dirtyField: string, value?: DirtyFieldElementValue) => {
-        console.log("Setting dirty field " + dirtyField, [JSON.stringify(value),
-        JSON.stringify(refDirtyFields.current[dirtyField]), JSON.stringify(refDirtyFields.current),
-        typeof value === "object" && value != null ? mergeDeep(refDirtyFields.current[dirtyField] ?? {}) : value, value
-        ]);
 
         if (typeof value === "object" && value != null)
             refDirtyFields.current[dirtyField] = mergeDeep(refDirtyFields.current[dirtyField] ?? {}, value);
@@ -48,19 +42,11 @@ export const DirtyContainer: React.FC<PropsWithChildren<{ id: string, initialdat
 
     const clearDirtyFields = useCallback((dirtyField: string, value?: DirtyFieldElementValue) => {
 
-        console.log("clearing dirty field " + dirtyField, [
-            JSON.stringify(value),
-            JSON.stringify(refDirtyFields.current[dirtyField]),
-            JSON.stringify(refDirtyFields.current),
-            typeof value === "object" && value != null ? mergeDeep(refDirtyFields.current[dirtyField] ?? {}) : value, value
-        ]);
-
         let old = refDirtyFields.current[dirtyField];
         if (isDirtyContainer(old) && value === old?.value) {
             refDirtyFields.current[dirtyField] = { value: value, __isDirty: false };
             setParentDirtyFields(id, refDirtyFields.current);
         }
-
 
     }, [id]);
 
@@ -78,11 +64,9 @@ export const DirtyContainer: React.FC<PropsWithChildren<{ id: string, initialdat
         }
     }, [etag, id]);
 
-
     const alldirtyFields = useMemo(() => Object.assign({}, rootDirtyFields[id] ?? {}, dirtyFields), [rootDirtyFields[id], dirtyFields]);
 
     useEffect(() => {
-        console.log("dirtyFields updated: " + id, [JSON.stringify(alldirtyFields)]);
     }, [alldirtyFields]);
 
     return (<DirtyContext.Provider value={{

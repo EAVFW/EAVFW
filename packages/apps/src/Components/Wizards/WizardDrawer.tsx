@@ -1,5 +1,4 @@
 
-
 import { EAVForm, useEAVForm } from "@eavfw/forms";
 import { mergeDeep } from "@eavfw/utils";
 import {
@@ -10,7 +9,6 @@ import {
     DrawerHeader,
     DrawerHeaderTitle, DrawerProps
 } from "@fluentui/react-components/unstable";
-
 
 import { Dismiss24Regular } from "@fluentui/react-icons";
 
@@ -24,7 +22,6 @@ import { WizardMessages } from "./WizardMessages";
 import { WizardTabs } from "./WizardTabs";
 import { WizardToaster } from "./WizardToaster";
 
-
 const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
 
     //const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
@@ -36,7 +33,6 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
      * When data is updated, we set the internal data.
      */
     useEffect(() => {
-        console.log('WizardReducer: Setting Wizard FormValues', [data]);
         r[1]({ action: "setValues", values: data })
     }, [data]);
 
@@ -44,7 +40,6 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
      * Reset data when the wizardkey is altered
      */
     useEffect(() => {
-        console.log('WizardReducer: Clearing EAV FormValues', [r[0].wizardKey]);
         updateState((p, c) => { p.formValues = {}; c.replaceState = true });
     }, [r[0].wizardKey])
 
@@ -54,21 +49,17 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
     useEffect(() => {
 
         let p = r[0].transition;
-        console.log("Transition Monitor", p);
         const dispatch = r[1];
 
         if (p) {
             let isCurrent = true;
             let t5 = setTimeout(() => {
-                console.log("Transition Monitor 5000");
                 dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Still working." });
             }, 5000);
             let t11 = setTimeout(() => {
-                console.log("Transition Monitor 11000");
                 dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Sorry, its taking longer than expected." });
             }, 11000);
             let t18 = setTimeout(() => {
-                console.log("Transition Monitor 18000");
                 dispatch({ action: "updateMessage", messageKey: "TransitionIn", "message": "Still working, sorry for keeping you wait." });
             }, 18000);
 
@@ -76,7 +67,6 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
                 clearTimeout(t5);
                 clearTimeout(t11);
                 clearTimeout(t18);
-
 
                 if (result.status.toLowerCase() === "failed") {
 
@@ -94,10 +84,8 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
                     return;
                 }
 
-
                 for (let action of Object.values(result.actions)) {
                     if (action.type === "UpdateWizardContext") {
-
 
                         if (action.body?.values) {
                             // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
@@ -118,7 +106,6 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
                 });
                 //  dispatch({ action: "setValues", values: result.body, expressionsProvider: onFormValuesChange, merge: true });
 
-
                 if (isCurrent) {
                     r[1]({ action: "setTransition", transition: false });
                 }
@@ -130,18 +117,12 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
                 clearTimeout(t11);
                 clearTimeout(t18);
 
-                console.log("Transition Monitor Cleared");
             }
         } else if (r[0].isTransitioning) {
             r[1]({ action: "setTransition", transition: false });
         }
 
-
-
-
-
     }, [r[0].transition]);
-
 
     const stack = useStackStyles();
 
@@ -155,13 +136,8 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
         return null;
 
     const onTabSelect: SelectTabEventHandler = (event, data) => {
-        console.log("selected tab", data);
         setSelectedTab(data.value as string);
     };
-
-
-
-
 
     return (<Drawer position="end" size="large"
         type="overlay"
@@ -197,20 +173,10 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
     </Drawer>)
 }
 
-
 export const WizardDrawer: React.FC = ({ }) => {
-
-
-
-
-
-
-
-
 
     return (
         <EAVForm purpose="drawer" onChange={(data, ctx) => {
-            console.log("WziardData", data, ctx);
 
         }}><Wizard />
         </EAVForm>

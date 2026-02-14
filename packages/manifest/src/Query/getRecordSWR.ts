@@ -3,8 +3,6 @@ import useSWR, { mutate  } from "swr";
 import { IRecord } from "../Types";
 import { useJsonFetcher } from "./jsonFetcher";
 
-
-
 export function getRecordSWR(entityName: string, recordId: string, query: string = "", ready = true, initialData: any = undefined, refreshInterval=0) {
 
     const [baseUrl, jsonFetcher] = useJsonFetcher();
@@ -36,11 +34,9 @@ export function getRecordSWR(entityName: string, recordId: string, query: string
         This case is indicated when recordId is None, then no data can be retrieved.
      */
     useEffect(() => {
-        console.log("Record data is refreshed", [key,recordId, data?.value]);
         if (recordId !== undefined) {
             setRecord(data?.value);
         } else if(data?.value !== undefined){
-            console.log("Error occurred in getRecordSWR. Record")
         }
     }, [data?.value])
 
@@ -51,4 +47,3 @@ export function getRecordSWR(entityName: string, recordId: string, query: string
         mutate: () => mutate(key)
     }
 }
-

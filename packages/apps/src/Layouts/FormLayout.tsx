@@ -20,11 +20,6 @@ import { WizardProvider } from "../Components/Wizards/WizardProvider";
 import { useSectionStyles } from "../Styles/SectionStyles.styles";
 import { makeStyles, mergeClasses } from "@fluentui/react-components";
 
-
-
-
-
-
 const FormLayoutContext = createContext({
 
     mutator: { mutate: () => { } },
@@ -32,30 +27,21 @@ const FormLayoutContext = createContext({
 });
 export const useFormLayoutContext = () => useContext(FormLayoutContext);
 
-
 const useLayoutStyles = makeStyles({
     ribbon: {
         width:"auto"
     }
 })
 export function FormLayout(props: PageLayoutProps) {
-    console.group("FormLayout");
     try {
-        console.log(props);
         if (!props.sitemap)
             return <div>loading</div>;
-
-
-       
 
         const app = useModelDrivenApp();
         const router = useRouter();
 
-
-
         const [selection, setSelection] = useState<Selection<Partial<IRecord> & IObjectWithKey>>(new Selection<Partial<IRecord> & IObjectWithKey>({
             onSelectionChanged: () => {
-
 
                 setselectionDetails(_getSelectionDetails())
             },
@@ -75,7 +61,6 @@ export function FormLayout(props: PageLayoutProps) {
                     return `${selectionCount} items selected`;
             }
         }
-
 
         const [selectionDetails, setselectionDetails] = useState<ModelDrivenGridViewerState["selectionDetails"]>(_getSelectionDetails());
         const [mutater, setMutator] = useState({ mutate: () => { } });
@@ -106,7 +91,6 @@ export function FormLayout(props: PageLayoutProps) {
                                                 <Stack verticalFill>
                                                     <RibbonBar className={mergeClasses(styles.section, styles1.ribbon)} />
 
-
                                                     <MessageArea />
                                                     <Stack.Item grow style={{ position: "relative" }}>
 
@@ -122,7 +106,6 @@ export function FormLayout(props: PageLayoutProps) {
                                     </ProgressBarProvider>
                                 </MessagesProvider>
 
-
                             </Stack>
                         </RibbonContextProvider>
                     </WizardProvider>
@@ -130,6 +113,5 @@ export function FormLayout(props: PageLayoutProps) {
             </ModelDrivenGridViewerSelectedContext.Provider>
         );
     } finally {
-        console.groupEnd();
     }
 }

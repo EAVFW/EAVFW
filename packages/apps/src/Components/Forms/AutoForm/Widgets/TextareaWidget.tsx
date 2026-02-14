@@ -12,8 +12,6 @@ import {
 } from '@rjsf/utils';
 import { ChangeEvent, FocusEvent } from 'react';
 
-
-
 export function TextareaWidget<
 	T = any,
 	S extends StrictRJSFSchema = RJSFSchema,
@@ -38,7 +36,6 @@ export function TextareaWidget<
 	rawErrors,
 	multiline, uiSchema
 }: BaseInputTemplateProps<T, S, F>) {
-	console.log("UIPROPS", [uiSchema, options, value]);
 	const inputProps = getInputProps<T, S, F>(schema, type, options);
 	const _onChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
 		onChange(value === '' ? options.emptyValue : value);
@@ -46,7 +43,6 @@ export function TextareaWidget<
 	const _onFocus = ({ target: { value } }: FocusEvent<HTMLTextAreaElement>) => onFocus(id, value);
 
 	const uiProps = options ?? {};
-	console.log("UIPROPS", [uiProps, inputProps]);
 	return (
 		<Textarea style={{ "flexGrow":1}}
 			id={id}
@@ -66,7 +62,6 @@ export function TextareaWidget<
 			onBlur={_onBlur}
 			onFocus={_onFocus}
 			// errorMessage={(rawErrors || []).join('\n')}
-
 
 			{...uiProps}
 			aria-describedby={ariaDescribedByIds<T>(id, !!schema.examples)}

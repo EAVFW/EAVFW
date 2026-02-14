@@ -6,15 +6,12 @@ import { useUserProfile } from "../../Profile/useUserProfile";
 import { ModelDrivenSitemap } from '../../../Model/ModelDrivenSitemap';
 import { ModelDrivenSitemapEntry } from '../../../Model/ModelDrivenSitemapEntry';
 
-
 function filterEntry(user: any) {
 
     if (!user)
         return () => false;
 
     return ([key, entry]: [string, ModelDrivenSitemapEntry]) => {
-
-
 
         if (!entry.roles)
             return true;
@@ -28,8 +25,6 @@ export function useNavigationData(sitemap: ModelDrivenSitemap) {
     const user = useUserProfile();
 
     return useMemo(() => {
-        console.groupCollapsed("AreaFilters");
-        console.log("user", user);
         try {
             const areas = Object.keys(sitemap.areas).filter(area => {
                 if (!user) return true;
@@ -63,10 +58,8 @@ export function useNavigationData(sitemap: ModelDrivenSitemap) {
                         return [groupKey, entries] as [string, typeof entries]
                     }).filter(x => x[1].length > 0)
             }
-            console.log(result);
             return result;
         } finally {
-            console.groupEnd();
         }
     }, [user, router.query.area]);
 }

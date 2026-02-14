@@ -26,22 +26,17 @@ function getProfile(entityKey?: string) {
                 
                 if (error.status === 401) return
                  
-
                 // Retry after 5 seconds.
                 setTimeout(() => revalidate({ retryCount }), baseDelayMs * 2 ** retryCount)
             }
         }
     )
 
-
-
-    console.log(data, error);
     if (data?.role && !Array.isArray(data.role)) {
         data.role = [data.role];
     }
 
     const { record: userInfo } = getRecordSWR(entityKey ? app.getEntityFromKey(entityKey).collectionSchemaName : "", data?.sub!, "", entityKey && data ? true : false)
-
 
     return {
         record: data ? data : notAuthorizedUser,
@@ -56,8 +51,6 @@ export const UserProvider: React.FC<PropsWithChildren<{ authorize?: boolean, onL
         getProfile(loadUserInfoEntityKey) :
         { record: notAuthorizedUser, isLoading: false, isError: false };
 
-    console.log("UserProvider PreAuthorize", [authorize, record]);
-
     useEffect(() => {
         if (onLoaded && record && record.isAuthenticated !== false) {
             onLoaded(record);
@@ -69,9 +62,6 @@ export const UserProvider: React.FC<PropsWithChildren<{ authorize?: boolean, onL
             return <Loader />
 
     }
-
-
-    console.log("UserProvider PostAuthorize", [authorize, record]);
 
     return <UserContext.Provider value={record}> {children} </UserContext.Provider>
 }

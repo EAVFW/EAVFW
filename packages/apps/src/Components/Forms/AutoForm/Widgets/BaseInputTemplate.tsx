@@ -12,7 +12,6 @@ import {
 } from '@rjsf/utils';
 import { ChangeEvent, FocusEvent, useEffect, useState } from 'react';
 
-
 // Keys of ITextFieldProps from @fluentui/react
 const allowedProps = [
 	'multiline',
@@ -78,7 +77,6 @@ export function React8BaseInputTemplate<
 	rawErrors,
 	multiline, uiSchema
 }: BaseInputTemplateProps<T, S, F>) {
-	console.log("UIPROPS", [uiSchema, options, value]);
 	const inputProps = getInputProps<T, S, F>(schema, type, options);
 	const _onChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) =>
 		onChange(value === '' ? options.emptyValue : value);
@@ -86,7 +84,6 @@ export function React8BaseInputTemplate<
 	const _onFocus = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onFocus(id, value);
 
 	const uiProps = options ?? {};
-	console.log("UIPROPS", [uiProps, inputProps]);
 	return (
 		<>
 			<TextField
@@ -126,8 +123,6 @@ export function React8BaseInputTemplate<
 	);
 }
 
-
-
 export function React9BaseInputTemplate<
 	T = any,
 	S extends StrictRJSFSchema = RJSFSchema,
@@ -152,13 +147,10 @@ export function React9BaseInputTemplate<
 	rawErrors,
 	multiline, uiSchema
 }: BaseInputTemplateProps<T, S, F>) {
-//	console.log("UIPROPS", [uiSchema, options, value]);
 	const inputProps = getInputProps<T, S, F>(schema, type, options);
 	
 	const _onBlur = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onBlur(id, value);
 	const _onFocus = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onFocus(id, value);
-
-	  
 
 	const _onChange = ({ target: { value } }: ChangeEvent<HTMLInputElement>) => {
 		let updatedValue = value === '' ? options.emptyValue : value;
@@ -167,7 +159,6 @@ export function React9BaseInputTemplate<
 	};
 
 	const uiProps = options ?? {};
-	console.log("UIPROPS", [uiSchema,uiProps, inputProps,value, value || value === 0 ? value : '']);
 	return (
 		<>
 			<Input

@@ -5,7 +5,6 @@ function ProgressBar(): JSX.Element {
 
     const { progressBarProps } = useProgressBarContext();
 
-    
     return (
         <div style={{ position: 'absolute', left: 0, right: 0, top: 0, height: 0 }}>
             <ProgressIndicator barHeight={4} {...progressBarProps} styles={{ itemProgress: { paddingTop: 0, paddingBottom: 1 } }} />
@@ -50,7 +49,6 @@ const ProgressBarProvider = (props: any) => {
     const [progressBarProps, setProgressPropsState] = useState(initialState);
 
     let setProgressBarProps = function (props: IProgressIndicatorProps): void {
-        console.log('setProgressBarProps', props);
         setProgressPropsState(_ => props);
 
         promise.current = new Promise<void>(resolve => {
@@ -68,7 +66,6 @@ const ProgressBarProvider = (props: any) => {
     }
 
     let hideProgressBar = function (): void {
-        console.log("Hiding Progress Bar", [promise.current]);
         if (promise.current) {
             promise.current.then(_ => { if (!promise.current) setProgressPropsState({ progressHidden: true }) });
             promise.current = undefined;  //Dont cancel the timer if its been startet again.

@@ -16,7 +16,6 @@ import { Field, makeStyles, shorthands } from "@fluentui/react-components";
 
 import { usePick } from './usePick';
 
-
 // Keys of IDropdownProps from @fluentui/react
 const allowedProps = [
     'componentRef',
@@ -114,7 +113,6 @@ export default function DateWidget<T = any, S extends StrictRJSFSchema = RJSFSch
     const controlClass = useControlClass();
     const uiProps = usePick(options as any ?? {}, allowedProps);
 
-    console.log("DateWidget", [options, uiProps, schema, label, hideLabel]);
     return (
         
         <DatePicker
@@ -134,8 +132,6 @@ export default function DateWidget<T = any, S extends StrictRJSFSchema = RJSFSch
             />  
     );
 }
-
-
 
 const useStyles = makeStyles({
     control: {
