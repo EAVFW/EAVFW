@@ -4,3 +4,18 @@
 [submodule "external/eavframework"]
 	path = external/eavframework
 	url = https://github.com/EAVFW/EAVFramework.git
+[submodule "external/EAVFW.Extensions.SecurityModel"]
+	path = external/EAVFW.Extensions.SecurityModel
+	url = https://github.com/EAVFW/EAVFW.Extensions.SecurityModel.git
+[submodule "external/EAVFW.Extensions.Documents"]
+	path = external/EAVFW.Extensions.Documents
+	url = https://github.com/EAVFW/EAVFW.Extensions.Documents.git
+[submodule "external/EAVFW.Extensions.Configuration"]
+	path = external/EAVFW.Extensions.Configuration
+	url = https://github.com/EAVFW/EAVFW.Extensions.Configuration.git
+[submodule "external/EAVFW.Extensions.Infrastructure"]
+	path = external/EAVFW.Extensions.Infrastructure
+	url = https://github.com/EAVFW/EAVFW.Extensions.Infrastructure.git
+[submodule "external/EAVFW.Extensions.DynamicManifest"]
+	path = external/EAVFW.Extensions.DynamicManifest
+	url = https://github.com/EAVFW/EAVFW.Extensions.DynamicManifest.git
