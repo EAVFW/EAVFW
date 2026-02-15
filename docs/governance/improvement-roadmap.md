@@ -4,16 +4,16 @@ A phased plan to improve code quality, type safety, testing, and architecture of
 
 ## Current State (Baseline Metrics)
 
-| Metric | Current |
-|--------|---------|
-| Test files | 0 |
+| Metric            | Current               |
+| ----------------- | --------------------- |
+| Test files        | 0                     |
 | `any` occurrences | 201 (across 78 files) |
-| Files >400 lines | 8 |
-| Default exports | 29 |
-| React contexts | 33 |
-| JSDoc coverage | ~5% |
-| ESLint config | None |
-| Prettier config | None |
+| Files >400 lines  | 8                     |
+| Default exports   | 29                    |
+| React contexts    | 33                    |
+| JSDoc coverage    | ~5%                   |
+| ESLint config     | None                  |
+| Prettier config   | None                  |
 
 ## Phase 1: Foundation — Tooling & Standards
 
@@ -107,14 +107,14 @@ A phased plan to improve code quality, type safety, testing, and architecture of
 
 ## Target Metrics
 
-| Metric | Now | Phase 1 | Phase 2 | Phase 3 | Phase 4 | Phase 5 | Phase 6 |
-|--------|-----|---------|---------|---------|---------|---------|---------|
-| Test files | 0 | 5+ | 15+ | 15+ | 25+ | 30+ | 40+ |
-| `any` occurrences | 201 | 201 | <50 | <20 | <20 | <10 | 0 |
-| Files >400 lines | 8 | 8 | 8 | 0 | 0 | 0 | 0 |
-| Default exports | 29 | 29 | 29 | 0 | 0 | 0 | 0 |
-| Contexts | 33 | 33 | 33 | ~24 | ~24 | ~20 | <20 |
-| JSDoc coverage | ~5% | ~15% | ~25% | ~40% | ~50% | ~70% | 100% |
+| Metric            | Now | Phase 1 | Phase 2 | Phase 3 | Phase 4 | Phase 5 | Phase 6 |
+| ----------------- | --- | ------- | ------- | ------- | ------- | ------- | ------- |
+| Test files        | 0   | 5+      | 15+     | 15+     | 25+     | 30+     | 40+     |
+| `any` occurrences | 201 | 201     | <50     | <20     | <20     | <10     | 0       |
+| Files >400 lines  | 8   | 8       | 8       | 0       | 0       | 0       | 0       |
+| Default exports   | 29  | 29      | 29      | 0       | 0       | 0       | 0       |
+| Contexts          | 33  | 33      | 33      | ~24     | ~24     | ~20     | <20     |
+| JSDoc coverage    | ~5% | ~15%    | ~25%    | ~40%    | ~50%    | ~70%    | 100%    |
 
 ## Dependencies and Sequencing
 

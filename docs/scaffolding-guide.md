@@ -16,6 +16,7 @@ dotnet new install ./external/eavfw-templates/templates/EAVFW.NextJS/
 ```
 
 To update templates after changes:
+
 ```bash
 dotnet new uninstall ./external/eavfw-templates/templates/EAVFW/
 dotnet new install ./external/eavfw-templates/templates/EAVFW/
@@ -38,20 +39,20 @@ dotnet new eavfw \
 
 ### Template Parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `--namespace` | Solution namespace. Used for project names, file names. | `EAVFW` |
-| `--appName` | Application name (e.g., "Portal"). Creates `{namespace}.{appName}` | `MainApp` |
-| `--databaseName` | SQL Server database name | `databaseName` |
-| `--schemaName` | Database schema | Falls back to namespace |
-| `--yourUserEmail` | Initial admin email for DB seeding | `pks@delegate.dk` |
-| `--yourUserName` | Initial admin username | `Poul Kjeldager` |
-| `--sendgrid_api_token` | SendGrid API token for email | (none) |
-| `--dotnetSDK` | .NET SDK version | `8.0.301` |
-| `--targetFramework` | Target framework | `net8.0` |
-| `--withSecurityModel` | Include EAVFW.Extensions.SecurityModel | `true` |
-| `--withDocuments` | Include EAVFW.Extensions.Documents | `true` |
-| `--skipRestore` | Skip NuGet restore | `false` |
+| Parameter              | Description                                                        | Default                 |
+| ---------------------- | ------------------------------------------------------------------ | ----------------------- |
+| `--namespace`          | Solution namespace. Used for project names, file names.            | `EAVFW`                 |
+| `--appName`            | Application name (e.g., "Portal"). Creates `{namespace}.{appName}` | `MainApp`               |
+| `--databaseName`       | SQL Server database name                                           | `databaseName`          |
+| `--schemaName`         | Database schema                                                    | Falls back to namespace |
+| `--yourUserEmail`      | Initial admin email for DB seeding                                 | `pks@delegate.dk`       |
+| `--yourUserName`       | Initial admin username                                             | `Poul Kjeldager`        |
+| `--sendgrid_api_token` | SendGrid API token for email                                       | (none)                  |
+| `--dotnetSDK`          | .NET SDK version                                                   | `8.0.301`               |
+| `--targetFramework`    | Target framework                                                   | `net8.0`                |
+| `--withSecurityModel`  | Include EAVFW.Extensions.SecurityModel                             | `true`                  |
+| `--withDocuments`      | Include EAVFW.Extensions.Documents                                 | `true`                  |
+| `--skipRestore`        | Skip NuGet restore                                                 | `false`                 |
 
 ### Generated Structure
 
@@ -76,6 +77,7 @@ dotnet new eavfw-nextjs --namespace MyProject --appName Portal --allow-scripts y
 ```
 
 This adds to `apps/MyProject.Portal/`:
+
 ```
 src/
   pages/          -- Next.js dynamic routes
@@ -158,16 +160,21 @@ npm link @eavfw/apps @eavfw/next @eavfw/expressions @eavfw/manifest @eavfw/hooks
 ## Common Issues
 
 ### "Cannot find module '@eavfw/manifest'"
+
 Run `npm install --force` again. Peer dependency resolution sometimes fails on first install.
 
 ### Source generator types not found
+
 Run `npm run gm` to regenerate the manifest, then `dotnet build` to trigger source generators.
 
 ### SQL Server connection refused
+
 Ensure Docker is running and the SQL Server container is up:
+
 ```bash
 docker ps | grep sql
 ```
 
 ### Next.js build fails with TypeScript errors
+
 Check that your `tsconfig.json` includes the correct paths and that all `@eavfw/*` packages are installed or linked.

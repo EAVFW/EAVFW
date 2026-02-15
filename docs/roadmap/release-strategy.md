@@ -6,13 +6,13 @@ All EAVFW packages (npm and NuGet) share a single version number. Releases are c
 
 ## Current State
 
-| Repo | Package(s) | Current release method | Current versioning |
-|------|-----------|----------------------|-------------------|
-| `EAVFW/` (this repo) | 11 `@eavfw/*` npm packages | semantic-release + conventional commits | Independent per package via `semantic-release-monorepo` |
-| `external/eavframework/` | `EAVFramework` NuGet | Manual / separate CI | Independent (v5.0.0) |
-| `external/eavframework/aspire/` | `EAVFramework.Extensions.Aspire.Hosting` NuGet | Manual / separate CI | Independent |
-| `external/eavfw-templates/` | `dotnet new` templates | Manual / separate CI | Independent (v2.2.11) |
-| `external/EAVFW.Extensions.*` | Various NuGet packages | Manual / separate CI | Independent |
+| Repo                            | Package(s)                                     | Current release method                  | Current versioning                                      |
+| ------------------------------- | ---------------------------------------------- | --------------------------------------- | ------------------------------------------------------- |
+| `EAVFW/` (this repo)            | 11 `@eavfw/*` npm packages                     | semantic-release + conventional commits | Independent per package via `semantic-release-monorepo` |
+| `external/eavframework/`        | `EAVFramework` NuGet                           | Manual / separate CI                    | Independent (v5.0.0)                                    |
+| `external/eavframework/aspire/` | `EAVFramework.Extensions.Aspire.Hosting` NuGet | Manual / separate CI                    | Independent                                             |
+| `external/eavfw-templates/`     | `dotnet new` templates                         | Manual / separate CI                    | Independent (v2.2.11)                                   |
+| `external/EAVFW.Extensions.*`   | Various NuGet packages                         | Manual / separate CI                    | Independent                                             |
 
 ### Problems
 
@@ -75,11 +75,13 @@ This means consumers can always use a single version: "we're on EAVFW 6.1.0" —
 Since Release Please only sees commits in this repo, we need to surface changes from other repos. Two approaches:
 
 **Option A: Submodule bump commits (Recommended)**
+
 - When `external/eavframework/` or `external/eavfw-templates/` have changes, update the submodule pointer in this repo
 - The submodule bump commit message includes the changelog: `feat: update eavframework — add WithDbGate() Aspire extension`
 - Release Please picks this up as a normal conventional commit
 
 **Option B: Sync workflow**
+
 - A GitHub Action in each external repo, on push to main, creates a commit in this repo summarizing the changes
 - More automated but adds complexity
 
@@ -94,11 +96,11 @@ feature branches ──> future ──> dev ──> main
 
 ### Branch Purposes
 
-| Branch | Purpose | Release channel | npm tag | NuGet suffix |
-|--------|---------|----------------|---------|-------------|
-| `main` | Stable releases | `latest` | `latest` | (none) |
-| `dev` | Next release candidate, small changes | `dev` | `dev` | `-dev.N` |
-| `future` | Big experiments, AI refactors, breaking changes | `future` | `future` | `-future.N` |
+| Branch   | Purpose                                         | Release channel | npm tag  | NuGet suffix |
+| -------- | ----------------------------------------------- | --------------- | -------- | ------------ |
+| `main`   | Stable releases                                 | `latest`        | `latest` | (none)       |
+| `dev`    | Next release candidate, small changes           | `dev`           | `dev`    | `-dev.N`     |
+| `future` | Big experiments, AI refactors, breaking changes | `future`        | `future` | `-future.N`  |
 
 ### Flow
 
@@ -107,6 +109,7 @@ feature branches ──> future ──> dev ──> main
 - **Hotfixes**: feature branch -> `main` directly (then backport to `dev`)
 
 Release Please creates separate release PRs for each branch:
+
 - PR to `main`: stable release (e.g., `6.1.0`)
 - PR to `dev`: prerelease (e.g., `6.2.0-dev.1`)
 - PR to `future`: prerelease (e.g., `7.0.0-future.1`)

@@ -19,7 +19,7 @@ All exported functions, types, interfaces, and components MUST have JSDoc commen
 
 Example:
 
-```typescript
+````typescript
 /**
  * Deeply merges two objects, with source values overriding target values.
  * Arrays are replaced, not concatenated.
@@ -42,7 +42,7 @@ Example:
 export const mergeDeep = <T extends Record<string, unknown>>(target: T, source: Partial<T>): T => {
   // implementation
 };
-```
+````
 
 ### Module-Level Documentation
 
@@ -69,10 +69,12 @@ Every `index.ts` barrel file should have a `@module` JSDoc comment describing th
 Each file should have ONE clear purpose. AI agents process files as atomic units -- a focused file is easier to understand, modify, and test.
 
 Good:
+
 - `useEntityLookup.ts` -- One hook that resolves entity definitions
 - `validateManifest.ts` -- One function that validates manifest structure
 
 Bad:
+
 - `helpers.ts` -- Grab bag of unrelated functions
 - `utils.ts` -- Ambiguous, could contain anything
 
@@ -80,17 +82,17 @@ Bad:
 
 Given a feature name, an AI agent should be able to predict where the code lives:
 
-| Looking for... | Look in... |
-|----------------|------------|
-| Entity type definitions | `packages/manifest/src/Entities/` |
-| Form components | `packages/apps/src/Components/Forms/` |
-| View components | `packages/apps/src/Components/Views/` |
-| Control components | `packages/apps/src/Components/Controls/` |
-| React hooks | `packages/hooks/src/` or `packages/apps/src/Hooks/` |
-| Expression parsing | `packages/expressions/src/` |
-| Form state management | `packages/forms/src/` |
-| Next.js integration | `packages/nextjs/src/` |
-| Utility functions | `packages/utils/src/` |
+| Looking for...          | Look in...                                          |
+| ----------------------- | --------------------------------------------------- |
+| Entity type definitions | `packages/manifest/src/Entities/`                   |
+| Form components         | `packages/apps/src/Components/Forms/`               |
+| View components         | `packages/apps/src/Components/Views/`               |
+| Control components      | `packages/apps/src/Components/Controls/`            |
+| React hooks             | `packages/hooks/src/` or `packages/apps/src/Hooks/` |
+| Expression parsing      | `packages/expressions/src/`                         |
+| Form state management   | `packages/forms/src/`                               |
+| Next.js integration     | `packages/nextjs/src/`                              |
+| Utility functions       | `packages/utils/src/`                               |
 
 ### New File Checklist
 
@@ -107,19 +109,19 @@ When creating a new file:
 
 Use these terms consistently. Never use the alternatives. This vocabulary reflects the EAV (Entity-Attribute-Value) domain model that EAVFW is built on.
 
-| Correct Term | DO NOT Use | Description |
-|-------------|------------|-------------|
-| Entity | Table, Model, Resource | A data object defined in the manifest |
-| Attribute | Field, Column, Property | A property of an entity |
-| Manifest | Schema, Config, Spec | The JSON document defining the application model |
-| View | Grid, Table, List | A visual representation of entity records |
-| Form | Detail, Editor, Screen | A UI for creating/editing a single entity record |
-| Control | Widget, Input, Component | A form field control (text, lookup, toggle, etc.) |
-| Ribbon | Toolbar, CommandBar, ActionBar | The command/action bar above views and forms |
-| Area | Section, Module, Zone | A navigation grouping in the app sidebar |
-| App | Application, Portal | A named application definition in the manifest |
-| Logical Name | slug, key, identifier | The lowercase programmatic name (e.g., `security_role`) |
-| Display Name | label, title | The human-readable name (e.g., `"Security Role"`) |
+| Correct Term | DO NOT Use                     | Description                                             |
+| ------------ | ------------------------------ | ------------------------------------------------------- |
+| Entity       | Table, Model, Resource         | A data object defined in the manifest                   |
+| Attribute    | Field, Column, Property        | A property of an entity                                 |
+| Manifest     | Schema, Config, Spec           | The JSON document defining the application model        |
+| View         | Grid, Table, List              | A visual representation of entity records               |
+| Form         | Detail, Editor, Screen         | A UI for creating/editing a single entity record        |
+| Control      | Widget, Input, Component       | A form field control (text, lookup, toggle, etc.)       |
+| Ribbon       | Toolbar, CommandBar, ActionBar | The command/action bar above views and forms            |
+| Area         | Section, Module, Zone          | A navigation grouping in the app sidebar                |
+| App          | Application, Portal            | A named application definition in the manifest          |
+| Logical Name | slug, key, identifier          | The lowercase programmatic name (e.g., `security_role`) |
+| Display Name | label, title                   | The human-readable name (e.g., `"Security Role"`)       |
 
 This vocabulary applies to code, comments, JSDoc, commit messages, and PR descriptions. For example, write "added a new attribute to the entity" not "added a new field to the table".
 
@@ -133,7 +135,7 @@ Maps control types to React components. Found in `packages/apps/src/Components/C
 
 ```typescript
 // Register a new control type
-registerControl("MyCustomControl", MyCustomControlComponent);
+registerControl('MyCustomControl', MyCustomControlComponent);
 ```
 
 ### ViewRegister

@@ -31,6 +31,7 @@ rich-text-editor -- Draft.js-based editor (standalone)
 ```
 
 **Key files:**
+
 - `packages/apps/src/ModelDrivenApp.ts` -- Core app orchestrator
 - `packages/apps/src/Components/` -- 16 component subdirectories (Controls, Views, Forms, Ribbon, Navigation, etc.)
 - `packages/forms/src/EAVForm.tsx` -- Main form component
@@ -42,11 +43,13 @@ rich-text-editor -- Draft.js-based editor (standalone)
 The .NET backend. Git submodule at `external/eavframework/`, published as NuGet packages.
 
 **Key areas:**
+
 - `src/` -- Core framework: EF Core integration, OData API, security model, plugin system
 - `aspire/` -- `EAVFramework.Extensions.Aspire.Hosting` for .NET Aspire orchestration
 - `generators/` -- Source generators that produce C# types from the manifest
 
 **What the backend provides:**
+
 - ASP.NET Core host that serves the Next.js frontend
 - EF Core database context generated from manifest
 - OData-compatible REST API for CRUD operations
@@ -59,6 +62,7 @@ The .NET backend. Git submodule at `external/eavframework/`, published as NuGet 
 `dotnet new` templates for scaffolding new EAVFW projects. Git submodule at `external/eavfw-templates/`.
 
 **Templates available:**
+
 - `eavfw` -- Main template: C# solution, models, business logic, npm scripts
 - `eavfw-nextjs` -- Adds Next.js frontend (pages, components, themes)
 - `eavfw-ado` -- Azure DevOps CI/CD pipeline
@@ -69,6 +73,7 @@ The .NET backend. Git submodule at `external/eavframework/`, published as NuGet 
 ### Manifest-Driven Architecture
 
 The central concept is the **manifest** (`manifest.json`). It defines:
+
 - Entities (tables) and their attributes (columns)
 - Forms (UI layout for editing records)
 - Views (list/grid configurations)
@@ -77,6 +82,7 @@ The central concept is the **manifest** (`manifest.json`). It defines:
 - Security roles and permissions
 
 **Flow:**
+
 ```
 manifest.json
     |
@@ -110,11 +116,13 @@ The Next.js app is served by the ASP.NET Core host. Pages use dynamic routes tha
 ### Extension Points
 
 **Frontend:**
+
 - `RegisterFeature(name, value)` -- Register themes, expression providers, custom controls, or any named feature
 - Custom controls in `packages/apps/src/Components/Controls/`
 - Custom ribbon actions
 
 **Backend:**
+
 - Plugin system: pre/post operation hooks on entity CRUD
 - `RegisterFeature()` pattern for .NET services
 - EF Core model customization
@@ -122,13 +130,13 @@ The Next.js app is served by the ASP.NET Core host. Pages use dynamic routes tha
 
 ## Technology Stack
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | TypeScript 5.4, React 18, Next.js 14, Fluent UI v8/v9 |
-| Form Engine | React JSON Schema Form (RJSF) |
-| Backend | .NET 8/10, ASP.NET Core, EF Core |
-| Database | SQL Server |
-| Orchestration | .NET Aspire (replacing docker-compose) |
-| Package Management | NPM Workspaces (frontend), NuGet (backend) |
-| Templates | `dotnet new` template engine |
-| CI/CD | GitHub Actions, semantic-release |
+| Layer              | Technology                                            |
+| ------------------ | ----------------------------------------------------- |
+| Frontend           | TypeScript 5.4, React 18, Next.js 14, Fluent UI v8/v9 |
+| Form Engine        | React JSON Schema Form (RJSF)                         |
+| Backend            | .NET 8/10, ASP.NET Core, EF Core                      |
+| Database           | SQL Server                                            |
+| Orchestration      | .NET Aspire (replacing docker-compose)                |
+| Package Management | NPM Workspaces (frontend), NuGet (backend)            |
+| Templates          | `dotnet new` template engine                          |
+| CI/CD              | GitHub Actions, semantic-release                      |

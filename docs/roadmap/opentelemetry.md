@@ -6,11 +6,11 @@ Full-stack observability for EAVFW applications — from browser click to databa
 
 ## Current State
 
-| Layer | What exists | What's missing |
-|-------|------------|----------------|
-| **Aspire dev** | ServiceDefaults template has full OTLP setup (tracing + metrics + logging), Aspire dashboard shows traces | No custom spans from EAVFW business logic — only framework-level auto-instrumentation |
-| **.NET backend** | 3 auth counters (`EAVMetrics.cs`), Serilog request logging, correlation ID middleware, W3C `traceparent` propagation to Next.js | No `ActivitySource` spans for CRUD/plugins/workflows, sparse `ILogger` usage, no database operation metrics |
-| **Frontend** | `@opentelemetry/api` peer dep in `@eavfw/apps`, partial wizard span code | No OTel SDK/exporter, no auto-instrumentation of fetch, trace propagation commented out, no metrics or structured logging |
+| Layer            | What exists                                                                                                                     | What's missing                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Aspire dev**   | ServiceDefaults template has full OTLP setup (tracing + metrics + logging), Aspire dashboard shows traces                       | No custom spans from EAVFW business logic — only framework-level auto-instrumentation                                     |
+| **.NET backend** | 3 auth counters (`EAVMetrics.cs`), Serilog request logging, correlation ID middleware, W3C `traceparent` propagation to Next.js | No `ActivitySource` spans for CRUD/plugins/workflows, sparse `ILogger` usage, no database operation metrics               |
+| **Frontend**     | `@opentelemetry/api` peer dep in `@eavfw/apps`, partial wizard span code                                                        | No OTel SDK/exporter, no auto-instrumentation of fetch, trace propagation commented out, no metrics or structured logging |
 
 ### Key Files (existing)
 

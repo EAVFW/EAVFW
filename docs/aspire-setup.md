@@ -15,6 +15,7 @@ npm run eavfw-apply-migrations # Apply migrations
 ```
 
 **.NET Aspire** replaces all of this with a single orchestrator (`AppHost`) that:
+
 - Manages SQL Server containers with persistent volumes
 - Creates databases and applies schema migrations automatically
 - Runs Mailpit for local email testing
@@ -92,6 +93,7 @@ All from `EAVFramework.Extensions.Aspire.Hosting`:
 ### `AddEAVFWApp<TProject>(name, npmBuildCommand, launchProfile)`
 
 Registers an EAVFW web application project. Handles:
+
 - Adding the project as an Aspire resource
 - Running `npm install --force && npm run <npmBuildCommand>` before startup
 - **Smart build caching**: hashes the `src/` directory and skips builds when unchanged
@@ -99,6 +101,7 @@ Registers an EAVFW web application project. Handles:
 ### `WithEAVModel<TModel, TContext, TIdentity, TSignin>(modelName, database, email, userId, username)`
 
 Full model setup in one call. Internally:
+
 1. Adds an `EAVFWModelProjectResource`
 2. Publishes schema to the target database (creates DB if needed, generates and runs migrations)
 3. Sets up signin token generation
@@ -107,6 +110,7 @@ Full model setup in one call. Internally:
 ### `WithMailPit(name?, httpPort?, smtpPort?)`
 
 Adds a Mailpit container and configures SMTP environment variables on the project:
+
 - `Smtp__Host`, `Smtp__Port`, `Smtp__Password`, `Smtp__Username`, `Smtp__EnableSsl`
 - Uses random ports by default to avoid conflicts
 - Web UI available at the allocated HTTP port
@@ -114,12 +118,14 @@ Adds a Mailpit container and configures SMTP environment variables on the projec
 ### `ForwardEnvironmentVariables<TProject>()`
 
 Forwards configuration values prefixed with the project type name as environment variables. For example, if the project type is `Projects.SCL_Portal`:
+
 - `SCL_Portal__CrmFeatureFlags__EnableCrmPolling` in appsettings/user-secrets
 - Becomes `CrmFeatureFlags__EnableCrmPolling` in the service environment
 
 ### `WithRestoreBacpacCommand(defaultDataDirectory?, defaultDatabaseName?)`
 
 Adds an interactive command to the Aspire dashboard for restoring `.bacpac` files. Prompts for:
+
 - BACPAC file path (auto-detects files in `../../data/`)
 - Target database name
 - Whether to overwrite existing database

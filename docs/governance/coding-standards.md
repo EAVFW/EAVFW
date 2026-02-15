@@ -180,13 +180,13 @@ Prefer composition patterns (render props, children, compound components) over l
 
 ## State Management
 
-| Scope | Pattern |
-|---|---|
-| Component-local | `useState` / `useReducer` |
-| Parent-child (1-2 levels) | Props drilling |
-| Subtree (3+ levels) | React Context with dedicated provider |
-| Server cache | SWR (already in use) |
-| Derived data | `useMemo` (pure computation) |
+| Scope                     | Pattern                               |
+| ------------------------- | ------------------------------------- |
+| Component-local           | `useState` / `useReducer`             |
+| Parent-child (1-2 levels) | Props drilling                        |
+| Subtree (3+ levels)       | React Context with dedicated provider |
+| Server cache              | SWR (already in use)                  |
+| Derived data              | `useMemo` (pure computation)          |
 
 ### Context Guidelines
 
@@ -230,17 +230,17 @@ export * from './validation';
 
 The following Prettier configuration applies to all packages:
 
-| Option | Value |
-|---|---|
-| `printWidth` | 100 |
-| `tabWidth` | 2 |
-| `useTabs` | false |
-| `semi` | true |
-| `singleQuote` | true |
-| `trailingComma` | all |
-| `arrowParens` | always |
-| `bracketSpacing` | true |
-| `endOfLine` | lf |
+| Option           | Value  |
+| ---------------- | ------ |
+| `printWidth`     | 100    |
+| `tabWidth`       | 2      |
+| `useTabs`        | false  |
+| `semi`           | true   |
+| `singleQuote`    | true   |
+| `trailingComma`  | all    |
+| `arrowParens`    | always |
+| `bracketSpacing` | true   |
+| `endOfLine`      | lf     |
 
 ### Adoption Strategy
 
@@ -268,18 +268,18 @@ For simple components (under ~50 lines with few types), a single file is accepta
 
 ## Naming Conventions
 
-| Element | Convention | Example |
-|---|---|---|
-| Component files | PascalCase | `ModelDrivenApp.ts`, `EntityList.tsx` |
-| Hook files | camelCase with `use` prefix | `useAsyncMemo.ts`, `useEAVForm.ts` |
-| Utility files | camelCase | `deepDiff.ts`, `mergeDeep.ts` |
-| Components | PascalCase | `ModelDrivenGridViewer` |
-| Hooks | camelCase with `use` prefix | `useEAVForm`, `useChangeDetector` |
-| Utility functions | camelCase, verb-noun | `capitalizeString`, `mergeDeep` |
-| Types / Interfaces | PascalCase | `ManifestDefinition`, `EntityDefinition` |
-| Boolean variables | `is`/`has`/`should`/`can` prefix | `isLoading`, `hasPermission`, `canEdit` |
-| True constants | SCREAMING_SNAKE_CASE | `MAX_FILE_SIZE`, `DEFAULT_PAGE_SIZE` |
-| Configuration objects | camelCase | `defaultFormConfig`, `gridOptions` |
+| Element               | Convention                       | Example                                  |
+| --------------------- | -------------------------------- | ---------------------------------------- |
+| Component files       | PascalCase                       | `ModelDrivenApp.ts`, `EntityList.tsx`    |
+| Hook files            | camelCase with `use` prefix      | `useAsyncMemo.ts`, `useEAVForm.ts`       |
+| Utility files         | camelCase                        | `deepDiff.ts`, `mergeDeep.ts`            |
+| Components            | PascalCase                       | `ModelDrivenGridViewer`                  |
+| Hooks                 | camelCase with `use` prefix      | `useEAVForm`, `useChangeDetector`        |
+| Utility functions     | camelCase, verb-noun             | `capitalizeString`, `mergeDeep`          |
+| Types / Interfaces    | PascalCase                       | `ManifestDefinition`, `EntityDefinition` |
+| Boolean variables     | `is`/`has`/`should`/`can` prefix | `isLoading`, `hasPermission`, `canEdit`  |
+| True constants        | SCREAMING_SNAKE_CASE             | `MAX_FILE_SIZE`, `DEFAULT_PAGE_SIZE`     |
+| Configuration objects | camelCase                        | `defaultFormConfig`, `gridOptions`       |
 
 ### Abbreviation Policy
 
@@ -304,7 +304,9 @@ const loadEntity = async (entityName: string): Promise<EntityDefinition | null> 
   try {
     const response = await fetch(`/api/entities/${entityName}`);
     if (!response.ok) {
-      throw new Error(`Failed to load entity "${entityName}": ${response.status} ${response.statusText}`);
+      throw new Error(
+        `Failed to load entity "${entityName}": ${response.status} ${response.statusText}`,
+      );
     }
     return await response.json();
   } catch (error) {
@@ -381,7 +383,7 @@ Circular imports between packages are forbidden. The one intentional exception i
 
 All exported functions, types, and components must have JSDoc comments:
 
-```typescript
+````typescript
 /**
  * Resolves an entity definition from the manifest by logical name.
  *
@@ -406,7 +408,7 @@ export const resolveEntity = (
 ): EntityDefinition | undefined => {
   // ...
 };
-```
+````
 
 ### Module Comments
 
