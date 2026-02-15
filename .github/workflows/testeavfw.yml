@@ -23,8 +23,7 @@ on:
         required: false
         default: '20'
         type: string
-      
-        
+
 jobs:
   eavfw_job:
     name: Build and Test EAVFW
@@ -40,7 +39,7 @@ jobs:
       - uses: actions/setup-node@v2
         with:
           node-version: ${{ inputs.nodeversion }}
-          
+
       - name: install EAVFW template
         run: (dotnet new --debug:rebuildcache) -and (dotnet new --install EAVFW.Templates${{ inputs.templateversion }}) -and (dotnet new --uninstall)
 
@@ -55,20 +54,20 @@ jobs:
 
       - name: create test project from template with no extensions
         run: ( dotnet new --debug:rebuildcache) -and (dotnet new eavfw --namespace "GithubTestOrg" --appName "GithubTestApp" --databaseName "GithubTestDB" --skipGitCommit --allow-scripts yes --dotnetSDK ${{ inputs.dotnetversion }} --reactTypesVersion ${{ inputs.react_type_version }} --reactDomTypesVersion ${{ inputs.react_dom_type_version }} --skipPortal)
-        working-directory: "./../GithubEAVTestDirectory"
+        working-directory: './../GithubEAVTestDirectory'
 
       - name: create test web portal from template
-        run: dotnet new eavfw-nextjs --namespace "GithubTestOrg" --appName "GithubTestApp" --skipGitCommit --allow-scripts yes 
-        working-directory: "./../GithubEAVTestDirectory"
- 
+        run: dotnet new eavfw-nextjs --namespace "GithubTestOrg" --appName "GithubTestApp" --skipGitCommit --allow-scripts yes
+        working-directory: './../GithubEAVTestDirectory'
+
       - name: Install NPM
         run: npm install --force
-        working-directory: "./../GithubEAVTestDirectory"
+        working-directory: './../GithubEAVTestDirectory'
 
       - name: LINK EAVFW
         run: npm run eavfw-link --force
-        working-directory: "./../GithubEAVTestDirectory"
-        
+        working-directory: './../GithubEAVTestDirectory'
+
       - name: build and export web portal
         run: npm run build
-        working-directory: "./../GithubEAVTestDirectory"
+        working-directory: './../GithubEAVTestDirectory'

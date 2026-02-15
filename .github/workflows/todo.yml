@@ -1,4 +1,4 @@
-﻿name: "Create issues from todo"
+﻿name: 'Create issues from todo'
 
 on:
   push:
@@ -9,14 +9,14 @@ on:
 
 jobs:
   build:
-    runs-on: "ubuntu-latest"
+    runs-on: 'ubuntu-latest'
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-      - name: "TODO to Issue"
-        uses: "alstr/todo-to-issue-action@v2.4"
-        id: "todo"
+      - name: 'TODO to Issue'
+        uses: 'alstr/todo-to-issue-action@v2.4'
+        id: 'todo'
         with:
           TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COMMENT_MARKER: "//"
-          LABEL: "// TODO"
+          COMMENT_MARKER: '//'
+          LABEL: '// TODO'
