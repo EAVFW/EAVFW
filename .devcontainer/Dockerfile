@@ -33,4 +33,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends tmux libnss3-to
 RUN echo "node ALL=(root) NOPASSWD: /usr/local/share/docker-init.sh, /usr/bin/dockerd, /usr/bin/containerd, /usr/bin/pkill" > /etc/sudoers.d/node-docker && \
   chmod 0440 /etc/sudoers.d/node-docker
 
+# Configure tmux mouse scroll support
+COPY .tmux.conf /home/node/.tmux.conf
+RUN chown node:node /home/node/.tmux.conf
+
 USER node
