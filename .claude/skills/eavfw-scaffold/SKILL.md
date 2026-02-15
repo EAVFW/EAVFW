@@ -22,6 +22,7 @@ dotnet new install EAVFW.Templates
 ```
 
 Or from a local clone:
+
 ```bash
 dotnet new install ./path/to/eavfw-templates/templates/EAVFW/
 dotnet new install ./path/to/eavfw-templates/templates/EAVFW.NextJS/
@@ -44,22 +45,22 @@ dotnet new eavfw \
 
 ### Key Parameters
 
-| Parameter | Required | Default | Description |
-|---|---|---|---|
-| `--namespace` | Yes | `EAVFW` | Root namespace and project prefix |
-| `--appName` | Yes | `MainApp` | Application name (e.g., Portal) |
-| `--databaseName` | Yes | `databaseName` | SQL Server database name |
-| `--schemaName` | No | same as namespace | Database schema |
-| `--yourUserEmail` | Yes | `pks@delegate.dk` | Initial admin user email |
-| `--yourUserName` | No | `Poul Kjeldager` | Initial admin display name |
-| `--sendgrid_api_token` | No | (none) | SendGrid API key for email |
-| `--targetFramework` | No | `net10.0` | .NET target framework |
-| `--skipPortal` | No | `false` | Skip automated frontend setup |
-| `--skipGitCommit` | No | `false` | Skip git initialization |
-| `--useLocalReferences` | No | `false` | Use local project references instead of NuGet (for dev inside EAVFW repo) |
-| `--withSecurityModel` | No | `true` | Include security model extension |
-| `--withDocuments` | No | `true` | Include documents extension |
-| `--withConfiguration` | No | `true` | Include configuration extension |
+| Parameter              | Required | Default           | Description                                                               |
+| ---------------------- | -------- | ----------------- | ------------------------------------------------------------------------- |
+| `--namespace`          | Yes      | `EAVFW`           | Root namespace and project prefix                                         |
+| `--appName`            | Yes      | `MainApp`         | Application name (e.g., Portal)                                           |
+| `--databaseName`       | Yes      | `databaseName`    | SQL Server database name                                                  |
+| `--schemaName`         | No       | same as namespace | Database schema                                                           |
+| `--yourUserEmail`      | Yes      | `pks@delegate.dk` | Initial admin user email                                                  |
+| `--yourUserName`       | No       | `Poul Kjeldager`  | Initial admin display name                                                |
+| `--sendgrid_api_token` | No       | (none)            | SendGrid API key for email                                                |
+| `--targetFramework`    | No       | `net10.0`         | .NET target framework                                                     |
+| `--skipPortal`         | No       | `false`           | Skip automated frontend setup                                             |
+| `--skipGitCommit`      | No       | `false`           | Skip git initialization                                                   |
+| `--useLocalReferences` | No       | `false`           | Use local project references instead of NuGet (for dev inside EAVFW repo) |
+| `--withSecurityModel`  | No       | `true`            | Include security model extension                                          |
+| `--withDocuments`      | No       | `true`            | Include documents extension                                               |
+| `--withConfiguration`  | No       | `true`            | Include configuration extension                                           |
 
 ## Step 3: Add the NextJS Frontend
 
@@ -71,6 +72,7 @@ dotnet new eavfw-nextjs \
 ```
 
 This creates the Next.js app under `apps/MyProject.Portal/` with:
+
 - Page routing for EAVFW model-driven views
 - Fluent UI integration
 - Manifest type bindings
@@ -97,6 +99,7 @@ aspire run
 ```
 
 This automatically:
+
 - Starts a SQL Server container with persistent data volume
 - Creates the database
 - Runs EF migrations from the manifest

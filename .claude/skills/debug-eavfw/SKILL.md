@@ -17,6 +17,7 @@ When invoked, diagnose the user's EAVFW development issue by checking against kn
 **Root cause**: Version mismatch between `@fluentui/react` v8 packages. The `disableGlobalClassNames` API changed between minor versions.
 
 **Fix**:
+
 1. Update all `@fluentui/*` packages to their latest v8 versions in the root `package.json`
 2. Run `npm install --force`
 3. Rebuild with `npm run build-app`
@@ -28,6 +29,7 @@ When invoked, diagnose the user's EAVFW development issue by checking against kn
 **Root cause**: Stale Docker credential store configuration, common in devcontainers where the host's Docker config is mounted.
 
 **Fix**:
+
 1. Check `~/.docker/config.json`
 2. Remove or rename the `credsStore` key (e.g., change `"credsStore": "desktop"` to `"credStore": ""` or remove it entirely)
 3. Retry the Docker operation
@@ -39,6 +41,7 @@ When invoked, diagnose the user's EAVFW development issue by checking against kn
 **Root cause**: In devcontainers, HTTPS endpoints are typically not available. Aspire requires this env var to allow HTTP.
 
 **Fix**:
+
 1. In the AppHost project's `Properties/launchSettings.json`, ensure the `http` profile has:
    ```json
    "environmentVariables": {
@@ -54,6 +57,7 @@ When invoked, diagnose the user's EAVFW development issue by checking against kn
 **Root cause**: The `PublishEAVFWProjectLifecycleHook` has not completed successfully. The model project must generate `manifest.g.json` before the app can start.
 
 **Diagnosis**:
+
 1. Use `mcp__aspire__list_resources` to check the model resource status
 2. Use `mcp__aspire__list_structured_logs` and look for `[EAVFW MODEL READY]` or `[EAVFW MODEL FAILED]` markers
 3. Check console logs of the model resource with `mcp__aspire__list_console_logs`
@@ -67,6 +71,7 @@ When invoked, diagnose the user's EAVFW development issue by checking against kn
 **Root cause**: The signin token creation step in `PublishEAVFWProjectLifecycleHook` did not complete, usually because DB creation or migrations failed first.
 
 **Diagnosis**:
+
 1. Check for `[EAVFW SIGNIN READY]` in structured logs - if missing, signin was not created
 2. Check for `[EAVFW DB CREATE READY]` and `[EAVFW MIGRATION READY]` - these must succeed first
 3. Look at the model resource console logs for detailed error messages
@@ -80,6 +85,7 @@ When invoked, diagnose the user's EAVFW development issue by checking against kn
 **Root cause**: In devcontainers, system libraries may already be pre-installed, but Playwright's `--with-deps` flag can conflict.
 
 **Fix**:
+
 1. Use `npx playwright install chromium` (without `--with-deps`) in devcontainers where system libs are pre-installed
 2. If libs are truly missing, install them manually: `apt-get install -y libatk-bridge2.0-0 libgbm1 libxkbcommon0`
 
@@ -88,6 +94,7 @@ When invoked, diagnose the user's EAVFW development issue by checking against kn
 **Error pattern**: The `eav-build` resource shows "Exited" with exit code 1 in the Aspire dashboard.
 
 **Diagnosis**:
+
 1. Use `mcp__aspire__list_console_logs` for the build resource to see the actual npm error output
 2. Look for `[BUILD ERROR]` lines in the console logs
 3. Common causes: missing dependencies (run `npm install --force`), TypeScript errors, missing environment variables

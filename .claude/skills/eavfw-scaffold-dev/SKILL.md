@@ -51,6 +51,7 @@ dotnet new eavfw-nextjs \
 ```
 
 Key flags:
+
 - `--useLocalReferences` sets `UseEAVFromNuget=false` and configures `LocalEAVFrameworkPath` and `LocalExternalpath` in Directory.Build.props
 - `--skipPortal` skips automated setup (we do it via Aspire)
 - `--skipGitCommit` since this is inside the EAVFW repo
@@ -163,12 +164,12 @@ These should already be set up in the EAVFW devcontainer:
 
 ### Extension Submodules
 
-| Package | Submodule Path | csproj Path |
-|---|---|---|
-| EAVFW.Extensions.SecurityModel | `external/EAVFW.Extensions.SecurityModel` | `src/EAVFW.Extensions.SecurityModel/EAVFW.Extensions.SecurityModel.csproj` |
-| EAVFW.Extensions.Documents | `external/EAVFW.Extensions.Documents` | `src/EAVFW.Extensions.Documents/EAVFW.Extensions.Documents.csproj` |
-| EAVFW.Extensions.Configuration | `external/EAVFW.Extensions.Configuration` | `src/EAVFW.Extensions.Configuration/EAVFW.Extensions.Configuration.csproj` |
-| EAVFW.Extensions.Infrastructure | `external/EAVFW.Extensions.Infrastructure` | `src/EAVFW.Extensions.Infrastructure/EAVFW.Extensions.Infrastructure.csproj` |
+| Package                          | Submodule Path                              | csproj Path                                                                    |
+| -------------------------------- | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| EAVFW.Extensions.SecurityModel   | `external/EAVFW.Extensions.SecurityModel`   | `src/EAVFW.Extensions.SecurityModel/EAVFW.Extensions.SecurityModel.csproj`     |
+| EAVFW.Extensions.Documents       | `external/EAVFW.Extensions.Documents`       | `src/EAVFW.Extensions.Documents/EAVFW.Extensions.Documents.csproj`             |
+| EAVFW.Extensions.Configuration   | `external/EAVFW.Extensions.Configuration`   | `src/EAVFW.Extensions.Configuration/EAVFW.Extensions.Configuration.csproj`     |
+| EAVFW.Extensions.Infrastructure  | `external/EAVFW.Extensions.Infrastructure`  | `src/EAVFW.Extensions.Infrastructure/EAVFW.Extensions.Infrastructure.csproj`   |
 | EAVFW.Extensions.DynamicManifest | `external/EAVFW.Extensions.DynamicManifest` | `src/EAVFW.Extensions.DynamicManifest/EAVFW.Extensions.DynamicManifest.csproj` |
 
 ## Troubleshooting

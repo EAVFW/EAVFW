@@ -11,6 +11,7 @@ Scaffold a new EAVFW project and verify it works end-to-end.
 ## Trigger
 
 Use this skill when a user wants to:
+
 - Create a new project using the EAVFW framework
 - Scaffold an EAVFW application
 - Set up a new EAVFW-based system (CRM, case management, etc.)
@@ -20,14 +21,14 @@ Use this skill when a user wants to:
 
 Derive these from the user's description. Ask only if truly ambiguous:
 
-| Parameter | How to derive | Default |
-|---|---|---|
-| **Namespace** | PascalCase from project name (e.g., "small CRM" -> `SimpleCRM`, "case management" -> `CaseManager`) | Required |
-| **App Name** | Always `Portal` unless user specifies otherwise | `Portal` |
-| **Database Name** | Same as Namespace | Same as Namespace |
-| **Schema** | `dbo` | `dbo` |
-| **User Email** | `admin@{namespace-lowercase}.dev` | Derived |
-| **User Name** | `Admin` | `Admin` |
+| Parameter         | How to derive                                                                                       | Default           |
+| ----------------- | --------------------------------------------------------------------------------------------------- | ----------------- |
+| **Namespace**     | PascalCase from project name (e.g., "small CRM" -> `SimpleCRM`, "case management" -> `CaseManager`) | Required          |
+| **App Name**      | Always `Portal` unless user specifies otherwise                                                     | `Portal`          |
+| **Database Name** | Same as Namespace                                                                                   | Same as Namespace |
+| **Schema**        | `dbo`                                                                                               | `dbo`             |
+| **User Email**    | `admin@{namespace-lowercase}.dev`                                                                   | Derived           |
+| **User Name**     | `Admin`                                                                                             | `Admin`           |
 
 ## Context Detection
 
@@ -36,6 +37,7 @@ This skill supports two modes. **Check the project's CLAUDE.md for instructions 
 ### Dev Mode (EAVFW development repo)
 
 When the CLAUDE.md or AGENTS.md instructs you to use dev mode (e.g., because you're inside the EAVFW monorepo), follow the `/eavfw-scaffold-dev` skill. Key differences:
+
 - Scaffold into `sandbox/{Namespace}`
 - Use local project references (`--useLocalReferences`)
 - Configure conditional extension references in csproj files
@@ -77,24 +79,25 @@ aspire run
 
 ### Dev mode (3 phases):
 
-| Phase | What |
-|---|---|
-| 1 | Install templates, scaffold with `--useLocalReferences`, apply NextJS template |
-| 2 | Build twice (manifest generation), configure local extension references in csproj |
-| 3 | Run `aspire run` and verify with `/validate-eavfw` |
+| Phase | What                                                                              |
+| ----- | --------------------------------------------------------------------------------- |
+| 1     | Install templates, scaffold with `--useLocalReferences`, apply NextJS template    |
+| 2     | Build twice (manifest generation), configure local extension references in csproj |
+| 3     | Run `aspire run` and verify with `/validate-eavfw`                                |
 
 ### Standard mode (2 phases):
 
-| Phase | What |
-|---|---|
-| 1 | Install templates, scaffold, apply NextJS template |
-| 2 | Build twice, run `aspire run` and verify |
+| Phase | What                                               |
+| ----- | -------------------------------------------------- |
+| 1     | Install templates, scaffold, apply NextJS template |
+| 2     | Build twice, run `aspire run` and verify           |
 
 ## Troubleshooting
 
 If anything fails, use `/debug-eavfw` to diagnose against the known issue catalog, and `/validate-eavfw` to check Aspire resource states via MCP tools.
 
 Common issues:
+
 - **First build fails with "Please build again"**: Expected — run `dotnet build` a second time
 - **Extension submodule missing**: Run `git submodule update --init --recursive`
 - **npm link not working**: Run `npm run link` from EAVFW repo root first

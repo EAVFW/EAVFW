@@ -17,6 +17,7 @@ Execute the following checks in order:
 Call `mcp__aspire__list_resources` to get the full resource list.
 
 **Expected resources** (names may vary by project):
+
 - SQL Server resource (type: container)
 - SQL Database resource (type: database)
 - Mail server resource (type: container, e.g., Mailpit)
@@ -30,15 +31,15 @@ Call `mcp__aspire__list_resources` to get the full resource list.
 
 For each resource from Step 1, verify its state:
 
-| Resource Type | Expected State |
-|---|---|
-| SQL Server | `Running` |
-| SQL Database | `Running` |
-| Mail server | `Running` |
-| Portal/App | `Running` |
-| Model (Data Model) | `Finished` |
-| NPM Install | `Finished` |
-| EAV Build | `Finished` |
+| Resource Type      | Expected State |
+| ------------------ | -------------- |
+| SQL Server         | `Running`      |
+| SQL Database       | `Running`      |
+| Mail server        | `Running`      |
+| Portal/App         | `Running`      |
+| Model (Data Model) | `Finished`     |
+| NPM Install        | `Finished`     |
+| EAV Build          | `Finished`     |
 
 **Check**: All resources are in their expected state. Flag any resource in `FailedToStart`, `Exited`, or error states.
 
@@ -46,15 +47,15 @@ For each resource from Step 1, verify its state:
 
 Call `mcp__aspire__list_structured_logs` and search for these markers:
 
-| Marker | Meaning | Required |
-|---|---|---|
-| `[EAVFW BUILD READY]` | npm build completed successfully | Yes (if build resource exists) |
+| Marker                      | Meaning                            | Required                             |
+| --------------------------- | ---------------------------------- | ------------------------------------ |
+| `[EAVFW BUILD READY]`       | npm build completed successfully   | Yes (if build resource exists)       |
 | `[EAVFW NPM INSTALL READY]` | npm install completed successfully | Yes (if npm install resource exists) |
-| `[EAVFW DB CREATE READY]` | Database created successfully | Yes |
-| `[EAVFW MIGRATION READY]` | Migrations applied successfully | Yes |
-| `[EAVFW SIGNIN READY]` | Signin link created | Yes (if signin configured) |
-| `[EAVFW MODEL READY]` | All model operations completed | Yes |
-| `[EAVFW BUILD HOOK READY]` | Build lifecycle hook completed | Yes (if build resource exists) |
+| `[EAVFW DB CREATE READY]`   | Database created successfully      | Yes                                  |
+| `[EAVFW MIGRATION READY]`   | Migrations applied successfully    | Yes                                  |
+| `[EAVFW SIGNIN READY]`      | Signin link created                | Yes (if signin configured)           |
+| `[EAVFW MODEL READY]`       | All model operations completed     | Yes                                  |
+| `[EAVFW BUILD HOOK READY]`  | Build lifecycle hook completed     | Yes (if build resource exists)       |
 
 **Check**: All required markers are present. If any `FAILED` markers are found (e.g., `[EAVFW BUILD FAILED]`, `[EAVFW MODEL FAILED]`), report them prominently.
 
@@ -67,6 +68,7 @@ For any resource that is NOT in a healthy state (`Running` or `Finished`), call 
 ### Step 5: Validate Portal Health
 
 Check the portal/app resource:
+
 1. Verify it has HTTP endpoints listed in its resource properties
 2. Check that endpoints are allocated (have URLs)
 3. Look for any health check failures
