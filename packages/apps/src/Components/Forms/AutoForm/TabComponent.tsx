@@ -16,7 +16,7 @@ import { Controls, ResolveFeature } from '../../..';
 import { makeStyles, shorthands, Spinner } from '@fluentui/react-components';
 import { useSectionStyles } from '../../../Styles/SectionStyles.styles';
 
-type TabComponentProps<T extends { id?: string; [key: string]: any }> = {
+type TabComponentProps<T extends { id?: string; [key: string]: unknown }> = {
   form: FormDefinition;
   columns?: FormTabDefinitionWithColumns['columns'];
   tabName: string;
@@ -27,12 +27,12 @@ type TabComponentProps<T extends { id?: string; [key: string]: any }> = {
   formData: T;
   onFormDataChange?: (formdata: T) => void;
   factory?: OptionsFactory;
-  formContext?: any;
+  formContext?: Record<string, unknown>;
   extraErrors?: FormValidation;
 };
 
 const StackTokens = { childrenGap: 25 };
-const TabComponent = <T extends { id?: string; [key: string]: any }>(
+const TabComponent = <T extends { id?: string; [key: string]: unknown }>(
   props: TabComponentProps<T>,
 ) => {
   const {
@@ -117,4 +117,6 @@ const TabComponent = <T extends { id?: string; [key: string]: any }>(
   }
 };
 
+/** @deprecated Use named import: `import { TabComponent } from '...'` instead of default import */
 export default TabComponent;
+export { TabComponent };

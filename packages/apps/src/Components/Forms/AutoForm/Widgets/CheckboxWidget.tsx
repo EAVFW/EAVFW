@@ -75,4 +75,6 @@ const CheckboxWidget = (props: WidgetProps) => {
   );
 };
 
+/** @deprecated Use named import: `import { CheckboxWidget } from '...'` instead of default import */
 export default CheckboxWidget;
+export { CheckboxWidget };

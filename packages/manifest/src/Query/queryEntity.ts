@@ -4,14 +4,20 @@ import { EntityDefinition } from '../Entities/EntityDefinition';
 import { IRecord } from '../Types/IRecord';
 
 /**
- * Deprecated : Use queryEntitySWR
- * @param entity
- * @param query
+ * Fetches entity records via a plain `fetch` call. Automatically expands
+ * lookup navigation properties.
+ *
+ * @deprecated Use {@link queryEntitySWR} instead for SWR-based caching.
+ *
+ * @typeParam T - The record type.
+ * @param entity - The entity definition.
+ * @param query - OData query parameters.
+ * @param baseUrl - API base URL (defaults to `NEXT_PUBLIC_API_BASE_URL`).
+ * @returns The response containing an `items` array.
  */
-
 export async function queryEntity<T extends IRecord>(
   entity: EntityDefinition,
-  query: any = {},
+  query: Record<string, string> = {},
   baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL,
 ) {
   let expand = Object.values(entity.attributes)

@@ -60,7 +60,7 @@ export function SelectWidget<
 
   const _onBlur = () => onBlur(id, selectedIndexes);
   const _onFocus = () => onFocus(id, selectedIndexes);
-  const _onChange = (_: any, data: OptionOnSelectData) => {
+  const _onChange = (_: unknown, data: OptionOnSelectData) => {
     const newValue = getValue(data, multiple);
     return onChange(enumOptionsValueForIndex<S>(newValue, enumOptions, optEmptyVal));
   };
@@ -93,4 +93,5 @@ export function SelectWidget<
   );
 }
 
+/** @deprecated Use named import: `import { SelectWidget } from '...'` instead of default import */
 export default SelectWidget;

@@ -1,4 +1,5 @@
 import { EAVForm, useEAVForm } from '@eavfw/forms';
+import { IWizardMessages } from '@eavfw/manifest';
 import { mergeDeep } from '@eavfw/utils';
 import {
   Button,
@@ -27,7 +28,7 @@ import { WizardMessages } from './WizardMessages';
 import { WizardTabs } from './WizardTabs';
 import { WizardToaster } from './WizardToaster';
 
-const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
+const Wizard = ({ children }: PropsWithChildren) => {
   //const onFormValuesChange = ResolveFeature("WizardExpressionsProvider");
 
   const [data, { onChange, updateState }] = useEAVForm((x) => x.formValues, undefined, 'Wizard');
@@ -107,12 +108,18 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
             if (action.body?.values) {
               // dispatch({ action: "setValues", values: action.body?.values, expressionsProvider: onFormValuesChange, merge: true })
               onChange((props) => {
-                dispatch({ action: 'setValues', values: mergeDeep(props, result.body?.values) });
+                dispatch({
+                  action: 'setValues',
+                  values: mergeDeep(props, result.body?.values as Record<string, unknown>),
+                });
               });
             }
 
             if (action.body?.messages) {
-              dispatch({ action: 'setMessages', messages: action.body?.messages });
+              dispatch({
+                action: 'setMessages',
+                messages: action.body?.messages as IWizardMessages,
+              });
             }
           }
         }
@@ -198,7 +205,7 @@ const Wizard: React.FC<PropsWithChildren> = ({ children }) => {
   );
 };
 
-export const WizardDrawer: React.FC = ({}) => {
+export const WizardDrawer = () => {
   return (
     <EAVForm purpose="drawer" onChange={(data, ctx) => {}}>
       <Wizard />

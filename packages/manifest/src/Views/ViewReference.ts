@@ -2,6 +2,11 @@ import { EntityDefinition } from '../Entities';
 import { RibbonViewInfo } from '../Ribbon';
 import { ViewDefinition } from './ViewDefinition';
 
+/**
+ * Runtime reference to a view, including the resolved entity definition,
+ * attribute metadata, and optional ribbon configuration. Used internally
+ * by the view rendering engine.
+ */
 export type ViewReference = {
   ribbon?: RibbonViewInfo;
   key: string;

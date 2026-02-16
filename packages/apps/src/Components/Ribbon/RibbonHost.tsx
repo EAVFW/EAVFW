@@ -3,9 +3,10 @@ import { RibbonButtonProps } from './RibbonButtonProps';
 import { RibbonButtons } from './RibbonButtons';
 import { useRibbon } from './useRibbon';
 
-export const RibbonHost: React.FC<
-  PropsWithChildren<{ ribbon: { [key: string]: Partial<RibbonButtonProps> } }>
-> = ({ ribbon, children }) => {
+export const RibbonHost = ({
+  ribbon,
+  children,
+}: PropsWithChildren<{ ribbon: { [key: string]: Partial<RibbonButtonProps> } }>) => {
   const { registerButton } = useRibbon();
 
   try {

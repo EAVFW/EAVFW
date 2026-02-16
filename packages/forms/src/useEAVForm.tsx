@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import isEqual from 'react-fast-compare';
 import { EAVFormContext } from './EAVFormContext';
 import { EAVCollectContext, EAVFormContextActions } from './EAVFormContextActions';
@@ -65,7 +65,7 @@ import { EAVFormContextState } from './EAVFormContextState';
 //    }
 //}
 
-export function useEAVForm<TCollected, TFormValues = any>(
+export function useEAVForm<TCollected, TFormValues = Record<string, unknown>>(
   collector: (state: EAVFormContextState<TFormValues>) => TCollected,
   timeoutOrLogin?: number | string,
   logid?: string,
@@ -93,8 +93,9 @@ export function useEAVForm<
   timeoutOrLogin?: number | string,
   logid?: string,
 ): [TCollected, EAVFormContextActions<TFormValues, TState>, string] {
-  const { purpose, actions, state, etag } =
-    useContext<EAVFormContextProps<TFormValues, TState>>(EAVFormContext);
+  const { purpose, actions, state, etag } = useContext<EAVFormContextProps<TFormValues, TState>>(
+    EAVFormContext as unknown as React.Context<EAVFormContextProps<TFormValues, TState>>,
+  );
 
   logid = typeof timeoutOrLogin === 'string' ? timeoutOrLogin : logid;
 

@@ -7,6 +7,11 @@ import { IntegerType } from './Number/IntegerType';
 import { PrimitiveTypeDefinition } from './PrimitiveTypeDefinition';
 import { StringType } from './String/StringType';
 
+/**
+ * Discriminated union of all structured attribute types. Each variant has a
+ * `type` discriminator (e.g. `'string'`, `'choice'`, `'lookup'`). Extended
+ * with {@link BaseNestedType} for shared properties like `required`.
+ */
 export type NestedType = BaseNestedType &
   (
     | StringType

@@ -34,10 +34,7 @@ const leftribbon: IStyleFunction<ICommandBarStyleProps, ICommandBarStyles> = (pr
   },
 });
 
-export const RibbonBar: React.FC<{ hideBack?: boolean; className?: string }> = ({
-  hideBack,
-  className,
-}) => {
+export const RibbonBar = ({ hideBack, className }: { hideBack?: boolean; className?: string }) => {
   const { buttons } = useRibbon();
   const styles = useSectionStyles();
 

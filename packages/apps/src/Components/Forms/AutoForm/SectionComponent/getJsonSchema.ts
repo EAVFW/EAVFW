@@ -18,17 +18,19 @@ export function getJsonSchema(
   field: FormColumnDefinition,
   entity: EntityDefinition,
   locale: string = '1033',
-  formContext: any,
+  formContext: Record<string, unknown>,
 ): ControlJsonSchema {
   try {
-    const { locale, descriptions } = formContext;
+    const { locale, descriptions } = formContext as {
+      locale: string;
+      descriptions?: Array<Record<string, unknown>>;
+    };
     const descriptionInfo = descriptions?.filter(
-      (d: any) => d.name === attribute?.logicalName && d.locale == locale,
+      (d: Record<string, unknown>) => d.name === attribute?.logicalName && d.locale == locale,
     )?.[0];
-    const description =
-      descriptionInfo?.description ??
+    const description = (descriptionInfo?.description ??
       attribute?.locale?.[locale]?.description ??
-      attribute?.description;
+      attribute?.description) as string | undefined;
 
     if (field.schema) {
       return {
@@ -38,7 +40,7 @@ export function getJsonSchema(
         readOnly: attribute.readonly || field.readonly,
         description: description,
         ...field.schema,
-        'x-field': field.uiSchema?.['ui:field'] ?? 'ControlHostWidget',
+        'x-field': (field.uiSchema?.['ui:field'] as string | undefined) ?? 'ControlHostWidget',
         'x-widget-props': {
           styles: field.styles,
           ...formContext,
@@ -54,7 +56,9 @@ export function getJsonSchema(
 
     const controlType =
       field.control ??
-      ((typeProps as any)['format'] === 'html' ? 'RichTextEditorControl' : field.control);
+      ((typeProps as Record<string, unknown>)['format'] === 'html'
+        ? 'RichTextEditorControl'
+        : field.control);
 
     const defaultProps: ControlJsonSchema = {
       title: field.displayName ?? attribute?.locale?.[locale]?.displayName ?? attribute.displayName,
@@ -76,7 +80,7 @@ export function getJsonSchema(
     };
 
     if (formContext.isCreate) {
-      defaultProps['default'] = attribute.default ?? field.default;
+      defaultProps['default'] = (attribute.default ?? field.default) as JSONSchema7['default'];
     }
 
     if (field.minLength) {
@@ -87,7 +91,7 @@ export function getJsonSchema(
       defaultProps['x-field'] = 'ControlHostWidget';
 
       if (typeof field.control === 'object') {
-        defaultProps['x-widget-props']['x-control-props'] = field.control;
+        defaultProps['x-widget-props']!['x-control-props'] = field.control;
       }
     }
 
@@ -132,8 +136,14 @@ export function getJsonSchema(
             ...defaultProps['x-widget-props'],
             resizable: false,
             styles: {
-              ...(defaultProps['x-widget-props']?.['styles'] ?? {}),
-              field: { ...(defaultProps['x-widget-props']?.['styles']?.['field'] ?? {}) },
+              ...((defaultProps['x-widget-props']?.['styles'] as
+                | Record<string, unknown>
+                | undefined) ?? {}),
+              field: {
+                ...(((
+                  defaultProps['x-widget-props']?.['styles'] as Record<string, unknown> | undefined
+                )?.['field'] as Record<string, unknown>) ?? {}),
+              },
             },
           },
         };

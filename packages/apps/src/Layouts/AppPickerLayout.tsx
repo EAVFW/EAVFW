@@ -4,8 +4,10 @@ import { TopBar } from '../Components/TopBar/ModelDrivenTopBar';
 import { ResolveFeature } from '../FeatureFlags';
 import { useSectionStyles } from '../Styles';
 
-export function AppPickerLayout(props: any) {
-  const topBarTheme = ResolveFeature('topBarTheme');
+export function AppPickerLayout(props: { children?: React.ReactNode }) {
+  const topBarTheme = ResolveFeature('topBarTheme') as unknown as
+    | Record<string, unknown>
+    | undefined;
   const styles = useSectionStyles();
 
   return (

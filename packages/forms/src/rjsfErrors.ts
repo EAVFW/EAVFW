@@ -18,8 +18,8 @@ export type JsonSchemaError =
 
 export const rjsfErrors: (
   arg: EAVFWErrorDefinition,
-  state?: any,
-  fx?: (n: EAVFWError, state: any) => JsonSchemaErrorObject,
+  state?: Record<string, unknown>,
+  fx?: (n: EAVFWError, state: Record<string, unknown>) => JsonSchemaErrorObject,
 ) => JsonSchemaError = (errors, state = {}, fx) => {
   if (typeof errors === 'undefined') return {} as JsonSchemaErrorObjectWrap;
 
@@ -39,9 +39,9 @@ export const rjsfErrors: (
       };
     } else {
       //The stateobject is not a real array, object with "0" "1" ect. no good way to detect if shold use state[i] or state
-      return errors.map((e, i) => rjsfErrors(e, state?.[i] ?? state, fx)) as Array<
-        JsonSchemaErrorObjectWrap | JsonSchemaErrorObject
-      >;
+      return errors.map((e, i) =>
+        rjsfErrors(e, (state?.[i] ?? state) as Record<string, unknown>, fx),
+      ) as Array<JsonSchemaErrorObjectWrap | JsonSchemaErrorObject>;
     }
   }
 
@@ -50,6 +50,9 @@ export const rjsfErrors: (
     return { __errors: [errors.error] } as JsonSchemaErrorObject;
   }
 
-  const entries = Object.entries(errors).map(([k, v]) => [k, rjsfErrors(v, state[k], fx)]);
+  const entries = Object.entries(errors).map(([k, v]) => [
+    k,
+    rjsfErrors(v, state[k] as Record<string, unknown> | undefined, fx),
+  ]);
   return Object.fromEntries(entries) as JsonSchemaErrorObjectWrap;
 };

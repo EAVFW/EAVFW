@@ -14,6 +14,6 @@ export type SectionComponentProps<T> = {
   formData: T;
   onFormDataChange?: (formdata: T) => void;
   factory?: OptionsFactory;
-  formContext?: any;
+  formContext?: Record<string, unknown>;
   extraErrors?: FormValidation;
 };

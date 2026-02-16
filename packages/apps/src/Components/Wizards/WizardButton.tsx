@@ -2,12 +2,12 @@ import { Button, ButtonProps } from '@fluentui/react-components';
 import { MouseEventHandler } from 'react';
 import { useWizard } from './useWizard';
 
-export const WizardButton: React.FC<{ action: string; workflow?: string } & ButtonProps> = ({
+export const WizardButton = ({
   children,
   action,
   workflow,
   ...buttonProps
-}) => {
+}: { action: string; workflow?: string } & ButtonProps) => {
   const [{ isTransitioning }, { moveNext }] = useWizard();
 
   return (

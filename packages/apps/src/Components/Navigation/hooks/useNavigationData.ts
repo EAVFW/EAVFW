@@ -6,7 +6,7 @@ import { useUserProfile } from '../../Profile/useUserProfile';
 import { ModelDrivenSitemap } from '../../../Model/ModelDrivenSitemap';
 import { ModelDrivenSitemapEntry } from '../../../Model/ModelDrivenSitemapEntry';
 
-function filterEntry(user: any) {
+function filterEntry(user: { role: string[] } | undefined | null) {
   if (!user) return () => false;
 
   return ([key, entry]: [string, ModelDrivenSitemapEntry]) => {

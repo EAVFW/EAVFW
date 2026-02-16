@@ -27,7 +27,7 @@ export const FormHeader = ({
   tabs: string[];
   getTabName: (tab: FormTabDefinition) => string;
   form: FormDefinition;
-  record: any;
+  record: Record<string, unknown>;
   entity: EntityDefinition;
   entityName: string;
   locale: string;
@@ -44,7 +44,7 @@ export const FormHeader = ({
     [entityName],
   );
   const primaryFieldValue = useMemo(
-    () => record[primaryField?.logicalName],
+    () => record[primaryField?.logicalName] as React.ReactNode,
     [primaryField, entityName],
   );
 

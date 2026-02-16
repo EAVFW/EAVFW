@@ -41,7 +41,7 @@ import { useChangeDetector } from '@eavfw/hooks';
 import ControlHostWidget from '../../Controls/ControlHostWidget';
 import SelectWidget from '../../Controls/SelectWidget';
 import { OptionsFactory } from './OptionsFactory';
-import { ControlJsonSchemaObject } from './ControlJsonSchema';
+import { ControlJsonSchema, ControlJsonSchemaObject } from './ControlJsonSchema';
 import { FormValidation } from '@rjsf/utils';
 import { useModelDrivenApp } from '../../../useModelDrivenApp';
 import { FieldTemplate } from './Templates/FieldTemplate';
@@ -81,18 +81,18 @@ export type ControlsComponentProps<T> = {
   columnName?: string;
   sectionName?: string;
   entityName: string;
-  formContext?: any;
+  formContext?: Record<string, unknown>;
   extraErrors?: FormValidation;
 };
 
 function createVisitedObject(id: string) {
   let keys = id.split('_');
-  let obj = {} as any;
+  let obj = {} as Record<string, unknown>;
   let root = obj;
   while (keys.length) {
     let a = keys.shift()!;
     obj[a] = keys.length === 0 ? true : {};
-    obj = obj[a];
+    obj = obj[a] as Record<string, unknown>;
   }
   return root;
 }
@@ -106,6 +106,7 @@ import ObjectFieldTemplate from './Templates/ObjectFieldTemplate';
 import { useSectionStyles } from '../../../Styles';
 import { mergeClasses } from '@fluentui/react-components';
 import { Controls } from '../../Controls';
+import { getUiSchema, transformErrors } from './ControlsUiSchema';
 
 export const WidgetRegister: FormProps['widgets'] = {
   SelectWidget: SelectWidget,
@@ -212,7 +213,9 @@ const ControlsComponent = <T extends {}>(props1: PropsWithChildren<ControlsCompo
         setVisitedFields(
           id.substr(app.currentEntityName.length + 1),
           schema.type === 'array'
-            ? createVisitedObject(id.substr(app.currentEntityName.length + 1))
+            ? (createVisitedObject(id.substr(app.currentEntityName.length + 1)) as Parameters<
+                typeof setVisitedFields
+              >[1])
             : true,
         );
       },
@@ -254,7 +257,8 @@ const ControlsComponent = <T extends {}>(props1: PropsWithChildren<ControlsCompo
         onChange={onChange}
         formContext={{
           ...(formContext ?? {}),
-          onFormDataChange: (data: any) => onChange({ formData: { ...formData, ...data } }), // onFormDataChange,
+          onFormDataChange: (data: Record<string, unknown>) =>
+            onChange({ formData: { ...formData, ...data } }), // onFormDataChange,
           formData: formData,
           extraErrors: extraErrors,
           formErrors: formErrors,
@@ -281,260 +285,6 @@ const ControlsComponent = <T extends {}>(props1: PropsWithChildren<ControlsCompo
   }
 };
 
+/** @deprecated Use named import: `import { ControlsComponent } from '...'` instead of default import */
 export default ControlsComponent;
-
-function hasCustomControl(
-  obj: JSONSchema7Definition,
-  type: 'x-widget' | 'x-field',
-): obj is JSONSchema7 & { 'x-widget': string; 'x-field': string } {
-  return typeof obj === 'object' && type in obj;
-}
-
-const readonlyStylesFunction: (
-  outerProps: any,
-  props: ITextFieldStyleProps,
-) => Partial<ITextFieldStyles> = (outerProps, props) => {
-  return {
-    fieldGroup: {
-      backgroundColor:
-        props.disabled || outerProps.readOnly
-          ? props.theme.palette.neutralLight
-          : props.theme.palette.neutralLighterAlt,
-      cursor: 'default',
-    },
-  };
-};
-
-function getControl(obj: JSONSchema7Definition, type: 'widget' | 'field') {
-  let t = ('x-' + type) as 'x-widget' | 'x-field';
-  if (hasCustomControl(obj, t)) {
-    return obj[t];
-  }
-}
-
-const theme = getTheme();
-const iconCloseButtonStylesFunc = (theme: ITheme) => ({
-  root: {
-    color: theme.palette.neutralPrimary,
-    marginLeft: 'auto',
-    marginTop: '4px',
-    marginRight: '2px',
-  },
-  rootHovered: {
-    color: theme.palette.neutralDark,
-  },
-});
-
-const contentStylesFunc = (theme: ITheme) =>
-  mergeStyleSets({
-    container: {
-      display: 'flex',
-      flexFlow: 'column nowrap',
-      alignItems: 'stretch',
-      maxWidth: '400px',
-    },
-    header: [
-      theme.fonts.xLargePlus,
-      {
-        flex: '1 1 auto',
-        borderTop: `2px solid ${theme.palette.themePrimary}`,
-        color: theme.palette.neutralPrimary,
-        display: 'flex',
-        alignItems: 'center',
-        fontWeight: FontWeights.semibold,
-        padding: '12px 12px 14px 24px',
-      },
-    ],
-    body: {
-      flex: '4 4 auto',
-      padding: '0 24px 24px 24px',
-      overflowY: 'hidden',
-
-      selectors: {
-        p: { margin: '14px 0' },
-        'p:first-child': { marginTop: 0 },
-        'p:last-child': { marginBottom: 0 },
-      },
-    },
-  });
-
-const stackTokens: IStackTokens = {
-  childrenGap: 4,
-};
-
-const labelCalloutStackStyles: Partial<IStackStyles> = { root: { padding: 20 } };
-const iconButtonStyles: Partial<IButtonStyles> = { root: { marginBottom: -3 } };
-const iconProps = { iconName: 'Info' };
-
-const cancelIcon: IIconProps = { iconName: 'Cancel' };
-//export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
-//    const [isCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
-//    const descriptionId = useId('description');
-//    const iconButtonId = useId('iconButton');
-//    const titleId = useId('title');
-//    const _theme = useContext(ThemeContext);
-//    const iconCloseButtonStyles = useMemo(() => iconCloseButtonStylesFunc(_theme ?? theme), [theme]);
-//    const contentStyles = useMemo(() => contentStylesFunc(_theme ?? theme), [theme]);
-//    return (
-//        <>
-//            <Stack horizontal verticalAlign="center" tokens={stackTokens}>
-//                <Label htmlFor={props.id} required={props.required} disabled={props.disabled}
-//                >{props.label || props.title}</Label>
-//                {props.description && <IconButton
-//                    id={iconButtonId}
-//                    iconProps={iconProps}
-//                    title="Info1"
-//                    ariaLabel="Info"
-//                    onClick={toggleIsCalloutVisible}
-//                    styles={iconButtonStyles}
-//                />}
-//            </Stack>
-//            {isCalloutVisible && (
-//                <Callout
-//                    target={'#' + iconButtonId}
-//                    setInitialFocus
-//                    onDismiss={toggleIsCalloutVisible}
-//                    ariaDescribedBy={descriptionId}
-//                    role="alertdialog" className={contentStyles.container}
-//                >
-//                    <div className={contentStyles.header}>
-//                        <span id={titleId}>{props.label}</span>
-//                        <IconButton
-//                            styles={iconCloseButtonStyles}
-//                            iconProps={cancelIcon}
-//                            ariaLabel="Close popup modal"
-//                            onClick={toggleIsCalloutVisible}
-//                        />
-//                    </div>
-
-//                    <div className={contentStyles.body}>
-//                        <Stack tokens={stackTokens} horizontalAlign="start" styles={labelCalloutStackStyles}>
-//                            {props.description && <span id={descriptionId} dangerouslySetInnerHTML={{ "__html": props.description }}></span>}
-//                            {/*  <DefaultButton onClick={toggleIsCalloutVisible}>Close</DefaultButton>*/}
-//                        </Stack>
-//                    </div>
-//                </Callout>
-//            )}
-//        </>
-//    );
-//};
-
-//const CustomLabelWrapper = ({ schema, textProps, formContext }: { schema: any, formContext: any, textProps: ITextFieldProps }) => {
-
-//    const app = useModelDrivenApp();
-//    const { attributeName, entityName, fieldName, formName
-//    } = schema["x-widget-props"]!;
-//    const { locale, descriptions } = formContext;
-
-//    const entity = app.getEntity(entityName!);
-//    const attribute = entity.attributes[attributeName!];
-//    const descriptionInfo = descriptions.filter((d: any) => d.name === attribute.logicalName && d.locale == locale)?.[0];
-
-//    return <CustomLabel
-//        label={schema.title} description={descriptionInfo?.description ?? schema["x-description"]}  {...textProps} />
-
-//}
-
-const emojiIcon: IIconProps = { iconName: 'Clear' };
-/** Render Caret Down Icon */
-const _onRenderCaretDown = (
-  formContext: any,
-  schema: any,
-  props?: IDropdownProps,
-  originalRender?: Function,
-) => {
-  //  const formdata = useFormContext();
-  const value = formContext.formData[schema['x-logicalname']];
-  return (
-    <>
-      {(value || value === 0) && !props?.disabled && (
-        <IconButton
-          iconProps={emojiIcon}
-          title="Clear"
-          ariaLabel="Clear"
-          style={{ height: 28, margin: 1 }}
-          onClick={(e) => {
-            formContext.onFormDataChange({ [schema['x-logicalname']]: null });
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        />
-      )}
-      {originalRender?.(props)}
-    </>
-  );
-};
-function mapUISchema(props: any, formContext: any) {
-  if (typeof props === 'object') {
-    const entries = Object.keys(props).map((k) => [
-      k,
-      {
-        //"ui:disabled": props[k]?.["x-widget-props"]?.disabled,
-        'ui:widget': getControl(props[k], 'widget'),
-        'ui:field': getControl(props[k], 'field'),
-        'ui:options': {
-          ...(props[k]['x-widget-props'] ?? {}),
-
-          // styles: readonlyStylesFunction.bind(null, props[k]),  //props[k].readOnly ? readonlyStylesFunction : props[k]["x-widget-props"]?.["styles"],
-          onRenderCaretDown: _onRenderCaretDown.bind(null, formContext, props[k]),
-
-          //Hack to render labels correct for booleans, due to react json form will set renderLabel=false for booleans
-          onRenderLabel: (p: any) =>
-            props[k].type === 'boolean' ? (
-              <EAVFWLabel {...p} description={props[k]?.description} />
-            ) : undefined,
-        },
-        //"ui:placeholder": props[k]?.["x-widget-props"]?.placeholder,
-        'ui:emptyValue': null,
-      },
-    ]);
-
-    return Object.fromEntries(entries);
-  }
-
-  return {};
-}
-/**
- * Extracts a specialized `UiSchema` from the custom Json schema given.
- *
- * It does this by looking for the custom `x-widget` property in the json schema
- * and converts this to a `UiSchema` which says that the given widget should be
- * used for that exact property on the json schema.
- * @param jsonSchema The schema to extract the `UiSchema` from
- * @param options Options which should be given to all widgets
- */
-function getUiSchema(
-  jsonSchema: ControlJsonSchemaObject,
-  options?: OptionsFactory, //UiSchemaOpts,
-  formContext?: any,
-): UiSchema {
-  const props = jsonSchema.properties;
-  const deps = mergeDeep(
-    {
-      'ui:options': { styles: formContext.section?.styles },
-    },
-    ...Object.values(jsonSchema.dependencies ?? {})
-      .map((c: any) => c.oneOf.map((o: any) => mapUISchema(o.properties, formContext)))
-      .flat(),
-    mapUISchema(props, formContext),
-  );
-  return deps;
-
-  // return mapUISchema(props);
-}
-
-/**
- * This function is used to customize error and it is used to add localization.
- * @param errors List of Error to transform
- */
-function transformErrors(errors: RJSFValidationError[], uischema?: UiSchema) {
-  return errors.map((error) => {
-    if (error.name === 'multipleOf') {
-      let numberOfDecimals = error.params.multipleOf.toString().split('.')[1]?.length || 0;
-      error.message = `Only ${numberOfDecimals} decimal${numberOfDecimals > 1 ? 's' : ''} are allowed.`;
-      // TODO: Figure out how to get the Display name for the property
-      error.stack = `${error.property}: ${error.message}`;
-    }
-    return error;
-  });
-}
+export { ControlsComponent };

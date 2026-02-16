@@ -14,9 +14,12 @@ import { useWizard } from './useWizard';
 
 const intervalDelay = 100;
 
-const DownloadProgressBar: React.FC<{ time?: number; onDownloadEnd: () => void }> = ({
+const DownloadProgressBar = ({
   time = 10000,
   onDownloadEnd,
+}: {
+  time?: number;
+  onDownloadEnd: () => void;
 }) => {
   const [value, setValue] = useState(time);
   // This effect simulates progress value based on state/remote data
@@ -37,9 +40,12 @@ const DownloadProgressBar: React.FC<{ time?: number; onDownloadEnd: () => void }
   return <ProgressBar value={value} max={time} />;
 };
 
-export const WizardToaster: React.FC<{ id?: string; position?: ToasterProps['position'] }> = ({
+export const WizardToaster = ({
   id = 'toaster',
   position = 'top-end',
+}: {
+  id?: string;
+  position?: ToasterProps['position'];
 }) => {
   const toasterId = useId(id);
   const { dispatchToast, dismissToast } = useToastController(toasterId);

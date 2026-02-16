@@ -1,697 +1,86 @@
-import React, {
-  createContext,
-  PropsWithChildren,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+/**
+ * ModelDrivenGridViewer barrel file.
+ *
+ * Re-exports all public symbols from split modules and contains
+ * the main ModelDrivenGridViewer component.
+ */
+
+// Re-export types
+export type {
+  ModelDrivenGridViewerState,
+  ModelDrivenGridViewerProps,
+  IScrollablePaneDetailsListExampleItem,
+  DefaultPrimaryFieldRenderProps,
+  ModelDrivenGridViewerContextProps,
+  LookupControlRenderProps,
+} from './gridViewerTypes';
+
+// Re-export utility functions
+export {
+  setCount,
+  setTop,
+  setSkip,
+  DefaultDataQuery,
+  DefaultDataCountQuery,
+  DefaultOnBuildFetchQuery,
+} from './gridViewerUtils';
+
+// Re-export renderers
+export { traverseRecordPath } from './gridViewerRenderers';
+
+// Re-export context
+export {
+  useModelDrivenGridViewerContext,
+  ModelDrivenGridViewerContextProvider,
+} from './gridViewerContext';
+
+// Re-export LookupControlRender
+export { LookupControlRender } from './LookupControlRender';
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   Stack,
-  DetailsList,
-  DetailsListLayoutMode,
-  Selection,
   SelectionMode,
-  IColumn,
-  IStackStyles,
-  CommandBar,
-  ICommandBarStyles,
-  ICommandBarItemProps,
-  IDropdownOption,
-  IDetailsFooterProps,
-  IRenderFunction,
-  StickyPositionType,
-  IDetailsHeaderProps,
-  IDetailsColumnRenderTooltipProps,
-  TooltipHost,
-  Sticky,
-  DetailsRow,
-  mergeStyleSets,
-  IDetailsRowStyles,
   IDetailsListProps,
-  getTheme,
-  ConstrainMode,
-  Modal,
-  IObjectWithKey,
-  MessageBar,
-  MessageBarType,
-  IDetailsColumnProps,
+  IDetailsRowStyles,
+  DetailsRow,
   useTheme,
-  IconButton,
-  DetailsHeader,
 } from '@fluentui/react';
-import { FormValidation, FieldValidation } from '@rjsf/utils';
 
-import Link from 'next/link';
+import { IRecord } from '@eavfw/manifest';
 
-import { useBoolean, useId } from '@fluentui/react-hooks';
-
-import {
-  AttributeDefinition,
-  ChoiceType,
-  EntityDefinition,
-  getNavigationProperty,
-  IRecord,
-  isAttributeLookup,
-  isChoice,
-  isLookup,
-  isPolyLookup,
-  LookupAttributeDefinition,
-  LookupType,
-  NestedType,
-  queryEntitySWR,
-  ViewColumnDefinition,
-  ViewDefinition,
-} from '@eavfw/manifest';
-import { FormRenderProps } from '../Forms/FormRenderProps';
 import { useRibbon } from '../Ribbon/useRibbon';
-import { errorMessageFactory, useMessageContext } from '../MessageArea/MessageContext';
 import { useProgressBarContext } from '../ProgressBar/ProgressBarContext';
-import { handleValidationErrors } from '../../Validation/handleValidationErrors';
-import { LazyFormRender } from '../Forms/LazyFormRender';
 import { useModelDrivenApp } from '../../useModelDrivenApp';
-import {
-  ColumnFilterProvider,
-  isAttributeLookupEntry,
-  useColumnFilter,
-} from '../ColumnFilter/ColumnFilterContext';
+import { ColumnFilterProvider } from '../ColumnFilter/ColumnFilterContext';
 import { useSelectionContext } from '../Selection/useSelectionContext';
-import { IColumnData } from '../ColumnFilter/IColumnData';
 import { useUserProfile } from '../Profile/useUserProfile';
-import { RibbonHost } from '../Ribbon/RibbonHost';
 import { ColumnFilterCallout } from '../ColumnFilter/ColumnFilterCallout';
 import { RibbonBar } from '../Ribbon/RibbonBar';
-import { filterRoles } from '../../filterRoles';
 import { useAppInfo } from '../../useAppInfo';
 import { useLazyMemo } from '../../../../hooks/src';
-import { Controls } from '../Controls/ControlRegister';
-import { IFetchQuery, usePaging } from './PagingContext';
+import { usePaging } from './PagingContext';
 import styles from './ModelDrivenGridViewer.module.scss';
 import ModelDrivenList from './ModelDrivenList';
-import { ModelDrivenApp } from '../../ModelDrivenApp';
 import { ModelDrivenViewContextProvider } from './ModelDrivenViewContext';
 
-//const theme = getTheme();
-
-export type ModelDrivenGridViewerState = {
-  columns: IColumn[];
-  items: IRecord[];
-  selectionDetails: string;
-  isModalSelection: boolean;
-  isCompactMode: boolean;
-  announcedMessage?: string;
-  showViewSelector: boolean;
-  showRibbonBar: boolean;
-  padding: number;
-  views: IDropdownOption[];
-  selectedView: string;
-  loaded: boolean;
-  commands: ICommandBarItemProps[];
-};
-
-export const DefaultDataQuery = (
-  entity: EntityDefinition,
-  newRecord?: boolean,
-  fetchQuery?: IFetchQuery,
-) => {
-  return queryEntitySWR(
-    entity,
-    setCount(fetchQuery, false),
-    !newRecord && typeof fetchQuery !== 'undefined',
-  );
-};
-export const DefaultDataCountQuery = (
-  entity: EntityDefinition,
-  newRecord?: boolean,
-  fetchQuery?: IFetchQuery,
-) => {
-  return queryEntitySWR(
-    entity,
-    setSkip(setTop(setCount(fetchQuery, true), 0), 0),
-    !newRecord && typeof fetchQuery !== 'undefined',
-  );
-};
-
-export type ModelDrivenGridViewerProps = {
-  allowNoPaging?: boolean;
-  defaultValues?: Array<any>;
-  viewName?: string;
-  filter?: string;
-  newRecord?: boolean;
-  entityName?: string;
-  entity: EntityDefinition;
-  locale: string;
-  showViewSelector?: boolean;
-  showRibbonBar?: boolean;
-  padding?: number;
-  rightCommands?: ICommandBarItemProps[];
-  commands?: (ctx: {
-    selection: Selection<Partial<IRecord> & IObjectWithKey>;
-  }) => ICommandBarItemProps[];
-  recordRouteGenerator: (record: IRecord) => string;
-  listComponent?: React.ComponentType<
-    IDetailsListProps & { formData: any; onChange?: (related: any) => void }
-  >;
-  onChange?: (data: any) => void;
-  formData?: any;
-  onHeaderRender?: IRenderFunction<IDetailsColumnProps>;
-  onBuildFetchQuery?: <T>(q: T) => T;
-  onQueueData?: typeof DefaultDataQuery;
-  onQueryDataCount?: typeof DefaultDataCountQuery;
-};
-
-const RibbonStyles: IStackStyles = {
-  root: {
-    overflow: 'hidden',
-    width: `100%`,
-    borderBottom: 'solid 0.5px white',
-  },
-};
-const leftribbon: ICommandBarStyles = {
-  root: {
-    padding: 0,
-    margin: 0,
-  },
-};
-
-export interface IScrollablePaneDetailsListExampleItem {
-  key: number | string;
-  name: string;
-  test2: string;
-  test3: string;
-  test4: string;
-  test5: string;
-  test6: string;
-}
-
-const footerItem: IScrollablePaneDetailsListExampleItem = {
-  key: 'footer',
-  name: 'Footer 1',
-  test2: 'Footer 2',
-  test3: 'Footer 3',
-  test4: 'Footer 4',
-  test5: 'Footer 5',
-  test6: 'Footer 6',
-};
-
-const onRenderDetailsHeader: IRenderFunction<IDetailsHeaderProps> = (props, defaultRender) => {
-  if (!props) {
-    return null;
-  }
-  const onRenderColumnHeaderTooltip: IRenderFunction<IDetailsColumnRenderTooltipProps> = (
-    tooltipHostProps,
-  ) => <TooltipHost {...tooltipHostProps} />;
-  return (
-    <Sticky stickyPosition={StickyPositionType.Header} isScrollSynced>
-      {defaultRender!({
-        ...props,
-        styles: {
-          root: { paddingTop: 0 },
-        },
-        onRenderColumnHeaderTooltip,
-      })}
-    </Sticky>
-  );
-};
-
-const classNames = mergeStyleSets({
-  wrapper: {
-    height: '80vh',
-    position: 'relative',
-    backgroundColor: 'white',
-  },
-  filter: {
-    backgroundColor: 'white',
-    paddingBottom: 20,
-    maxWidth: 300,
-  },
-  header: {
-    margin: 0,
-    backgroundColor: 'white',
-  },
-  row: {
-    display: 'inline-block',
-  },
-  cell: {
-    alignSelf: 'center',
-  },
-});
-
-const RenderDetailsFooter: IRenderFunction<IDetailsFooterProps> = (props, defaultRender) => {
-  if (!props) {
-    return null;
-  }
-
-  const {
-    currentPage,
-    firstItemNumber,
-    lastItemNumber,
-    pageSize,
-    totalRecords,
-    moveToFirst,
-    moveNext,
-    movePrevious,
-  } = usePaging();
-  const { selectedCount } = { selectedCount: 0 };
-
-  return (
-    <Stack grow horizontal horizontalAlign="space-between">
-      <Stack.Item grow className="Footer" align="end">
-        <Stack grow horizontal horizontalAlign="space-between">
-          <Stack.Item grow={1} align="center">
-            {firstItemNumber} - {lastItemNumber} of {totalRecords} ({selectedCount} selected)
-          </Stack.Item>
-          <Stack.Item align="center" className="FooterRight">
-            <Stack grow horizontal verticalAlign="center">
-              <IconButton
-                className="FooterIcon"
-                iconProps={{ iconName: 'DoubleChevronLeft' }}
-                onClick={moveToFirst}
-              />
-              <IconButton
-                className="FooterIcon"
-                iconProps={{ iconName: 'ChevronLeft' }}
-                onClick={movePrevious}
-              />
-              <span style={{ display: 'block' }}>Page {currentPage + 1}</span>
-              <IconButton
-                className="FooterIcon"
-                iconProps={{ iconName: 'ChevronRight' }}
-                onClick={moveNext}
-              />
-            </Stack>
-          </Stack.Item>
-        </Stack>
-      </Stack.Item>
-    </Stack>
-  );
-};
-
-type LookupControlRenderProps = {
-  recordRouteGenerator: any;
-  item: any;
-  attribute: AttributeDefinition;
-  type: LookupType;
-  onChange?: any;
-};
-
-const LookupControlRender: React.FC<LookupControlRenderProps> = ({
-  item,
-  attribute,
-  type,
-  recordRouteGenerator,
-  onChange,
-}) => {
-  const [isOpen, { setFalse, setTrue }] = useBoolean(false);
-  const save = useRibbon();
-  const app = useModelDrivenApp();
-
-  const recordRef = useRef<any>(item[attribute.logicalName.slice(0, -2)]);
-  const _onDataChange = useCallback((data: any) => {
-    recordRef.current = data;
-  }, []);
-
-  const [extraErrors, setExtraErrors] = useState({} as FormValidation);
-  const entitySaveMessageKey = 'entitySaved';
-  const { addMessage, removeMessage } = useMessageContext();
-  const { showIndeterminateProgressIndicator, hideProgressBar } = useProgressBarContext();
-
-  let entity = app.getEntity(type.foreignKey?.principalTable!);
-  const attributes = useMemo(
-    () => ({
-      ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}),
-      ...entity.attributes,
-    }),
-    [entity.logicalName],
-  );
-
-  const _onModalDismiss = useCallback(async (data: any) => {
-    setFalse();
-    if (data === 'save') {
-      showIndeterminateProgressIndicator();
-
-      let plain = Object.fromEntries(
-        Object.values(attributes).map((v) => [v.logicalName, recordRef.current[v.logicalName]]),
-      );
-      let rsp = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records/${recordRef.current.id}`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify(plain),
-          credentials: 'include',
-        },
-      );
-
-      if (rsp.ok) {
-        for (let k of Object.keys(plain)) {
-          item[attribute.logicalName.slice(0, -2)][k] = plain[k];
-        }
-
-        if (onChange) onChange(item);
-
-        addMessage(entitySaveMessageKey, (props?: any) => (
-          <MessageBar
-            messageBarType={MessageBarType.success}
-            {...props}
-            onDismiss={() => removeMessage(entitySaveMessageKey)}
-          >
-            {app.getLocalization('entitySaved') ?? <>Entity have been saved!</>}
-          </MessageBar>
-        ));
-      } else {
-        const { errors, extraErrors } = await handleValidationErrors(rsp, app);
-
-        setExtraErrors(extraErrors);
-
-        addMessage(
-          entitySaveMessageKey,
-          errorMessageFactory(
-            {
-              key: entitySaveMessageKey,
-              removeMessage: removeMessage,
-              messages: errors,
-            },
-            app,
-          ),
-        );
-      }
-
-      hideProgressBar();
-    }
-  }, []);
-
-  const _onClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    if (save.canSave) {
-      const _once = () => {
-        save.events.off('saveComplete', _once);
-        setTrue();
-      };
-      save.events.on('saveComplete', _once);
-      save.events.emit('onSave');
-    } else {
-      setTrue();
-    }
-    return false;
-  };
-
-  return (
-    <>
-      <Modal isOpen={isOpen} onDismiss={setFalse} isBlocking={true}>
-        <Stack verticalFill styles={{ root: { minWidth: '60vw', maxWidth: '90vw' } }}>
-          <Stack horizontal>
-            <Stack.Item grow>
-              <CommandBar
-                id="ModalRibbonBarCommands"
-                items={[]}
-                farItems={[
-                  {
-                    key: 'close',
-                    ariaLabel: 'Info',
-                    iconOnly: true,
-                    iconProps: { iconName: 'Cancel' },
-                    onClick: setFalse,
-                  },
-                ]}
-                ariaLabel="Use left and right arrow keys to navigate between commands"
-              />
-            </Stack.Item>
-          </Stack>
-
-          <LazyFormRender
-            extraErrors={extraErrors}
-            record={recordRef.current}
-            entityName={type.foreignKey?.principalTable}
-            dismissPanel={_onModalDismiss}
-            onChange={_onDataChange}
-          />
-        </Stack>
-      </Modal>
-      <a href="#" onClick={_onClick}>
-        {item[
-          attribute.logicalName.endsWith('id')
-            ? attribute.logicalName.slice(0, -2)
-            : attribute.logicalName
-        ][type.foreignKey?.principalNameColumn?.toLowerCase()!] ?? '<ingen navn>'}
-      </a>
-      {}
-    </>
-  );
-};
-
-function _getKey(item: any, index?: number): string {
-  return item.key;
-}
+import { ModelDrivenGridViewerProps, ModelDrivenGridViewerState } from './gridViewerTypes';
+import {
+  DefaultDataQuery,
+  DefaultDataCountQuery,
+  DefaultOnBuildFetchQuery,
+} from './gridViewerUtils';
+import { ConditionRenderComponent, RenderDetailsFooter } from './gridViewerRenderers';
 
 /**
- * Retrieves the text content of a cell based on the provided item and column information.
- * @param item The data item representing a row.
- * @param column The column information object.
- * @returns The text content to be displayed in the cell.
+ * A model-driven grid viewer component that renders entity records
+ * in a details list with filtering, paging, and selection support.
  */
-const getCellText = (item: any, column: IColumn): string => {
-  // Get the value from the item's property specified by the column's fieldName.
-  let value = item && column && column.fieldName ? item[column.fieldName] : '';
-
-  // Handle null or undefined values by setting them to an empty string.
-  if (value === null || value === undefined) {
-    value = '';
-  }
-
-  // Convert boolean values to string representation.
-  if (typeof value === 'boolean') {
-    return value.toString();
-  }
-
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-
-  // Convert and format the value as a date and time string.
-  return value;
-};
-
-/**
- * Converts a SQL DateTime format to the format DD-MM-YYYY HH:MM:SS.
- * @param inputDateTime The input date and time in SQL DateTime format.
- * @returns The formatted date and time string in DD-MM-YYYY HH:MM:SS format.
- */
-function convertDateTimeFormat(inputDateTime: string): string {
-  if (inputDateTime != undefined) {
-    const inputDate = new Date(inputDateTime);
-
-    const day = String(inputDate.getDate()).padStart(2, '0');
-    const month = String(inputDate.getMonth() + 1).padStart(2, '0');
-    const year = inputDate.getFullYear();
-
-    const hours = String(inputDate.getHours()).padStart(2, '0');
-    const minutes = String(inputDate.getMinutes()).padStart(2, '0');
-    const seconds = String(Math.round(inputDate.getSeconds())).padStart(2, '0');
-
-    const formattedDateTime = `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
-    return formattedDateTime;
-  } else {
-    return inputDateTime;
-  }
-}
-
-const RenderChoiceColumn: React.FC<{ value: any; type: ChoiceType; locale: string }> = ({
-  value,
-  type,
-  locale,
-}) => {
-  if (value || value === 0) {
-    const [key, optionValue] = Object.entries<any>(type.options ?? {}).filter(
-      ([key, option]) => (typeof option === 'number' ? option : option.value) === value,
-    )[0];
-
-    return <>{optionValue?.locale?.[locale]?.displayName ?? optionValue?.text ?? key}</>;
-  }
-  return null;
-};
-
-const ConditionRenderComponent: React.FC<{
-  [key: string]: any;
-  column?: IColumn;
-  entity: EntityDefinition;
-}> = ({ recordRouteGenerator, entity, item, column, locale }) => {
-  if (!column) throw new Error('Column not defined');
-
-  const attribute = column.data as AttributeDefinition;
-
-  const { onRenderPrimaryField: RenderPrimaryField } = useModelDrivenGridViewerContext();
-
-  const type = attribute.type as NestedType;
-
-  if (isChoice(type) && item) {
-    return (
-      <RenderChoiceColumn value={item[column?.fieldName as string]} type={type} locale={locale} />
-    );
-  } else if (attribute.isPrimaryField) {
-    return (
-      <RenderPrimaryField recordRouteGenerator={recordRouteGenerator} item={item} column={column} />
-    );
-    //        return <Link href={recordRouteGenerator(item)}><a>{item[column?.fieldName!] ?? '<ingen navn>'}</a></Link>
-  } else if (isLookup(type)) {
-    if (column.key.indexOf('/') !== -1) {
-      const app = useModelDrivenApp();
-      const [subitem, value, lookup] = traverseRecordPath(app, column, item);
-
-      if (isChoice(lookup.type)) {
-        return <RenderChoiceColumn value={value} type={lookup.type} locale={locale} />;
-      }
-
-      return (
-        <Link
-          legacyBehavior={true}
-          href={recordRouteGenerator({
-            id: subitem.id,
-            entityName: subitem?.['$type'] ?? lookup.type.foreignKey?.principalTable!,
-          })}
-        >
-          <a>{value}</a>
-        </Link>
-      );
-    }
-
-    if (!(attribute.logicalName in item)) {
-      return null;
-    }
-
-    const linkedItem = item[attribute.logicalName.slice(0, -2)];
-
-    if (isPolyLookup(type)) {
-      const app = useModelDrivenApp();
-      const { currentEntityName } = useAppInfo();
-      if (type.inline) {
-        const lookups = Object.entries(app.getAttributes(entity.logicalName)).filter(
-          isAttributeLookupEntry,
-        );
-
-        const lookupsFromReferenceTypes = type.referenceTypes
-          .map((referenceType) =>
-            lookups.filter(
-              (a) =>
-                a[1].type.referenceType === referenceType && a[1].logicalName.slice(0, -2) in item,
-            ),
-          )
-          .filter((x) => x.length > 0)[0][0];
-
-        const referenceItem = item[lookupsFromReferenceTypes[1].logicalName.slice(0, -2)];
-        return (
-          <Link
-            legacyBehavior={true}
-            href={recordRouteGenerator({
-              id: item[attribute.logicalName], //item[lookupsFromReferenceTypes[1].logicalName],
-              entityName:
-                referenceItem?.['$type'] ??
-                lookupsFromReferenceTypes[1].type?.foreignKey?.principalTable!,
-            })}
-          >
-            <a>
-              {
-                referenceItem[
-                  lookupsFromReferenceTypes[1].type.foreignKey?.principalNameColumn?.toLowerCase()!
-                ]
-              }
-            </a>
-          </Link>
-        );
-      }
-
-      const referenceType = Object.values(
-        app.getAttributes(app.getEntityFromKey(type.referenceType).logicalName),
-      ).filter((a) => a.logicalName in linkedItem)[0] as LookupAttributeDefinition;
-
-      const referenceItem = linkedItem[referenceType.logicalName.slice(0, -2)];
-      // return <div>{linkedItem[referenceType.logicalName]}</div>;
-
-      return (
-        <Link
-          legacyBehavior={true}
-          href={recordRouteGenerator({
-            id: linkedItem[referenceType.logicalName],
-            entityName: referenceItem?.['$type'] ?? referenceType.type?.foreignKey?.principalTable!,
-          })}
-        >
-          <a>{referenceItem[referenceType.type.foreignKey?.principalNameColumn?.toLowerCase()!]}</a>
-        </Link>
-      );
-    }
-    return (
-      <Link
-        legacyBehavior={true}
-        href={recordRouteGenerator({
-          id: item[attribute.logicalName],
-          entityName:
-            item[attribute.logicalName.slice(0, -2)]?.['$type'] ?? type.foreignKey?.principalTable!,
-        })}
-      >
-        <a>
-          {
-            item[attribute.logicalName.slice(0, -2)]?.[
-              type.foreignKey?.principalNameColumn?.toLowerCase()!
-            ]
-          }
-        </a>
-      </Link>
-    );
-  } else if (column.data.control && column.data.control in Controls) {
-    const CustomControl = Controls[column.data.control] as React.FC<{
-      value: any;
-    }>;
-
-    return <CustomControl value={item[attribute.logicalName]}></CustomControl>;
-  } else if (type.type === 'datetime') {
-    let value = item && column && column.fieldName ? item[column.fieldName] : '';
-
-    return <>{convertDateTimeFormat(value)}</>;
-  }
-
-  return <>{getCellText(item, column)}</>;
-};
-
-const DefaultOnBuildFetchQuery = (q: any) => q;
-
-const Footer = () => {
-  return <div>Hello</div>;
-};
-export function setCount(fetchQuery?: IFetchQuery, count = true) {
-  if (fetchQuery) {
-    let clone = { ...fetchQuery } as IFetchQuery;
-    if (clone['$count'] !== count) {
-      clone['$count'] = count;
-      return clone;
-    }
-  }
-  return fetchQuery;
-}
-export function setTop(fetchQuery?: IFetchQuery, top = 100) {
-  if (fetchQuery) {
-    let clone = { ...fetchQuery } as IFetchQuery;
-    if (clone['$top'] !== top) {
-      clone['$top'] = top;
-      return clone;
-    }
-  }
-  return fetchQuery;
-}
-export function setSkip(fetchQuery?: IFetchQuery, skip = 0) {
-  if (fetchQuery) {
-    let clone = { ...fetchQuery } as IFetchQuery;
-    if (clone['$skip'] !== skip) {
-      clone['$skip'] = skip;
-      return clone;
-    }
-  }
-  return fetchQuery;
-}
-
 export function ModelDrivenGridViewer({
   allowNoPaging,
   locale,
@@ -719,13 +108,14 @@ export function ModelDrivenGridViewer({
   const appinfo = useAppInfo();
 
   const [items, setItems] = useState<IRecord[]>(
-    newRecord ? (formData[entity.collectionSchemaName.toLowerCase()] ?? []) : [],
+    newRecord
+      ? ((formData?.[entity.collectionSchemaName.toLowerCase()] as IRecord[] | undefined) ?? [])
+      : [],
   );
   const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
   const [announcedMessage, setannouncedMessage] = useState<string>();
 
   const [isCompactMode, setisCompactMode] = useState(false);
-  // const [columns, setColumns] = useState<IColumn[]>([]);
   const attributes = useMemo(
     () => ({
       ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}),
@@ -746,19 +136,15 @@ export function ModelDrivenGridViewer({
     [commands, selection, selectionDetails, appinfo.currentEntityName, appinfo.currentRecordId],
   );
 
-  //useEffect(() => {
-  //    setCommands(commands?.({ selection }) ?? rightCommands ?? []);
-  //}, [selection, selectionDetails]);
-
   const { buttons, addButton, removeButton, events } = useRibbon();
 
   useEffect(() => {
-    for (let cmd of stateCommands) {
+    for (const cmd of stateCommands) {
       addButton(cmd);
     }
 
     return () => {
-      for (let cmd of stateCommands) {
+      for (const cmd of stateCommands) {
         removeButton(cmd.key);
       }
     };
@@ -795,7 +181,7 @@ export function ModelDrivenGridViewer({
     if (formData?.modifiedon) mutate();
   }, [formData?.modifiedon]);
 
-  //Show loading bar based on loading from data.
+  // Show loading bar based on loading from data.
   useEffect(() => {
     if (isLoading && !newRecord) showIndeterminateProgressIndicator();
     else {
@@ -806,25 +192,20 @@ export function ModelDrivenGridViewer({
     };
   }, [isLoading, isError]);
 
-  //Set items whenever its done loading and augment with entityName.
+  // Set items whenever its done loading and augment with entityName.
   useEffect(() => {
     if (data)
       setItems(data.items.map((item) => Object.assign(item, { entityName: entity.logicalName })));
 
     if (newRecord && defaultValues) {
       setItems(
-        defaultValues.map((item) => Object.assign(item, { entityName: entity.logicalName })),
+        defaultValues.map((item) =>
+          Object.assign(item, { entityName: entity.logicalName }),
+        ) as IRecord[],
       );
     }
   }, [data, newRecord && defaultValues]);
 
-  //Callback to recalculate the fetchQuery.
-
-  // KIG HER TORSDAG; HVORDAN BLIVER MODIFIED ON SAT?
-  // useEffect(() => {
-
-  //     fetchCallBack();
-  // }, [formData?.modifiedon, selectedView]);
   useEffect(() => {
     setTotalRecords(count?.count ?? -1);
   }, [count?.count]);
@@ -841,7 +222,6 @@ export function ModelDrivenGridViewer({
 
       if (props) {
         if (props.itemIndex % 2 === 0) {
-          // Every other row renders with a different background color
           customStyles.root = {
             backgroundColor: theme.palette.neutralLighterAlt,
           };
@@ -946,80 +326,5 @@ export function ModelDrivenGridViewer({
   );
 }
 
-export type DefaultPrimaryFieldRenderProps = {
-  recordRouteGenerator: (record: IRecord) => string;
-  item: IRecord;
-  column: IColumn;
-};
-export type ModelDrivenGridViewerContextProps = {
-  onRenderPrimaryField: React.FC<DefaultPrimaryFieldRenderProps>;
-};
-
-export const traverseRecordPath = (app: ModelDrivenApp, column: IColumn, subitem: any) => {
-  let parts = column.key.split('/');
-  let navattributes = app.getEntity(subitem['$type']).attributes;
-  let value = null as any;
-  while (parts.length) {
-    let nav = parts.shift()!;
-    let attribute = navattributes[nav];
-    if (isAttributeLookup(attribute)) {
-      subitem = subitem[attribute.logicalName.slice(0, -2)];
-
-      if (parts.length === 0)
-        return [
-          subitem,
-          subitem[attribute.type.foreignKey?.principalNameColumn?.toLowerCase()!],
-          attribute,
-        ];
-
-      navattributes = app.getEntityFromKey(attribute.type.referenceType).attributes;
-    } else {
-      value = subitem[attribute.logicalName];
-      return [subitem, value, attribute];
-    }
-  }
-  return [subitem, value];
-};
-const DefaultPrimaryFieldRender: React.FC<DefaultPrimaryFieldRenderProps> = ({
-  recordRouteGenerator,
-  item,
-  column,
-}) => {
-  if (column.key.indexOf('/') !== -1) {
-    const app = useModelDrivenApp();
-    const [subitem, value] = traverseRecordPath(app, column, item);
-
-    return (
-      <Link legacyBehavior={true} href={recordRouteGenerator(subitem)}>
-        <a>{value}</a>
-      </Link>
-    );
-  }
-  let value = item[column?.fieldName!] ?? '<ingen navn>';
-  return (
-    <Link legacyBehavior={true} href={recordRouteGenerator(item)}>
-      <a>{value}</a>
-    </Link>
-  );
-};
-const ModelDrivenGridViewerContext = createContext<ModelDrivenGridViewerContextProps>({
-  onRenderPrimaryField: DefaultPrimaryFieldRender,
-});
-
-export function useModelDrivenGridViewerContext<T>() {
-  return useContext<ModelDrivenGridViewerContextProps>(
-    ModelDrivenGridViewerContext,
-  ) as ModelDrivenGridViewerContextProps & T;
-}
-export function ModelDrivenGridViewerContextProvider<T>({
-  children,
-  ...props
-}: PropsWithChildren<ModelDrivenGridViewerContextProps & T>) {
-  return (
-    <ModelDrivenGridViewerContext.Provider value={props}>
-      {children}
-    </ModelDrivenGridViewerContext.Provider>
-  );
-}
-
+/** @deprecated Use named import: `import { ModelDrivenGridViewer } from '...'` instead of default import */
 export default ModelDrivenGridViewer;

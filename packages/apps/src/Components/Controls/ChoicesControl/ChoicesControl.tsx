@@ -2,7 +2,7 @@ import { Dropdown, IDropdownOption, IDropdownProps } from '@fluentui/react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { JSONSchema7 } from 'json-schema';
 import { useRef } from 'react';
-import { AttributeDefinition, ChoicesType, queryEntitySWR } from '@eavfw/manifest';
+import { AttributeDefinition, ChoicesType, IRecord, queryEntitySWR } from '@eavfw/manifest';
 import { ChoicesControlProps } from './ChoicesControlProps';
 import { useRibbon } from '../../Ribbon/useRibbon';
 import { useModelDrivenApp } from '../../../useModelDrivenApp';
@@ -14,7 +14,7 @@ declare module 'json-schema' {
   }
 }
 
-export const ChoicesControl: React.FC<ChoicesControlProps> = ({
+export const ChoicesControl = ({
   entityName,
   attributeName,
   value,
@@ -28,7 +28,7 @@ export const ChoicesControl: React.FC<ChoicesControlProps> = ({
   name,
   formContext,
   idSchema,
-}) => {
+}: ChoicesControlProps) => {
   const app = useModelDrivenApp();
   const appInfo = useAppInfo();
   const entity = app.getEntity(entityName);
@@ -37,7 +37,7 @@ export const ChoicesControl: React.FC<ChoicesControlProps> = ({
   const items = schema.items as JSONSchema7;
   const choices = column.type as ChoicesType;
   const enumOptions = items.properties?.[choices.logicalName] as JSONSchema7;
-  const changedItems = useRef<{ [key: number]: any }>({});
+  const changedItems = useRef<Record<number, { state: string; item: { id: string } }>>({});
   const [newOptions, setnewOptions] = useState<Array<IDropdownOption>>([]);
 
   const saveinfo = useRibbon();
@@ -48,9 +48,8 @@ export const ChoicesControl: React.FC<ChoicesControlProps> = ({
     isLoading: false,
   });
   const { data, mutate, isLoading } = appInfo.currentRecordId
-    ? queryEntitySWR<any>(app.getEntity(choices.logicalName), {
+    ? queryEntitySWR<IRecord>(app.getEntity(choices.logicalName), {
         $filter: `${entity.logicalName}id eq ${appInfo.currentRecordId}`,
-        $expand: undefined,
       })
     : dummy.current;
   useEffect(() => {
@@ -119,17 +118,24 @@ export const ChoicesControl: React.FC<ChoicesControlProps> = ({
     onFormDataChange(relatedItems);
   };
 
-  const _onBlur = useCallback((e: any) => onBlur(idSchema.$id, selectedKeys), [selectedKeys]);
+  const _onBlur = useCallback(
+    (e: React.FocusEvent<HTMLElement>) => onBlur(idSchema.$id, selectedKeys),
+    [selectedKeys],
+  );
 
-  const _onFocus = useCallback((e: any) => onFocus?.(idSchema.$id, selectedKeys), [selectedKeys]);
+  const _onFocus = useCallback(
+    (e: React.FocusEvent<HTMLElement>) => onFocus?.(idSchema.$id, selectedKeys),
+    [selectedKeys],
+  );
 
   useEffect(() => {
-    const fromFormData = formData[name]?.map((f: any) => f[choices.logicalName]) ?? [];
+    const fromFormData =
+      formData[name]?.map((f: Record<string, unknown>) => f[choices.logicalName]) ?? [];
     const fromRemote = data?.items ?? []; //map(f => f[choices.logicalName]) ?? [];
     const fromRemoteFiltered = fromRemote
       .filter(
         (value) =>
-          (formData[`${name}@deleted`]?.filter((id: any) => id === value.id)?.length ?? 0) === 0,
+          (formData[`${name}@deleted`]?.filter((id: string) => id === value.id)?.length ?? 0) === 0,
       )
       .map((f) => f[choices.logicalName]);
 
@@ -154,4 +160,5 @@ export const ChoicesControl: React.FC<ChoicesControlProps> = ({
   );
 };
 
+/** @deprecated Use named import: `import { ChoicesControl } from '...'` instead of default import */
 export default ChoicesControl;

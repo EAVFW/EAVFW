@@ -87,7 +87,7 @@ type TaskProps = {
   title: string;
   description: string;
 };
-const Task: React.FC<TaskProps> = ({ cardProps, title, description }) => {
+const Task = ({ cardProps, title, description }: TaskProps) => {
   const styles = useStyles();
   return (
     <Card className={styles.card} {...cardProps}>
@@ -118,7 +118,7 @@ type KanbanBoardColumnProps = {
   title: string;
   tasks: Array<any>;
 };
-const KanbanBoardColumn: React.FC<KanbanBoardColumnProps> = ({
+const KanbanBoardColumn = ({
   stateid,
   title,
   onDrop,
@@ -126,7 +126,7 @@ const KanbanBoardColumn: React.FC<KanbanBoardColumnProps> = ({
   drag,
   onCreateTask,
   tasks,
-}) => {
+}: KanbanBoardColumnProps) => {
   return (
     <div className={styles['kanban-block']} id={stateid} onDrop={onDrop} onDragOver={allowDrop}>
       <strong>{title}</strong>
@@ -142,7 +142,7 @@ const KanbanBoardColumn: React.FC<KanbanBoardColumnProps> = ({
     </div>
   );
 };
-export const KanbanBoard: React.FC = () => {
+export const KanbanBoard = () => {
   const app = useModelDrivenApp();
   const { currentRecordId } = useAppInfo();
   const [baseUrl, jsonFetcher] = useJsonFetcher();
@@ -159,7 +159,7 @@ export const KanbanBoard: React.FC = () => {
   });
 
   const drag = useCallback((ev: DragEvent<HTMLDivElement>) => {
-    //@ts-ignore
+    // @ts-expect-error - ev.target is typed as EventTarget but we know it's an HTMLElement with id
     ev.dataTransfer.setData('taskid', ev.target.id);
   }, []);
   const allowDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {
@@ -211,7 +211,7 @@ export const KanbanBoard: React.FC = () => {
     // }
 
     var todo = document.getElementById('todo')!;
-    //@ts-ignore
+    // @ts-expect-error - HTMLElement doesn't have value property, but we know it's an input element
     var taskName = document.getElementById('task-name')?.value;
     todo.innerHTML += `
             <div class="task" id="${taskName.toLowerCase().split(' ').join('')}" draggable="true" ondragstart="drag(event)">

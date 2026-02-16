@@ -18,7 +18,7 @@ export class ExtensionMethods {
    * ExtensionMethods.capitalizeFirstLetter(42);       // ''
    * ```
    */
-  static capitalizeFirstLetter(input: any): string {
+  static capitalizeFirstLetter(input: unknown): string {
     if (typeof input !== 'string') {
       return '';
     }
@@ -44,7 +44,7 @@ export class ExtensionMethods {
    *
    * @see {@link ExtensionMethods.isComplexType}
    */
-  static isPrimitiveType(value: any): boolean {
+  static isPrimitiveType(value: unknown): boolean {
     return value !== Object(value);
   }
 
@@ -63,7 +63,7 @@ export class ExtensionMethods {
    *
    * @see {@link ExtensionMethods.isPrimitiveType}
    */
-  static isComplexType(value: any): boolean {
+  static isComplexType(value: unknown): boolean {
     return value === Object(value);
   }
 }

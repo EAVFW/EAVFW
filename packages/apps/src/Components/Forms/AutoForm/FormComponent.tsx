@@ -11,7 +11,7 @@ import { FormValidation } from '@rjsf/utils';
 import { ResolveFeature } from '../../../FeatureFlags';
 import { useSectionStyles } from '../../../Styles/SectionStyles.styles';
 
-type FormComponentProps<T extends { id?: string; [key: string]: any }> = {
+type FormComponentProps<T extends { id?: string; [key: string]: unknown }> = {
   form: FormDefinition;
   tabs: string[];
   getTabName: (tab: FormTabDefinition) => string;
@@ -21,7 +21,7 @@ type FormComponentProps<T extends { id?: string; [key: string]: any }> = {
   formData: T;
   onFormDataChange?: (formdata: T) => void;
   factory?: OptionsFactory;
-  formContext?: any;
+  formContext?: Record<string, unknown>;
   extraErrors?: FormValidation;
 };
 
@@ -30,7 +30,7 @@ const pivotItemStyle = {
   overflow: 'auto',
 };
 
-const FormComponent = <T extends { id?: string; [key: string]: any }>(
+const FormComponent = <T extends { id?: string; [key: string]: unknown }>(
   props: FormComponentProps<T>,
 ) => {
   const {
@@ -64,7 +64,13 @@ const FormComponent = <T extends { id?: string; [key: string]: any }>(
     useEffect(() => {
       if (form.scripts?.onInit) {
         Object.getOwnPropertyNames(form.scripts.onInit).forEach((name) => {
-          const onInit = ResolveFeature(form.scripts!.onInit![name]);
+          const onInit = ResolveFeature(form.scripts!.onInit![name]) as
+            | ((
+                form: FormDefinition,
+                entity: EntityDefinition,
+                formData: Record<string, unknown>,
+              ) => void)
+            | undefined;
           if (onInit) {
             onInit(form, entity, formData);
           }
@@ -162,4 +168,6 @@ const FormComponent = <T extends { id?: string; [key: string]: any }>(
   }
 };
 
+/** @deprecated Use named import: `import { FormComponent } from '...'` instead of default import */
 export default FormComponent;
+export { FormComponent };

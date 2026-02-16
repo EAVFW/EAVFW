@@ -14,6 +14,7 @@ import { AttributeDefinition, EntityDefinition, FormColumnDefinition } from '@ea
 import { Controls } from './ControlRegister';
 import { useModelDrivenApp } from '../../useModelDrivenApp';
 import ChoicesControl from './ChoicesControl/ChoicesControl';
+import { ChoicesControlProps } from './ChoicesControl/ChoicesControlProps';
 import LookupControl from './LookupControl/LookupControl';
 import { EAVFWLabel } from '../Forms/AutoForm/Templates/EAVFWLabel';
 
@@ -23,10 +24,10 @@ export type ControlHostWidgetProps = {
       column: AttributeDefinition;
       field: FormColumnDefinition;
       entity: EntityDefinition;
-      styles?: any;
+      styles?: Record<string, unknown>;
       locale: string;
-      formData: any;
-      onRenderLabel?: any;
+      formData: Record<string, unknown>;
+      onRenderLabel?: (props: FieldTemplateProps) => React.ReactNode;
       extraErrors?: FormValidation;
     };
   } & JSONSchema7;
@@ -40,10 +41,10 @@ export type EAVFWUIOptions = {
   entityName: string;
   formName: string;
   fieldName: string;
-  styles?: any;
+  styles?: Record<string, unknown>;
 } & UIOptionsType;
 
-export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
+export const ControlHostWidgetNew = (props: FieldTemplateProps) => {
   const app = useModelDrivenApp();
 
   const { extraErrors, formErrors } = props.formContext;
@@ -56,14 +57,14 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
     ...options
   } = getUiOptions(uiSchema) as EAVFWUIOptions;
 
-  const { ['x-control']: control } = schema as any;
+  const { ['x-control']: control } = schema as JSONSchema7 & { 'x-control'?: string };
 
   const { styles, onRenderLabel, entityName, fieldName, attributeName, formName } = options!;
 
   const column = app.getEntity(entityName).forms?.[formName]?.columns[fieldName];
   const label = props.schema.title!;
 
-  const _onChange = (data: any, es?: ErrorSchema) => {
+  const _onChange = (data: unknown, es?: ErrorSchema) => {
     try {
       props.onChange(data);
     } finally {
@@ -95,7 +96,6 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
       />
     );
 
-  //@ts-ignore
   const widgetProps = props.schema['x-widget-props']!;
 
   if (control && control in Controls) {
@@ -113,10 +113,15 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
       <>
         <LabelTemplate />
         <ChoicesControl
-          value={props.formData}
-          {...(props as any)}
-          onChange={_onChange}
-          {...widgetProps}
+          {...({
+            ...props,
+            ...widgetProps,
+            value: props.formData,
+            onChange: _onChange,
+            required: required ?? false,
+            disabled: disabled ?? false,
+            readonly: props.readonly ?? false,
+          } as unknown as ChoicesControlProps)}
         />
       </>
     );
@@ -137,17 +142,20 @@ export const ControlHostWidgetNew: React.FC<FieldTemplateProps> = (props) => {
     <>
       <LabelTemplate />
       <LookupControl
-        key={props.id}
-        value={props.formData}
-        {...(props as any)}
-        onChange={_onChange}
-        {...widgetProps}
-        {...props.uiSchema}
-        extraErrors={localExtraErrors}
-        errorMessage={errorMessage}
+        {...({
+          ...props,
+          ...widgetProps,
+          ...props.uiSchema,
+          key: props.id,
+          value: props.formData,
+          onChange: _onChange,
+          extraErrors: localExtraErrors,
+          errorMessage,
+        } as unknown as FieldProps)}
       />
     </>
   );
 };
 
-export default ControlHostWidgetNew as any as ComponentClass<FieldProps<any>, any>;
+/** @deprecated Use named import: `import { ControlHostWidgetNew } from '...'` instead of default import */
+export default ControlHostWidgetNew as unknown as ComponentClass<FieldProps>;

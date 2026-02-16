@@ -8,7 +8,7 @@ import { AppPickerLayout, EmptyLayout, FormLayout, PageLayout, RootLayout } from
 export type FeatureMap = {
   useEvaluateFormDefinition: (
     form: FormDefinition,
-    formdata: any,
+    formdata: Record<string, unknown>,
   ) => { evaluatedForm: FormDefinition; isEvaluatedFormLoading: boolean };
   formsConfig: FormsConfig;
   defaultTheme?: Theme;
@@ -18,7 +18,7 @@ export type FeatureMap = {
   PageLayout: typeof PageLayout;
   AppPickerLayout: typeof AppPickerLayout;
   FormLayout: typeof FormLayout;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 const Features: FeatureMap = {
   useEvaluateFormDefinition: (form, data) => ({

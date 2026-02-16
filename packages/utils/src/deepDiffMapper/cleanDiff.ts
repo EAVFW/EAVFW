@@ -26,11 +26,14 @@ let n = 0;
  *
  * @see {@link deepDiffMapper}
  */
-export function cleanDiff(updatedValues: object, isArray: boolean = false): [boolean, any] {
+export function cleanDiff(
+  updatedValues: object,
+  isArray: boolean = false,
+): [boolean, Record<string, unknown> | unknown[] | undefined] {
   let id = n++;
   console.time('cleandiff' + id);
   try {
-    let a = isArray ? [] : ({} as any);
+    let a: Record<string, unknown> = isArray ? ([] as unknown as Record<string, unknown>) : {};
     let changed = false;
     for (let [key, value] of Object.entries(updatedValues)) {
       if ('__type' in value) {

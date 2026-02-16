@@ -29,12 +29,17 @@ const useOverlay = makeStyles({
   },
 });
 
-export const WizardTab: React.FC<{
+export const WizardTab = ({
+  tabName,
+  columns,
+  controlName,
+  className,
+}: {
   tabName: string;
   className?: string;
   columns?: FormTabDefinitionWithColumns['columns'];
   controlName?: string;
-}> = ({ tabName, columns, controlName, className }) => {
+}) => {
   const [{ isTransitioning }] = useWizard();
   const styles = useOverlay();
   const stack = useStackStyles();

@@ -3,10 +3,10 @@ import { PropsWithChildren, useEffect } from 'react';
 import { useState } from 'react';
 import { TabContext } from './TabContext';
 
-export const RouterTabProvider: React.FC<PropsWithChildren<{ defaultTabs?: string[] }>> = ({
+export const RouterTabProvider = ({
   defaultTabs = [],
   children,
-}) => {
+}: PropsWithChildren<{ defaultTabs?: string[] }>) => {
   const router = useRouter();
   const [tabs, setTabs] = useState(defaultTabs);
   const [tabName, setSelectedTab] = useState<string>(router.query.tabName as string);

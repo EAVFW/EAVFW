@@ -4,9 +4,10 @@ import { AppNavigationContext } from './AppNavigationContext';
 import { EAVApp } from './EAVApp';
 import { ModelDrivenApp } from './ModelDrivenApp';
 
-export const StateBasedAppContextProvider: React.FC<
-  PropsWithChildren<{ model: ModelDrivenApp }>
-> = ({ children, model }) => {
+export const StateBasedAppContextProvider = ({
+  children,
+  model,
+}: PropsWithChildren<{ model: ModelDrivenApp }>) => {
   const [currentAppName, setcurrentAppName] = useState('');
   const [currentAreaName, setcurrentAreaName] = useState('');
   const [currentEntityName, setcurrentEntityName] = useState('');

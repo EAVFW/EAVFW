@@ -17,7 +17,7 @@ export function RegistereRibbonButton(
   name: string,
   render: (props: RibbonButtonProps) => ReactNode | null | void,
 ) {
-  RibbonButtons[name] = (props: any) => render({ key: name, ...props });
+  RibbonButtons[name] = (props: Partial<RibbonButtonProps>) => render({ key: name, ...props });
 
   return new RibbonBuilder(name) as IRibbonBuilder;
 }

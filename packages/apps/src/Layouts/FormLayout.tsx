@@ -72,7 +72,9 @@ export function FormLayout(props: PageLayoutProps) {
     const [selectionDetails, setselectionDetails] =
       useState<ModelDrivenGridViewerState['selectionDetails']>(_getSelectionDetails());
     const [mutater, setMutator] = useState({ mutate: () => {} });
-    const topBarTheme = ResolveFeature('topBarTheme');
+    const topBarTheme = ResolveFeature('topBarTheme') as unknown as
+      | Record<string, unknown>
+      | undefined;
 
     //  const [isOpen, setIsOpen] = useState(false);
 

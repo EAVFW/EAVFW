@@ -95,6 +95,7 @@ export const RichTextEditor: React.VFC<RichTextEditorProps> = ({
   }
 };
 
+/** @deprecated Use named import: `import { RichTextEditor } from '...'` instead of default import */
 export default RichTextEditor;
 
 RegistereControl('RichTextEditor', RichTextEditor);

@@ -91,7 +91,7 @@ export function React8BaseInputTemplate<
         id={id}
         name={id}
         placeholder={placeholder}
-        //@ts-ignore
+        // @ts-expect-error - Fluent UI TextField label prop type mismatch with RJSF label value
         label={labelValue(label, hideLabel)}
         autoFocus={autofocus}
         required={required}
@@ -102,12 +102,12 @@ export function React8BaseInputTemplate<
         // name={name}
         {...inputProps}
         defaultValue={value || value === 0 ? value : ''}
-        onChange={(onChangeOverride as any) || _onChange}
+        // @ts-expect-error -- RJSF onChangeOverride type mismatch with Fluent UI TextField onChange
+        onChange={onChangeOverride || _onChange}
         onBlur={_onBlur}
         onFocus={_onFocus}
         errorMessage={(rawErrors || []).join('\n')}
         list={schema.examples ? examplesId<T>(id) : undefined}
-        //@ts-ignore
         {...uiProps}
         aria-describedby={ariaDescribedByIds<T>(id, !!schema.examples)}
       />
@@ -119,7 +119,7 @@ export function React8BaseInputTemplate<
                 ? ([schema.default] as string[])
                 : [],
             )
-            .map((example: any) => {
+            .map((example: string) => {
               return <option key={example} value={example} />;
             })}
         </datalist>
@@ -179,7 +179,7 @@ export function React9BaseInputTemplate<
         // name={name}
         {...(inputProps as Omit<typeof inputProps, 'type'>)}
         value={value || value === 0 ? value : ''}
-        onChange={(onChangeOverride as any) || _onChange}
+        onChange={onChangeOverride || _onChange}
         onBlur={_onBlur}
         onFocus={_onFocus}
         // errorMessage={(rawErrors || []).join('\n')}
@@ -195,7 +195,7 @@ export function React9BaseInputTemplate<
                 ? ([schema.default] as string[])
                 : [],
             )
-            .map((example: any) => {
+            .map((example: string) => {
               return <option key={example} value={example} />;
             })}
         </datalist>

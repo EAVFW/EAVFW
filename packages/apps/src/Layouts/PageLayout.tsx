@@ -7,7 +7,9 @@ import { PageLayoutProps } from './PageLayoutProps';
 import { PageStackStyles } from './PageStackStyles';
 
 export function PageLayout(props: PageLayoutProps) {
-  const topBarTheme = ResolveFeature('topBarTheme');
+  const topBarTheme = ResolveFeature('topBarTheme') as unknown as
+    | Record<string, unknown>
+    | undefined;
 
   if (!props.sitemap) return <div>loading</div>;
 

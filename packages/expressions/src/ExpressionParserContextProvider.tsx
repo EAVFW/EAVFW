@@ -7,16 +7,18 @@ const setVariablesFunction = process.env['NEXT_PUBLIC_BLAZOR_SET_VARIABLES'];
 
 declare global {
   interface Window {
-    expressionUpdated: any;
-    expressionError: any;
-    multipleExpressionsUpdated: any;
+    expressionUpdated: (id: string, result: unknown) => void;
+    expressionError: (id: string, error: unknown) => void;
+    multipleExpressionsUpdated: (
+      valuesToUpdate: { id: string; result?: unknown; error?: unknown }[],
+    ) => void;
   }
 }
 
-const expressionResults = {} as any;
+const expressionResults: Record<string, (result?: unknown, error?: unknown) => void> = {};
 if (typeof global.window !== 'undefined') {
   window['multipleExpressionsUpdated'] = function (
-    valuesToUpdate: { id: any; result: any | undefined; error: any | undefined }[],
+    valuesToUpdate: { id: string; result?: unknown; error?: unknown }[],
   ) {
     if (valuesToUpdate != undefined && valuesToUpdate.length != 0) {
       setTimeout(() => {
@@ -27,23 +29,41 @@ if (typeof global.window !== 'undefined') {
     }
   };
 
-  window['expressionUpdated'] = function (id: any, result: any) {
+  window['expressionUpdated'] = function (id: string, result: unknown) {
     setTimeout(() => {
       expressionResults[id](result);
     });
   };
 
-  window['expressionError'] = function (id: any, error: any) {
+  window['expressionError'] = function (id: string, error: unknown) {
     setTimeout(() => {
       expressionResults[id](undefined, error);
     });
   };
 }
 
-export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
-  const _variables = useRef({});
-  const _expresssions = useRef({});
-  const _results = useRef<any>({});
+/**
+ * Top-level provider that manages expression registration, variable state,
+ * and communication with the Blazor WebAssembly expression engine. Wrap
+ * your form tree with this provider so that child controls can register
+ * expressions via {@link useExpressionParser}.
+ *
+ * Variables and expressions are debounced (250 ms) before being sent to the
+ * Blazor runtime to avoid excessive interop calls during rapid form edits.
+ *
+ * @example
+ * ```tsx
+ * <ExpressionParserContextProvider>
+ *   <MyForm />
+ * </ExpressionParserContextProvider>
+ * ```
+ */
+export const ExpressionParserContextProvider = ({ children }: PropsWithChildren) => {
+  const _variables = useRef<Record<string, unknown>>({});
+  const _expresssions = useRef<Record<string, unknown>>({});
+  const _results = useRef<Record<string, { isLoading: boolean; data?: unknown; error?: unknown }>>(
+    {},
+  );
   const [variables, setVariables] = useState(_variables.current);
   const [formValues, setFormValues] = useState({});
   const [expressions, setExpressions] = useState({});
@@ -57,7 +77,7 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
     useState(false);
 
   //Using a ref to store variables to avoid triggering changes on the appendVariables method
-  const _appendVariables = useCallback((obj: any) => {
+  const _appendVariables = useCallback((obj: Record<string, unknown>) => {
     _variables.current = {
       ..._variables.current,
       ...obj,
@@ -73,12 +93,12 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
     (
       id: string,
       expresssion: string,
-      context: any,
-      oncallback: (data: any, error: any, id?: string) => void,
+      context: Record<string, unknown>,
+      oncallback: (data: unknown, error: unknown, id?: string) => void,
     ) => {
       _results.current[id] = { isLoading: false };
 
-      expressionResults[id] = (result: any, error: any) => {
+      expressionResults[id] = (result?: unknown, error?: unknown) => {
         oncallback(result, error, id);
         _results.current[id].data = result;
         _results.current[id].isLoading = false;
@@ -111,12 +131,12 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
   );
 
   const allEvaluated = useMemo(
-    () => Object.values(_results.current).filter((x: any) => x.isLoading === true).length === 0,
+    () => Object.values(_results.current).filter((x) => x.isLoading === true).length === 0,
     [_resultetag],
   );
 
-  const _removeExpresssion = useCallback((id: any) => {
-    let expr = { ..._expresssions.current } as any;
+  const _removeExpresssion = useCallback((id: string) => {
+    let expr = { ..._expresssions.current };
     delete expr[id];
     setExpressions((_expresssions.current = expr));
   }, []);
@@ -140,7 +160,9 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
               setisParserContextVariablesInitialized(true);
             }
           })
-          .catch((err) => {})
+          .catch((_error) => {
+            /* Silently ignore: Blazor interop may fail during hot-reload or teardown */
+          })
           .finally(() => {
             //   alert("variables set in " + (new Date().getTime() - time));
           });
@@ -148,7 +170,7 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
     },
     250,
     [isVariablesUpToDate, variables, blazor.isInitialized],
-  ) as any;
+  );
 
   useEffect(() => {
     _d();
@@ -164,7 +186,9 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
               setisParserContextExpressionsInitialized(true);
             }
           })
-          .catch((err) => {})
+          .catch((_error) => {
+            /* Silently ignore: Blazor interop may fail during hot-reload or teardown */
+          })
           .finally(() => {
             //   alert("variables set in " + (new Date().getTime() - time));
           });
@@ -172,7 +196,7 @@ export const ExpressionParserContextProvider: React.FC<PropsWithChildren> = ({ c
     },
     250,
     [expressions, blazor.isInitialized],
-  ) as any;
+  );
 
   useEffect(() => {
     _dd();

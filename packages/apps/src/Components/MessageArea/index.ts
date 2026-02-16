@@ -11,6 +11,7 @@ import MessageArea, {
   successMessageFactory,
 } from './MessageContext';
 
+/** @deprecated Use named import: `import { MessageArea } from '...'` instead of default import */
 export default MessageArea;
 export {
   MessagesContext,

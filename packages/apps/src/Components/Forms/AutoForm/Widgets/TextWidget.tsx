@@ -92,7 +92,7 @@ const TextWidget = ({
       type={inputType as string}
       value={value || value === 0 ? value : ''}
       // value={value || value === 0 ? value : ""}
-      onChange={_onChange as any}
+      onChange={_onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}
       errorMessage={(rawErrors || []).join('\n')}
@@ -101,4 +101,6 @@ const TextWidget = ({
   );
 };
 
+/** @deprecated Use named import: `import { TextWidget } from '...'` instead of default import */
 export default TextWidget;
+export { TextWidget };

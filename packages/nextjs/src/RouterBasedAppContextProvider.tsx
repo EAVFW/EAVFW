@@ -6,7 +6,7 @@ import {
   AppNavigationContextProvider,
 } from '@eavfw/apps';
 
-export const RouterBasedAppContextProvider: React.FC<PropsWithChildren> = ({ children }) => {
+export const RouterBasedAppContextProvider = ({ children }: PropsWithChildren) => {
   const router = useRouter();
 
   const navigationModel = useMemo<AppNavigationContextProps>(

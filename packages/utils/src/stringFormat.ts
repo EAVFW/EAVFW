@@ -14,12 +14,12 @@
  * // 'Entity Account has 5 attributes'
  * ```
  */
-export function stringFormat(format: string, ...params: any[]): string {
+export function stringFormat(format: string, ...params: unknown[]): string {
   if (params.length) {
     let key;
 
     for (key in params) {
-      format = format.replace(new RegExp('\\{' + key + '\\}', 'gi'), params[key]);
+      format = format.replace(new RegExp('\\{' + key + '\\}', 'gi'), String(params[key]));
     }
   }
 

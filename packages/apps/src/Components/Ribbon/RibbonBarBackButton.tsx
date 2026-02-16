@@ -14,7 +14,7 @@ const commandback: IButtonStyles = {
   },
 };
 
-export const RibbonBarBackButton: React.FC = ({}) => {
+export const RibbonBarBackButton = () => {
   const router = useRouter();
 
   return (

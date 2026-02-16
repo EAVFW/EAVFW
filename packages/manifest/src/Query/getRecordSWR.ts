@@ -3,12 +3,28 @@ import useSWR, { mutate } from 'swr';
 import { IRecord } from '../Types';
 import { useJsonFetcher } from './jsonFetcher';
 
+/**
+ * React hook that fetches a single entity record by id using SWR.
+ *
+ * @param entityName - The entity's collection schema name.
+ * @param recordId - The record identifier.
+ * @param query - Optional OData query string (e.g. `'?$expand=account'`).
+ * @param ready - When `false`, the fetch is deferred.
+ * @param initialData - Optional initial record data (used for new records).
+ * @param refreshInterval - Polling interval in milliseconds.
+ * @returns An object with `record`, `isLoading`, `isError`, and `mutate`.
+ *
+ * @example
+ * ```tsx
+ * const { record, isLoading } = getRecordSWR('accounts', recordId);
+ * ```
+ */
 export function getRecordSWR(
   entityName: string,
   recordId: string,
   query: string = '',
   ready = true,
-  initialData: any = undefined,
+  initialData: IRecord | undefined = undefined,
   refreshInterval = 0,
 ) {
   const [baseUrl, jsonFetcher] = useJsonFetcher();

@@ -8,6 +8,7 @@ import {
   FluentProvider,
   Option,
   Text,
+  Theme,
   makeStyles,
   mergeClasses,
   tokens,
@@ -45,7 +46,7 @@ import { useSectionStyles } from '../../Styles';
 
 export interface ModelDrivenNavigationProps /*extends WithRouterProps, WithAppProps, WithUserProps*/ {
   sitemap: ModelDrivenSitemap;
-  theme?: any;
+  theme?: Record<string, unknown>;
 }
 export type ModelDrivenNavigationArea = {
   key: string;
@@ -105,7 +106,7 @@ const useStyles = makeStyles({
     },
   },
 });
-export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigationProps) {
+function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigationProps) {
   const logger = resolveEAVService('loggerFactory')('ModelDrivenNavigation');
 
   const [{ model, isModelDrivenNavigationOpen }, { toggleNav }] = useEAVApp();
@@ -134,7 +135,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
     <div className={styles.root}>
       <FluentProvider
         id="themeNavV2"
-        theme={ResolveFeature('topBarV2Theme', false)}
+        theme={ResolveFeature('topBarV2Theme', false) as Partial<Theme> | undefined}
         className={mergeClasses(sectionstyles.section, sectionstyles.grow, styles.root)}
       >
         <PortalCompatProvider>
@@ -148,7 +149,10 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
           >
             <NavDrawerHeader>
               {model.getConfig('SVG_LOGO_PATH') ? (
-                <img style={{ overflow: 'visible' }} src={model.getConfig('SVG_LOGO_PATH')} />
+                <img
+                  style={{ overflow: 'visible' }}
+                  src={model.getConfig('SVG_LOGO_PATH') as string}
+                />
               ) : (
                 <img style={{ padding: 8, boxSizing: 'border-box' }} src="/logo.png" alt="Logo" />
               )}
@@ -183,7 +187,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
       </FluentProvider>
       <FluentProvider
         id="themeNavV2"
-        theme={ResolveFeature('topBarV2Theme', false)}
+        theme={ResolveFeature('topBarV2Theme', false) as Partial<Theme> | undefined}
         className={mergeClasses(sectionstyles.section, styles.areapicker)}
       >
         <PortalCompatProvider>
@@ -193,3 +197,7 @@ export default function ModelDrivenNavigation({ sitemap }: ModelDrivenNavigation
     </div>
   );
 }
+
+/** @deprecated Use named import: `import { ModelDrivenNavigation } from '...'` instead of default import */
+export default ModelDrivenNavigation;
+export { ModelDrivenNavigation };

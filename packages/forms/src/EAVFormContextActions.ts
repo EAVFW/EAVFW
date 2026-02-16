@@ -4,7 +4,7 @@ import { EAVFormContextState } from './EAVFormContextState';
 
 export type EAVFormOnChangeCallbackContext = {
   skipValidation?: boolean;
-  onCommit?: Function;
+  onCommit?: () => void;
   autoSave?: boolean;
 };
 export type EAVFormOnChangeCallback<T> = (props: T, ctx: EAVFormOnChangeCallbackContext) => void;
@@ -23,8 +23,8 @@ export type EAVFormCollectorRegistrationHandler<
 ) => EAVCollectContext<TValues, TState, TCollected>;
 
 export type EAVFormCollectorRegistration = {
-  oldValue: any;
-  trigger: any;
+  oldValue: unknown;
+  trigger: (state: EAVFormContextState<unknown>, etag: string) => void;
 };
 export type EAVFormContextActions<T, TState extends EAVFormContextState<T>> = {
   runValidation: (
@@ -33,7 +33,7 @@ export type EAVFormContextActions<T, TState extends EAVFormContextState<T>> = {
   ) => void;
   updateState: <TState extends EAVFormContextState<T>>(
     cb: (state: TState, ctx: { replaceState: boolean }) => void,
-  ) => { changedProp: boolean; changedValues: any } | undefined | void;
+  ) => { changedProp: boolean; changedValues: Record<string, unknown> } | undefined | void;
   onChange: EAVFOrmOnChangeHandler<T>;
   addVisited: (id: string) => void;
 

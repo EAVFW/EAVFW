@@ -8,13 +8,13 @@ import {
   FormContextType,
 } from '@rjsf/utils';
 
-export default function DateTimeWidget<
+function DateTimeWidget<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any,
 >(props: WidgetProps<T, S, F>) {
   const { registry } = props;
-  const uiProps: any = props.options['props'] || {};
+  const uiProps = (props.options['props'] as Record<string, unknown>) || {};
   const options = {
     ...props.options,
     props: {
@@ -29,9 +29,13 @@ export default function DateTimeWidget<
   );
 
   const value = utcToLocal(props.value);
-  const onChange = (value: any) => {
+  const onChange = (value: string) => {
     props.onChange(localToUTC(value));
   };
   // TODO: rows and columns.
   return <BaseInputTemplate {...props} options={options} value={value} onChange={onChange} />;
 }
+
+/** @deprecated Use named import: `import { DateTimeWidget } from '...'` instead of default import */
+export default DateTimeWidget;
+export { DateTimeWidget };

@@ -46,7 +46,7 @@ const EAVAppReducer = (state: AppContextType, action: EAVAppReducerAction) => {
   return { ...state };
 };
 
-export const EAVApp: React.FC<PropsWithChildren<Test>> = ({ children, baseUrl, ...props }) => {
+export const EAVApp = ({ children, baseUrl, ...props }: PropsWithChildren<Test>) => {
   //  const model = useMemo(() => "model" in props ?
   //        props.model : new ModelDrivenApp(throwIfNull(props.manifest, "Manifest or model must be given")), ["model" in props ? props.model:props.manifest]);
 

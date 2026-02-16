@@ -28,10 +28,10 @@ export async function handleValidationErrors(rsp: Response, app: ModelDrivenApp)
 
       if (name) {
         if (extraErrors[name] === undefined) {
-          //@ts-ignore
+          // @ts-expect-error - FormValidation index signature doesn't match FieldValidation shape
           extraErrors[name] = { __errors: [localizedError] } as FieldValidation;
         } else {
-          //@ts-ignore
+          // @ts-expect-error - FormValidation index signature doesn't expose __errors directly
           extraErrors[name].__errors.push(localizedError);
         }
       } else {

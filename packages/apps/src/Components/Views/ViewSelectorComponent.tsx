@@ -43,7 +43,8 @@ const ViewSelectorComponent: React.VFC<ViewSelectorComponentProps> = (props) => 
       aria-label={ariaLabel}
       onOptionSelect={(e, v) => {
         onChangeView(
-          e as any,
+          // @ts-expect-error -- Fluent UI v9 Dropdown event type differs from v8 callback signature
+          e,
           views.find((x) => x.key === v.optionValue),
         );
       }}
@@ -58,4 +59,6 @@ const ViewSelectorComponent: React.VFC<ViewSelectorComponentProps> = (props) => 
     </Dropdown>
   );
 };
+/** @deprecated Use named import: `import { ViewSelectorComponent } from '...'` instead of default import */
 export default ViewSelectorComponent;
+export { ViewSelectorComponent };

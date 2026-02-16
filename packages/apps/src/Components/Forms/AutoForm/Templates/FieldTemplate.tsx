@@ -81,11 +81,11 @@ export const FieldTemplate = ({
           className={mergeClasses('control-field', styles.flex)}
           style={{ ...(templateStyles?.field ?? {}) }}
           aria-disabled={disabled}
-          //@ts-ignore
+          // @ts-expect-error - Fluent UI Field label prop accepts render function but types don't reflect it
           label={
             displayLabel
               ? {
-                  children: (_: any, p: any) => (
+                  children: (_: unknown, p: Record<string, unknown>) => (
                     <EAVFWLabel
                       id={id}
                       disabled={disabled}
@@ -108,4 +108,5 @@ export const FieldTemplate = ({
   );
 };
 
+/** @deprecated Use named import: `import { FieldTemplate } from '...'` instead of default import */
 export default FieldTemplate;

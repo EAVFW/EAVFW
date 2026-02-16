@@ -3,6 +3,8 @@ import { Stack } from '@fluentui/react';
 
 import {
   AutoFormColumnDefinition,
+  AutoFormColumnsDefinition,
+  AutoFormControlsDefinition,
   AutoFormSectionsDefinition,
   EntityDefinition,
   FormDefinition,
@@ -28,11 +30,11 @@ export type ColumnComponentProps<T> = {
   formData: T;
   onFormDataChange?: (formdata: T) => void;
   factory?: OptionsFactory;
-  formContext?: any;
+  formContext?: Record<string, unknown>;
   extraErrors?: FormValidation;
 };
 
-const ColumnComponent = <T extends { id?: string; [key: string]: any }>(
+const ColumnComponent = <T extends { id?: string; [key: string]: unknown }>(
   props: ColumnComponentProps<T>,
 ) => {
   const {
@@ -138,11 +140,16 @@ const ColumnComponent = <T extends { id?: string; [key: string]: any }>(
   }
 };
 
+/** @deprecated Use named import: `import { ColumnComponent } from '...'` instead of default import */
 export default ColumnComponent;
+export { ColumnComponent };
 
-export const WizardColumn: React.FC<{ column: AutoFormColumnDefinition; columnName: string }> = ({
+export const WizardColumn = ({
   column,
   columnName,
+}: {
+  column: AutoFormColumnDefinition;
+  columnName: string;
 }) => {
   const styles = useStackStyles();
 
@@ -152,7 +159,9 @@ export const WizardColumn: React.FC<{ column: AutoFormColumnDefinition; columnNa
         <div key={columnName + sectionName} className={styles.item}>
           <WizardSection
             sectionName={columnName + sectionName}
-            section={column.sections[sectionName]}
+            section={
+              column.sections[sectionName] as AutoFormControlsDefinition | AutoFormColumnsDefinition
+            }
           />
         </div>
       ))}

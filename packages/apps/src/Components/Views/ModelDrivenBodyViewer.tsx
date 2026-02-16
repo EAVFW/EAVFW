@@ -130,4 +130,5 @@ export function ModelDrivenBodyViewer({
   );
 }
 
+/** @deprecated Use named import: `import { ModelDrivenBodyViewer } from '...'` instead of default import */
 export default ModelDrivenBodyViewer;

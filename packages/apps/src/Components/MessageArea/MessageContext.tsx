@@ -3,12 +3,12 @@ import { MessageBar, MessageBarType } from '@fluentui/react';
 import React, { useContext, useState } from 'react';
 
 type ContextType = {
-  messages: { [key: string]: (props?: { [prop: string]: any }) => JSX.Element };
+  messages: { [key: string]: (props?: { [prop: string]: unknown }) => JSX.Element };
   addMessage: (key: string, messageRender: messageRenderType) => void;
   removeMessage: (key: string) => void;
 };
 
-type messageRenderType = (props?: { [prop: string]: any }) => JSX.Element;
+type messageRenderType = (props?: { [prop: string]: unknown }) => JSX.Element;
 
 /**
  * Returns and renders the MessageArea which lists the messages
@@ -32,7 +32,7 @@ function MessageArea(): JSX.Element {
  */
 interface MessageProps {
   messageContent: JSX.Element;
-  props: { [key: string]: { [prop: string]: any } };
+  props: { [key: string]: { [prop: string]: unknown } };
 }
 
 /**
@@ -59,7 +59,7 @@ export function successMessageFactory(
   factoryProps: { key: string; removeMessage: (key: string) => void },
   app?: ModelDrivenApp,
 ) {
-  return (props?: any) => {
+  return (props?: Record<string, unknown>) => {
     const _app = app ?? useModelDrivenApp();
     return (
       <MessageBar
@@ -77,7 +77,7 @@ export function errorMessageFactory(
   factoryProps: { key: string; removeMessage: (key: string) => void; messages?: string[] },
   app?: ModelDrivenApp,
 ) {
-  return (props?: any) => {
+  return (props?: Record<string, unknown>) => {
     const _app = app ?? useModelDrivenApp();
     return (
       <MessageBar
@@ -98,7 +98,7 @@ export function errorMessageFactory(
  * @param props
  * @constructor
  */
-const MessagesProvider = (props: any) => {
+const MessagesProvider = (props: { children?: React.ReactNode }) => {
   let initialState: { [key: string]: messageRenderType } = {};
   const [messages, setMessages] = useState(initialState);
 
@@ -124,6 +124,7 @@ const MessagesProvider = (props: any) => {
   );
 };
 
+/** @deprecated Use named import: `import { MessageArea } from '...'` instead of default import */
 export default MessageArea;
-export { MessagesContext, MessagesProvider, useMessageContext };
+export { MessageArea, MessagesContext, MessagesProvider, useMessageContext };
 export type { MessageProps };

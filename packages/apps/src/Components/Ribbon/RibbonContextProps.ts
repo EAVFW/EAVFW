@@ -7,13 +7,13 @@ import { RibbonState } from './RibbonState';
 export type RibbonContextProps = {
   defaultRibbons: RibbonViewInfo;
   events: MittEmitter<string>;
-  saveCompleted: (e: any) => void;
+  saveCompleted: (e: { entityName: string; id?: string }) => void;
   //  setCanSave: (canSave: boolean)=> void;
   updateState: (state: Partial<RibbonState>) => void;
   addButton: (command: ICommandBarItemProps) => void;
   removeButton: (key: string) => void;
   registerButton: (
     command: ICommandBarItemProps & Partial<RibbonButtonProps>,
-    deps?: Array<any>,
+    deps?: Array<unknown>,
   ) => void;
 };

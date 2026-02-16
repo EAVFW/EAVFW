@@ -13,7 +13,7 @@ export type CardObject = {
   subTitle: string;
   cardIcon: JSX.Element;
   headerAction: JSX.Element;
-  otherAttributes: { [key: string]: any };
+  otherAttributes: { [key: string]: unknown };
   otherActions: OtherAction[];
 };
 
@@ -28,13 +28,17 @@ export class ItemToCardResolver {
   public static convertItemsToCardObjects(
     items: IRecord[],
     selectedView: string,
-    viewColumns: { [key: string]: any },
+    viewColumns: { [key: string]: Record<string, unknown> },
     app: ModelDrivenApp,
     buttons: ICommandBarItemProps[],
-    selection: any,
+    selection: { selectToIndex: (index: number, clearPrevious: boolean) => void },
   ): CardObject[] {
     const cardObjects: CardObject[] = [];
-    const iconElement = ItemToCardResolver.getElementByKey(items, app, Views);
+    const iconElement = ItemToCardResolver.getElementByKey(
+      items,
+      app,
+      Views as unknown as Record<string, () => JSX.Element>,
+    );
     const otherActions = ItemToCardResolver.resolveOtherActions(items, app, buttons, selectedView);
 
     // Iterate over items[]
@@ -42,9 +46,9 @@ export class ItemToCardResolver {
       let item = items[i];
       let title = '';
       let subTitle = '';
-      const otherAttributes: { [key: string]: any } = {};
+      const otherAttributes: { [key: string]: unknown } = {};
       let statusText = '';
-      let statusViewConfigObject: any;
+      let statusViewConfigObject: Record<string, unknown> | undefined;
 
       /* Columns represents the collection of properties/attributes for a given entity.
        * The code below iterates over each column in the entity and looks for definitions in a separate viewColumns object.
@@ -56,7 +60,7 @@ export class ItemToCardResolver {
         const correspondingViewColumn = viewColumns[columnKey];
         /* If this condition is true, a mobile view object exists for this column and it's visible property is not set to false, so it should be displayed. */
         if (correspondingViewColumn && correspondingViewColumn?.visible !== false) {
-          let value: any;
+          let value: unknown;
           if (isChoice(column[1].type)) {
             // This is ugly. Fix if time allows for it.
             const statusValue = item[columnKey.toLowerCase()];
@@ -66,27 +70,28 @@ export class ItemToCardResolver {
             );
 
             value = option ? option[0] : value;
-            statusText = value;
+            statusText = value as string;
           } else {
             value = item[columnKey.toLowerCase()];
           }
 
           /* This should be updated to use more concise logic like above to resolve type from column */
           if (ExtensionMethods.isComplexType(value)) {
-            var attributes = app.getAttributes(value.$type);
+            const complexValue = value as IRecord;
+            var attributes = app.getAttributes(complexValue.$type as string);
             Object.entries(attributes).forEach(([elementKey, elementValue]) => {
               if (elementValue.isPrimaryField) {
-                value = value[elementValue.logicalName];
+                value = complexValue[elementValue.logicalName];
               }
             });
           }
           if (correspondingViewColumn.useAsCardTitle) {
-            title = value;
+            title = value as string;
           } else if (correspondingViewColumn.useAsCardSubtitle) {
-            subTitle = value;
+            subTitle = value as string;
           } else {
             if (correspondingViewColumn.displayName) {
-              otherAttributes[correspondingViewColumn.displayName] = value;
+              otherAttributes[correspondingViewColumn.displayName as string] = value;
             } else {
               otherAttributes[columnKey] = value;
             }
@@ -100,9 +105,9 @@ export class ItemToCardResolver {
           (key) => typeof item[key] === 'string' && key !== 'id',
         );
 
-        if (!title && stringKeys.length > 0) title = item[stringKeys[0]];
+        if (!title && stringKeys.length > 0) title = item[stringKeys[0]] as string;
 
-        if (!subTitle && stringKeys.length > 1) subTitle = item[stringKeys[1]];
+        if (!subTitle && stringKeys.length > 1) subTitle = item[stringKeys[1]] as string;
       }
 
       const itemOtherActions = otherActions
@@ -121,7 +126,10 @@ export class ItemToCardResolver {
       // const colorDerivedByStatus = statusViewConfigObject.options.
       // const colorOption = Object.entries(statusViewConfigObject!.options!)
       //     .find(([, value]) => value === statusValue);
-      const colorOption = statusViewConfigObject!.options[statusText].color;
+      const statusOptions = (
+        statusViewConfigObject as Record<string, Record<string, Record<string, string>>>
+      )?.options;
+      const colorOption = statusOptions?.[statusText]?.color;
       const statusColor = colorOption ? colorOption : 'grey';
       const headerActionElement = React.createElement(StatusColorComponent, { color: statusColor });
 
@@ -140,7 +148,11 @@ export class ItemToCardResolver {
     return cardObjects;
   }
 
-  public static getElementByKey(items: IRecord[], app: ModelDrivenApp, Views: any) {
+  public static getElementByKey(
+    items: IRecord[],
+    app: ModelDrivenApp,
+    Views: Record<string, () => JSX.Element>,
+  ) {
     const entityName = items.find((item) => item.entityName != null)?.entityName;
 
     if (entityName) {

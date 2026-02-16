@@ -9,9 +9,11 @@ import { useWizard } from './useWizard';
 import { Dismiss24Regular, DismissRegular } from '@fluentui/react-icons';
 import { Dispatch, SetStateAction, useState } from 'react';
 
-export const WizardMessages: React.FC<{
+export const WizardMessages = ({
+  setDetailedError,
+}: {
   setDetailedError: Dispatch<SetStateAction<string | undefined>>;
-}> = ({ setDetailedError }) => {
+}) => {
   const [{ messages = {} }] = useWizard();
 
   return (

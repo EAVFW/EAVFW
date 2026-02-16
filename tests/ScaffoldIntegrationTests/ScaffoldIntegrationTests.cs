@@ -110,6 +110,25 @@ public class ScaffoldIntegrationTests
             (exitCode, _, stdErr) = RunCommand("dotnet", $"build {testProjectPath}", ProjectDir, timeoutMs: 300_000);
         }
         Assert.AreEqual(0, exitCode, $"Failed to build test project: {stdErr}");
+
+        // Install npm dependencies for the scaffolded project
+        (exitCode, _, stdErr) = RunCommand("npm", "install --force", ProjectDir, timeoutMs: 300_000);
+        Assert.AreEqual(0, exitCode, $"Failed to install npm dependencies: {stdErr}");
+
+        // Run Next.js build early so failures produce clear error output instead of
+        // being buried inside Aspire resource logs during the smoke test.
+        var (njsExit, njsOut, njsErr) = RunCommand("npm", "run build-app", ProjectDir, timeoutMs: 300_000);
+        Assert.AreEqual(0, njsExit,
+            $"Next.js build failed.\n\n--- stdout (last 80 lines) ---\n{TailLines(njsOut, 80)}\n\n--- stderr (last 40 lines) ---\n{TailLines(njsErr, 40)}");
+    }
+
+    /// <summary>Return the last <paramref name="n"/> lines of <paramref name="text"/>.</summary>
+    private static string TailLines(string text, int n)
+    {
+        if (string.IsNullOrEmpty(text)) return "(empty)";
+        var lines = text.Split('\n');
+        var start = Math.Max(0, lines.Length - n);
+        return string.Join('\n', lines[start..]);
     }
 
     [TestMethod]

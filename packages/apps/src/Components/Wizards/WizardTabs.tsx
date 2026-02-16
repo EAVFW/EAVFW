@@ -16,12 +16,17 @@ import { useStackStyles } from '../useStackStyles';
 import { useWizard } from './useWizard';
 import { WizardTab } from './WizardTab';
 
-export const WizardTabs: React.FC<{
+export const WizardTabs = ({
+  tabs = {},
+  className,
+  selectedTab = Object.keys(tabs)[0],
+  onTabSelect,
+}: {
   tabs?: WizardTabsDefinition;
   className?: string;
   selectedTab?: string;
   onTabSelect: TabListProps['onTabSelect'];
-}> = ({ tabs = {}, className, selectedTab = Object.keys(tabs)[0], onTabSelect }) => {
+}) => {
   const stack = useStackStyles();
   const app = useModelDrivenApp();
 
@@ -39,7 +44,7 @@ export const WizardTabs: React.FC<{
         ([key, value]) =>
           typeof value.visible === 'undefined' ||
           (typeof value.visible === 'boolean' && value.visible) ||
-          (typeof value.visible === 'string' && expressions[value.visible]),
+          (typeof value.visible === 'string' && expressions?.[value.visible]),
       )
       .map(([key, tab]) => (
         <Tab

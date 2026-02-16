@@ -37,11 +37,11 @@ export type PagingProviderProps = {
   initialPageSize?: number;
   enabled?: boolean;
 };
-export const PagingProvider: React.FC<PropsWithChildren<PagingProviderProps>> = ({
+export const PagingProvider = ({
   children,
   initialPageSize = 100,
   enabled = true,
-}) => {
+}: PropsWithChildren<PagingProviderProps>) => {
   const [lastItemNumber, setLastItemNumber] = useState<number>();
   const [totalRecords, setTotalRecords] = useState<number>();
   const [currentPage, setCurrentPage] = useState<number>(0);

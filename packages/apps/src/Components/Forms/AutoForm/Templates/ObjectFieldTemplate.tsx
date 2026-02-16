@@ -17,7 +17,7 @@ import {
  *
  * @param props - The `ObjectFieldTemplateProps` for this component
  */
-export default function ObjectFieldTemplate<
+function ObjectFieldTemplate<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any,
@@ -99,3 +99,7 @@ export default function ObjectFieldTemplate<
     </>
   );
 }
+
+/** @deprecated Use named import: `import { ObjectFieldTemplate } from '...'` instead of default import */
+export default ObjectFieldTemplate;
+export { ObjectFieldTemplate };

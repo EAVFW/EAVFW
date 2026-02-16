@@ -31,7 +31,10 @@ export type FormDataContextProps = {
   mutate: () => void;
   record?: IRecord;
   isLoading: boolean;
-  onChangeCallback: (formData: any, ctx?: any) => void;
+  onChangeCallback: (
+    formData: Record<string, unknown>,
+    ctx?: { onCommit?: () => void; skipValidation?: boolean },
+  ) => void;
   addExpand: (str: string) => () => void;
   extraErrors?: FormValidation;
 };
@@ -44,10 +47,10 @@ const FormDataContext = createContext<FormDataContextProps>({
   },
 });
 export const useFormChangeHandlerProvider = () => useContext(FormDataContext);
-export const FormChangeHandlerProvider: React.FC<PropsWithChildren<{ recordId?: string }>> = ({
+export const FormChangeHandlerProvider = ({
   children,
   recordId,
-}) => {
+}: PropsWithChildren<{ recordId?: string }>) => {
   const app = useModelDrivenApp();
   const router = useRouter();
 
@@ -87,7 +90,7 @@ export const FormChangeHandlerProvider: React.FC<PropsWithChildren<{ recordId?: 
 export function useFormChangeHandler(
   entity: EntityDefinition,
   recordId?: string,
-  initialdata?: any,
+  initialdata?: Record<string, unknown>,
 ) {
   const router = useRouter();
   //  const [_, setEtag] = useState(new Date().toISOString());
@@ -174,15 +177,15 @@ export function useFormChangeHandler(
     recordId!,
     expand ? `?$expand=${expand}` : '',
     typeof recordId !== 'undefined',
-    defaultData,
+    defaultData as IRecord | undefined,
   );
 
   const changedRecord = useRef(record);
 
   const onChangeCallback = useCallback(
-    (formData: any, ctx?: any) => {
+    (formData: Record<string, unknown>, ctx?: { onCommit?: () => void }) => {
       try {
-        changedRecord.current = formData;
+        changedRecord.current = formData as IRecord;
 
         const [changed, changedValues] = cleanDiff(
           deepDiffMapper.map(recordId ? record : {}, changedRecord.current),

@@ -136,4 +136,5 @@ export const MonacoEditorControl: React.VFC<MonacoEditorControlProps> = ({
   } finally {
   }
 };
+/** @deprecated Use named import: `import { MonacoEditorControl } from '...'` instead of default import */
 export default MonacoEditorControl;

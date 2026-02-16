@@ -24,7 +24,10 @@ import ModelDrivenEntityViewer from './ModelDrivenEntityViewer';
 import { ResolveFeature } from '../../FeatureFlags';
 import { errorMessageFactory, useMessageContext } from '../../Components/MessageArea';
 
-export type PreSaveValidator = (data: any, e: EntityDefinition) => PreSaveValidatorResult;
+export type PreSaveValidator = (
+  data: Record<string, unknown>,
+  e: EntityDefinition,
+) => PreSaveValidatorResult;
 export interface PreSaveValidatorResult {
   success: boolean;
   msg?: string;
@@ -100,8 +103,8 @@ export function FormRender<T>(props: FormRenderProps) {
   //        setRecord(props.record);
   //}, [props.record]);
 
-  const StickyFooter: React.FC<PropsWithChildren> = React.useCallback(
-    ({ children }) =>
+  const StickyFooter = React.useCallback(
+    ({ children }: PropsWithChildren) =>
       (props.stickyFooter ?? true) ? (
         <Sticky stickyPosition={StickyPositionType.Footer}>{children}</Sticky>
       ) : (
@@ -125,7 +128,7 @@ export function FormRender<T>(props: FormRenderProps) {
     [dismissPanel, record],
   );
 
-  const _onChange = useCallback((data: any) => {
+  const _onChange = useCallback((data: Record<string, unknown>) => {
     record.current = data;
     // setRecord(data);
     //  onChange(data);

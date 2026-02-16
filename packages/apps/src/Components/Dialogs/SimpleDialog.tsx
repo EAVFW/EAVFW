@@ -29,7 +29,7 @@ export type SimpleDialogProps = {
   primaryButton?: SimpleDialogPrimaryButtonProps;
 };
 
-export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({
+export const SimpleDialog = ({
   title = 'Import',
   maxWidth = 450,
   hideDialog,
@@ -38,7 +38,7 @@ export const SimpleDialog: React.FC<PropsWithChildren<SimpleDialogProps>> = ({
   minWidth = '60vw',
   primaryButton: { spinning = false, ...primaryButton } = {},
   onCancelText = 'Cancel',
-}) => {
+}: PropsWithChildren<SimpleDialogProps>) => {
   // const [isDraggable, { toggle: toggleIsDraggable }] = useBoolean(true);
   //const labelId: string = useId('Custom_Import_Label');
   //  const subTextId: string = useId('Custom_Import_SubLabel');

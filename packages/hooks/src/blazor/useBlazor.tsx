@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 
 declare global {
   interface Window {
-    Blazor: any;
+    Blazor: { start: (config: Record<string, unknown>) => Promise<void> };
   }
 }
 
@@ -12,12 +12,28 @@ const addValidationRulesFunction = process.env['NEXT_PUBLIC_BLAZOR_ADD_VALIDATIO
 const validateValidationRulesFunction = process.env['NEXT_PUBLIC_BLAZOR_VALIDATE_VALIDATION_RULES'];
 const validateFormFunction = process.env['NEXT_PUBLIC_BLAZOR_EVAL_VALIDATION'];
 const updateFormDataFunction = process.env['NEXT_PUBLIC_BLAZOR_UPDATE_FORM_DATA'];
+/**
+ * Context value when Blazor WebAssembly is not available or not configured.
+ *
+ * @example
+ * ```ts
+ * const blazor = useBlazor();
+ * if (!blazor.isEnabled) {
+ *   // Blazor is not available
+ * }
+ * ```
+ */
 export type DisabledBlazorContextType = {
   isEnabled: false;
   isInitialized: false;
   namespace: undefined;
   startTime: number;
 };
+/**
+ * Context value when Blazor WebAssembly is enabled and its namespace is
+ * configured via `NEXT_PUBLIC_BLAZOR_NAMESPACE`. Contains the function
+ * names used to invoke .NET validation and form-data methods.
+ */
 export type EnabledBlazorContextType = {
   isInitialized: boolean;
   isEnabled: true;
@@ -34,8 +50,36 @@ const blazorContext = React.createContext<DisabledBlazorContextType | EnabledBla
   isInitialized: false,
   isEnabled: false,
 } as DisabledBlazorContextType);
+/**
+ * Returns the current Blazor interop context. Check `isEnabled` before
+ * calling any .NET interop functions.
+ *
+ * @returns The Blazor context — either {@link DisabledBlazorContextType}
+ *   or {@link EnabledBlazorContextType}.
+ *
+ * @example
+ * ```tsx
+ * const blazor = useBlazor();
+ * if (blazor.isEnabled && blazor.isInitialized) {
+ *   DotNet.invokeMethodAsync(blazor.namespace, 'MyMethod');
+ * }
+ * ```
+ */
 export const useBlazor = () => useContext(blazorContext);
-export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
+/**
+ * Provider component that bootstraps the Blazor WebAssembly runtime and
+ * exposes its state via {@link useBlazor}. When `NEXT_PUBLIC_BLAZOR_NAMESPACE`
+ * is set and `window.Blazor` exists, the runtime is started and resources are
+ * loaded. Otherwise a disabled context is provided.
+ *
+ * @example
+ * ```tsx
+ * <BlazorProvider>
+ *   <App />
+ * </BlazorProvider>
+ * ```
+ */
+export const BlazorProvider = ({ children }: PropsWithChildren) => {
   const [isInitialized, setInitialized] = useState(false);
   const [initTime, setInitTime] = useState<string>();
   const startTime = useMemo(() => new Date().getTime(), []);
@@ -85,7 +129,8 @@ export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
           //}
         },
       }).then(() => {
-        DotNet.invokeMethodAsync(namespace, 'GetSystemInfo').then((info: any) => {
+        DotNet.invokeMethodAsync(namespace, 'GetSystemInfo').then((result: unknown) => {
+          const info = result as { init_time: string };
           setInitTime(info.init_time);
           setInitialized(true);
         });
@@ -94,17 +139,19 @@ export const BlazorProvider: React.FC<PropsWithChildren> = ({ children }) => {
 
     return (
       <blazorContext.Provider
-        value={{
-          addValidationRulesFunction,
-          updateFormDataFunction,
-          validateValidationRulesFunction,
-          validateFormFunction,
-          startTime: startTime,
-          isInitialized: isInitialized,
-          namespace: namespace,
-          init_time: initTime,
-          isEnabled: typeof namespace !== 'undefined' && window.Blazor,
-        }}
+        value={
+          {
+            addValidationRulesFunction,
+            updateFormDataFunction,
+            validateValidationRulesFunction,
+            validateFormFunction,
+            startTime: startTime,
+            isInitialized: isInitialized,
+            namespace: namespace,
+            init_time: initTime,
+            isEnabled: typeof namespace !== 'undefined' && !!window.Blazor,
+          } as EnabledBlazorContextType
+        }
       >
         {children}
       </blazorContext.Provider>

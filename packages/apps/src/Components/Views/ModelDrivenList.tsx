@@ -36,6 +36,7 @@ import {
   ConstrainMode,
   Modal,
   IObjectWithKey,
+  ISelection,
   MessageBar,
   MessageBarType,
   IDetailsColumnProps,
@@ -104,16 +105,19 @@ export type ModelDrivenGridViewerState = {
 
 export type ModelDrivenListProps = {
   listComponent?: React.ComponentType<
-    IDetailsListProps & { formData: any; onChange?: (related: any) => void }
+    IDetailsListProps & {
+      formData: Record<string, unknown>;
+      onChange?: (related: Record<string, unknown>) => void;
+    }
   >;
-  onChange?: (data: any) => void;
-  formData?: any;
+  onChange?: (data: Record<string, unknown>) => void;
+  formData?: Record<string, unknown>;
   onRenderDetailsFooter?: IRenderFunction<IDetailsFooterProps>;
-  onRenderItemColumn: (item?: any, index?: number, column?: IColumn) => React.ReactNode;
+  onRenderItemColumn: (item?: IRecord, index?: number, column?: IColumn) => React.ReactNode;
   className?: string;
   selectionMode: SelectionMode;
   setKey: string;
-  items: any[];
+  items: IRecord[];
   onItemInvoked: (item: IRecord) => void;
 };
 
@@ -248,162 +252,11 @@ const RenderDetailsFooter: IRenderFunction<IDetailsFooterProps> = (props, defaul
   );
 };
 
-type LookupControlRenderProps = {
-  recordRouteGenerator: any;
-  item: any;
-  attribute: AttributeDefinition;
-  type: LookupType;
-  onChange?: any;
-};
-
-const LookupControlRender: React.FC<LookupControlRenderProps> = ({
-  item,
-  attribute,
-  type,
-  recordRouteGenerator,
-  onChange,
-}) => {
-  const [isOpen, { setFalse, setTrue }] = useBoolean(false);
-  const save = useRibbon();
-  const app = useModelDrivenApp();
-
-  const recordRef = useRef<any>(item[attribute.logicalName.slice(0, -2)]);
-  const _onDataChange = useCallback((data: any) => {
-    recordRef.current = data;
-  }, []);
-
-  const [extraErrors, setExtraErrors] = useState({} as FormValidation);
-  const entitySaveMessageKey = 'entitySaved';
-  const { addMessage, removeMessage } = useMessageContext();
-  const { showIndeterminateProgressIndicator, hideProgressBar } = useProgressBarContext();
-
-  let entity = app.getEntity(type.foreignKey?.principalTable!);
-  const attributes = useMemo(
-    () => ({
-      ...((entity.TPT && app.getEntity(entity.TPT).attributes) ?? {}),
-      ...entity.attributes,
-    }),
-    [entity.logicalName],
-  );
-
-  const _onModalDismiss = useCallback(async (data: any) => {
-    setFalse();
-    if (data === 'save') {
-      showIndeterminateProgressIndicator();
-
-      let plain = Object.fromEntries(
-        Object.values(attributes).map((v) => [v.logicalName, recordRef.current[v.logicalName]]),
-      );
-      let rsp = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/entities/${entity.collectionSchemaName}/records/${recordRef.current.id}`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify(plain),
-          credentials: 'include',
-        },
-      );
-
-      if (rsp.ok) {
-        for (let k of Object.keys(plain)) {
-          item[attribute.logicalName.slice(0, -2)][k] = plain[k];
-        }
-
-        if (onChange) onChange(item);
-
-        addMessage(entitySaveMessageKey, (props?: any) => (
-          <MessageBar
-            messageBarType={MessageBarType.success}
-            {...props}
-            onDismiss={() => removeMessage(entitySaveMessageKey)}
-          >
-            {app.getLocalization('entitySaved') ?? <>Entity have been saved!</>}
-          </MessageBar>
-        ));
-      } else {
-        const { errors, extraErrors } = await handleValidationErrors(rsp, app);
-
-        setExtraErrors(extraErrors);
-
-        addMessage(
-          entitySaveMessageKey,
-          errorMessageFactory({
-            key: entitySaveMessageKey,
-            removeMessage: removeMessage,
-            messages: errors,
-          }),
-        );
-      }
-
-      hideProgressBar();
-    }
-  }, []);
-
-  const _onClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-
-    if (save.canSave) {
-      const _once = () => {
-        save.events.off('saveComplete', _once);
-        setTrue();
-      };
-      save.events.on('saveComplete', _once);
-      save.events.emit('onSave');
-    } else {
-      setTrue();
-    }
-    return false;
-  };
-
-  return (
-    <>
-      <Modal isOpen={isOpen} onDismiss={setFalse} isBlocking={true}>
-        <Stack verticalFill styles={{ root: { minWidth: '60vw', maxWidth: '90vw' } }}>
-          <Stack horizontal>
-            <Stack.Item grow>
-              <CommandBar
-                id="ModalRibbonBarCommands"
-                items={[]}
-                farItems={[
-                  {
-                    key: 'close',
-                    ariaLabel: 'Info',
-                    iconOnly: true,
-                    iconProps: { iconName: 'Cancel' },
-                    onClick: setFalse,
-                  },
-                ]}
-                ariaLabel="Use left and right arrow keys to navigate between commands"
-              />
-            </Stack.Item>
-          </Stack>
-
-          <LazyFormRender
-            extraErrors={extraErrors}
-            record={recordRef.current}
-            entityName={type.foreignKey?.principalTable}
-            dismissPanel={_onModalDismiss}
-            onChange={_onDataChange}
-          />
-        </Stack>
-      </Modal>
-      <a href="#" onClick={_onClick}>
-        {item[
-          attribute.logicalName.endsWith('id')
-            ? attribute.logicalName.slice(0, -2)
-            : attribute.logicalName
-        ][type.foreignKey?.principalNameColumn?.toLowerCase()!] ?? '<ingen navn>'}
-      </a>
-      {}
-    </>
-  );
-};
-
-function _getKey(item: any, index?: number): string {
-  return item.key;
+function _getKey(item: IRecord, index?: number): string {
+  return item.key as string;
 }
 
-const getCellText = (item: any, column: IColumn): string => {
+const getCellText = (item: IRecord, column: IColumn): string => {
   let value = item && column && column.fieldName ? item[column.fieldName] : '';
 
   if (value === null || value === undefined) {
@@ -414,7 +267,7 @@ const getCellText = (item: any, column: IColumn): string => {
     return value.toString();
   }
 
-  return value;
+  return String(value);
 };
 
 export function ModelDrivenList({
@@ -474,7 +327,7 @@ export function ModelDrivenList({
       setKey={setKey}
       layoutMode={DetailsListLayoutMode.justified}
       isHeaderVisible={true}
-      selection={selection}
+      selection={selection as unknown as ISelection<IObjectWithKey>}
       selectionPreservedOnEmptyClick={true}
       enterModalSelectionOnTouch={true}
       ariaLabelForSelectionColumn="Toggle selection"
@@ -484,11 +337,12 @@ export function ModelDrivenList({
       onRenderRow={_onRenderRow}
       onRenderDetailsHeader={onRenderDetailsHeader}
       onChange={onChange}
-      formData={formData}
+      formData={formData!}
       onRenderItemColumn={onRenderItemColumn}
       onRenderDetailsFooter={onRenderDetailsFooter}
     />
   );
 }
 
+/** @deprecated Use named import: `import { ModelDrivenList } from '...'` instead of default import */
 export default ModelDrivenList;

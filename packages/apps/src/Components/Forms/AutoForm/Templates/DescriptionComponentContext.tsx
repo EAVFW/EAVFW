@@ -14,9 +14,14 @@ export const DefaultDescriptionComponent = ({
   return <span id={descriptionId} dangerouslySetInnerHTML={{ __html: description }}></span>;
 };
 
-const DescriptionComponentContext = createContext({ renderFunc: DefaultDescriptionComponent });
+const DescriptionComponentContext = createContext<{
+  renderFunc: (props: DescriptionComponentProps) => React.ReactNode;
+}>({ renderFunc: DefaultDescriptionComponent });
 export const useDescriptionRenderFunc = () => useContext(DescriptionComponentContext);
-export const DescriptionComponentProvider = (props: { renderFunc: any; children: any }) => (
+export const DescriptionComponentProvider = (props: {
+  renderFunc: (props: DescriptionComponentProps) => React.ReactNode | null;
+  children: React.ReactNode;
+}) => (
   <DescriptionComponentContext.Provider value={props}>
     {props.children}
   </DescriptionComponentContext.Provider>

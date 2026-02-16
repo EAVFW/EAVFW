@@ -22,8 +22,8 @@ export type MobileListProps = {
   locale: string;
   viewName?: string;
   showViewSelector?: boolean;
-  formData?: any;
-  defaultValues?: Array<any>;
+  formData?: Record<string, unknown>;
+  defaultValues?: Array<Record<string, unknown>>;
   recordRouteGenerator: (record: IRecord) => string;
   onQueueData?: typeof DefaultDataQuery;
   onQueryDataCount?: typeof DefaultDataCountQuery;
@@ -33,7 +33,7 @@ export type MobileListProps = {
   rightCommands?: ICommandBarItemProps[];
 };
 
-export const MobileList: React.FC<MobileListProps> = ({
+export const MobileList = ({
   className,
   entity,
   viewName,
@@ -42,7 +42,7 @@ export const MobileList: React.FC<MobileListProps> = ({
   newRecord,
   onQueueData = DefaultDataQuery,
   recordRouteGenerator,
-}) => {
+}: MobileListProps) => {
   const { buttons } = useRibbon();
   const {
     fetchQuery,
@@ -53,7 +53,9 @@ export const MobileList: React.FC<MobileListProps> = ({
   } = usePaging();
   const selectedView = useMemo(() => viewName ?? Object.keys(entity.views ?? {})[0], [viewName]);
   const [items, setItems] = useState<IRecord[]>(
-    newRecord ? (formData[entity.collectionSchemaName.toLowerCase()] ?? []) : [],
+    newRecord
+      ? ((formData?.[entity.collectionSchemaName.toLowerCase()] as IRecord[] | undefined) ?? [])
+      : [],
   );
   const { selection } = useSelectionContext();
   const app = useModelDrivenApp();
@@ -72,7 +74,9 @@ export const MobileList: React.FC<MobileListProps> = ({
 
     if (newRecord && defaultValues) {
       setItems(
-        defaultValues.map((item) => Object.assign(item, { entityName: entity.logicalName })),
+        defaultValues.map((item) =>
+          Object.assign(item, { entityName: entity.logicalName }),
+        ) as IRecord[],
       );
     }
   }, [data, newRecord && defaultValues]);
@@ -138,4 +142,4 @@ export const MobileList: React.FC<MobileListProps> = ({
 
 import { RegistereView } from '../../ViewRegister';
 import { ColumnFilterProvider } from '../../../ColumnFilter/ColumnFilterContext';
-RegistereView('mobile', MobileList);
+RegistereView('mobile', MobileList as React.ComponentType<Record<string, unknown>>);

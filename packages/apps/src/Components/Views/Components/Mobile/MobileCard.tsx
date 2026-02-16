@@ -5,12 +5,14 @@ import {
   CardFooter,
   CardHeader,
   Checkbox,
+  CheckboxOnChangeData,
   Subtitle2,
   Title3,
   makeStyles,
 } from '@fluentui/react-components';
 import React from 'react';
 import { ExtensionMethods } from '@eavfw/utils';
+import { IRecord } from '@eavfw/manifest';
 import { CardObject } from './ItemToCardResolver';
 import { useSelectionContext } from '../../../Selection';
 // import { Views } from "../../../Views/ViewRegister";
@@ -23,7 +25,7 @@ export type Action = {
 type MobileCardProps = {
   item: CardObject;
   className: string;
-  handleItemClicked: (item: any) => void;
+  handleItemClicked: (item: IRecord) => void;
 };
 const useFloatingItemsStyle = makeStyles({
   root: {
@@ -50,11 +52,7 @@ interface CheckboxState {
   checked: boolean;
 }
 
-export const MobileCard: React.FC<MobileCardProps> = ({
-  item,
-  className,
-  handleItemClicked,
-}: MobileCardProps) => {
+export const MobileCard = ({ item, className, handleItemClicked }: MobileCardProps) => {
   const style = useFloatingItemsStyle();
   const { selection } = useSelectionContext();
   const [selected1, setSelected1] = React.useState(false);
@@ -66,7 +64,13 @@ export const MobileCard: React.FC<MobileCardProps> = ({
     [],
   );
   const onSelected1Change = React.useCallback(
-    (_: any, state: any) => setCheckboxState(state, setSelected1),
+    (_: unknown, state: CheckboxOnChangeData) =>
+      setCheckboxState({ selected: !!state.checked, checked: !!state.checked }, setSelected1),
+    [setCheckboxState],
+  );
+  const onCardSelectionChange = React.useCallback(
+    (_: unknown, data: { selected: boolean }) =>
+      setCheckboxState({ selected: data.selected, checked: data.selected }, setSelected1),
     [setCheckboxState],
   );
 
@@ -81,7 +85,7 @@ export const MobileCard: React.FC<MobileCardProps> = ({
         </div>
       }
       selected={selected1}
-      onSelectionChange={onSelected1Change}
+      onSelectionChange={onCardSelectionChange}
     >
       <CardHeader
         style={{ padding: '0 5px' }}
@@ -107,7 +111,9 @@ export const MobileCard: React.FC<MobileCardProps> = ({
       >
         {item.otherAttributes &&
           Object.entries(item.otherAttributes).map(([key, value], index) => {
-            return <BodyComponent propertyName={key} value={value} key={index} />;
+            return (
+              <BodyComponent propertyName={key} value={value as React.ReactNode} key={index} />
+            );
           })}
       </div>
 
@@ -128,7 +134,7 @@ export const MobileCard: React.FC<MobileCardProps> = ({
 
 type PropertyComponentProps = {
   propertyName: string;
-  value: any;
+  value: React.ReactNode;
 };
 
 const spanStyle: React.CSSProperties = {
@@ -139,7 +145,7 @@ const spanStyle: React.CSSProperties = {
   paddingRight: '10px',
 };
 
-const BodyComponent: React.FC<PropertyComponentProps> = ({ propertyName, value }) => (
+const BodyComponent = ({ propertyName, value }: PropertyComponentProps) => (
   <Body1>
     <b>
       <span style={spanStyle}>{propertyName}:</span>

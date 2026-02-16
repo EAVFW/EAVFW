@@ -6,22 +6,54 @@ import {
 } from './ExpressionParserAttributeContext';
 import { useExpressionParserContext } from './useExpressionParserContext';
 
-// Enum used to set the exprssion order.
-// ordered is used when the expression should be ordered between other ordered expressions
-// First is used when it should be placed unordered before the ordered expression.
-// Last is used when it should be placed unordered after the ordered expression.
+/**
+ * Controls the evaluation order of an expression relative to other
+ * registered expressions.
+ *
+ * - `first` — evaluated before ordered expressions.
+ * - `ordered` — evaluated in registration order among other ordered expressions.
+ * - `last` — evaluated after all ordered expressions (e.g. visibility).
+ */
 export enum ExpressionOrder {
   first = 'first',
   ordered = 'ordered',
   last = 'last',
 }
 
+/**
+ * The return value of {@link useExpressionParser}, representing the
+ * current state of an expression evaluation.
+ *
+ * @typeParam T - The expected result type of the expression.
+ */
 export type useExpressionParserValue<T> = {
+  /** The evaluated result, the raw expression string, or `undefined` while loading. */
   data: T | string | undefined;
+  /** `true` while the expression is being evaluated by the Blazor runtime. */
   isLoading: boolean;
+  /** Error message if evaluation failed. */
   error?: string;
 };
 
+/**
+ * React hook that registers a manifest expression for evaluation and
+ * returns its current result. Expressions containing `@` are sent to the
+ * Blazor runtime; plain strings are returned as-is.
+ *
+ * @typeParam T - The expected result type (defaults to `string`).
+ * @param expression - The expression string (e.g. `"@currentUser.name"`),
+ *   or `undefined` to skip evaluation.
+ * @param expressionOrder - Controls evaluation priority relative to other
+ *   expressions.
+ * @returns An object with `data`, `isLoading`, and optional `error`.
+ *
+ * @example
+ * ```tsx
+ * const { data, isLoading } = useExpressionParser<boolean>('@canEdit');
+ * if (isLoading) return <Spinner />;
+ * if (data) return <EditButton />;
+ * ```
+ */
 export function useExpressionParser<T = string>(
   expression?: string,
   expressionOrder?: ExpressionOrder,
@@ -61,7 +93,7 @@ export function useExpressionParser<T = string>(
     };
 
     if (expression && expression.indexOf('@') !== -1) {
-      addExpresssion(id, expression, context, (result: any, error: any) => {
+      addExpresssion(id, expression, context, (result: unknown, error: unknown) => {
         //
 
         if (error) {
@@ -73,9 +105,9 @@ export function useExpressionParser<T = string>(
         if (oldvalue.current !== result) {
           //Using an timeout to make sure the render loop is completed beforethe value is changes. If not the value can change back after the new value is placed
           setTimeout(() => {
-            setEvaluated({ data: result, isLoading: false });
+            setEvaluated({ data: result as T | string | undefined, isLoading: false });
             //     setExpressionResult(id, result, undefined);
-            oldvalue.current = result;
+            oldvalue.current = result as T | string | undefined;
           }, 0);
         }
       });

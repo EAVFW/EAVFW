@@ -122,7 +122,7 @@ export const useWizard = () => {
             if (action.type === 'UpdateWizardContext') {
               if (action.body?.values) {
                 onChange((props, ctx) => {
-                  values = mergeDeep(props, action.body?.values);
+                  values = mergeDeep(props, action.body!.values!);
                   dispatch({ action: 'setValues', values: values });
                 });
               }
@@ -142,7 +142,10 @@ export const useWizard = () => {
             for (let action of Object.values(result.actions)) {
               if (action.type === 'UpdateWizardContext') {
                 if (action.body?.messages) {
-                  dispatch({ action: 'setMessages', messages: action.body?.messages });
+                  dispatch({
+                    action: 'setMessages',
+                    messages: action.body?.messages as IWizardMessages,
+                  });
                 }
               }
             }

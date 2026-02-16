@@ -341,11 +341,17 @@ export class ModelDrivenApp {
 
     return wizards;
   }
-  newEntityUrl(appname: string, area: string, entityname: string, formName?: string, query?: any) {
+  newEntityUrl(
+    appname: string,
+    area: string,
+    entityname: string,
+    formName?: string,
+    query?: Record<string, string>,
+  ) {
     if (!entityname) throw new Error('entityName not given');
 
     const q = Object.keys(query ?? {})
-      .map((k) => `${k}=${query[k]}`)
+      .map((k) => `${k}=${query![k]}`)
       .join('&');
     const _formName = formName ?? this.getDefaultFormName(entityname);
 

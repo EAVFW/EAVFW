@@ -7,7 +7,7 @@ export type ControlJsonSchemaObject = {
 export type ControlJsonSchema = JSONSchema7 & {
   'x-widget'?: string;
   'x-field'?: string;
-  'x-widget-props'?: any;
+  'x-widget-props'?: Record<string, unknown>;
   'x-control'?: string;
   'x-description'?: string;
   'x-logicalname'?: string;

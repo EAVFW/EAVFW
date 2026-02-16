@@ -21,7 +21,7 @@ export function ComboBoxSearch(props: ComboBoxSearchProps) {
   const primaryField = Object.values(entityDefinition.attributes).filter((a) => a.isPrimaryField)[0]
     .logicalName;
 
-  const _updateOptions = (query: any) => {
+  const _updateOptions = (query: Record<string, string | number>) => {
     setOptions([{ key: 'dummy', text: loadingText, disabled: true }]);
     queryEntity(app.getEntity(entityDefinition.logicalName), query).then((results) => {
       let options = results.items.map((record: IRecord): IComboBoxOption => {
@@ -45,7 +45,7 @@ export function ComboBoxSearch(props: ComboBoxSearchProps) {
   ) => {
     // setSearchTerm(event);
 
-    let query: any = { $top: 10 };
+    let query: Record<string, string | number> = { $top: 10 };
     if (event) {
       query['$filter'] = `contains(${primaryField}, \'${event}\')`;
     }

@@ -34,15 +34,16 @@ const dialogContentProps = {
 };
 
 function uuidv4() {
-  //@ts-ignore
+  // @ts-expect-error - arithmetic on number literals to build UUID template string
   return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
     (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
   );
 }
 
-export const RibbonContextProvider: React.FC<
-  PropsWithChildren<{ defaultRibbons?: RibbonViewInfo }>
-> = ({ children, defaultRibbons = {} }) => {
+export const RibbonContextProvider = ({
+  children,
+  defaultRibbons = {},
+}: PropsWithChildren<{ defaultRibbons?: RibbonViewInfo }>) => {
   const app = useModelDrivenApp();
   const router = useRouter();
 
@@ -71,7 +72,9 @@ export const RibbonContextProvider: React.FC<
     stateRef.current = { ...stateRef.current, ...state };
     try {
       throw new Error('updateRibbonState');
-    } catch (err) {}
+    } catch (_error) {
+      /* Intentional: throw-and-catch used to capture stack trace for debugging */
+    }
     setRibbonState2(stateRef.current);
   }, []);
 
@@ -106,14 +109,14 @@ export const RibbonContextProvider: React.FC<
     useMemo(() => {
       const mitter = mitt();
 
-      const _onShow = (data: any) => {
+      const _onShow = (data: { type: string }) => {
         const button = ribbonButtonsRef.current.filter((k) => k.key === data.type)[0];
         if (button) {
           button.disabled = false;
           setRibbonButtons(ribbonButtonsRef.current.slice());
         }
       };
-      const _onHide = (data: any) => {
+      const _onHide = (data: { type: string }) => {
         const button = ribbonButtonsRef.current.filter((k) => k.key === data.type)[0];
         if (button) {
           button.disabled = true;
@@ -142,7 +145,7 @@ export const RibbonContextProvider: React.FC<
       e.preventDefault();
       return (e.returnValue = warningText);
     };
-    const handleBrowseAway = (url: string, props: any) => {
+    const handleBrowseAway = (url: string, props: { shallow?: boolean }) => {
       const hasUnSavedChanges = stateRef.current.canSave; // ribbonState.canSave;
 
       const oldUrl = new URL(router.asPath, window.location.href);
@@ -185,7 +188,7 @@ export const RibbonContextProvider: React.FC<
               updateRibbonState({ skipRedirect: false });
               //   setRibbonState( ribbonState.skipRedirect = true;
 
-              const onComplete = (e: any) => {
+              const onComplete = (e: { entityName: string; id?: string }) => {
                 ribbonEvents.off('saveComplete', onComplete);
                 const entityName = pastUrl?.match(/entities\/(.*?)\//)?.[1];
                 if (entityName) {
@@ -200,7 +203,7 @@ export const RibbonContextProvider: React.FC<
 
                   const newUrl = new URL(pastUrl!, window.location.href);
                   for (let lookup of lookups) {
-                    newUrl.searchParams.set(lookup.logicalName, e.id);
+                    newUrl.searchParams.set(lookup.logicalName, e.id ?? '');
                   }
                   router.push(newUrl);
                   setPastUrl(undefined);
@@ -231,7 +234,7 @@ export const RibbonContextProvider: React.FC<
           ...ribbonState,
           defaultRibbons,
           buttons: ribbonButtons,
-          saveCompleted: (data: any) => {
+          saveCompleted: (data: { entityName: string; id?: string }) => {
             ribbonEvents.emit('saveComplete', data);
           },
           updateState: updateRibbonState,
@@ -252,12 +255,16 @@ export const RibbonContextProvider: React.FC<
             if (button.workflow) {
               const [_, { onChange: onFormDataChange }] = useEAVForm(() => ({}));
               button.onClick = useCallback(
-                (ev?: any) => {
+                (ev?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLElement>) => {
                   const runner = (async () => {
-                    const actions = button.workflow.actions;
-                    const starter = Object.entries<any>(actions).filter(
+                    const actions = button.workflow!.actions as Record<
+                      string,
+                      Record<string, unknown>
+                    >;
+                    const starter = Object.entries<Record<string, unknown>>(actions).filter(
                       ([actionkey, entry]) =>
                         typeof entry.runAfter === 'undefined' ||
+                        !entry.runAfter ||
                         Object.values(entry.runAfter).length === 0,
                     );
 
@@ -266,6 +273,7 @@ export const RibbonContextProvider: React.FC<
                     function handleQueue() {
                       while (queue.length) {
                         const [action, entry] = queue.pop() ?? [];
+                        if (!entry) continue;
                         const type = entry.type;
                         switch (type) {
                           case 'UpdateRecord':
@@ -274,9 +282,10 @@ export const RibbonContextProvider: React.FC<
 
                               ctx.onCommit = () => {
                                 queue.push(
-                                  ...Object.entries<any>(actions).filter(
+                                  ...Object.entries<Record<string, unknown>>(actions).filter(
                                     ([actionkey, entry]) =>
                                       typeof entry.runAfter === 'object' &&
+                                      entry.runAfter !== null &&
                                       Object.entries(entry.runAfter).filter(
                                         ([runafterKey, runafterstatus]) => runafterKey === action,
                                       ).length === 1,
@@ -284,7 +293,7 @@ export const RibbonContextProvider: React.FC<
                                 );
                                 handleQueue();
                               };
-                              Object.assign(props, entry.inputs.data);
+                              Object.assign(props, (entry.inputs as Record<string, unknown>).data);
                             }); //TODO wait until change is applied
 
                             break;
@@ -293,9 +302,10 @@ export const RibbonContextProvider: React.FC<
                             ribbonEvents.emit('onSave', ev);
 
                             queue.push(
-                              ...Object.entries<any>(actions).filter(
+                              ...Object.entries<Record<string, unknown>>(actions).filter(
                                 ([actionkey, entry]) =>
                                   typeof entry.runAfter === 'object' &&
+                                  entry.runAfter !== null &&
                                   Object.entries(entry.runAfter).filter(
                                     ([runafterKey, runafterstatus]) => runafterKey === action,
                                   ).length === 1,

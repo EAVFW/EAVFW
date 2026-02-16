@@ -9,12 +9,12 @@ export interface ModelDrivenAppModel {
   dashboards?: ManifestDefinition['dashboards'];
   entityMap: { [key: string]: string };
   entityCollectionSchemaNameMap: { [key: string]: string };
-  apps: { [key: string]: any };
+  apps: ManifestDefinition['apps'];
   config?: {
     pages?: {
       forms?: FormsConfig;
     };
-    [name: string]: any;
+    [name: string]: unknown;
   };
   localization: ManifestDefinition['localization'];
   errorMessages?: ManifestDefinition['errorMessages'];

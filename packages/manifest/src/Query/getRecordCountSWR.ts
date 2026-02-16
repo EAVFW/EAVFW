@@ -2,7 +2,25 @@ import { useMemo } from 'react';
 import useSWR, { mutate } from 'swr';
 import { useJsonFetcher } from './jsonFetcher';
 
-export function getRecordCount(entityName: string, query: any = {}, automaticallyrefreshtime = 0) {
+/**
+ * React hook that fetches the total record count for an entity using SWR.
+ * Sends a `$top=0&$count=true` OData query.
+ *
+ * @param entityName - The entity's collection schema name.
+ * @param query - Additional OData query parameters.
+ * @param automaticallyrefreshtime - Polling interval in milliseconds.
+ * @returns An object with `count`, `isLoading`, `isError`, and `mutate`.
+ *
+ * @example
+ * ```tsx
+ * const { count, isLoading } = getRecordCount('accounts');
+ * ```
+ */
+export function getRecordCount(
+  entityName: string,
+  query: Record<string, string> = {},
+  automaticallyrefreshtime = 0,
+) {
   const [baseUrl, jsonFetcher] = useJsonFetcher();
 
   const q = useMemo(() => {

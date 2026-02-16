@@ -59,7 +59,8 @@ export function TextareaWidget<
       // name={name}
       {...(inputProps as Omit<typeof inputProps, 'type'>)}
       value={value || value === 0 ? value : ''}
-      onChange={(onChangeOverride as any) || _onChange}
+      // @ts-expect-error -- RJSF onChangeOverride type mismatch with Fluent UI Textarea onChange
+      onChange={onChangeOverride || _onChange}
       onBlur={_onBlur}
       onFocus={_onFocus}
       // errorMessage={(rawErrors || []).join('\n')}

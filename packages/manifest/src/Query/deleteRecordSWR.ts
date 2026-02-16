@@ -1,8 +1,19 @@
 import { EntityDefinition } from '../Entities/EntityDefinition';
 import { IRecord } from '../Types/IRecord';
 
-//TODO : Figure out how to mutate/clear swr keys that prefixes this key;
-
+/**
+ * Deletes a single entity record via the EAVFW API.
+ *
+ * @typeParam T - The record type.
+ * @param entity - The entity definition.
+ * @param recordId - The id of the record to delete.
+ * @returns The parsed JSON response.
+ *
+ * @example
+ * ```ts
+ * await deleteRecordSWR(accountEntity, '00000000-0000-0000-0000-000000000001');
+ * ```
+ */
 export async function deleteRecordSWR<T extends IRecord>(
   entity: EntityDefinition,
   recordId: string,

@@ -1,15 +1,20 @@
 import { JSONSchema7 } from 'json-schema';
-import { EntityDefinition } from '@eavfw/manifest';
+import { AttributeDefinition, EntityDefinition, FormColumnDefinition } from '@eavfw/manifest';
 import { ModelDrivenApp } from '../../../../ModelDrivenApp';
 import { getJsonSchema } from './getJsonSchema';
 
 export function getDependencySchema(
-  fields: any[],
-  field: any,
+  fields: Array<{
+    field: FormColumnDefinition;
+    attribute: AttributeDefinition;
+    fieldName: string;
+    attributeName: string;
+  }>,
+  field: string,
   entity: EntityDefinition,
   app: ModelDrivenApp,
   formName: string,
-  formContext: any,
+  formContext: Record<string, unknown>,
 ): JSONSchema7 {
   const type = entity.attributes[field!].type;
 
@@ -17,7 +22,7 @@ export function getDependencySchema(
 
   if (type === 'boolean' || (typeof type !== 'string' && type.type === 'boolean')) {
     function gen(value: boolean) {
-      let prop = {} as any;
+      let prop = {} as Record<string, { enum: boolean[] }>;
       prop[entity.attributes[field!].logicalName] = { enum: [value] };
       return prop;
     }

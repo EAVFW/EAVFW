@@ -9,7 +9,7 @@ export const useTaskStyles = makeStyles({
   },
 });
 
-export const Task: React.FC<{ title: string; description: string }> = ({ title, description }) => {
+export const Task = ({ title, description }: { title: string; description: string }) => {
   const styles = useTaskStyles();
 
   return (

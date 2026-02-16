@@ -39,12 +39,14 @@ const DirtyContext = createContext<DirtyContextType>({
 
 export const useDirtyContext = () => useContext(DirtyContext);
 
-function isDirtyContainer(o: any): o is DirtyFieldContainer {
-  return '__isDirty' in o;
+function isDirtyContainer(o: unknown): o is DirtyFieldContainer {
+  return typeof o === 'object' && o !== null && '__isDirty' in o;
 }
-export const DirtyContainer: React.FC<
-  PropsWithChildren<{ id: string; initialdata?: DirtyFieldElement }>
-> = ({ id, children, initialdata = {} }) => {
+export const DirtyContainer = ({
+  id,
+  children,
+  initialdata = {},
+}: PropsWithChildren<{ id: string; initialdata?: DirtyFieldElement }>) => {
   const [_, __, etag] = useEAVForm((state) => null);
 
   const { setDirtyFields: setParentDirtyFields, dirtyFields: rootDirtyFields } = useDirtyContext();
@@ -54,9 +56,9 @@ export const DirtyContainer: React.FC<
     (dirtyField: string, value?: DirtyFieldElementValue) => {
       if (typeof value === 'object' && value != null)
         refDirtyFields.current[dirtyField] = mergeDeep(
-          refDirtyFields.current[dirtyField] ?? {},
-          value,
-        );
+          (refDirtyFields.current[dirtyField] ?? {}) as Record<string, unknown>,
+          value as Record<string, unknown>,
+        ) as DirtyFieldElementValue;
       else {
         refDirtyFields.current[dirtyField] = { value: value, __isDirty: true };
       }

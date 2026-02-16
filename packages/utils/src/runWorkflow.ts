@@ -7,7 +7,7 @@
 export type WorkflowState = {
   status: 'Failed' | 'Succeded';
   failedReason?: string;
-  body: any;
+  body: Record<string, unknown>;
   events: Array<{
     eventType: 'action_completed' | 'workflow_finished';
     jobId: string;
@@ -17,15 +17,15 @@ export type WorkflowState = {
   triggers: {
     [key: string]: {
       time: string;
-      body: any;
+      body: Record<string, unknown>;
     };
   };
   actions: {
     [key: string]: {
       type: string;
       body?: {
-        values: any;
-        messages: any;
+        values: Record<string, unknown>;
+        messages: Record<string, unknown>;
       };
     };
   };
@@ -64,12 +64,12 @@ export type WorkflowState = {
 export const runWorkflow = async (
   workflowNameOrId: string,
   trigger: string,
-  values: any,
+  values: Record<string, unknown>,
   options?: {
     currentEntityCollectionSchemaName?: string;
     currentRecordId?: string;
     refreshInterval?: number;
-    onStatusUpdated?: (status: any) => void;
+    onStatusUpdated?: (status: Record<string, unknown>) => void;
     fullStatusPayload?: boolean;
   },
 ) => {
@@ -103,7 +103,8 @@ export const runWorkflow = async (
 
     let status = await statusRsp.json();
     completed =
-      status.completed || status?.events?.some((evt: any) => evt.eventType === 'workflow_finished');
+      status.completed ||
+      status?.events?.some((evt: { eventType: string }) => evt.eventType === 'workflow_finished');
     if (options?.onStatusUpdated) options.onStatusUpdated(status);
     await new Promise((resolve) => setTimeout(resolve, options?.refreshInterval ?? 5000));
   }

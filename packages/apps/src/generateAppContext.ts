@@ -27,11 +27,14 @@ function sortObj<T>(
   let keys = Object.keys(areas);
   return keys
     .sort((a, b) => sort(areas[a], keys.indexOf(a), areas[b], keys.indexOf(b)))
-    .reduce((accumulator, key) => {
-      accumulator[key] = childMapper(areas[key]);
+    .reduce(
+      (accumulator, key) => {
+        accumulator[key] = childMapper(areas[key]);
 
-      return accumulator;
-    }, {} as any);
+        return accumulator;
+      },
+      {} as { [key: string]: T },
+    );
 }
 
 function sortAreas(areas: AreasType) {
@@ -75,7 +78,7 @@ function sortAreas(areas: AreasType) {
   );
 }
 
-function isEntityDefinition(item: any): item is EntityDefinition {
+function isEntityDefinition(item: unknown): item is EntityDefinition {
   if (typeof item !== 'object' || item === null) return false;
 
   return (
@@ -96,7 +99,9 @@ function normalizeType(attribute: { type: PrimitiveType | { type: PrimitiveType 
 
 function getTitle(
   item: EntityDefinition | DashboardDefinition,
-  sitemap: any,
+  sitemap: SiteMapDefinition & {
+    locale?: Record<string, { pluralName?: string; displayName?: string }>;
+  },
   locale: string,
 ): string {
   //let selectedLocale = item.locale?.[locale];
@@ -126,7 +131,7 @@ function getTitle(
 }
 
 function getLogicalName(item: EntityDefinition | DashboardDefinition, key: string): string {
-  return item.logicalName ?? key.toLowerCase().replace(/\s/g, '');
+  return (item.logicalName as string | undefined) ?? key.toLowerCase().replace(/\s/g, '');
 }
 
 function processSitemap(
@@ -211,7 +216,7 @@ function processItems(
       Object.values((item as EntityDefinition).attributes).forEach(normalizeType);
 
     entityMap[key] = getLogicalName(item, key);
-    entityCollectionSchemaNameMap[item.collectionSchemaName] = getLogicalName(item, key);
+    entityCollectionSchemaNameMap[item.collectionSchemaName as string] = getLogicalName(item, key);
 
     processSitemap(apps, key, item, item.sitemap, areas, itemType, locale);
   }
@@ -276,5 +281,5 @@ export function generateAppContext(
     sitemap: { areas: areaSorted, dashboards: {} },
   };
 
-  return appcontext;
+  return appcontext as unknown as ModelDrivenAppModel;
 }

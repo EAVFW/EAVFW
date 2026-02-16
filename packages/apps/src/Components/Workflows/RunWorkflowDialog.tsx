@@ -38,7 +38,7 @@ export type WorkFlowDialogProps = {
 };
 type workflowmetadata = {
   schema: JSONSchema7;
-  uiSchema: any;
+  uiSchema: Record<string, unknown>;
 };
 export const WorkFlowDialog = ({
   ribbonkey,
@@ -69,7 +69,7 @@ export const WorkFlowDialog = ({
     isLoading: isLoadingMetadata,
   } = useSWRFetch<workflowmetadata>(`/workflows/${workflow}/metadata`, !hideDialog);
 
-  const [payload, setPayload] = useState({} as any);
+  const [payload, setPayload] = useState<Record<string, unknown>>({});
 
   const { selection, selectionDetails } = useSelectionContext();
 
@@ -184,5 +184,6 @@ export const RegisterWorkflowRibbonButton = (
 ) =>
   RegistereRibbonButton(ribbonkey, ({ key, ...props }) => {
     const appliedProps = { ...defaultProps, ...propsDefaults, ...props };
-    return <WorkFlowDialog key={key} ribbonkey={key} {...appliedProps} />;
+    const workflow = typeof appliedProps.workflow === 'string' ? appliedProps.workflow : undefined;
+    return <WorkFlowDialog key={key} ribbonkey={key} {...appliedProps} workflow={workflow} />;
   });

@@ -57,7 +57,7 @@ type KanbanBoardV3Props = {
   onItemClicked?: (id: string) => void;
 };
 
-export const KanbanBoardV3: React.FC<KanbanBoardV3Props> = ({ boardId, onItemClicked }) => {
+export const KanbanBoardV3 = ({ boardId, onItemClicked }: KanbanBoardV3Props) => {
   const style = useKanbanBoardStyles();
   const [baseUrl] = useJsonFetcher();
   const app = useModelDrivenApp();
@@ -74,7 +74,7 @@ export const KanbanBoardV3: React.FC<KanbanBoardV3Props> = ({ boardId, onItemCli
   });
 
   const drag = useCallback((ev: DragEvent<HTMLDivElement>) => {
-    //@ts-ignore
+    // @ts-expect-error - ev.target is typed as EventTarget but we know it's an HTMLElement with id
     ev.dataTransfer.setData('taskid', ev.target.id);
   }, []);
   const allowDrop = useCallback((ev: DragEvent<HTMLDivElement>) => {

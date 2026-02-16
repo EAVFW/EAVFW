@@ -6,36 +6,61 @@ import {
 } from './ExpressionParserAttributeContext';
 import { ExpressionParserVisibilityHost } from './ExpressionParserVisibilityHost';
 
-const StyleInjector: React.FC<PropsWithChildren<{ isLoading: boolean }>> = ({
-  children,
-  isLoading,
-}) => {
+const StyleInjector = ({ children, isLoading }: PropsWithChildren<{ isLoading: boolean }>) => {
   const StyledChildren = () =>
-    React.Children.map(children, (child: any) =>
-      React.cloneElement(child, {
-        style: { ...child.props.style, display: isLoading ? 'none' : 'block' },
-        ['data-loading']: isLoading,
-        // className: `${child.props.className} isLoading`
-      }),
+    React.Children.map(children, (child) =>
+      React.isValidElement<{ style?: React.CSSProperties; className?: string }>(child)
+        ? React.cloneElement(child, {
+            style: { ...child.props.style, display: isLoading ? 'none' : 'block' },
+            ['data-loading' as string]: isLoading,
+          })
+        : child,
     );
-  //@ts-ignore
   return <StyledChildren />;
 };
 
-export const ExpressionParserFieldProvider: React.FC<
-  PropsWithChildren<
-    Omit<ExpressionParserAttributeContextType, 'setIsLoading' | 'isLoading' | 'ids'> & {
-      visible?: string | boolean;
-      onVisibilityCalculated?: (visiblity: boolean) => void;
-    }
-  >
-> = ({ onVisibilityCalculated, children, attributeKey, entityKey, visible, arrayIdx }) => {
+/**
+ * Provides per-attribute expression context and visibility evaluation for a
+ * single form control. Wraps its children in an
+ * {@link ExpressionParserAttributeContext} and an
+ * {@link ExpressionParserVisibilityHost}.
+ *
+ * @param props.attributeKey - The logical name of the attribute.
+ * @param props.entityKey - The logical name of the owning entity.
+ * @param props.visible - A boolean or expression string controlling visibility.
+ * @param props.arrayIdx - Index for array-type attributes.
+ * @param props.onVisibilityCalculated - Callback fired when visibility resolves.
+ *
+ * @example
+ * ```tsx
+ * <ExpressionParserFieldProvider
+ *   attributeKey="status"
+ *   entityKey="account"
+ *   visible="@isAdmin"
+ * >
+ *   <StatusControl />
+ * </ExpressionParserFieldProvider>
+ * ```
+ */
+export const ExpressionParserFieldProvider = ({
+  onVisibilityCalculated,
+  children,
+  attributeKey,
+  entityKey,
+  visible,
+  arrayIdx,
+}: PropsWithChildren<
+  Omit<ExpressionParserAttributeContextType, 'setIsLoading' | 'isLoading' | 'ids'> & {
+    visible?: string | boolean;
+    onVisibilityCalculated?: (visiblity: boolean) => void;
+  }
+>) => {
   const loadingInfo = useRef({});
 
   const [loadingInfoTime, setIsLoadingTime] = useState({});
 
   const _setIsLoading = useCallback(
-    (id: any, isLoading: any) => {
+    (id: string, isLoading: boolean) => {
       loadingInfo.current = { ...loadingInfo.current, [id]: isLoading };
       setIsLoadingTime(new Date().getTime());
     },

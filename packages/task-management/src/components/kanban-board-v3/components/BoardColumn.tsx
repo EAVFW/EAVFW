@@ -52,7 +52,7 @@ export const BoardTask = ({
   );
 };
 
-export const BoardColumn: React.FC<BoardColumnProps> = ({
+export const BoardColumn = ({
   stateid,
   title,
   onDrop,
@@ -60,7 +60,7 @@ export const BoardColumn: React.FC<BoardColumnProps> = ({
   drag,
   tasks,
   onItemClicked,
-}) => {
+}: BoardColumnProps) => {
   const styles = useBoardColumnStyles();
 
   const handleOnItemClicked = (id: string) => {

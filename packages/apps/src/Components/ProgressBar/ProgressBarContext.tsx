@@ -43,7 +43,7 @@ function useProgressBarContext() {
   return useContext(ProgressBarContext);
 }
 
-const ProgressBarProvider = (props: any) => {
+const ProgressBarProvider = (props: { children?: React.ReactNode }) => {
   let promise = useRef<Promise<void>>();
 
   let initialState: IProgressIndicatorProps = { progressHidden: true };
@@ -90,5 +90,6 @@ const ProgressBarProvider = (props: any) => {
   );
 };
 
+/** @deprecated Use named import: `import { ProgressBar } from '...'` instead of default import */
 export default ProgressBar;
-export { ProgressBarProvider, useProgressBarContext, ProgressBarContext };
+export { ProgressBar, ProgressBarProvider, useProgressBarContext, ProgressBarContext };

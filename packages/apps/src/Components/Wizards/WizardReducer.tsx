@@ -33,7 +33,11 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
       const wizard = action.wizard?.[1];
       if (!wizard)
         return {
-          expressions: ResolveFeature('WizardExpressionsProvider')({}),
+          expressions: (
+            ResolveFeature('WizardExpressionsProvider') as (
+              values: Record<string, unknown>,
+            ) => unknown
+          )({}),
         };
 
       // Get the active trace provider
@@ -42,7 +46,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
       // Use the tracer provider to get a tracer
       const tracer = tracerProvider.getTracer('eavfw-wizard');
 
-      const wizardPromise = new Promise<any>((resolve, reject) => {
+      const wizardPromise = new Promise<unknown>((resolve, reject) => {
         state.spanResolve = resolve;
         state.spanReject = reject;
       });
@@ -128,13 +132,16 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
         messages: action.messages,
       };
     case 'setValues':
-      let values = action.merge === true ? mergeDeep(state.values, action.values) : action.values;
+      let values =
+        action.merge === true ? mergeDeep(state.values ?? {}, action.values ?? {}) : action.values;
       return {
         ...state,
         values,
-        expressions: (action.expressionsProvider ?? ResolveFeature('WizardExpressionsProvider'))(
-          values,
-        ),
+        expressions: (
+          (action.expressionsProvider ?? ResolveFeature('WizardExpressionsProvider')) as (
+            values: Record<string, unknown> | undefined,
+          ) => unknown
+        )(values),
       };
     case 'updateMessage':
       state.messages![action.messageKey].message = action.message;
@@ -160,7 +167,7 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
             ([key, value]) =>
               typeof value.visible === 'undefined' ||
               (typeof value.visible === 'boolean' && value.visible) ||
-              (typeof value.visible === 'string' && expressionResults[value.visible]),
+              (typeof value.visible === 'string' && expressionResults?.[value.visible]),
           )
           .map((kv) => kv[0]);
 
@@ -181,11 +188,13 @@ const wizardReducer: Reducer<IWizardState, IWizardAction> = (state, action) => {
   }
 };
 
-export const WizardReducer: React.FC<PropsWithChildren> = ({ children }) => {
-  const onFormValuesChange = ResolveFeature('WizardExpressionsProvider');
+export const WizardReducer = ({ children }: PropsWithChildren) => {
+  const onFormValuesChange = ResolveFeature('WizardExpressionsProvider') as (
+    values: Record<string, unknown>,
+  ) => unknown;
 
   const r = useReducer(wizardReducer, {
-    expressions: onFormValuesChange({}),
+    expressions: onFormValuesChange({}) as Record<string, unknown> | undefined,
   });
 
   return <WizardContext.Provider value={r}>{children}</WizardContext.Provider>;
@@ -211,7 +220,11 @@ function getTransitionWorker(
   return transitionIn
     ? new Promise(async (resolve, reject) => {
         if (transitionIn) {
-          let { result, rsp } = await runWorkflow(transitionIn.workflow, trigger, state.values);
+          let { result, rsp } = await runWorkflow(
+            transitionIn.workflow,
+            trigger,
+            state.values ?? {},
+          );
 
           if (rsp.ok) {
             resolve(result);

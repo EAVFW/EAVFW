@@ -5,6 +5,10 @@ type addPrefixToObject<T, P extends string> = {
   [K in keyof T as K extends string ? `${P}${K}` : never]: T[K];
 };
 
+/**
+ * Per-attribute configuration within a form layout. Controls rendering
+ * options, visibility, read-only state, custom controls, and styling.
+ */
 export type FormColumnDefinition = {
   query?: { expand: boolean };
   rows?: number;
@@ -22,7 +26,7 @@ export type FormColumnDefinition = {
     field?: CSSProperties;
     container?: CSSProperties;
   };
-  default?: any;
+  default?: string | number | boolean | Record<string, unknown>;
   disableCreate?: boolean;
   searchForLabel?: string;
   label?: boolean;
@@ -32,6 +36,6 @@ export type FormColumnDefinition = {
   };
   minLength?: number;
   displayName?: string;
-  schema?: JSONSchema7 & addPrefixToObject<any, 'x-'>;
-  uiSchema?: any;
+  schema?: JSONSchema7 & addPrefixToObject<Record<string, unknown>, 'x-'>;
+  uiSchema?: Record<string, unknown>;
 };

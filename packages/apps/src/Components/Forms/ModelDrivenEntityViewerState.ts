@@ -8,7 +8,7 @@ import { FormValidation } from '@rjsf/utils';
 
 export type ModelDrivenEntityViewerState = {
   selectedForm: string;
-  formData: any;
+  formData: Record<string, unknown>;
   saving: boolean;
   formName: string;
   form: FormDefinition;

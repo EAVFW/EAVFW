@@ -43,7 +43,7 @@ import { useSectionStyles } from '../../Styles';
 export type TopBarProps = {
   title?: string;
   search: boolean;
-  theme?: any;
+  theme?: Record<string, unknown>;
   showMenuOpener?: boolean;
 };
 
@@ -122,9 +122,9 @@ export function TopBar({ title, search, showMenuOpener = true, theme }: TopBarPr
   const [app, { toggleNav }] = useEAVApp();
   const styles = useContentStyles();
 
-  const topBarV2Theme: FluentUI9Theme =
-    ResolveFeature('topBarV2Theme', false) ?? ResolveFeature('defaultV2Theme', false);
-  const defaultTheme: FluentUI9Theme = ResolveFeature('defaultV2Theme');
+  const topBarV2Theme = (ResolveFeature('topBarV2Theme', false) ??
+    ResolveFeature('defaultV2Theme', false)) as FluentUI9Theme;
+  const defaultTheme = ResolveFeature('defaultV2Theme') as FluentUI9Theme;
   const section = useSectionStyles();
   const [isModalOpen, { setTrue: showModal, setFalse: hideModal, toggle }] = useBoolean(false);
   const titleId = useId('title');
@@ -149,9 +149,9 @@ export function TopBar({ title, search, showMenuOpener = true, theme }: TopBarPr
           <>
             <Persona
               onClick={toggle}
-              primaryText={`${profile.name || profile.email}`}
-              secondaryText={profile.email}
-              name={profile.name || profile.email}
+              primaryText={`${(profile.name as string) || (profile.email as string)}`}
+              secondaryText={(profile.email as string) ?? undefined}
+              name={((profile.name as string) || (profile.email as string)) ?? undefined}
               //imageInitials={((profile.name as string)?.trim().split(' ').map((n: any) => n[0].toUpperCase()).join('') || profile.email.split('@')[0])}
 
               // hidePersonaDetails={!true}
@@ -188,7 +188,7 @@ export function TopBar({ title, search, showMenuOpener = true, theme }: TopBarPr
                       </Link>
 
                       <Stack horizontal horizontalAlign="start" verticalAlign="center">
-                        <Text size={400}>{profile.fullname}</Text>
+                        <Text size={400}>{profile.fullname as string}</Text>
                         {profile.role &&
                           profile.role.map((role: string) => (
                             <div key={role}>

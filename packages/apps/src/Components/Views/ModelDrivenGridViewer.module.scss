@@ -1,26 +1,23 @@
-
 .gridviewWrapper {
-    height: 100%;
+  height: 100%;
 
-    :global{
+  :global {
+    .ms-Viewport {
+      // height: 100%;
 
-     .ms-Viewport {
-       // height: 100%;
+      .gridview {
+        height: 100%;
 
-        .gridview {
-            height: 100%;
+        div[role='grid'] {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
 
-
-            div[role='grid'] {
-                height:100%;
-                display: flex;
-                flex-direction: column;
-
-                .ms-DetailsList-contentWrapper {
-                    flex: 1 1 auto;
-                }
-            }
+          .ms-DetailsList-contentWrapper {
+            flex: 1 1 auto;
+          }
         }
+      }
     }
-     }
+  }
 }

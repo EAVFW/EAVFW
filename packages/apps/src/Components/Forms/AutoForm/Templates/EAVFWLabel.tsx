@@ -105,13 +105,20 @@ const infoIconProps = { iconName: 'Info' };
 const warnIconProps = { iconName: 'Warning' };
 const iconButtonStyles: Partial<IButtonStyles> = { root: { marginBottom: -3, height: 'auto' } };
 
-export const EAVFWLabel: React.FC<{
+export const EAVFWLabel = ({
+  id,
+  description,
+  required,
+  label,
+  disabled,
+  ...props
+}: {
   id?: string;
   label: string;
   required?: boolean;
   disabled?: boolean;
   description?: string;
-}> = ({ id, description, required, label, disabled, ...props }) => {
+}) => {
   const { data: _label, isLoading, error } = useExpressionParser(label);
   const [isInfoCalloutVisible, { toggle: toggleIsCalloutVisible }] = useBoolean(false);
   const descriptionId = useId(id + '_description'); //id contains data attribute, so reference is possible through descriptionId

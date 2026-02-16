@@ -58,4 +58,5 @@ export const FormSelectorComponent: React.VFC<FormSelectorProps> = (props) => {
     />
   );
 };
+/** @deprecated Use named import: `import { FormSelectorComponent } from '...'` instead of default import */
 export default FormSelectorComponent;

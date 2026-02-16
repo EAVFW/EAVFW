@@ -4,10 +4,8 @@ import React, { Fragment, PropsWithChildren } from 'react';
 import { ResolveFeature } from '../FeatureFlags';
 import { PortalCompatProvider } from '@fluentui/react-portal-compat';
 
-export const RootLayout: React.FC<PropsWithChildren<{ id?: string; layout?: string }>> = (
-  props,
-) => {
-  const defaultV2Theme: Theme = ResolveFeature('defaultV2Theme', false);
+export const RootLayout = (props: PropsWithChildren<{ id?: string; layout?: string }>) => {
+  const defaultV2Theme = ResolveFeature('defaultV2Theme', false) as Theme;
   const defaultTheme = ResolveFeature('defaultTheme');
 
   return (

@@ -47,20 +47,18 @@ function getProfile(entityKey?: string) {
   };
 }
 
-export const UserProvider: React.FC<
-  PropsWithChildren<{
-    authorize?: boolean;
-    onLoaded?: (profile: UserProfile) => void;
-    onRenderLoading?: React.FC;
-    loadUserInfoEntityKey?: string;
-  }>
-> = ({
+export const UserProvider = ({
   onLoaded,
   loadUserInfoEntityKey,
   children,
   authorize,
   onRenderLoading: Loader = DefaultLoader,
-}) => {
+}: PropsWithChildren<{
+  authorize?: boolean;
+  onLoaded?: (profile: UserProfile) => void;
+  onRenderLoading?: React.FC;
+  loadUserInfoEntityKey?: string;
+}>) => {
   const { record, isLoading, isError } = authorize
     ? getProfile(loadUserInfoEntityKey)
     : { record: notAuthorizedUser, isLoading: false, isError: false };

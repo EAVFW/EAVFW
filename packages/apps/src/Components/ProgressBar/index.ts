@@ -9,5 +9,6 @@ import ProgressBar, {
  * This is only here for making the import statements cleaner, when using ProgressBar.
  */
 
+/** @deprecated Use named import: `import { ProgressBar } from '...'` instead of default import */
 export default ProgressBar;
 export { ProgressBarProvider, useProgressBarContext, ProgressBarContext, ProgressBar };

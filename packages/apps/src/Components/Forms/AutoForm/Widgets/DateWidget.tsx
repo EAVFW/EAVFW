@@ -88,7 +88,7 @@ const parseDate = (dateStr?: string) => {
   return dt;
 };
 
-export default function DateWidget<
+function DateWidget<
   T = any,
   S extends StrictRJSFSchema = RJSFSchema,
   F extends FormContextType = any,
@@ -116,7 +116,7 @@ export default function DateWidget<
   const _onBlur = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onBlur(id, value);
   const _onFocus = ({ target: { value } }: FocusEvent<HTMLInputElement>) => onFocus(id, value);
   const controlClass = useControlClass();
-  const uiProps = usePick((options as any) ?? {}, allowedProps);
+  const uiProps = usePick((options as Record<string, unknown>) ?? {}, allowedProps);
 
   return (
     <DatePicker
@@ -136,6 +136,10 @@ export default function DateWidget<
     />
   );
 }
+
+/** @deprecated Use named import: `import { DateWidget } from '...'` instead of default import */
+export default DateWidget;
+export { DateWidget };
 
 const useStyles = makeStyles({
   control: {

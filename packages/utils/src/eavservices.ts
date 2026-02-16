@@ -20,8 +20,8 @@ declare global {
  * literals with `{name}` placeholders.
  */
 export interface IQuickFormLogger {
-  log(body: string, ...args: any[]): void;
-  warn(body: string, ...args: any[]): void;
+  log(body: string, ...args: unknown[]): void;
+  warn(body: string, ...args: unknown[]): void;
 }
 /**
  * Returns the global {@link EAVServiceCollection}, creating it if it does not
@@ -101,21 +101,21 @@ export function resolveEAVService<Key extends keyof EAVServiceCollection>(name: 
  */
 export class DefaultLogger implements IQuickFormLogger {
   constructor(private category: string = 'eavfw') {}
-  private replaceLiteral(body: string, ...args: any[]) {
+  private replaceLiteral(body: string, ...args: unknown[]) {
     var iterLiteral = '{(.*?)}';
     let i = 0;
     var re = new RegExp(iterLiteral, 'g');
 
     return body.replace(re, (s) => {
       try {
-        return s.startsWith('{@') ? JSON.stringify(args[i++]) : args[i++];
+        return s.startsWith('{@') ? JSON.stringify(args[i++]) : String(args[i++]);
       } catch (e) {
         return '...' + args[i - 1] + '...';
       }
     });
   }
-  log(message: string, ...args: any[]): void {}
-  warn(message: string, ...args: any[]): void {}
+  log(message: string, ...args: unknown[]): void {}
+  warn(message: string, ...args: unknown[]): void {}
 }
 
 registerEAVService('logger', new DefaultLogger());

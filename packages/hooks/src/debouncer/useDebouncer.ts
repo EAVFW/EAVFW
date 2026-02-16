@@ -1,10 +1,20 @@
 import { useEffect, useMemo } from 'react';
 
+/**
+ * A debounced function wrapper. Call it like a regular function; invocation
+ * is delayed until the wait period elapses without another call. Returns a
+ * `Promise` that resolves with the function's return value.
+ *
+ * @typeParam T1 - The argument type accepted by the debounced function.
+ * @typeParam T - The return type of the wrapped function.
+ */
 interface IDebounced<T1, T> {
-  (this: any, arg?: T1): Promise<T>;
+  (this: unknown, arg?: T1): Promise<T>;
 
+  /** Cancel any pending invocation. */
   clear(): void;
 
+  /** Immediately invoke the pending call (if any) and cancel the timer. */
   flush(): void;
 }
 
@@ -25,9 +35,9 @@ interface IDebounced<T1, T> {
 function debounce<T1, T>(func: Function, wait: number, immediate: boolean) {
   let timeout: number | null = null,
     args: IArguments | null,
-    context: any,
+    context: unknown,
     timestamp: number,
-    result: any;
+    result: T;
   if (null == wait) wait = 100;
 
   let resolves = [] as Array<Function>;
@@ -85,10 +95,30 @@ function debounce<T1, T>(func: Function, wait: number, immediate: boolean) {
   return debounced;
 }
 
+/**
+ * React hook that returns a debounced version of `changeHandler`. The
+ * debounced function is memoized across renders and automatically cleared
+ * on unmount to prevent calling `setState` on an unmounted component.
+ *
+ * @typeParam T - The argument type of the handler.
+ * @typeParam T2 - The return type of the handler.
+ * @param changeHandler - The function to debounce.
+ * @param wait - Debounce delay in milliseconds.
+ * @param deps - Additional dependency list for re-creating the debouncer.
+ * @returns A debounced function with `.clear()` and `.flush()` methods.
+ *
+ * @example
+ * ```tsx
+ * const debouncedSave = useDebouncer(
+ *   (value: string) => saveToServer(value),
+ *   300,
+ * );
+ * ```
+ */
 export const useDebouncer = <T, T2>(
   changeHandler: (arg1: T) => T2,
   wait: number,
-  deps = [] as any[],
+  deps = [] as unknown[],
 ) => {
   const debouncedChangeHandler = useMemo(() => debounce<T, T2>(changeHandler, wait, false), deps);
 

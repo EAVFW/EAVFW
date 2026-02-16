@@ -1,7 +1,11 @@
+import { ManifestDefinition } from '@eavfw/manifest';
 import { createContext } from 'react';
 import { EAVFormContextProps } from './EAVFormContextProps';
+import { EAVFormContextState } from './EAVFormContextState';
 
-export const EAVFormContext = createContext<EAVFormContextProps<any, any>>({
+export const EAVFormContext = createContext<
+  EAVFormContextProps<Record<string, unknown>, EAVFormContextState<Record<string, unknown>>>
+>({
   purpose: 'empty',
   actions: {
     runValidation: () => false,
@@ -19,7 +23,7 @@ export const EAVFormContext = createContext<EAVFormContextProps<any, any>>({
     },
   },
   state: {
-    formDefinition: {} as any,
+    formDefinition: {} as ManifestDefinition,
     errors: {},
     formValues: {},
     fieldMetadata: {},

@@ -4,12 +4,12 @@ import { FormValidation } from '@rjsf/utils';
 export type FormRenderProps = {
   stickyFooter?: boolean;
   hideFooter?: boolean;
-  record?: any;
+  record?: Record<string, unknown>;
   type?: NestedType;
   forms?: string[];
   formName?: string;
   dismissPanel: (ev: 'save' | 'cancel') => void;
-  onChange: (data: any, ctx?: any) => void;
+  onChange: (data: Record<string, unknown>, ctx?: { autoSave?: boolean }) => void;
   entityName?: string;
   extraErrors?: FormValidation;
   saveBtnText?: string;
