@@ -1,7 +1,0 @@
-﻿{
-  "branches": [
-	"main", 
-	{name: 'dev', prerelease: true, },
-	{name: 'dev-patch', prerelease: true, }
-	]
-}
